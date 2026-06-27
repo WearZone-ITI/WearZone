@@ -12,6 +12,18 @@ appcompat = "1.7.1"
 material = "1.14.0"
 jetbrainsKotlinJvm = "2.2.10"
 
+
+#Omar
+
+#Omar
+
+#Ahmed
+
+#Ahmed
+
+#Hend
+
+#Hend
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -30,9 +42,34 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+
+#Omar
+
+#Omar
+
+#Ahmed
+
+#Ahmed
+
+#Hend
+
+#Hend
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 
+
+
+#Omar
+
+#Omar
+
+#Ahmed
+
+#Ahmed
+
+#Hend
+
+#Hend
