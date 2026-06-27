@@ -11,6 +11,12 @@ composeBom = "2026.02.01"
 appcompat = "1.7.1"
 material = "1.14.0"
 jetbrainsKotlinJvm = "2.2.10"
+# Aalaa
+kotlinxSerializationJson = "1.11.0"
+navigationCompose = "2.9.8"
+hilt = "2.60"
+ksp = "2.3.9"
+# Aalaa
 
 
 #Omar
@@ -47,6 +53,13 @@ material = { group = "com.google.android.material", name = "material", version.r
 
 #Omar
 
+# Aalaa
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+# Aalaa
+
 #Ahmed
 
 #Ahmed
@@ -73,3 +86,8 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 #Hend
 
 #Hend
+# Aalaa
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+# Aalaa
