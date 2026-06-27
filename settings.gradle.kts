@@ -24,4 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "WearZone"
 include(":app")
- 
+include(":data")
+include(":presentation")
+include(":domain")
