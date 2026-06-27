@@ -10,13 +10,18 @@
 
 | Field           | Value                                                             |
 |-----------------|-------------------------------------------------------------------|
-| **App Name**    | WearZone                                                          |
-| **Platform**    | Android (Kotlin + Jetpack Compose)                                |
-| **Domain**      | E-Commerce — Shopify-backed fashion/apparel browsing & checkout   |
-| **Users**       | Guest · Authenticated Customer                                    |
-| **Backend**     | Shopify API + Firebase Auth                                       |
-| **Reference**   | `Shopify_Project_Specs.pdf` ← READ THIS FIRST                    |
-| **Design Ref**  | https://stitch.withgoogle.com/projects/2465420536387730507        |
+| **App Name**        | WearZone                                                                         |
+| **Package**         | `com.wearzone`                                                                   |
+| **Platform**        | Android (Kotlin + Jetpack Compose)                                               |
+| **Domain**          | E-Commerce — Shopify-backed fashion/apparel browsing & checkout                  |
+| **Users**           | Guest · Authenticated Customer                                                   |
+| **Backend**         | Shopify Storefront API (mobile) · Firebase Auth · BFF for Admin API operations   |
+| **Store URL**       | `mad46-and9.myshopify.com`                                                       |
+| **Jira Board**      | https://shopify-app.atlassian.net/jira/software/projects/KAN/boards/1            |
+| **GitHub**          | https://github.com/WearZone-ITI                                                  |
+| **Figma**           | https://www.figma.com/design/k80kg88yUwwpiU5YxNFh0x/E-Commerce-App              |
+| **Postman**         | https://shopify-7701.postman.co/workspace/9648adda-b1d7-4fd7-95f9-252c6fb88055  |
+| **Spec Reference**  | `Shopify_Project_Specs.pdf` — commit to repo root or link via Jira attachment    |
 
 ---
 
@@ -33,19 +38,22 @@ the APK **full read/write access to the entire Shopify store backend** — produ
 orders, customer data, financials. This is not a theoretical risk; APK decompilation
 takes under 60 seconds with freely available tools.
 
-### The Right Decision: Two Paths
+### Mandatory API Strategy for This Project
 
-| Path | API | Library | Security | Performance | When to use |
-|------|-----|---------|----------|-------------|-------------|
-| **A — Senior / Production** | Shopify Storefront GraphQL API | Apollo Kotlin | ✅ Safe for public APKs | ✅ Fetch only what you need | If team agrees to use bonus points |
-| **B — Academic / Grading** | Shopify Admin REST API | Retrofit 2 | ❌ Academic use only | ⚠️ Over-fetches | If grading rubric requires REST |
+| Layer      | API                              | Auth Mechanism                              | Safe to bundle? |
+|------------|----------------------------------|---------------------------------------------|-----------------|
+| **Mobile** | Shopify **Storefront REST API**  | `X-Shopify-Storefront-Access-Token` header  | ✅ Yes — read-only, scoped |
+| **Backend/BFF** | Shopify Admin REST API      | `X-Shopify-Access-Token` (server-side only) | ❌ Never in APK |
 
-**Default for this project: Path B (Retrofit + Admin REST)** for grading compliance.
-However, sections §1.4 and §7 include parallel GraphQL notes so any agent
-can switch to Path A without restructuring the codebase.
+**Storefront Token (mobile-safe):** `94f4cb99e27e5fcdea2a4a380e19a38c`
+Store in `local.properties` as `SHOPIFY_STOREFRONT_TOKEN` — exposed via `BuildConfig`.
 
-> If Path A is chosen, replace `Retrofit` + `OkHttp` in the tech stack with
-> `Apollo Kotlin` (latest). The domain and presentation layers change **zero lines**.
+> ⚠️ The Admin API token (`shpat_...`) grants full store-admin scope. It lives **only**
+> on the backend/BFF. It is **never** referenced anywhere in the Android codebase.
+> Any agent that writes `shpat_` into any Android source file must be rejected immediately.
+
+For GraphQL (bonus path), switch to Apollo Kotlin with the **Storefront GraphQL API**
+using the same public Storefront token. The domain and presentation layers change zero lines.
 
 ---
 
@@ -190,9 +198,9 @@ root/
 
 ```
 data/src/main/kotlin/com.wearzone.data/
+├── db/
+│   └── WearZoneDatabase.kt              ← @Database (intentionally outside local/ — shared by DAOs)
 ├── local/
-│   ├── db/
-│   │   └── WearZoneDatabase.kt          ← @Database
 │   ├── dao/
 │   │   ├── CartDao.kt
 │   │   ├── WishlistDao.kt
@@ -412,8 +420,8 @@ presentation/src/main/kotlin/com.wearzone.presentation/
 └── common/
     ├── components/                     ← Shared composables
     ├── navigation/
-    │   ├── AppNavHost.kt
-    │   └── AppRoutes.kt               ← @Serializable route objects (type-safe)
+    │   ├── AppNavHost.kt              ← single NavGraph for the entire app (all graphs + composables here)
+    │   └── AppRoutes.kt               ← @Serializable graph roots + route objects (all type-safe)
     └── theme/
         ├── AppTheme.kt
         ├── AppColors.kt
@@ -716,6 +724,10 @@ abstract class RepositoryModule {
 object NetworkModule {
 
     @Provides @Singleton
+    @Named("storefront_token")
+    fun provideStorefrontToken(): String = BuildConfig.SHOPIFY_STOREFRONT_TOKEN
+
+    @Provides @Singleton
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
         errorInterceptor: ErrorInterceptor,
@@ -766,7 +778,7 @@ class ProductRepositoryImpl @Inject constructor(
 
     override suspend fun getProducts(): Result<List<Product>> =
         withContext(ioDispatcher) {            // ✅ dispatcher switch lives here
-            runCatching {
+            runCatchingCancellable {           // ✅ safe — re-throws CancellationException
                 val dto = remoteDataSource.fetchProducts()
                 dto.map { it.toDomain() }
             }
@@ -833,109 +845,251 @@ dependencies {
 
 ## 5. Navigation — Type-Safe Jetpack Navigation Compose 2.8.0+
 
-### 5.1 Route Definitions — @Serializable Objects & Data Classes
+> **Rule:** All navigation for the entire application lives in exactly **two files**:
+> `AppRoutes.kt` (route definitions) and `AppNavHost.kt` (the single NavHost with all
+> nested graphs). No other file may declare routes or navigation logic.
+
+### 5.1 Route & Graph Root Definitions — AppRoutes.kt
 
 ```kotlin
 // presentation/common/navigation/AppRoutes.kt
 
-// ✅ Type-safe route objects — string routes are BANNED
+// ── Graph roots (used as navigation<GraphRoot>(startDestination = ...)) ────────
+@Serializable data object AuthGraph
+@Serializable data object HomeGraph
+@Serializable data object ProductGraph
+@Serializable data object SearchGraph
+@Serializable data object CartGraph
+@Serializable data object WishlistGraph
+@Serializable data object CheckoutGraph
+@Serializable data object AccountGraph
+
+// ── Screen routes — type-safe, @Serializable objects ──────────────────────────
 @Serializable data object HomeRoute
 @Serializable data object LoginRoute
 @Serializable data object RegisterRoute
 @Serializable data object CartRoute
 @Serializable data object WishlistRoute
 @Serializable data object CheckoutRoute
+@Serializable data object AddressRoute    // ← part of CheckoutGraph, not standalone
 @Serializable data object AccountRoute
 @Serializable data object SearchRoute
-@Serializable data object AddressRoute
 
-// Routes with arguments use data class (type-safe — no string parsing)
+// Routes with navigation arguments use data class (type-safe — no string parsing)
 @Serializable data class ProductListRoute(val brand: String? = null, val category: String? = null)
 @Serializable data class ProductDetailRoute(val productId: String)
 
 // ❌ BANNED — string routes
-// "product_detail/{productId}"  ← NEVER use this pattern
+// "product_detail/{productId}"  ← NEVER
 ```
 
-### 5.2 NavHost Setup
+---
+
+### 5.2 AppNavHost — Single NavGraph for the Entire Application
 
 ```kotlin
 // presentation/common/navigation/AppNavHost.kt
+//
+// This is the ONLY navigation file in the project.
+// Every screen composable and every nested graph is declared here.
+// Do NOT create additional NavGraph files anywhere in the project.
+
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: Any = HomeRoute,
+    startDestination: Any = AuthGraph,  // resolved at launch from Proto DataStore auth state
 ) {
     NavHost(
         navController    = navController,
         startDestination = startDestination,
     ) {
 
-        // ── Auth graph ───────────────────────────────────────────────────
-        navigation<LoginRoute>(startDestination = LoginRoute) {
+        // ════════════════════════════════════════════════════════════════════
+        // AUTH GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<AuthGraph>(startDestination = LoginRoute) {
+
             composable<LoginRoute> {
                 LoginScreen(
-                    onLoginSuccess  = {
-                        navController.navigate(HomeRoute) {
-                            popUpTo<LoginRoute> { inclusive = true }
+                    onLoginSuccess       = {
+                        navController.navigate(HomeGraph) {
+                            popUpTo<AuthGraph> { inclusive = true }
                         }
                     },
                     onNavigateToRegister = { navController.navigate(RegisterRoute) },
                 )
             }
+
             composable<RegisterRoute> {
-                RegisterScreen(onNavigateBack = { navController.popBackStack() })
+                RegisterScreen(
+                    onNavigateBack    = { navController.popBackStack() },
+                    onRegisterSuccess = {
+                        navController.navigate(HomeGraph) {
+                            popUpTo<AuthGraph> { inclusive = true }
+                        }
+                    },
+                )
             }
         }
 
-        // ── Main graph ───────────────────────────────────────────────────
-        composable<HomeRoute> {
-            HomeScreen(
-                onNavigateToProductList = { navController.navigate(ProductListRoute()) },
-                onNavigateToSearch      = { navController.navigate(SearchRoute) },
-            )
+        // ════════════════════════════════════════════════════════════════════
+        // HOME GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<HomeGraph>(startDestination = HomeRoute) {
+
+            composable<HomeRoute> {
+                HomeScreen(
+                    onNavigateToProductList = { brand, category ->
+                        navController.navigate(ProductListRoute(brand = brand, category = category))
+                    },
+                    onNavigateToSearch  = { navController.navigate(SearchGraph) },
+                    onNavigateToCart    = { navController.navigate(CartGraph) },
+                    onNavigateToAccount = { navController.navigate(AccountGraph) },
+                    onNavigateToWishlist = { navController.navigate(WishlistGraph) },
+                )
+            }
         }
 
-        composable<ProductListRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<ProductListRoute>()   // ✅ type-safe arg extraction
-            ProductListScreen(
-                brand    = route.brand,
-                category = route.category,
-                onNavigateToDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
-            )
+        // ════════════════════════════════════════════════════════════════════
+        // PRODUCT GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<ProductGraph>(startDestination = ProductListRoute()) {
+
+            composable<ProductListRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ProductListRoute>()  // ✅ type-safe
+                ProductListScreen(
+                    brand              = route.brand,
+                    category           = route.category,
+                    onNavigateToDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+                    onNavigateBack     = { navController.popBackStack() },
+                )
+            }
+
+            composable<ProductDetailRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ProductDetailRoute>() // ✅ type-safe
+                ProductDetailScreen(
+                    productId         = route.productId,
+                    onNavigateBack    = { navController.popBackStack() },
+                    onNavigateToCart  = { navController.navigate(CartGraph) },
+                    onNavigateToLogin = {
+                        navController.navigate(AuthGraph) {
+                            popUpTo<HomeGraph> { inclusive = false }
+                        }
+                    },
+                )
+            }
         }
 
-        composable<ProductDetailRoute> { backStackEntry ->
-            val route = backStackEntry.toRoute<ProductDetailRoute>()  // ✅ type-safe
-            ProductDetailScreen(
-                productId       = route.productId,
-                onNavigateBack  = { navController.popBackStack() },
-                onNavigateToCart = { navController.navigate(CartRoute) },
-            )
+        // ════════════════════════════════════════════════════════════════════
+        // SEARCH GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<SearchGraph>(startDestination = SearchRoute) {
+
+            composable<SearchRoute> {
+                SearchScreen(
+                    onNavigateBack            = { navController.popBackStack() },
+                    onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+                )
+            }
         }
 
-        composable<CartRoute>     { CartScreen(navController) }
-        composable<WishlistRoute> { WishlistScreen(navController) }
-        composable<CheckoutRoute> { CheckoutScreen(navController) }
-        composable<AccountRoute>  { AccountScreen(navController) }
-        composable<SearchRoute>   { SearchScreen(navController) }
-        composable<AddressRoute>  { AddressScreen(navController) }
+        // ════════════════════════════════════════════════════════════════════
+        // CART GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<CartGraph>(startDestination = CartRoute) {
+
+            composable<CartRoute> {
+                CartScreen(
+                    onNavigateBack       = { navController.popBackStack() },
+                    onNavigateToCheckout = { navController.navigate(CheckoutGraph) },
+                    onNavigateToLogin    = {
+                        navController.navigate(AuthGraph) {
+                            popUpTo<HomeGraph> { inclusive = false }
+                        }
+                    },
+                )
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // WISHLIST GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<WishlistGraph>(startDestination = WishlistRoute) {
+
+            composable<WishlistRoute> {
+                WishlistScreen(
+                    onNavigateBack            = { navController.popBackStack() },
+                    onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+                    onNavigateToLogin         = {
+                        navController.navigate(AuthGraph) {
+                            popUpTo<HomeGraph> { inclusive = false }
+                        }
+                    },
+                )
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // CHECKOUT GRAPH  (Checkout + Address share the same back-stack scope)
+        // ════════════════════════════════════════════════════════════════════
+        navigation<CheckoutGraph>(startDestination = CheckoutRoute) {
+
+            composable<CheckoutRoute> {
+                CheckoutScreen(
+                    onNavigateBack                = { navController.popBackStack() },
+                    onNavigateToAddress           = { navController.navigate(AddressRoute) },
+                    onNavigateToOrderConfirmation = {
+                        navController.navigate(AccountGraph) {
+                            popUpTo<CheckoutGraph> { inclusive = true }
+                        }
+                    },
+                )
+            }
+
+            composable<AddressRoute> {
+                AddressScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // ACCOUNT GRAPH
+        // ════════════════════════════════════════════════════════════════════
+        navigation<AccountGraph>(startDestination = AccountRoute) {
+
+            composable<AccountRoute> {
+                AccountScreen(
+                    onNavigateToLogin       = {
+                        navController.navigate(AuthGraph) {
+                            popUpTo<HomeGraph> { inclusive = true }
+                        }
+                    },
+                    onNavigateToWishlist    = { navController.navigate(WishlistGraph) },
+                    onNavigateToOrderDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+                )
+            }
+        }
     }
 }
 ```
 
+---
+
 ### 5.3 Navigation Rules
 
-| Rule                                     | Detail                                                            |
-|------------------------------------------|-------------------------------------------------------------------|
-| String routes                            | BANNED — use `@Serializable` objects/data classes                 |
-| Argument passing                         | IDs only via route data class — never pass domain objects         |
-| Navigation called from ViewModel         | NEVER — emit `UiEffect` → collect in screen → call navController  |
-| Back stack on auth completion            | `popUpTo<LoginRoute> { inclusive = true }`                        |
-| Auth guard                               | Check auth state in NavHost before entering protected composables |
-| NavController scope                      | Pass as lambda callbacks — never pass NavController into ViewModel|
+| Rule                                              | Detail                                                                      |
+|---------------------------------------------------|-----------------------------------------------------------------------------|
+| String routes                                     | BANNED — use `@Serializable` objects / data classes only                    |
+| Navigation files                                  | Exactly two: `AppRoutes.kt` and `AppNavHost.kt` — no others                |
+| Argument passing                                  | IDs only via typed route data class — never pass domain objects             |
+| NavController in ViewModel                        | NEVER — emit `UiEffect` → collect in screen → call navController            |
+| Cross-graph navigation                            | Navigate to the **graph root** (e.g. `navController.navigate(CartGraph)`)   |
+| Back-stack clearing on auth success               | `popUpTo<AuthGraph> { inclusive = true }` when entering `HomeGraph`         |
+| Auth guard for protected screens                  | Navigate to `AuthGraph` with `popUpTo` to clear back stack                  |
+| NavController scope                               | Pass as lambda callbacks — **never** pass `NavController` into a ViewModel  |
+| `AddressRoute`                                    | Declared inside `CheckoutGraph` — it is part of checkout flow, not global   |
 
----
 
 ## 6. Kotlin Coroutines & Flows — Rules
 
@@ -1025,16 +1179,33 @@ private val _uiEffect = MutableSharedFlow<CartUiEffect>(replay = 0)
 
 ### 6.4 Exception Handling
 
+> ⚠️ **Never use bare `runCatching { }` in suspend functions.**
+> `runCatching` catches `Throwable`, which includes `CancellationException`.
+> A cancelled coroutine becomes a silent `Result.failure` instead of propagating
+> cancellation up the scope hierarchy — breaking structured concurrency.
+
+**Always use `runCatchingCancellable` in coroutine contexts:**
+
 ```kotlin
-// ✅ In suspend repository functions — use runCatching
+// domain/common/result/RunCatchingCancellable.kt  ← add this utility once, use everywhere
+suspend fun <T> runCatchingCancellable(block: suspend () -> T): Result<T> =
+    runCatching { block() }.also { result ->
+        result.exceptionOrNull()?.let { e ->
+            if (e is CancellationException) throw e   // re-propagate cancellation
+        }
+    }
+```
+
+```kotlin
+// ✅ In suspend repository functions — use runCatchingCancellable, NOT runCatching
 override suspend fun getProducts(): Result<List<Product>> =
     withContext(ioDispatcher) {
-        runCatching {
+        runCatchingCancellable {
             remoteDataSource.fetchProducts().map { it.toDomain() }
         }
     }
 
-// ✅ In Flow chains — use .catch
+// ✅ In Flow chains — use .catch (never .runCatching inside flow)
 fun observeCart(): Flow<List<CartItem>> = cartDao
     .observeCart()
     .map { it.map { entity -> entity.toDomain() } }
@@ -1050,6 +1221,9 @@ viewModelScope.launch {
         .onFailure { error   -> _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Error") }
 }
 
+// ❌ BANNED — bare runCatching in suspend functions (swallows CancellationException)
+runCatching { remoteDataSource.fetchProducts() }
+
 // ❌ BANNED — silent catch
 try { ... } catch (e: Exception) { /* empty */ }
 ```
@@ -1058,40 +1232,70 @@ try { ... } catch (e: Exception) { /* empty */ }
 
 ## 7. Network Layer — Shopify API
 
-### 7.1 API Authentication (Path B — Admin REST)
+### 7.1 API Authentication — Storefront Token (MANDATORY)
 
-> ⚠️ This sends credentials in every HTTP header. Acceptable for academic use only.
+> ✅ The Storefront Access Token is a **public**, read-only token scoped to
+> product/cart browsing. It is safe to ship in an APK.
+>
+> ❌ `Credentials.basic(apiKey, password)` and any Admin API token (`shpat_...`) are
+> **BANNED** in the Android codebase. Admin operations must go through a backend/BFF.
 
 ```kotlin
 // data/remote/interceptor/AuthInterceptor.kt
 class AuthInterceptor @Inject constructor(
-    @Named("shopify_api_key") private val apiKey: String,
-    @Named("shopify_password") private val password: String,
+    @Named("storefront_token") private val storefrontToken: String,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
-            .header("Authorization", Credentials.basic(apiKey, password))
+            // ✅ Storefront API header — safe for public distribution
+            .header("X-Shopify-Storefront-Access-Token", storefrontToken)
             .build()
         return chain.proceed(request)
     }
 }
 ```
 
-### 7.2 URL Scheme (Path B)
+Provide the token via Hilt in `NetworkModule`:
 
-```
-https://{apikey}:{password}@{hostname}/admin/api/{version}/{resource}.json
-```
-
-Store in `local.properties` → exposed via `BuildConfig`:
-```
-SHOPIFY_API_KEY=...
-SHOPIFY_PASSWORD=...
-SHOPIFY_HOSTNAME=...
-SHOPIFY_API_VERSION=2024-01
+```kotlin
+@Provides @Named("storefront_token")
+fun provideStorefrontToken(): String = BuildConfig.SHOPIFY_STOREFRONT_TOKEN
+// local.properties → SHOPIFY_STOREFRONT_TOKEN=94f4cb99e27e5fcdea2a4a380e19a38c
 ```
 
-For Path A (Apollo/GraphQL), use the **Storefront API** public token — safe to bundle.
+### 7.2 API URL Pattern — Storefront REST
+
+All Shopify Storefront REST calls use this URI pattern:
+
+```
+https://{hostname}/api/{version}/{resource}.json
+```
+
+Example: `https://mad46-and9.myshopify.com/api/2024-01/products.json`
+
+> ❌ BANNED: `https://{apikey}:{password}@{hostname}/admin/api/...`
+> Embedding credentials in a URL compiles them into BuildConfig plaintext strings
+> and is extractable from any APK in under 60 seconds. Never use this pattern.
+
+Store in `local.properties` — **never commit this file to git**:
+
+```properties
+SHOPIFY_BASE_URL=https://mad46-and9.myshopify.com/api/2024-01/
+SHOPIFY_STOREFRONT_TOKEN=94f4cb99e27e5fcdea2a4a380e19a38c
+```
+
+Expose via `BuildConfig` in `build.gradle.kts`:
+
+```kotlin
+android {
+    defaultConfig {
+        buildConfigField("String", "SHOPIFY_BASE_URL",
+            "\"${localProperties["SHOPIFY_BASE_URL"]}\"")
+        buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN",
+            "\"${localProperties["SHOPIFY_STOREFRONT_TOKEN"]}\"")
+    }
+}
+```
 
 ### 7.3 Retrofit Service Rules
 
@@ -1121,15 +1325,28 @@ interface ProductApiService {
 
 ```kotlin
 // data/remote/interceptor/ErrorInterceptor.kt
+//
+// ✅ All custom exceptions extend IOException — OkHttp interceptors MUST only throw
+// IOException. Throwing arbitrary Throwable bypasses Retrofit's error pipeline and
+// can crash coroutine callers in ways runCatching won't handle correctly.
+//
+// Sealed hierarchy keeps the type tree in one place:
+sealed class ShopifyHttpException(message: String) : IOException(message)
+class UnauthorizedException : ShopifyHttpException("401 Unauthorized — token invalid or missing")
+class ForbiddenException    : ShopifyHttpException("403 Forbidden — insufficient scope")
+class NotFoundException     : ShopifyHttpException("404 Not Found")
+class ValidationException(body: String?) : ShopifyHttpException("422 Unprocessable: $body")
+class ServerException(code: Int)         : ShopifyHttpException("5xx Server Error: $code")
+
 class ErrorInterceptor @Inject constructor() : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
         when (response.code) {
-            401        -> throw UnauthorizedException()
-            403        -> throw ForbiddenException()
-            404        -> throw NotFoundException()
-            422        -> throw ValidationException(response.body?.string())
-            in 500..599 -> throw ServerException(response.code)
+            401          -> throw UnauthorizedException()
+            403          -> throw ForbiddenException()
+            404          -> throw NotFoundException()
+            422          -> throw ValidationException(response.body?.string())
+            in 500..599  -> throw ServerException(response.code)
         }
         return response
     }
@@ -1180,7 +1397,11 @@ interface CartDao {
 }
 ```
 
-### 8.3 DataStore — Preferences (simple key-value)
+### 8.3 DataStore — Preferences (simple key-value only)
+
+> ✅ Use for: selected currency, locale, last-seen filter — **non-sensitive, non-structured** data.
+> ❌ **NEVER store `auth_token`, user identity, or session state here.**
+> Auth token canonical storage is **Proto DataStore only** (see §8.4).
 
 ```kotlin
 // Use for: selected currency, locale, last-seen filter
@@ -1195,11 +1416,16 @@ class UserPreferencesDataSource @Inject constructor(
 
     companion object {
         val CURRENCY_KEY = stringPreferencesKey("currency_code")
+        // ❌ AUTH_TOKEN_KEY must NOT exist here — use Proto DataStore (§8.4)
     }
 }
 ```
 
-### 8.4 Proto DataStore — structured data
+### 8.4 Proto DataStore — canonical storage for auth token and structured user state
+
+> **This is the single source of truth for `auth_token`.** §13.1 and §1.5 both defer here.
+> Proto DataStore is typed (generated Kotlin classes), survives process death, and
+> provides type-safe reads without `stringPreferencesKey` casting bugs.
 
 ```proto
 // data/src/main/proto/user_preferences.proto
@@ -1207,14 +1433,14 @@ syntax = "proto3";
 option java_package = "com.wearzone.data.local.proto";
 
 message UserPreferences {
-    string auth_token    = 1;
+    string auth_token    = 1;   // ← ONLY place auth_token is persisted — not Preferences DS
     string currency_code = 2;
     bool   is_guest      = 3;
     string locale        = 4;
 }
 ```
 
-Use Proto DataStore for: auth token, user identity state — data that must survive process death with type safety.
+Use Proto DataStore for: **auth token, user identity state** — data that must survive process death with type safety.
 
 ---
 
@@ -1222,27 +1448,45 @@ Use Proto DataStore for: auth token, user identity state — data that must surv
 
 Every feature that reads persistent data follows SSOT via the Repository:
 
+> ⚠️ **Do NOT use `.onStart { remoteRefresh() }` for offline-first flows.**
+> `onStart`'s action runs to completion **before** the outer `flow { }` block begins
+> collecting. Because the remote fetch is `withContext`-awaited inside `onStart`,
+> cached local data is not emitted until the network call finishes — the exact opposite
+> of offline-first intent. On slow or offline networks, users see a blocked loader
+> instead of instant cached content.
+>
+> **Fix: use `channelFlow + launch`** — the remote refresh runs concurrently while
+> local data emits immediately from Room.
+
 ```kotlin
-// ✅ Repository SSOT pattern — emit local first, refresh from remote, Room re-emits automatically
+// ✅ CORRECT — channelFlow lets local emit first; remote refresh is concurrent
 class ProductRepositoryImpl @Inject constructor(
     private val localDs: IProductLocalDataSource,
     private val remoteDs: IProductRemoteDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IProductRepository {
 
-    override fun observeProducts(brand: String?): Flow<List<Product>> =
-        localDs.observeProducts(brand)
-            .map { it.map { entity -> entity.toDomain() } }
-            .onStart { refreshFromRemote(brand) }
-
-    private suspend fun refreshFromRemote(brand: String?) {
-        withContext(ioDispatcher) {
-            runCatching { remoteDs.fetchProducts(brand) }
+    override fun observeProducts(brand: String?): Flow<List<Product>> = channelFlow {
+        // 1. Kick off remote refresh concurrently — does NOT block local emission
+        launch(ioDispatcher) {
+            runCatchingCancellable { remoteDs.fetchProducts(brand) }
                 .onSuccess { dto -> localDs.cacheProducts(dto.map { it.toEntity() }) }
                 // Network errors are silent — local cache is the fallback
         }
-    }
+        // 2. Emit local cache immediately; Room re-emits when refresh writes complete
+        emitAll(
+            localDs.observeProducts(brand).map { list -> list.map { it.toDomain() } }
+        )
+    }.flowOn(ioDispatcher)
 }
+```
+
+```kotlin
+// ❌ WRONG — onStart blocks local emission until the network call finishes
+override fun observeProducts(brand: String?): Flow<List<Product>> =
+    localDs.observeProducts(brand)
+        .map { it.map { entity -> entity.toDomain() } }
+        .onStart { refreshFromRemote(brand) }  // ← awaits remote BEFORE local emits
 ```
 
 **Rules:**
@@ -1730,6 +1974,8 @@ Timber.w("Coupon '$code' was invalid")
 - ✅ Work on ONE feature or layer at a time
 - ✅ Show the list of files to create/change BEFORE writing code
 - ✅ Map every feature implementation to its section in `Shopify_Project_Specs.pdf`
+  (commit the PDF to repo root, or link its Jira attachment — either is acceptable;
+  the reference must resolve before any feature PR is opened)
 - ✅ Every ViewModel must have a test file before the feature is marked done
 - ✅ Every UseCase must reach 100% test coverage before a PR is raised
 
@@ -1755,7 +2001,7 @@ Timber.w("Coupon '$code' was invalid")
 | ViewModel structure & Channel effect | §3.3                                              |
 | Hilt modules & scopes                | §4                                                |
 | KSP configuration                    | §4.6                                              |
-| Type-safe navigation setup           | §5                                                |
+| Type-safe navigation setup           | §5 — AppNavHost §5.2, graph files §5.3–§5.10     |
 | Dispatcher model (why VM has none)   | §6.1                                              |
 | Flow hot/cold decision               | §6.2                                              |
 | Shopify API security warning         | Security Notice (top of file)                     |
