@@ -19,9 +19,23 @@ fun NavGraph(
         startDestination = Route.SplashRoute,
         modifier = modifier
     ) {
+        // Aalaa
         composable<Route.SplashRoute> {
             Text(text = "Splash Screen")
         }
+        // Aalaa
+
+        // Hend
+
+        // Hend
+
+        // Ahmed
+
+        // Ahmed
+
+        // Omer
+
+        // Omer
     }
   
 }
