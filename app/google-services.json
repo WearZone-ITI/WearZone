@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1048875285452",
+    "project_id": "wearzone-a0084",
+    "storage_bucket": "wearzone-a0084.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048875285452:android:b104100e29872b4e9b3b69",
+        "android_client_info": {
+          "package_name": "com.example.wearzone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq7RM2Fz-ednraoG8rbfprS6CZliZcYXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048875285452:android:8c1a0b4d9680b4da9b3b69",
+        "android_client_info": {
+          "package_name": "com.wearzone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq7RM2Fz-ednraoG8rbfprS6CZliZcYXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
