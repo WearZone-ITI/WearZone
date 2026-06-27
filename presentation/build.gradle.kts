@@ -24,6 +24,21 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    //Omar
+
+    //Omar
+
+    //Ahmed
+
+    //Ahmed
+
+    //Alaa
+
+    //Alaa
+
+    //Hend
+
+    //Hend
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
