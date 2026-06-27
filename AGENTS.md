@@ -237,11 +237,6 @@ data/src/main/kotlin/com.wearzone.data/
 │   ├── WishlistRepositoryImpl.kt
 │   ├── CheckoutRepositoryImpl.kt
 │   └── AccountRepositoryImpl.kt
-└── di/
-    ├── NetworkModule.kt
-    ├── DatabaseModule.kt
-    ├── DataSourceModule.kt
-    └── DispatcherModule.kt              ← @IoDispatcher, @DefaultDispatcher live here
 
 domain/src/main/kotlin/com.wearzone.domain/
 ├── auth/
