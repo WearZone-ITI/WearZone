@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
+import com.example.presentation.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +46,7 @@ class OnboardingViewModel @Inject constructor(
     fun handleIntent(intent: OnboardingUiIntent) {
         when (intent) {
             OnboardingUiIntent.OnGetStartedClicked -> completeOnboarding()
-            OnboardingUiIntent.OnContinueAsGuestClicked -> showGuestModeUnavailable()
+            OnboardingUiIntent.OnContinueAsGuestClicked -> navigateToGuest()
             OnboardingUiIntent.OnNextPageClicked -> showNextPage()
             OnboardingUiIntent.OnPreviousPageClicked -> showPreviousPage()
             is OnboardingUiIntent.OnPageSelected -> selectPage(intent.page)
@@ -62,17 +63,18 @@ class OnboardingViewModel @Inject constructor(
                     _uiState.value = OnboardingUiState.Idle(page)
                     _uiEffect.send(OnboardingUiEffect.NavigateToLogin)
                 }
-                .onFailure { error ->
-                    val message = error.localizedMessage ?: "Unable to continue. Please try again."
-                    _uiState.value = OnboardingUiState.Error(message, page)
-                    _uiEffect.send(OnboardingUiEffect.ShowError(message))
+                .onFailure {
+                    _uiState.value = OnboardingUiState.Error(
+                        messageRes = R.string.onboarding_error_unable_to_continue,
+                        currentPage = page,
+                    )
                 }
         }
     }
 
-    private fun showGuestModeUnavailable() {
+    private fun navigateToGuest() {
         viewModelScope.launch {
-            _uiEffect.send(OnboardingUiEffect.ShowGuestModeUnavailable)
+            _uiEffect.send(OnboardingUiEffect.NavigateToGuest)
         }
     }
 

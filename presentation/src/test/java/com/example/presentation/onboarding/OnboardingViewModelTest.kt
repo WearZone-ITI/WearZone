@@ -4,6 +4,7 @@ import com.example.domain.onboarding.repository.IAuthRepository
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule
+import com.example.presentation.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -40,26 +41,28 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `write failure emits ShowError and does not navigate`() = runTest {
+    fun `write failure shows inline error and does not navigate`() = runTest {
         val repository = FakeAuthRepository(writeError = IllegalStateException("Disk is full"))
         val viewModel = createViewModel(repository)
 
         viewModel.handleIntent(OnboardingUiIntent.OnGetStartedClicked)
 
         assertTrue(repository.saveAttempted)
-        assertEquals(OnboardingUiEffect.ShowError("Disk is full"), viewModel.uiEffect.first())
-        assertEquals(OnboardingUiState.Error("Disk is full", 0), viewModel.uiState.value)
+        assertEquals(
+            OnboardingUiState.Error(R.string.onboarding_error_unable_to_continue, 0),
+            viewModel.uiState.value,
+        )
     }
 
     @Test
-    fun `Continue as Guest emits ShowGuestModeUnavailable and does not save or navigate`() = runTest {
+    fun `Continue as Guest emits NavigateToGuest and does not save`() = runTest {
         val repository = FakeAuthRepository()
         val viewModel = createViewModel(repository)
 
         viewModel.handleIntent(OnboardingUiIntent.OnContinueAsGuestClicked)
 
         assertFalse(repository.saveAttempted)
-        assertEquals(OnboardingUiEffect.ShowGuestModeUnavailable, viewModel.uiEffect.first())
+        assertEquals(OnboardingUiEffect.NavigateToGuest, viewModel.uiEffect.first())
         assertEquals(OnboardingUiState.Idle(), viewModel.uiState.value)
     }
 
