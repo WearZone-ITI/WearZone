@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.presentation.R
 import com.wearzone.domain.product.model.Product
 
 @Composable
@@ -44,7 +45,7 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
             .clickable { product?.id?.let(onProductClick) }
     ) {
         AsyncImage(
-            model = product?.imageUrl ?: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzmht841nVvZBosvF6GJb1m-bI3WslceHXHYw9GE53i3YYsjsEtoO9z4BIGggx49XVVGXZyatNdNvD2NYAlQdNm_0fkZz4kG9b04qZ6ZuzPT9l19cKmudmVPydbzA-cY9SNo0lk7ixMBt50kPVXGBFp41x1-3KNr53j9iY1GiT-lV6HLAPBedU8JjrjeZKchpCkc-S95D0UFekLnUJmMxJEeoFO-y0TyaVOoZ5UNzkC3r7V6EAZ2NhG__8SK_MznD4e83FG1th0B4",
+            model = product?.imageUrl ?: R.drawable.place_holder_hero,
             contentDescription = product?.title ?: "Hero",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

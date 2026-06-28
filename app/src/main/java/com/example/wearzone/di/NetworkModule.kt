@@ -1,6 +1,8 @@
 package com.example.wearzone.di
 
 import com.wearzone.data.remote.api.ProductApiService
+import com.wearzone.domain.product.repository.IProductRepository
+import com.wearzone.domain.product.usecase.GetProductsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,5 +57,13 @@ object NetworkModule {
     @Singleton
     fun provideProductApiService(retrofit: Retrofit): ProductApiService {
         return retrofit.create(ProductApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetProductsUseCase(
+        repository: IProductRepository
+    ): GetProductsUseCase {
+        return GetProductsUseCase(repository)
     }
 }
