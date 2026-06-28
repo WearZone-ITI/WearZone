@@ -11,3 +11,8 @@ kotlin {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
 }
+dependencies{
+    //Hend
+    implementation(libs.javax.inject)
+    //Hend
+}
