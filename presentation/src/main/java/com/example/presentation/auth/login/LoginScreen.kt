@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,7 +39,6 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.example.presentation.auth.login.components.SocialLoginButtons
 import com.example.presentation.common.theme.AppColors
 import com.example.presentation.common.theme.AppTypography
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -52,17 +50,13 @@ fun LoginScreen(
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val credentialManager = remember { androidx.credentials.CredentialManager.create(context) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 is LoginUiEffect.NavigateToHome -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Login successful!", duration = androidx.compose.material3.SnackbarDuration.Short)
-                    }
-                    kotlinx.coroutines.delay(1000)
+                    snackbarHostState.showSnackbar("Login successful!", duration = androidx.compose.material3.SnackbarDuration.Short)
                     onLoginSuccess()
                 }
                 is LoginUiEffect.NavigateToRegister -> onNavigateToRegister()
