@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://mad46-and9.myshopify.com/admin/api/2024-04/"
+    private const val BASE_URL = ""
 
     @Provides
     @Singleton
