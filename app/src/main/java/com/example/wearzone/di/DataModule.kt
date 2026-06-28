@@ -12,12 +12,23 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
 
-    @Provides
+abstract class DataModule {
+
+    @Binds
     @Singleton
-    fun provideOnboardingPreferencesDataSource(
-        dataStore: DataStore<Preferences>,
-    ): IOnboardingPreferencesDataSource =
-        OnboardingPreferencesDataSourceImpl(dataStore)
+    abstract fun bindAuthRemoteDataSource(
+        impl: com.example.data.remote.datasource.AuthRemoteDataSourceImpl
+    ): com.example.data.remote.datasource.IAuthRemoteDataSource
+        
+    companion object {
+
+        @Provides
+        @Singleton
+        fun provideOnboardingPreferencesDataSource(
+            dataStore: DataStore<Preferences>,
+        ): IOnboardingPreferencesDataSource {
+            return OnboardingPreferencesDataSourceImpl(dataStore)
+        }
+    }
 }

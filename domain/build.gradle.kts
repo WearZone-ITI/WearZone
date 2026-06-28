@@ -15,3 +15,4 @@ kotlin {
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
 }
+dependencies { implementation("javax.inject:javax.inject:1") }
