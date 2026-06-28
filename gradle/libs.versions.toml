@@ -20,7 +20,6 @@ ksp = "2.2.10-2.0.2"
 retrofit = "3.0.0"
 room = "2.8.4"
 
-ksp = "2.3.9"
 firebaseBom = "33.16.0"
 googleServices = "4.5.0"
 kotlinxCoroutinesPlayServices = "1.11.0"
@@ -36,8 +35,15 @@ kotlinxCoroutinesPlayServices = "1.11.0"
 #Ahmed
 
 #Hend
-
+hiltNavigationComposeVersion = "1.2.0"
+coilVersion = "3.1.0"
+lifecycleVersion = "2.9.1"
+javaxInject = "1"
+turbine = "1.2.1"
+kotlinxCoroutinesTest = "1.11.0"
+mockk = "1.14.11"
 #Hend
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -84,6 +90,14 @@ kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-cor
 #Ahmed
 
 #Hend
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationComposeVersion" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilVersion" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleVersion" }
+javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 #Hend
 [plugins]
