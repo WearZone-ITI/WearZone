@@ -16,13 +16,11 @@ import javax.inject.Singleton
 object DispatcherModule {
 
     @Provides
-    @IoDispatcher
     @Singleton
     @Named("IoDispatcher")
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     @Provides
-    @DefaultDispatcher
     @Singleton
     @Named("DefaultDispatcher")
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
@@ -31,4 +29,15 @@ object DispatcherModule {
     @Singleton
     @Named("MainDispatcher")
     fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
-}
+
+    @Provides
+    @Singleton
+    @IoDispatcher
+    fun provideIoDispatcherCustom(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
+    @Singleton
+    @DefaultDispatcher
+    fun provideDefaultDispatcherCustom(): CoroutineDispatcher = Dispatchers.Default
+
+    }
