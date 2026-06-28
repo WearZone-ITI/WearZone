@@ -10,7 +10,7 @@ val ChampagneGold = Color(0xFFD4AF37)
 val OffWhite      = Color(0xFFF9F9F9)
 
 // ── Input / Surface ──────────────────────────────────────────────────────────
-val InputBg             = Color(0xFFEFEDED)
+val screenBackground             = Color(0xFFEFEDED)
 val InputBgFocused      = Color(0xFFEFEDED)
 val InputBorderFocused  = MidnightSlate
 
