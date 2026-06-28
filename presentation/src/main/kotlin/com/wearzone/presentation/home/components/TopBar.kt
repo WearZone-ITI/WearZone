@@ -1,0 +1,91 @@
+package com.wearzone.presentation.home.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.wearzone.domain.product.model.Product
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar() {
+    TopAppBar(
+        title = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "WearZone",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = { }) {
+                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+            }
+        },
+        actions = {
+            Box(modifier = Modifier.padding(end = 8.dp)) {
+                IconButton(onClick = { }) {
+                    Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart", tint = Color.Black)
+                }
+                Badge(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                ) {
+                    Text("3")
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFBF9F9))
+    )
+}
+
+@Composable
+fun GreetingSection() {
+    Column {
+        Text("Hello, Omar", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+        Text("Discover today's curated styles.", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+    }
+}
+
+
+

@@ -1,3 +1,11 @@
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,6 +31,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        val storefrontToken = localProperties.getProperty("SHOPIFY_STOREFRONT_TOKEN", "")
+        buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"$storefrontToken\"")
+        
+        val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
+        buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
     }
 
     buildTypes {
@@ -38,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -85,10 +100,14 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    // Immutable collections
+    implementation(libs.kotlinx.collections.immutable)
 
     // Retrofit
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
 
     // Room
     implementation(libs.androidx.room.runtime)

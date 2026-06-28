@@ -20,10 +20,13 @@ ksp = "2.2.10-2.0.2"
 retrofit = "3.0.0"
 room = "2.8.4"
 
-ksp = "2.3.9"
 firebaseBom = "33.16.0"
 googleServices = "4.5.0"
 kotlinxCoroutinesPlayServices = "1.11.0"
+kotlinxCoroutinesCore = "1.8.0"
+kotlinxCollectionsImmutable = "0.3.7"
+coil = "3.2.0"
+hiltNavigationCompose = "1.2.0"
 # Aalaa
 
 
@@ -70,6 +73,7 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 # Retrofit
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 # Room
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -77,6 +81,11 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 # Aalaa
 
 #Ahmed
