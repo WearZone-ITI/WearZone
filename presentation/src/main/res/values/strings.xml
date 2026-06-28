@@ -24,10 +24,10 @@
     <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
     <string name="error_register_failed">Registration failed. Please try again.</string>
 
-    <string name="terms_agreement_prefix">I agree to WearZone's </string>
-    <string name="terms_of_service">Terms of Service</string>
+    <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
+    <string name="terms_of_service">  Terms of Service</string>
     <string name="terms_and"> and </string>
-    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy"> Privacy Policy</string>
     <string name="terms_period">.</string>
 
     <string name="password_strength">Password strength: %1$s</string>
@@ -37,7 +37,7 @@
     <string name="password_strength_good">Good</string>
     <string name="password_strength_strong">Strong</string>
 
-    <string name="empty">""</string>
+    <string name="empty">&quot;&quot;</string>
     <!--Hend-->
 
     <!--Alaa-->

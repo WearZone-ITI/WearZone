@@ -52,11 +52,12 @@ fun TermsCheckbox(
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             ),
         ) {
+            append(" ")
             append(terms)
         }
 
         pop()
-
+        append(" ")
         append(and)
 
         pushStringAnnotation(
@@ -71,11 +72,13 @@ fun TermsCheckbox(
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             ),
         ) {
+            append(" ")
             append(privacy)
         }
 
         pop()
 
+        append(" ")
         append(period)
     }
 
