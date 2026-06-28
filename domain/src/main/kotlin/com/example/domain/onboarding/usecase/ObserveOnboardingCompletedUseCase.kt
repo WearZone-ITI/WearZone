@@ -1,6 +1,6 @@
 package com.example.domain.onboarding.usecase
 
-import com.example.domain.onboarding.repository.IAuthRepository
+import com.example.domain.auth.repository.IAuthRepository
 import kotlinx.coroutines.flow.Flow
 
 class ObserveOnboardingCompletedUseCase(

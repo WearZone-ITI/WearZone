@@ -1,6 +1,5 @@
 package com.example.presentation.onboarding
 
-import com.example.domain.onboarding.repository.IAuthRepository
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule

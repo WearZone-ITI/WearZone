@@ -1,6 +1,6 @@
 package com.example.wearzone.di
 
-import com.example.domain.onboarding.repository.IAuthRepository
+import com.example.domain.auth.repository.IAuthRepository
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import dagger.Module

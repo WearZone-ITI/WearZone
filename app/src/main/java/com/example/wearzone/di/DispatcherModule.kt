@@ -14,8 +14,6 @@ import javax.inject.Singleton
 object DispatcherModule {
 
     @Provides
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
-  
     @Singleton
     @Named("IoDispatcher")
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
