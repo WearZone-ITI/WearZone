@@ -1,6 +1,7 @@
 package com.example.presentation.onboarding
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,7 +45,7 @@ import com.example.presentation.R
 @Composable
 fun OnboardingScreen(
     onNavigateToLogin: () -> Unit,
-    onShowMessage: (String) -> Unit,
+    onNavigateToGuest: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -52,10 +54,7 @@ fun OnboardingScreen(
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 OnboardingUiEffect.NavigateToLogin -> onNavigateToLogin()
-                is OnboardingUiEffect.ShowError -> onShowMessage(effect.message)
-                OnboardingUiEffect.ShowGuestModeUnavailable -> {
-                    onShowMessage("Guest mode is not available yet.")
-                }
+                OnboardingUiEffect.NavigateToGuest -> onNavigateToGuest()
             }
         }
     }
@@ -86,7 +85,7 @@ private fun OnboardingContent(
     ) {
         Image(
             painter = painterResource(page.imageRes),
-            contentDescription = page.imageDescription,
+            contentDescription = stringResource(page.imageDescriptionRes),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,7 +101,7 @@ private fun OnboardingContent(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = page.title,
+            text = stringResource(page.titleRes),
             color = MaterialTheme.colorScheme.onBackground,
             fontFamily = FontFamily.Serif,
             fontSize = 34.sp,
@@ -112,7 +111,7 @@ private fun OnboardingContent(
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
-            text = page.description,
+            text = stringResource(page.descriptionRes),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 16.sp,
             lineHeight = 24.sp,
@@ -133,7 +132,7 @@ private fun OnboardingContent(
         if (uiState is OnboardingUiState.Error) {
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = uiState.message,
+                text = stringResource(uiState.messageRes),
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
@@ -188,7 +187,7 @@ private fun PageNavigationActions(
                 .weight(1f)
                 .height(56.dp),
         ) {
-            Text(text = "Back")
+            Text(text = stringResource(R.string.onboarding_back))
         }
         Button(
             onClick = { onIntent(OnboardingUiIntent.OnNextPageClicked) },
@@ -201,7 +200,10 @@ private fun PageNavigationActions(
                 .weight(1f)
                 .height(56.dp),
         ) {
-            Text(text = "Next", fontWeight = FontWeight.SemiBold)
+            Text(
+                text = stringResource(R.string.onboarding_next),
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
@@ -230,7 +232,10 @@ private fun FinalPageActions(
                 modifier = Modifier.size(22.dp),
             )
         } else {
-            Text(text = "Get Started", fontWeight = FontWeight.SemiBold)
+            Text(
+                text = stringResource(R.string.onboarding_get_started),
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
     Spacer(modifier = Modifier.height(12.dp))
@@ -240,7 +245,7 @@ private fun FinalPageActions(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            text = "Continue as Guest",
+            text = stringResource(R.string.onboarding_continue_as_guest),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
@@ -248,30 +253,30 @@ private fun FinalPageActions(
 }
 
 private data class OnboardingPage(
-    @DrawableRes val imageRes: Int,
-    val imageDescription: String,
-    val title: String,
-    val description: String,
+    @param:DrawableRes val imageRes: Int,
+    @param:StringRes val imageDescriptionRes: Int,
+    @param:StringRes val titleRes: Int,
+    @param:StringRes val descriptionRes: Int,
 )
 
 private fun onboardingPages(): List<OnboardingPage> =
     listOf(
         OnboardingPage(
             imageRes = R.drawable.onboarding_style_discovery,
-            imageDescription = "Woman wearing a cream outfit",
-            title = "Discover Curated Fashion",
-            description = "Explore refined looks selected for your everyday wardrobe.",
+            imageDescriptionRes = R.string.onboarding_style_discovery_image_description,
+            titleRes = R.string.onboarding_style_discovery_title,
+            descriptionRes = R.string.onboarding_style_discovery_description,
         ),
         OnboardingPage(
             imageRes = R.drawable.onboarding_shopping_flow,
-            imageDescription = "Woman shopping from her phone",
-            title = "Shop With Ease",
-            description = "Browse collections, compare styles, and keep your favorites close.",
+            imageDescriptionRes = R.string.onboarding_shopping_flow_image_description,
+            titleRes = R.string.onboarding_shopping_flow_title,
+            descriptionRes = R.string.onboarding_shopping_flow_description,
         ),
         OnboardingPage(
             imageRes = R.drawable.onboarding_delivery_moment,
-            imageDescription = "Woman opening a fashion package",
-            title = "Unbox Your Style",
-            description = "Finish onboarding to continue to the Login placeholder and start your WearZone journey.",
+            imageDescriptionRes = R.string.onboarding_delivery_moment_image_description,
+            titleRes = R.string.onboarding_delivery_moment_title,
+            descriptionRes = R.string.onboarding_delivery_moment_description,
         ),
     )
