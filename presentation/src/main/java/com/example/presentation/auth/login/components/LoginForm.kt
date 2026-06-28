@@ -10,6 +10,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,7 +35,7 @@ fun LoginForm(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        androidx.compose.material3.TextField(
+        TextField(
             value = formState.email,
             onValueChange = { onIntent(LoginUiIntent.OnEmailChanged(it)) },
             label = { Text("Email Address", style = AppTypography.bodyMedium, color = AppColors.TextPrimary) },
@@ -43,7 +45,7 @@ fun LoginForm(
                 imeAction = ImeAction.Next
             ),
             singleLine = true,
-            colors = androidx.compose.material3.TextFieldDefaults.colors(
+            colors = TextFieldDefaults.colors(
                 focusedContainerColor = AppColors.InputBackground,
                 unfocusedContainerColor = AppColors.InputBackground,
                 focusedIndicatorColor = AppColors.TextPrimary,
@@ -53,7 +55,7 @@ fun LoginForm(
             )
         )
 
-        androidx.compose.material3.TextField(
+        TextField(
             value = formState.password,
             onValueChange = { onIntent(LoginUiIntent.OnPasswordChanged(it)) },
             label = { Text("Password", style = AppTypography.bodyMedium, color = AppColors.TextPrimary) },
@@ -64,7 +66,7 @@ fun LoginForm(
                 imeAction = ImeAction.Done
             ),
             singleLine = true,
-            colors = androidx.compose.material3.TextFieldDefaults.colors(
+            colors = TextFieldDefaults.colors(
                 focusedContainerColor = AppColors.InputBackground,
                 unfocusedContainerColor = AppColors.InputBackground,
                 focusedIndicatorColor = AppColors.TextPrimary,

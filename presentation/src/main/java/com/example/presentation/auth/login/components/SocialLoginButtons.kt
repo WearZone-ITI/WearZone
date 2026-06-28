@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,10 +37,10 @@ fun SocialLoginButtons(
             border = BorderStroke(1.dp, AppColors.Primary),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.TextPrimary)
         ) {
-            androidx.compose.material3.Icon(
-                painter = androidx.compose.ui.res.painterResource(id = com.example.presentation.R.drawable.ic_google),
+            Icon(
+                painter = painterResource(id = com.example.presentation.R.drawable.ic_google),
                 contentDescription = "Sign in with Google",
-                tint = androidx.compose.ui.graphics.Color.Unspecified
+                tint = Color.Unspecified
             )
         }
 
@@ -50,10 +53,10 @@ fun SocialLoginButtons(
             border = BorderStroke(1.dp, AppColors.Primary),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.TextPrimary)
         ) {
-            androidx.compose.material3.Icon(
-                painter = androidx.compose.ui.res.painterResource(id = com.example.presentation.R.drawable.ic_apple),
+            Icon(
+                painter = painterResource(id = com.example.presentation.R.drawable.ic_apple),
                 contentDescription = "Sign in with Apple",
-                tint = androidx.compose.ui.graphics.Color.Unspecified
+                tint = Color.Unspecified
             )
         }
     }

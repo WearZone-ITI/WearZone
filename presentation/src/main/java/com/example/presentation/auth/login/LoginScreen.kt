@@ -31,6 +31,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.auth.login.components.LoginForm
+import com.example.presentation.BuildConfig
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import com.example.presentation.auth.login.components.SocialLoginButtons
 import com.example.presentation.common.theme.AppColors
 import com.example.presentation.common.theme.AppTypography
@@ -52,44 +58,46 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
-                is LoginUiEffect.NavigateToHome -> onLoginSuccess()
+                is LoginUiEffect.NavigateToHome -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Login successful!", duration = androidx.compose.material3.SnackbarDuration.Short)
+                    }
+                    kotlinx.coroutines.delay(1000)
+                    onLoginSuccess()
+                }
                 is LoginUiEffect.NavigateToRegister -> onNavigateToRegister()
                 is LoginUiEffect.ShowSnackbar -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(effect.message)
-                    }
+                    snackbarHostState.showSnackbar(effect.message)
                 }
                 is LoginUiEffect.LaunchGoogleSignIn -> {
-                    scope.launch {
-                        try {
-                            val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
-                                .setFilterByAuthorizedAccounts(false)
-                                .setServerClientId(context.getString(com.example.presentation.R.string.default_web_client_id))
-                                .setAutoSelectEnabled(true)
-                                .build()
+                    try {
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                            .setAutoSelectEnabled(true)
+                            .build()
 
-                            val request = androidx.credentials.GetCredentialRequest.Builder()
-                                .addCredentialOption(googleIdOption)
-                                .build()
+                        val request = GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
 
-                            val result = credentialManager.getCredential(
-                                request = request,
-                                context = context
-                            )
-                            
-                            val credential = result.credential
-                            if (credential is androidx.credentials.CustomCredential &&
-                                credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
-                                viewModel.handleIntent(LoginUiIntent.OnGoogleSignInResult(googleIdTokenCredential.idToken))
-                            } else {
-                                snackbarHostState.showSnackbar("Unexpected credential type")
-                            }
-                        } catch (e: androidx.credentials.exceptions.GetCredentialException) {
-                            snackbarHostState.showSnackbar(e.message ?: "Google Sign-In failed")
-                        } catch (e: Exception) {
-                            snackbarHostState.showSnackbar(e.message ?: "Google Sign-In failed")
+                        val result = credentialManager.getCredential(
+                            request = request,
+                            context = context
+                        )
+                        
+                        val credential = result.credential
+                        if (credential is CustomCredential &&
+                            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                            viewModel.handleIntent(LoginUiIntent.OnGoogleSignInResult(googleIdTokenCredential.idToken))
+                        } else {
+                            snackbarHostState.showSnackbar("Unexpected credential type")
                         }
+                    } catch (e: GetCredentialException) {
+                        snackbarHostState.showSnackbar(e.message ?: "Google Sign-In failed")
+                    } catch (e: Exception) {
+                        snackbarHostState.showSnackbar(e.message ?: "Google Sign-In failed")
                     }
                 }
             }
@@ -97,7 +105,16 @@ fun LoginScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                val isSuccess = data.visuals.message.contains("success", ignoreCase = true)
+                androidx.compose.material3.Snackbar(
+                    snackbarData = data,
+                    containerColor = if (isSuccess) AppColors.Success else AppColors.Primary,
+                    contentColor = AppColors.OnPrimary
+                )
+            }
+        }
     ) { paddingValues ->
         LoginContent(
             uiState = uiState,
@@ -180,10 +197,11 @@ private fun LoginContent(
 
             if (uiState is LoginUiState.Error) {
                 Spacer(modifier = Modifier.height(8.dp))
+                val isWarning = uiState.message.contains("fill", ignoreCase = true) || uiState.message.contains("empty", ignoreCase = true)
                 Text(
                     text = uiState.message,
                     style = AppTypography.bodyMedium,
-                    color = AppColors.Error
+                    color = if (isWarning) AppColors.Warning else AppColors.Error
                 )
             }
 

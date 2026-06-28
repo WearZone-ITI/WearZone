@@ -47,17 +47,12 @@ fun NavGraph(
             com.example.presentation.auth.login.LoginScreen(
                 viewModel = viewModel,
                 onLoginSuccess = {
-                    // Navigate to Home eventually
-                    navController.navigate(Route.SplashRoute)
+                    
                 },
                 onNavigateToRegister = {
-                    navController.navigate(Route.RegisterRoute)
+                    
                 }
             )
-        }
-
-        composable<Route.RegisterRoute> {
-            Text(text = "Register Placeholder")
         }
         // Ahmed
 

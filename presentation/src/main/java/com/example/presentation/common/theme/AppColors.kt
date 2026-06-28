@@ -12,4 +12,6 @@ object AppColors {
     val InputBorder    = Color(0xFF6B7280)
     val Divider        = Color(0xFFE9E8E7)
     val Error          = Color(0xFFFF3B30)
+    val Warning        = Color(0xFFEAB308)
+    val Success        = Color(0xFF4CAF50)
 }
