@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.presentation.common.theme.AppColors
 import com.example.presentation.common.theme.ErrorRed
 import com.example.presentation.common.theme.MidnightSlate
 import com.example.presentation.common.theme.OnSurface
@@ -82,7 +83,7 @@ fun LuxeTextField(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+                        .background(AppColors.InputBackground, RoundedCornerShape(8.dp))
                         .border(borderWidth, borderColor, RoundedCornerShape(8.dp))
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                 ) {

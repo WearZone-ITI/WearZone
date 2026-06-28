@@ -1,7 +1,6 @@
 package com.example.presentation.auth.register
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,10 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -32,27 +29,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.presentation.auth.register.components.BottomSection
 import com.example.presentation.auth.register.components.LuxeTextField
 import com.example.presentation.auth.register.components.PasswordStrengthBar
 import com.example.presentation.auth.register.components.TermsCheckbox
-import com.example.presentation.common.theme.screenBackground
+import com.example.presentation.common.theme.AppColors
 import com.example.presentation.common.theme.MidnightSlate
 import com.example.presentation.common.theme.OnSurfaceVariant
 import com.example.presentation.util.toMessage
@@ -84,7 +76,7 @@ fun RegisterScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = screenBackground,
+        containerColor = AppColors.Background,
     ) { innerPadding ->
         RegisterScreenContent(
             formState = formState,
@@ -103,7 +95,8 @@ private fun RegisterScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .imePadding()
             .padding(horizontal = 20.dp, vertical = 32.dp)
@@ -185,7 +178,7 @@ private fun RegisterScreenContent(
         )
 
         Spacer(Modifier.height(8.dp))
-        PasswordStrengthBar(password = formState.password,)
+        PasswordStrengthBar(password = formState.password)
         Spacer(Modifier.height(20.dp))
         LuxeTextField(
             value = formState.confirmPassword,
@@ -194,7 +187,7 @@ private fun RegisterScreenContent(
             placeholder = stringResource(R.string.password_placeholder),
             isError = formState.confirmPasswordError != null,
             errorMessage = formState.confirmPasswordError,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (formState.isConfirmPasswordVisible) VisualTransformation.None
             else PasswordVisualTransformation(),
 
@@ -265,56 +258,9 @@ private fun RegisterScreenContent(
 
         Spacer(Modifier.height(20.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(
-                    Alignment.CenterHorizontally,
-                ),
-        ) {
-            Text(
-                text = stringResource(
-                    R.string.already_have_account,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = OnSurfaceVariant,
-            )
-            val loginText = buildAnnotatedString {
-
-                pushStringAnnotation(
-                    "LOGIN",
-                    "login",
-                )
-
-                withStyle(
-                    SpanStyle(
-                        color = MidnightSlate,
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = TextDecoration.Underline,
-                    ),
-                ) {
-                    append(
-                        stringResource(
-                            R.string.log_in,
-                        ),
-                    )
-                }
-
-                pop()
-            }
-            ClickableText(
-                text = loginText,
-                style = MaterialTheme.typography.bodyMedium,
-                onClick = { offset ->
-                    loginText.getStringAnnotations(
-                        "LOGIN",
-                        offset,
-                        offset,
-                    ).firstOrNull()?.let {
-                        intentActions(RegisterUiIntent.NavigateToHomeClicked)
-                    }
-                },
-            )
+        BottomSection {
+            intentActions(RegisterUiIntent.NavigateToHomeClicked)
         }
+
     }
 }
