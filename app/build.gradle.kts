@@ -1,4 +1,6 @@
 import java.util.Properties
+import java.io.FileInputStream
+
 
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
@@ -31,10 +33,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(FileInputStream(localPropertiesFile))
+        }
+        val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "\"\""
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", googleClientId)
+
         val storefrontToken = localProperties.getProperty("SHOPIFY_STOREFRONT_TOKEN", "")
         buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"$storefrontToken\"")
-        
+
         val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
         buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
     }
@@ -69,6 +79,10 @@ dependencies {
     //Omar
 
     //Ahmed
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     //Ahmed
 
