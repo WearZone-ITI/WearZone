@@ -1,5 +1,7 @@
 package com.example.wearzone.di
 
+import com.example.data.repository.AuthRepositoryImpl
+import com.example.domain.auth.repository.IAuthRepository
 import com.example.data.db.repository.AuthRepositoryImpl
 import com.example.domain.auth.repository.IAuthRepository
 import dagger.Binds
@@ -10,9 +12,8 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-
     @Binds
     abstract fun bindAuthRepository(
-        authRepositoryImpl: AuthRepositoryImpl
+        impl: AuthRepositoryImpl
     ): IAuthRepository
 }

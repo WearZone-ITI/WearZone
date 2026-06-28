@@ -16,7 +16,8 @@ sealed interface Route{
     // Hend
 
     // Ahmed
-
+    @Serializable
+    data object LoginRoute : Route
     // Ahmed
 
     // Omer

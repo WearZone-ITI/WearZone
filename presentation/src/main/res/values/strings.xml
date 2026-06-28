@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
 
     <!--Hend-->
     <string name="create_account">Create Account</string>
