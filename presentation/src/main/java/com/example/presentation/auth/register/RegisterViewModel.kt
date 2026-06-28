@@ -1,5 +1,6 @@
 package com.example.presentation.auth.register
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.auth.usecase.RegisterUseCase
@@ -84,7 +85,7 @@ class RegisterViewModel @Inject constructor(
                     _uiState.value = RegisterUiState.Success(
                         RegisteredUserUiModel(
                             email = user.email,
-                            displayName = user.displayName,
+                            displayName = user.displayName?:"",
                         ),
                     )
                     _effects.send(RegisterUiEffect.NavigateToHome)

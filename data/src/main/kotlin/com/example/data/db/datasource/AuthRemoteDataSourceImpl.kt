@@ -1,10 +1,10 @@
-package com.example.data.remote.datasource
+package com.example.data.db.datasource
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
 class AuthRemoteDataSourceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
@@ -19,6 +19,18 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         val result = firebaseAuth.signInWithCredential(credential).await()
         return result.user ?: throw Exception("User is null after Google sign in")
+    }
+
+    override suspend fun register(
+        name: String,
+        email: String,
+        password: String,
+    ): FirebaseUser {
+        val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+        val firebaseUser = authResult.user
+            ?: throw IllegalStateException("Firebase user was null after registration")
+
+        return firebaseUser
     }
 
     override fun getCurrentUser(): FirebaseUser? {

@@ -1,7 +1,7 @@
-package com.example.data.repository
+package com.example.db.repository
 
-import com.example.data.remote.datasource.IAuthRemoteDataSource
-import com.example.domain.auth.model.User
+import com.example.data.db.repository.AuthRepositoryImpl
+import com.example.data.db.datasource.IAuthRemoteDataSource
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
 import io.mockk.every

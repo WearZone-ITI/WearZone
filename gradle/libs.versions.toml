@@ -46,9 +46,6 @@ hiltNavigationComposeVersion = "1.2.0"
 coilVersion = "3.1.0"
 lifecycleVersion = "2.9.1"
 javaxInject = "1"
-turbine = "1.2.1"
-kotlinxCoroutinesTest = "1.11.0"
-mockk = "1.14.11"
 #Hend
 
 [libraries]
@@ -114,9 +111,6 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilVe
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleVersion" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 #Hend
 [plugins]

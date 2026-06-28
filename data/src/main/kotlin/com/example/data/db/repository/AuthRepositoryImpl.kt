@@ -1,34 +1,59 @@
 package com.example.data.db.repository
 
 import com.example.data.db.di.IoDispatcher
+import com.example.data.db.datasource.IAuthRemoteDataSource
 import com.example.domain.auth.model.User
 import com.example.domain.auth.repository.IAuthRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.example.domain.common.result.runCatchingCancellable
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
+    private val remoteDataSource: IAuthRemoteDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IAuthRepository {
+
+    override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.signInWithEmail(email, password).toDomain()
+            }
+        }
+
+    override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.signInWithGoogleCredential(idToken).toDomain()
+            }
+        }
+
+    override suspend fun isLoggedIn(): Boolean =
+        withContext(ioDispatcher) {
+            remoteDataSource.getCurrentUser() != null
+        }
+
+    override suspend fun getCurrentUser(): User? =
+        withContext(ioDispatcher) {
+            remoteDataSource.getCurrentUser()?.toDomain()
+        }
 
     override suspend fun register(
         name: String,
         email: String,
         password: String,
     ): Result<User> = withContext(ioDispatcher) {
-        runCatching {
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
-                ?: throw IllegalStateException("Firebase user was null after registration")
-
-            User(
-                uid = firebaseUser.uid,
-                email = email,
-                displayName = name,
-            )
+        runCatchingCancellable {
+            remoteDataSource.register(name, email, password).toDomain()
         }
+    }
+    private fun FirebaseUser.toDomain(): User {
+        return User(
+            uid = this.uid,
+            email = this.email ?: "",
+            displayName = this.displayName,
+            photoUrl = this.photoUrl?.toString()
+        )
     }
 }
