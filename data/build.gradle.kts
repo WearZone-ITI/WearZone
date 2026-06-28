@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -41,7 +42,12 @@ dependencies {
     //Alaa
 
     //Hend
-
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     //Hend
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
