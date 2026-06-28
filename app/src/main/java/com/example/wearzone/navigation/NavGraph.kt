@@ -16,7 +16,7 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.SplashRoute,
+        startDestination = Route.RegisterRoute,
         modifier = modifier
     ) {
         // Aalaa
@@ -26,7 +26,16 @@ fun NavGraph(
         // Aalaa
 
         // Hend
-
+        composable<Route.RegisterRoute> {
+            com.example.presentation.auth.register.RegisterScreen(
+                onNavigateToHome = {
+                    // TODO: Navigate to HomeRoute
+                },
+                onNavigateToLogin = {
+                    // TODO: Navigate to LoginRoute
+                }
+            )
+        }
         // Hend
 
         // Ahmed

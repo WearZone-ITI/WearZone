@@ -11,7 +11,8 @@ sealed interface Route{
     // Aalaa
 
     // Hend
-
+    @Serializable
+    data object RegisterRoute : Route
     // Hend
 
     // Ahmed

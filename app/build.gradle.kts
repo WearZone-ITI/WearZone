@@ -62,7 +62,10 @@ dependencies {
     //Alaa
 
     //Hend
-
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
     //Hend
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
