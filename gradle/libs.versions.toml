@@ -20,10 +20,11 @@ ksp = "2.2.10-2.0.2"
 retrofit = "3.0.0"
 room = "2.8.4"
 
-ksp = "2.3.9"
 firebaseBom = "33.16.0"
 googleServices = "4.5.0"
 kotlinxCoroutinesPlayServices = "1.11.0"
+datastore = "1.2.0"
+hiltNavigationCompose = "1.3.0"
 # Aalaa
 
 
@@ -76,7 +77,11 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesPlayServices" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 # Aalaa
 
 #Ahmed
