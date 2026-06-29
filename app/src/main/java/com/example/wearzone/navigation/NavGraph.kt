@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.wearzone.presentation.home.HomeScreen
+import com.example.presentation.auth.register.RegisterScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.onboarding.OnboardingScreen
 import com.wearzone.presentation.home.HomeScreen
@@ -44,7 +45,16 @@ fun NavGraph(
             // Aalaa
 
             // Hend
-
+        composable<Route.RegisterRoute> {
+           RegisterScreen(
+                onNavigateToHome = {
+                    // TODO: Navigate to HomeRoute
+                },
+                onNavigateToLogin = {
+                    // TODO: Navigate to LoginRoute
+                }
+            )
+        }
             // Hend
 
             // Ahmed
