@@ -1,9 +1,13 @@
 package com.example.presentation.onboarding
 
-import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
-import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
+import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
+import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
+import com.example.wearzone.presentation.onboarding.OnboardingUiEffect
+import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
+import com.example.wearzone.presentation.onboarding.OnboardingUiState
+import com.example.wearzone.presentation.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first

@@ -1,9 +1,9 @@
 package com.example.presentation.auth.login
 
 import app.cash.turbine.test
-import com.example.domain.auth.model.User
-import com.example.domain.auth.usecase.LoginWithEmailUseCase
-import com.example.domain.auth.usecase.LoginWithGoogleUseCase
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
+import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
