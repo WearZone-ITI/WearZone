@@ -1,3 +1,18 @@
 <resources>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_continue_as_guest">Continue as Guest</string>
+    <string name="onboarding_error_unable_to_continue">Unable to continue. Please try again.</string>
+    <string name="onboarding_style_discovery_image_description">Woman wearing a cream outfit</string>
+    <string name="onboarding_style_discovery_title">Discover Curated Fashion</string>
+    <string name="onboarding_style_discovery_description">Explore refined looks selected for your everyday wardrobe.</string>
+    <string name="onboarding_shopping_flow_image_description">Woman shopping from her phone</string>
+    <string name="onboarding_shopping_flow_title">Shop With Ease</string>
+    <string name="onboarding_shopping_flow_description">Browse collections, compare styles, and keep your favorites close.</string>
+    <string name="onboarding_delivery_moment_image_description">Woman opening a fashion package</string>
+    <string name="onboarding_delivery_moment_title">Unbox Your Style</string>
+    <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
+    <string name="login_placeholder_title">Login Screen</string>
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
 </resources>

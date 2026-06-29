@@ -1,0 +1,17 @@
+<resources>
+    <string name="onboarding_back">رجوع</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_get_started">ابدأ الآن</string>
+    <string name="onboarding_continue_as_guest">المتابعة كضيف</string>
+    <string name="onboarding_error_unable_to_continue">تعذر المتابعة. يرجى المحاولة مرة أخرى.</string>
+    <string name="onboarding_style_discovery_image_description">امرأة ترتدي زياً بلون كريمي</string>
+    <string name="onboarding_style_discovery_title">اكتشف أزياء مختارة بعناية</string>
+    <string name="onboarding_style_discovery_description">استكشف إطلالات راقية مختارة لخزانة ملابسك اليومية.</string>
+    <string name="onboarding_shopping_flow_image_description">امرأة تتسوق من هاتفها</string>
+    <string name="onboarding_shopping_flow_title">تسوق بسهولة</string>
+    <string name="onboarding_shopping_flow_description">تصفح المجموعات، وقارن الأنماط، واحتفظ بمفضلاتك بالقرب منك.</string>
+    <string name="onboarding_delivery_moment_image_description">امرأة تفتح طرد أزياء</string>
+    <string name="onboarding_delivery_moment_title">افتح أناقتك</string>
+    <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
+    <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
+</resources>

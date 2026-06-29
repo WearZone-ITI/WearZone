@@ -1,10 +1,16 @@
 package com.example.domain.auth.repository
 
 import com.example.domain.auth.model.User
+import kotlinx.coroutines.flow.Flow
 
 interface IAuthRepository {
     suspend fun loginWithEmail(email: String, password: String): Result<User>
     suspend fun loginWithGoogleCredential(idToken: String): Result<User>
     suspend fun isLoggedIn(): Boolean
     suspend fun getCurrentUser(): User?
+
+    fun observeOnboardingCompleted(): Flow<Boolean>
+
+    suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit>
+
 }
