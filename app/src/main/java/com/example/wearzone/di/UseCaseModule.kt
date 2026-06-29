@@ -4,14 +4,16 @@ import com.example.domain.auth.repository.IAuthRepository
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import dagger.Module
+import com.wearzone.domain.product.repository.IProductRepository
+import com.wearzone.domain.product.usecase.GetProductsUseCase
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
-
     @Provides
     fun provideObserveOnboardingCompletedUseCase(
         repository: IAuthRepository,
@@ -23,4 +25,13 @@ object UseCaseModule {
         repository: IAuthRepository,
     ): SetOnboardingCompletedUseCase =
         SetOnboardingCompletedUseCase(repository)
+
+
+    @Provides
+    fun provideGetProductsUseCase(
+        repository: IProductRepository
+    ): GetProductsUseCase {
+        return GetProductsUseCase(repository)
+    }
 }
+

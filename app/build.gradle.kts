@@ -1,6 +1,13 @@
 import java.util.Properties
 import java.io.FileInputStream
 
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -34,6 +41,12 @@ android {
         }
         val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "\"\""
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", googleClientId)
+
+        val storefrontToken = localProperties.getProperty("SHOPIFY_STOREFRONT_TOKEN", "")
+        buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"$storefrontToken\"")
+
+        val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
+        buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
     }
 
     buildTypes {
@@ -62,7 +75,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
 
     //Omar
-
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
     //Omar
 
     //Ahmed
@@ -77,8 +90,10 @@ dependencies {
 
     //Hend
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     //Hend
     implementation(libs.androidx.activity.compose)
@@ -99,11 +114,14 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.hilt.navigation.compose)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Immutable collections
+    implementation(libs.kotlinx.collections.immutable)
 
     // Retrofit
     implementation(libs.retrofit)
