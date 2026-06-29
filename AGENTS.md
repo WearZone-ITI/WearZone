@@ -8,20 +8,20 @@
 
 ## 0. Project Identity
 
-| Field           | Value                                                             |
-|-----------------|-------------------------------------------------------------------|
-| **App Name**        | WearZone                                                                         |
-| **Package**         | `com.wearzone`                                                                   |
-| **Platform**        | Android (Kotlin + Jetpack Compose)                                               |
-| **Domain**          | E-Commerce — Shopify-backed fashion/apparel browsing & checkout                  |
-| **Users**           | Guest · Authenticated Customer                                                   |
-| **Backend**         | Shopify Storefront API (mobile) · Firebase Auth · BFF for Admin API operations   |
-| **Store URL**       | `mad46-and9.myshopify.com`                                                       |
-| **Jira Board**      | https://shopify-app.atlassian.net/jira/software/projects/KAN/boards/1            |
-| **GitHub**          | https://github.com/WearZone-ITI                                                  |
-| **Figma**           | https://www.figma.com/design/k80kg88yUwwpiU5YxNFh0x/E-Commerce-App              |
-| **Postman**         | https://shopify-7701.postman.co/workspace/9648adda-b1d7-4fd7-95f9-252c6fb88055  |
-| **Spec Reference**  | `Shopify_Project_Specs.pdf` — commit to repo root or link via Jira attachment    |
+| Field           | Value                                                                          |
+|-----------------|--------------------------------------------------------------------------------|
+| **App Name**        | WearZone                                                                       |
+| **Package**         | `com.example.wearzone`                                                         |
+| **Platform**        | Android (Kotlin + Jetpack Compose)                                             |
+| **Domain**          | E-Commerce — Shopify-backed fashion/apparel browsing & checkout                |
+| **Users**           | Guest · Authenticated Customer                                                 |
+| **Backend**         | Shopify Storefront API (mobile) · Firebase Auth · BFF for Admin API operations |
+| **Store URL**       | `mad46-and9.myshopify.com`                                                     |
+| **Jira Board**      | https://shopify-app.atlassian.net/jira/software/projects/KAN/boards/1          |
+| **GitHub**          | https://github.com/WearZone-ITI                                                |
+| **Figma**           | https://www.figma.com/design/k80kg88yUwwpiU5YxNFh0x/E-Commerce-App             |
+| **Postman**         | https://shopify-7701.postman.co/workspace/9648adda-b1d7-4fd7-95f9-252c6fb88055 |
+| **Spec Reference**  | `Shopify_Project_Specs.pdf` — commit to repo root or link via Jira attachment  |
 
 ---
 
@@ -197,58 +197,62 @@ root/
 ### 2.2 Complete Folder Structure
 
 ```
-data/src/main/kotlin/com.wearzone.data/
+app/src/main/kotlin/com.example.wearzone/
+├── di/
+│   ├── DatabaseModule.kt
+│   ├── DataSourceModule.kt
+│   ├── DispatcherModule.kt
+│   ├── NetworkModule.kt
+│   ├── RepositoryModule.kt
+│   └── UseCaseModule.kt
+├── navigation/
+│   ├── NavGraph.kt                      ← single NavHost for entire app
+│   └── Route.kt                         ← @Serializable graph roots + route objects
+├── App.kt
+├── MainActivity.kt                      ← @AndroidEntryPoint, single Activity
+└── WearZoneApplication.kt              ← @HiltAndroidApp
+
+data/src/main/kotlin/com.example.wearzone.data/
 ├── db/
-│   └── WearZoneDatabase.kt              ← @Database (intentionally outside local/ — shared by DAOs)
+│   ├── WearZoneDatabase.kt
+│   └── WearZoneEntity.kt
+├── di/
+│   └── DispatcherQualifiers.kt
 ├── local/
-│   ├── dao/
-│   │   ├── CartDao.kt
-│   │   ├── WishlistDao.kt
-│   │   └── ProductCacheDao.kt
-│   ├── entity/                          ← Room @Entity classes (suffix: Entity)
-│   │   ├── CartItemEntity.kt
-│   │   ├── WishlistItemEntity.kt
-│   │   └── ProductCacheEntity.kt
 │   └── datasource/
-│       ├── ICartLocalDataSource.kt
-│       ├── CartLocalDataSourceImpl.kt
-│       ├── IProductLocalDataSource.kt
-│       └── ProductLocalDataSourceImpl.kt
+│       ├── IOnboardingPreferencesDataSource.kt
+│       └── OnboardingPreferencesDataSourceImpl.kt
 ├── remote/
 │   ├── api/
-│   │   ├── ProductApiService.kt         ← Retrofit @Service
-│   │   ├── OrderApiService.kt
-│   │   └── CurrencyApiService.kt
-│   ├── dto/                             ← @Serializable DTOs (suffix: Dto)
-│   │   ├── ProductDto.kt                ← contains .toDomain() mapper
-│   │   ├── ProductDetailDto.kt
-│   │   ├── OrderDto.kt
-│   │   └── AddressDto.kt
-│   ├── interceptor/
-│   │   ├── AuthInterceptor.kt
-│   │   ├── ErrorInterceptor.kt
-│   │   └── LoggingInterceptor.kt
-│   └── datasource/
-│       ├── IProductRemoteDataSource.kt
-│       └── ProductRemoteDataSourceImpl.kt
-├── repository/
-│   ├── ProductRepositoryImpl.kt
-│   ├── CartRepositoryImpl.kt
-│   ├── WishlistRepositoryImpl.kt
-│   ├── CheckoutRepositoryImpl.kt
-│   └── AccountRepositoryImpl.kt
+│   │   └── ProductApiService.kt
+│   ├── datasource/
+│   │   ├── AuthRemoteDataSourceImpl.kt
+│   │   ├── IAuthRemoteDataSource.kt
+│   │   ├── IProductRemoteDataSource.kt
+│   │   └── ProductRemoteDataSourceImpl.kt
+│   └── dto/
+│       └── ProductDto.kt
+└── repository/
+    ├── AuthRepositoryImpl.kt
+    └── ProductRepositoryImpl.kt
 
-domain/src/main/kotlin/com.wearzone.domain/
+domain/src/main/kotlin/com.example.wearzone.domain/
 ├── auth/
-│   ├── model/                           ← Pure Kotlin (suffix: none — just the concept name)
-│   │   ├── User.kt
-│   │   └── AuthToken.kt
+│   ├── model/
+│   │   └── User.kt
 │   ├── repository/
 │   │   └── IAuthRepository.kt
 │   └── usecase/
-│       ├── LoginUseCase.kt
-│       ├── RegisterUseCase.kt
-│       └── LogoutUseCase.kt
+│       ├── GetCurrentUserUseCase.kt
+│       ├── LoginWithEmailUseCase.kt
+│       ├── LoginWithGoogleUseCase.kt
+│       └── RegisterUseCase.kt
+├── common/
+│   ├── DataResult.kt                    ← sealed class DataResult<T>
+│   ├── DomainError.kt                   ← sealed class DomainError
+│   ├── RunCatchingCancellable.kt
+│   └── ValidationError.kt
+├── onboarding/
 ├── product/
 │   ├── model/
 │   │   ├── Product.kt
@@ -295,42 +299,42 @@ domain/src/main/kotlin/com.wearzone.domain/
 │       ├── PlaceOrderUseCase.kt
 │       ├── ApplyCouponUseCase.kt
 │       └── ValidateAddressUseCase.kt
-├── account/
-│   ├── model/
-│   │   ├── UserProfile.kt
-│   │   ├── OrderHistory.kt
-│   │   └── CurrencyRate.kt
-│   ├── repository/
-│   │   ├── IAccountRepository.kt
-│   │   └── ICurrencyRepository.kt
-│   └── usecase/
-│       ├── GetProfileUseCase.kt
-│       ├── GetOrderHistoryUseCase.kt
-│       └── GetExchangeRatesUseCase.kt
-└── common/
-    ├── result/
-    │   └── DataResult.kt               ← sealed class DataResult<T>
-    └── error/
-        └── DomainError.kt              ← sealed class DomainError
+└── account/
+    ├── model/
+    │   ├── UserProfile.kt
+    │   ├── OrderHistory.kt
+    │   └── CurrencyRate.kt
+    ├── repository/
+    │   ├── IAccountRepository.kt
+    │   └── ICurrencyRepository.kt
+    └── usecase/
+        ├── GetProfileUseCase.kt
+        ├── GetOrderHistoryUseCase.kt
+        └── GetExchangeRatesUseCase.kt
 
-presentation/src/main/kotlin/com.wearzone.presentation/
+presentation/src/main/kotlin/com.example.wearzone.presentation/
 ├── auth/
 │   ├── login/
+│   │   ├── components/
 │   │   ├── LoginScreen.kt
-│   │   ├── LoginViewModel.kt
-│   │   ├── LoginUiState.kt             ← sealed interface
-│   │   ├── LoginUiIntent.kt            ← sealed interface
-│   │   ├── LoginUiEffect.kt            ← sealed interface
-│   │   └── components/
-│   │       ├── LoginForm.kt
-│   │       └── SocialLoginButtons.kt
+│   │   ├── LoginUiEffect.kt
+│   │   ├── LoginUiIntent.kt
+│   │   ├── LoginUiState.kt
+│   │   └── LoginViewModel.kt
 │   └── register/
+│       ├── components/
 │       ├── RegisterScreen.kt
-│       ├── RegisterViewModel.kt
-│       ├── RegisterUiState.kt
-│       ├── RegisterUiIntent.kt
 │       ├── RegisterUiEffect.kt
-│       └── components/
+│       ├── RegisterUiIntent.kt
+│       ├── RegisterUiState.kt
+│       └── RegisterViewModel.kt
+├── common/
+│   ├── theme/
+│   │   ├── AppTheme.kt
+│   │   ├── AppColors.kt
+│   │   ├── AppTypography.kt
+│   │   └── AppShapes.kt
+│   └── Validation.kt
 ├── home/
 │   ├── HomeScreen.kt
 │   ├── HomeViewModel.kt
@@ -341,6 +345,7 @@ presentation/src/main/kotlin/com.wearzone.presentation/
 │       ├── CategoryRow.kt
 │       ├── BrandRow.kt
 │       └── FeaturedProductsGrid.kt
+├── onboarding/
 ├── product/
 │   ├── list/
 │   │   ├── ProductListScreen.kt
@@ -405,34 +410,13 @@ presentation/src/main/kotlin/com.wearzone.presentation/
 │   └── components/
 │       ├── OrderHistoryCard.kt
 │       └── WishlistPreview.kt
-├── address/
-│   ├── AddressScreen.kt
-│   ├── AddressViewModel.kt
-│   ├── AddressUiState.kt
-│   ├── AddressUiIntent.kt
-│   ├── AddressUiEffect.kt
-│   └── components/
-└── common/
-    ├── components/                     ← Shared composables
-    ├── navigation/
-    │   ├── AppNavHost.kt              ← single NavGraph for the entire app (all graphs + composables here)
-    │   └── AppRoutes.kt               ← @Serializable graph roots + route objects (all type-safe)
-    └── theme/
-        ├── AppTheme.kt
-        ├── AppColors.kt
-        ├── AppTypography.kt
-        └── AppShapes.kt
-
-app/src/main/kotlin/com.wearzone/
-├── WearZoneApplication.kt             ← @HiltAndroidApp
-├── MainActivity.kt                    ← @AndroidEntryPoint, single Activity
-└── di/
-    ├── NetworkModule.kt               ← Retrofit, OkHttp, Interceptors
-    ├── DatabaseModule.kt              ← RoomDatabase, DAOs
-    ├── RepositoryModule.kt            ← @Binds IRepo → RepoImpl
-    ├── DataSourceModule.kt            ← @Binds IDataSource → DataSourceImpl
-    ├── DataStoreModule.kt             ← DataStore, ProtoDataStore
-    └── DispatcherModule.kt            ← @IoDispatcher, @DefaultDispatcher qualifiers
+└── address/
+    ├── AddressScreen.kt
+    ├── AddressViewModel.kt
+    ├── AddressUiState.kt
+    ├── AddressUiIntent.kt
+    ├── AddressUiEffect.kt
+    └── components/
 ```
 
 ---
@@ -747,13 +731,13 @@ object NetworkModule {
 ### 4.3 Dispatcher Injection — Data Layer ONLY
 
 ```kotlin
-// app/di/DispatcherModule.kt
+// data/di/DispatcherQualifiers.kt
 
 // Step 1 — Declare qualifiers
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class IoDispatcher
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class DefaultDispatcher
 
-// Step 2 — Provide them
+// Step 2 — Provide them (in app/di/DispatcherModule.kt)
 @Module
 @InstallIn(SingletonComponent::class)
 object DispatcherModule {
@@ -841,13 +825,13 @@ dependencies {
 ## 5. Navigation — Type-Safe Jetpack Navigation Compose 2.8.0+
 
 > **Rule:** All navigation for the entire application lives in exactly **two files**:
-> `AppRoutes.kt` (route definitions) and `AppNavHost.kt` (the single NavHost with all
+> `Route.kt` (route definitions) and `NavGraph.kt` (the single NavHost with all
 > nested graphs). No other file may declare routes or navigation logic.
 
-### 5.1 Route & Graph Root Definitions — AppRoutes.kt
+### 5.1 Route & Graph Root Definitions — Route.kt
 
 ```kotlin
-// presentation/common/navigation/AppRoutes.kt
+// app/navigation/Route.kt
 
 // ── Graph roots (used as navigation<GraphRoot>(startDestination = ...)) ────────
 @Serializable data object AuthGraph
@@ -880,10 +864,10 @@ dependencies {
 
 ---
 
-### 5.2 AppNavHost — Single NavGraph for the Entire Application
+### 5.2 NavGraph — Single NavGraph for the Entire Application
 
 ```kotlin
-// presentation/common/navigation/AppNavHost.kt
+// app/navigation/NavGraph.kt
 //
 // This is the ONLY navigation file in the project.
 // Every screen composable and every nested graph is declared here.
@@ -892,7 +876,7 @@ dependencies {
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: Any = AuthGraph,  // resolved at launch from Proto DataStore auth state
+    startDestination: Any = AuthGraph,
 ) {
     NavHost(
         navController    = navController,
@@ -937,9 +921,9 @@ fun AppNavHost(
                     onNavigateToProductList = { brand, category ->
                         navController.navigate(ProductListRoute(brand = brand, category = category))
                     },
-                    onNavigateToSearch  = { navController.navigate(SearchGraph) },
-                    onNavigateToCart    = { navController.navigate(CartGraph) },
-                    onNavigateToAccount = { navController.navigate(AccountGraph) },
+                    onNavigateToSearch   = { navController.navigate(SearchGraph) },
+                    onNavigateToCart     = { navController.navigate(CartGraph) },
+                    onNavigateToAccount  = { navController.navigate(AccountGraph) },
                     onNavigateToWishlist = { navController.navigate(WishlistGraph) },
                 )
             }
@@ -951,7 +935,7 @@ fun AppNavHost(
         navigation<ProductGraph>(startDestination = ProductListRoute()) {
 
             composable<ProductListRoute> { backStackEntry ->
-                val route = backStackEntry.toRoute<ProductListRoute>()  // ✅ type-safe
+                val route = backStackEntry.toRoute<ProductListRoute>()
                 ProductListScreen(
                     brand              = route.brand,
                     category           = route.category,
@@ -961,7 +945,7 @@ fun AppNavHost(
             }
 
             composable<ProductDetailRoute> { backStackEntry ->
-                val route = backStackEntry.toRoute<ProductDetailRoute>() // ✅ type-safe
+                val route = backStackEntry.toRoute<ProductDetailRoute>()
                 ProductDetailScreen(
                     productId         = route.productId,
                     onNavigateBack    = { navController.popBackStack() },
@@ -1025,7 +1009,7 @@ fun AppNavHost(
         }
 
         // ════════════════════════════════════════════════════════════════════
-        // CHECKOUT GRAPH  (Checkout + Address share the same back-stack scope)
+        // CHECKOUT GRAPH
         // ════════════════════════════════════════════════════════════════════
         navigation<CheckoutGraph>(startDestination = CheckoutRoute) {
 
@@ -1076,7 +1060,7 @@ fun AppNavHost(
 | Rule                                              | Detail                                                                      |
 |---------------------------------------------------|-----------------------------------------------------------------------------|
 | String routes                                     | BANNED — use `@Serializable` objects / data classes only                    |
-| Navigation files                                  | Exactly two: `AppRoutes.kt` and `AppNavHost.kt` — no others                |
+| Navigation files                                  | Exactly two: `Route.kt` and `NavGraph.kt` — no others                      |
 | Argument passing                                  | IDs only via typed route data class — never pass domain objects             |
 | NavController in ViewModel                        | NEVER — emit `UiEffect` → collect in screen → call navController            |
 | Cross-graph navigation                            | Navigate to the **graph root** (e.g. `navController.navigate(CartGraph)`)   |
@@ -1182,7 +1166,7 @@ private val _uiEffect = MutableSharedFlow<CartUiEffect>(replay = 0)
 **Always use `runCatchingCancellable` in coroutine contexts:**
 
 ```kotlin
-// domain/common/result/RunCatchingCancellable.kt  ← add this utility once, use everywhere
+// domain/common/RunCatchingCancellable.kt  ← add this utility once, use everywhere
 suspend fun <T> runCatchingCancellable(block: suspend () -> T): Result<T> =
     runCatching { block() }.also { result ->
         result.exceptionOrNull()?.let { e ->
@@ -1320,12 +1304,6 @@ interface ProductApiService {
 
 ```kotlin
 // data/remote/interceptor/ErrorInterceptor.kt
-//
-// ✅ All custom exceptions extend IOException — OkHttp interceptors MUST only throw
-// IOException. Throwing arbitrary Throwable bypasses Retrofit's error pipeline and
-// can crash coroutine callers in ways runCatching won't handle correctly.
-//
-// Sealed hierarchy keeps the type tree in one place:
 sealed class ShopifyHttpException(message: String) : IOException(message)
 class UnauthorizedException : ShopifyHttpException("401 Unauthorized — token invalid or missing")
 class ForbiddenException    : ShopifyHttpException("403 Forbidden — insufficient scope")
@@ -1355,7 +1333,7 @@ class ErrorInterceptor @Inject constructor() : Interceptor {
 ### 8.1 Room Entity Rules
 
 ```kotlin
-// ✅ @Entity classes live in data/local/entity/ ONLY — suffix: Entity
+// ✅ @Entity classes live in data/db/ — suffix: Entity
 @Entity(tableName = "cart_items")
 data class CartItemEntity(
     @PrimaryKey val variantId: Long,
@@ -1399,7 +1377,6 @@ interface CartDao {
 > Auth token canonical storage is **Proto DataStore only** (see §8.4).
 
 ```kotlin
-// Use for: selected currency, locale, last-seen filter
 class UserPreferencesDataSource @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
@@ -1418,17 +1395,13 @@ class UserPreferencesDataSource @Inject constructor(
 
 ### 8.4 Proto DataStore — canonical storage for auth token and structured user state
 
-> **This is the single source of truth for `auth_token`.** §13.1 and §1.5 both defer here.
-> Proto DataStore is typed (generated Kotlin classes), survives process death, and
-> provides type-safe reads without `stringPreferencesKey` casting bugs.
-
 ```proto
 // data/src/main/proto/user_preferences.proto
 syntax = "proto3";
-option java_package = "com.wearzone.data.local.proto";
+option java_package = "com.example.wearzone.data.local.proto";
 
 message UserPreferences {
-    string auth_token    = 1;   // ← ONLY place auth_token is persisted — not Preferences DS
+    string auth_token    = 1;
     string currency_code = 2;
     bool   is_guest      = 3;
     string locale        = 4;
@@ -1444,14 +1417,9 @@ Use Proto DataStore for: **auth token, user identity state** — data that must 
 Every feature that reads persistent data follows SSOT via the Repository:
 
 > ⚠️ **Do NOT use `.onStart { remoteRefresh() }` for offline-first flows.**
-> `onStart`'s action runs to completion **before** the outer `flow { }` block begins
-> collecting. Because the remote fetch is `withContext`-awaited inside `onStart`,
-> cached local data is not emitted until the network call finishes — the exact opposite
-> of offline-first intent. On slow or offline networks, users see a blocked loader
-> instead of instant cached content.
->
-> **Fix: use `channelFlow + launch`** — the remote refresh runs concurrently while
-> local data emits immediately from Room.
+
+**Fix: use `channelFlow + launch`** — the remote refresh runs concurrently while
+local data emits immediately from Room.
 
 ```kotlin
 // ✅ CORRECT — channelFlow lets local emit first; remote refresh is concurrent
@@ -1462,13 +1430,10 @@ class ProductRepositoryImpl @Inject constructor(
 ) : IProductRepository {
 
     override fun observeProducts(brand: String?): Flow<List<Product>> = channelFlow {
-        // 1. Kick off remote refresh concurrently — does NOT block local emission
         launch(ioDispatcher) {
             runCatchingCancellable { remoteDs.fetchProducts(brand) }
                 .onSuccess { dto -> localDs.cacheProducts(dto.map { it.toEntity() }) }
-                // Network errors are silent — local cache is the fallback
         }
-        // 2. Emit local cache immediately; Room re-emits when refresh writes complete
         emitAll(
             localDs.observeProducts(brand).map { list -> list.map { it.toDomain() } }
         )
@@ -1481,7 +1446,7 @@ class ProductRepositoryImpl @Inject constructor(
 override fun observeProducts(brand: String?): Flow<List<Product>> =
     localDs.observeProducts(brand)
         .map { it.map { entity -> entity.toDomain() } }
-        .onStart { refreshFromRemote(brand) }  // ← awaits remote BEFORE local emits
+        .onStart { refreshFromRemote(brand) }
 ```
 
 **Rules:**
@@ -1505,15 +1470,8 @@ data class Success(
     val products: ImmutableList<ProductUiModel>,   // ✅
 ) : ProductListUiState
 
-// When building the list:
-_uiState.value = ProductListUiState.Success(
-    products = products.map { it.toUiModel() }.toImmutableList()  // ✅
-)
-
 // ❌ BANNED in UiState
 data class Success(val products: List<ProductUiModel>)   // ← Compose sees this as unstable
-data class Success(val products: Set<ProductUiModel>)    // ← same problem
-data class Success(val products: Map<*, *>)              // ← same problem
 ```
 
 ### 10.2 State Hoisting
@@ -1531,33 +1489,16 @@ fun QuantitySelector(
     // pure rendering only
 }
 
-// ✅ CORRECT — parent passes values and lambdas
-@Composable
-fun CartItemRow(
-    item: CartItemUiModel,
-    onIntent: (CartUiIntent) -> Unit,
-) {
-    QuantitySelector(
-        quantity    = item.quantity,
-        maxQuantity = item.stockAvailable,
-        onIncrease  = { onIntent(CartUiIntent.IncrementQuantity(item.variantId)) },
-        onDecrease  = { onIntent(CartUiIntent.DecrementQuantity(item.variantId)) },
-    )
-}
-
 // ❌ WRONG — local uncontrolled state in a component that should be controlled
 @Composable
 fun QuantitySelector(...) {
-    var count by remember { mutableStateOf(0) }   // ← parent can't observe or reset this
+    var count by remember { mutableStateOf(0) }
 }
 ```
 
 ### 10.3 Intelligent Recomposition
 
 ```kotlin
-// ✅ Stable UiModels (data class provides equals/hashCode)
-data class ProductUiModel(val id: String, val title: String, val price: String)
-
 // ✅ Keys in LazyColumn prevent full recomposition on list change
 LazyColumn {
     items(products, key = { it.id }) { product ->
@@ -1569,10 +1510,6 @@ LazyColumn {
 val total by remember(cartItems) {
     derivedStateOf { cartItems.sumOf { it.price * it.quantity } }
 }
-
-// ✅ Annotate complex UiState classes explicitly when needed
-@Immutable
-data class CheckoutUiState(...)
 ```
 
 ### 10.4 Side Effects Rules
@@ -1595,10 +1532,6 @@ DisposableEffect(lifecycleOwner) {
     lifecycleOwner.lifecycle.addObserver(observer)
     onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
 }
-
-// ❌ WRONG — business logic inside SideEffect
-// ❌ WRONG — LaunchedEffect without a key (always specify a meaningful key)
-// ❌ WRONG — navigating inside BlocBuilder equivalent (use UiEffect Channel)
 ```
 
 ---
@@ -1617,7 +1550,6 @@ DisposableEffect(lifecycleOwner) {
 ### 11.2 Test Dispatcher Rule
 
 ```kotlin
-// shared test utility — replaces all @IoDispatcher usages
 @OptIn(ExperimentalCoroutinesApi::class)
 class TestCoroutineRule : TestWatcher() {
     val testDispatcher = UnconfinedTestDispatcher()
@@ -1630,9 +1562,6 @@ class TestCoroutineRule : TestWatcher() {
     }
 }
 ```
-
-Since dispatchers are injected into repositories (not ViewModels), tests substitute them
-via constructor injection of `UnconfinedTestDispatcher` — no production code changes needed.
 
 ### 11.3 Test Doubles Strategy
 
@@ -1676,30 +1605,6 @@ class ProductListViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
-
-    @Test
-    fun `when products empty, state is Empty`() = runTest {
-        fakeRepo.productsToReturn = emptyList()
-        val viewModel = ProductListViewModel(getProductsUseCase)
-
-        viewModel.uiState.test {
-            skipItems(1) // Loading
-            assertEquals(ProductListUiState.Empty, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `when network fails, state is Error`() = runTest {
-        fakeRepo.errorToThrow = IOException("No network")
-        val viewModel = ProductListViewModel(getProductsUseCase)
-
-        viewModel.uiState.test {
-            skipItems(1)
-            assertIs<ProductListUiState.Error>(awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
 }
 ```
 
@@ -1724,20 +1629,21 @@ fun `clicking product emits NavigateToDetail effect`() = runTest {
 
 ```
 data/src/test/
-├── repository/           ← ProductRepositoryImplTest, CartRepositoryImplTest
-├── datasource/           ← ProductRemoteDataSourceTest
-└── mapper/               ← ProductDtoMapperTest, CartItemEntityMapperTest
+├── repository/
+├── datasource/
+└── mapper/
 
 domain/src/test/
-├── product/usecase/      ← GetProductsUseCaseTest, SearchProductsUseCaseTest
-├── cart/usecase/         ← AddToCartUseCaseTest, RemoveFromCartUseCaseTest
-└── checkout/usecase/     ← PlaceOrderUseCaseTest, ApplyCouponUseCaseTest
+├── auth/usecase/
+├── product/usecase/
+├── cart/usecase/
+└── checkout/usecase/
 
 presentation/src/test/
-├── product/list/         ← ProductListViewModelTest
-├── cart/                 ← CartViewModelTest
-├── checkout/             ← CheckoutViewModelTest
-└── auth/login/           ← LoginViewModelTest
+├── product/list/
+├── cart/
+├── checkout/
+└── auth/login/
 ```
 
 ---
@@ -1748,7 +1654,7 @@ presentation/src/test/
 |----------------------------|---------------------|--------------------------------------------|
 | Kotlin files               | `PascalCase`        | `ProductListViewModel.kt`                  |
 | Composable functions       | `PascalCase`        | `ProductCard()`, `AppButton()`             |
-| Packages                   | `lowercase`         | `com.wearzone.data.remote.dto`             |
+| Packages                   | `lowercase`         | `com.example.wearzone.data.remote.dto`     |
 | Variables / functions      | `camelCase`         | `loadProducts()`, `uiState`                |
 | Constants                  | `UPPER_SNAKE_CASE`  | `AUTH_TOKEN_KEY`, `MAX_COD_AMOUNT`         |
 | Room tables                | `snake_case`        | `cart_items`, `wishlist_items`             |
@@ -1859,15 +1765,6 @@ private fun requestRemoveCartItem(itemId: String) {
         )
     }
 }
-
-// Composable handles the dialog and sends back the confirm intent
-is CartUiEffect.ShowConfirmDialog -> {
-    showDialog(
-        message   = effect.message,
-        onConfirm = { viewModel.handleIntent(effect.onConfirm) },
-        onDismiss = { },
-    )
-}
 ```
 
 ---
@@ -1879,8 +1776,8 @@ is CartUiEffect.ShowConfirmDialog -> {
 ```kotlin
 // presentation/common/theme/AppColors.kt
 object AppColors {
-    val Primary        = Color(0xFF1A1A2E)   // Deep navy — WearZone brand
-    val Accent         = Color(0xFFE94560)   // Coral red
+    val Primary        = Color(0xFF1A1A2E)
+    val Accent         = Color(0xFFE94560)
     val Surface        = Color(0xFFFFFFFF)
     val SurfaceVariant = Color(0xFFF5F5F5)
     val Background     = Color(0xFFFAFAFA)
@@ -1897,7 +1794,6 @@ object AppColors {
 ### 14.2 Tokens — AppTypography
 
 ```kotlin
-// ❌ NEVER hardcode TextStyle inline in a Composable
 val AppTypography = Typography(
     headlineLarge = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Bold,     fontSize = 28.sp),
     titleMedium   = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
@@ -1914,10 +1810,10 @@ AppTextField(value, onValueChange, label, isError, errorMessage, modifier)
 AppLoadingOverlay()
 AppErrorWidget(message, onRetry)
 AppSnackbar — via SnackbarHostState in Scaffold
-ConfirmationDialog(title, message, confirmLabel, onConfirm, onDismiss) ← REQUIRED for destructive actions
+ConfirmationDialog(title, message, confirmLabel, onConfirm, onDismiss)
 EmptyStateWidget(title, subtitle, illustrationRes)
 ProductCard(product, onProductClick, onWishlistToggle)
-LoadingShimmer(modifier, shape)                                          ← skeleton screens
+LoadingShimmer(modifier, shape)
 ```
 
 ### 14.4 Accessibility Checklist
@@ -1945,17 +1841,6 @@ LoadingShimmer(modifier, shape)                                          ← ske
 | Hardcoded dimensions             | `dimensionResource` or theme tokens     |
 | Hardcoded colors                 | `AppColors.*` only                      |
 
-### 15.2 Logging
-
-```kotlin
-// Plant in Application class — DEBUG builds only
-if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
-
-// Usage
-Timber.d("Cart loaded: ${items.size} items")
-Timber.e(exception, "Failed to place order")
-Timber.w("Coupon '$code' was invalid")
-```
 
 ---
 
@@ -1969,8 +1854,6 @@ Timber.w("Coupon '$code' was invalid")
 - ✅ Work on ONE feature or layer at a time
 - ✅ Show the list of files to create/change BEFORE writing code
 - ✅ Map every feature implementation to its section in `Shopify_Project_Specs.pdf`
-  (commit the PDF to repo root, or link its Jira attachment — either is acceptable;
-  the reference must resolve before any feature PR is opened)
 - ✅ Every ViewModel must have a test file before the feature is marked done
 - ✅ Every UseCase must reach 100% test coverage before a PR is raised
 
@@ -1996,7 +1879,7 @@ Timber.w("Coupon '$code' was invalid")
 | ViewModel structure & Channel effect | §3.3                                              |
 | Hilt modules & scopes                | §4                                                |
 | KSP configuration                    | §4.6                                              |
-| Type-safe navigation setup           | §5 — AppNavHost §5.2, graph files §5.3–§5.10     |
+| Type-safe navigation setup           | §5                                                |
 | Dispatcher model (why VM has none)   | §6.1                                              |
 | Flow hot/cold decision               | §6.2                                              |
 | Shopify API security warning         | Security Notice (top of file)                     |
