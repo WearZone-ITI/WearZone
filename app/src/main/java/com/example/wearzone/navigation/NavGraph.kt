@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.presentation.auth.register.RegisterScreen
 
 @Composable
 fun NavGraph(
@@ -39,7 +40,7 @@ fun NavGraph(
 
         // Hend
         composable<Route.RegisterRoute> {
-            com.example.presentation.auth.register.RegisterScreen(
+           RegisterScreen(
                 onNavigateToHome = {
                     // TODO: Navigate to HomeRoute
                 },
