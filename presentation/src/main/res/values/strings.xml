@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_next">Next</string>
@@ -15,4 +16,52 @@
     <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
     <string name="login_placeholder_title">Login Screen</string>
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
+
+    <!--Hend-->
+    <string name="create_account">Create Account</string>
+    <string name="register_subtitle">Join WearZone for an accessible luxury experience.</string>
+    <string name="full_name">Full Name</string>
+    <string name="full_name_placeholder">Jane Doe</string>
+    <string name="email_address">Email Address</string>
+    <string name="email_placeholder">jane@example.com</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="log_in">Log in</string>
+
+    <string name="error_blank_name">Full name is required</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_short_password">Password must be at least 8 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
+    <string name="error_register_failed">Registration failed. Please try again.</string>
+
+    <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
+    <string name="terms_of_service">  Terms of Service</string>
+    <string name="terms_and"> and </string>
+    <string name="privacy_policy"> Privacy Policy</string>
+    <string name="terms_period">.</string>
+
+    <string name="password_strength">Password strength: %1$s</string>
+
+    <string name="password_strength_weak">Weak</string>
+    <string name="password_strength_fair">Fair</string>
+    <string name="password_strength_good">Good</string>
+    <string name="password_strength_strong">Strong</string>
+
+    <string name="empty">&quot;&quot;</string>
+    <!--Hend-->
+
+    <!--Alaa-->
+    <!--Alaa-->
+
+    <!--Ahmed-->
+    <!--Ahmed-->
+
+    <!--Omar-->
+    <!--Omar-->
+
 </resources>

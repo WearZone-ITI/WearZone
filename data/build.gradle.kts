@@ -48,8 +48,9 @@ dependencies {
     //Alaa
 
     //Hend
-
+    testImplementation(libs.kotlinx.coroutines.test)
     //Hend
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)

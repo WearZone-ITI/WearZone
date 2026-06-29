@@ -1,14 +1,13 @@
 package com.example.wearzone.di
 
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.jvm.java
-
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
