@@ -198,6 +198,16 @@ private fun LoginContent(
                 }
             }
 
+            if (uiState is LoginUiState.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val isWarning = uiState.message.contains("fill", ignoreCase = true) || uiState.message.contains("empty", ignoreCase = true)
+                Text(
+                    text = uiState.message,
+                    style = AppTypography.bodyMedium,
+                    color = if (isWarning) AppColors.Warning else AppColors.Error
+                )
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(
