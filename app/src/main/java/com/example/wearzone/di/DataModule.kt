@@ -23,8 +23,6 @@ abstract class DataModule {
     abstract fun bindAuthRemoteDataSource(
         impl: AuthRemoteDataSourceImpl
     ): IAuthRemoteDataSource
-        impl: com.example.data.remote.datasource.AuthRemoteDataSourceImpl
-    ): com.example.data.remote.datasource.IAuthRemoteDataSource
 
     companion object {
 
