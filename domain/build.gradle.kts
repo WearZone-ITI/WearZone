@@ -12,3 +12,7 @@ kotlin {
     }
 }
 dependencies{ implementation(libs.javax.inject) }
+
+dependencies {
+    implementation(libs.kotlinx.coroutines.core)
+}

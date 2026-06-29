@@ -2,17 +2,22 @@ package com.example.data.db.repository
 
 import com.example.data.db.di.IoDispatcher
 import com.example.data.db.datasource.IAuthRemoteDataSource
+import com.example.data.local.datastore.IOnboardingPreferencesDataSource
+import com.example.data.remote.datasource.IAuthRemoteDataSource
 import com.example.domain.auth.model.User
 import com.example.domain.auth.repository.IAuthRepository
 import com.example.domain.common.result.runCatchingCancellable
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val remoteDataSource: IAuthRemoteDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val dataSource: IOnboardingPreferencesDataSource,
 ) : IAuthRepository {
 
     override suspend fun loginWithEmail(email: String, password: String): Result<User> =
@@ -56,4 +61,18 @@ class AuthRepositoryImpl @Inject constructor(
             photoUrl = this.photoUrl?.toString()
         )
     }
+
+    override fun observeOnboardingCompleted(): Flow<Boolean> =
+        dataSource.observeOnboardingCompleted()
+
+    override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatching {
+                dataSource.setOnboardingCompleted(completed)
+            }.onFailure { error ->
+                if (error is CancellationException) {
+                    throw error
+                }
+            }
+        }
 }
