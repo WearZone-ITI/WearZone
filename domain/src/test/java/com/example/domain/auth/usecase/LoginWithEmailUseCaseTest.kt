@@ -1,7 +1,8 @@
 package com.example.domain.auth.usecase
 
-import com.example.domain.auth.model.User
-import com.example.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest

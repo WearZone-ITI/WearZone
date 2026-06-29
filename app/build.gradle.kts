@@ -75,7 +75,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
 
     //Omar
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
     //Omar
 
     //Ahmed
@@ -92,8 +92,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     //Hend
     implementation(libs.androidx.activity.compose)
@@ -118,7 +116,6 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
 
     // Immutable collections
     implementation(libs.kotlinx.collections.immutable)

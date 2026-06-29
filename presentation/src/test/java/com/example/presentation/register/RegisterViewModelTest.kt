@@ -1,10 +1,10 @@
 package com.example.presentation.register
 
 import app.cash.turbine.test
-import com.example.domain.auth.usecase.RegisterUseCase
-import com.example.presentation.auth.register.RegisterUiEffect
-import com.example.presentation.auth.register.RegisterUiIntent
-import com.example.presentation.auth.register.RegisterViewModel
+import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.presentation.auth.register.RegisterUiEffect
+import com.example.wearzone.presentation.auth.register.RegisterUiIntent
+import com.example.wearzone.presentation.auth.register.RegisterViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -19,7 +19,6 @@ hilt = "2.60"
 ksp = "2.2.10-2.0.2"
 retrofit = "3.0.0"
 room = "2.8.4"
-
 firebaseBom = "33.16.0"
 googleServices = "4.5.0"
 kotlinxCoroutinesPlayServices = "1.11.0"
@@ -31,6 +30,7 @@ hiltNavigationCompose = "1.3.0"
 
 #Omar
 datastore = "1.2.1"
+retrofit2KotlinxSerializationConverter = "1.0.0"
 #Omar
 
 #Ahmed
@@ -40,18 +40,15 @@ googleId = "1.1.1"
 mockk = "1.13.12"
 turbine = "1.1.0"
 kotlinxCoroutinesTest = "1.9.0"
-
 #Ahmed
 
 #Hend
-hiltNavigationComposeVersion = "1.2.0"
-coilVersion = "3.1.0"
-lifecycleVersion = "2.9.1"
 javaxInject = "1"
 #Hend
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -72,7 +69,7 @@ androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = 
 
 
 #Omar
-
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
 #Omar
 
 # Aalaa
@@ -92,13 +89,11 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 # Aalaa
-androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 #Ahmed
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
@@ -115,8 +110,9 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 
 #Hend
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
-
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 #Hend
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -124,18 +120,14 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 
-
-
 #Omar
 
 #Omar
 
 #Ahmed
-
 #Ahmed
 
 #Hend
-
 #Hend
 # Aalaa
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
