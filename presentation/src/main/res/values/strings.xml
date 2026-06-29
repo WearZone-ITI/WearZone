@@ -17,11 +17,62 @@
     <string name="login_placeholder_title">Login Screen</string>
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
 
+    <!--Hend-->
+    <string name="create_account">Create Account</string>
+    <string name="register_subtitle">Join WearZone for an accessible luxury experience.</string>
+    <string name="full_name">Full Name</string>
+    <string name="full_name_placeholder">Jane Doe</string>
+    <string name="email_address">Email Address</string>
+    <string name="email_placeholder">jane@example.com</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="hide_password">Hide</string>
+    <string name="show_password">Show</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="log_in">Log in</string>
+    <string name="error_blank_name">Full name is required</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_short_password">Password must be at least 8 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
+    <string name="error_register_failed">Registration failed. Please try again.</string>
+    <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
+    <string name="terms_of_service">  Terms of Service</string>
+    <string name="terms_and"> and </string>
+    <string name="privacy_policy"> Privacy Policy</string>
+    <string name="terms_period">.</string>
+    <string name="password_strength">Password strength: %1$s</string>
+    <string name="password_strength_weak">Weak</string>
+    <string name="password_strength_fair">Fair</string>
+    <string name="password_strength_good">Good</string>
+    <string name="password_strength_strong">Strong</string>
 
-        <string name="hero_banner_default_title">The Midnight Slate Collection</string>
-        <string name="hero_banner_shop_now">Shop Now</string>
-        <string name="hero_banner_recommended">RECOMMENDED FOR YOU</string>
-        <string name="hero_banner_description">Hero Banner Image</string>
+    <string name="empty">&quot;&quot;</string>
+    <!--Hend-->
+
+    <!--Alaa-->
+    <!--Alaa-->
+
+    <!--Ahmed-->
+    <string name="login_successful">Login successful!</string>
+    <string name="unexpected_credential_type">Unexpected credential type</string>
+    <string name="google_sign_in_failed">Google Sign-In failed</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login_subtitle">Sign in to access your curated collection.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="or_continue_with">OR CONTINUE WITH</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+
+    <!--Ahmed-->
+
+    <!--Omar-->
+    <string name="hero_banner_default_title">The Midnight Slate Collection</string>
+    <string name="hero_banner_shop_now">Shop Now</string>
+    <string name="hero_banner_recommended">RECOMMENDED FOR YOU</string>
+    <string name="hero_banner_description">Hero Banner Image</string>
     <string name="home_new_arrivals">New Arrivals</string>
     <string name="content_desc_favorite">Favorite</string>
     <string name="content_desc_add_to_cart">Add to Cart</string>
@@ -41,51 +92,6 @@
     <string name="nav_search">Search</string>
     <string name="nav_wishlist">Wishlist</string>
     <string name="nav_profile">Profile</string>
-    <!--Hend-->
-    <string name="create_account">Create Account</string>
-    <string name="register_subtitle">Join WearZone for an accessible luxury experience.</string>
-    <string name="full_name">Full Name</string>
-    <string name="full_name_placeholder">Jane Doe</string>
-    <string name="email_address">Email Address</string>
-    <string name="email_placeholder">jane@example.com</string>
-    <string name="password">Password</string>
-    <string name="confirm_password">Confirm Password</string>
-    <string name="password_placeholder">••••••••</string>
-    <string name="hide_password">Hide password</string>
-    <string name="show_password">Show password</string>
-    <string name="already_have_account">Already have an account?</string>
-    <string name="log_in">Log in</string>
-
-    <string name="error_blank_name">Full name is required</string>
-    <string name="error_invalid_email">Please enter a valid email address</string>
-    <string name="error_short_password">Password must be at least 8 characters</string>
-    <string name="error_password_mismatch">Passwords do not match</string>
-    <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
-    <string name="error_register_failed">Registration failed. Please try again.</string>
-
-    <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
-    <string name="terms_of_service">  Terms of Service</string>
-    <string name="terms_and"> and </string>
-    <string name="privacy_policy"> Privacy Policy</string>
-    <string name="terms_period">.</string>
-
-    <string name="password_strength">Password strength: %1$s</string>
-
-    <string name="password_strength_weak">Weak</string>
-    <string name="password_strength_fair">Fair</string>
-    <string name="password_strength_good">Good</string>
-    <string name="password_strength_strong">Strong</string>
-
-    <string name="empty">&quot;&quot;</string>
-    <!--Hend-->
-
-    <!--Alaa-->
-    <!--Alaa-->
-
-    <!--Ahmed-->
-    <!--Ahmed-->
-
-    <!--Omar-->
     <!-- Product Detail Screen — Omar -->
     <string name="product_detail_select_size">Select Size</string>
     <string name="product_detail_size_guide">Size Guide</string>

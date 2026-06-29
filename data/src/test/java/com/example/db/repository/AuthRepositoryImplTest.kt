@@ -1,7 +1,7 @@
 package com.example.db.repository
 
-import com.example.data.db.repository.AuthRepositoryImpl
-import com.example.data.db.datasource.IAuthRemoteDataSource
+import com.example.wearzone.data.repository.AuthRepositoryImpl
+import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
 import io.mockk.every
@@ -15,7 +15,10 @@ import org.junit.Test
 class AuthRepositoryImplTest {
 
     private val remoteDataSource = mockk<IAuthRemoteDataSource>()
-    private val repository = AuthRepositoryImpl(remoteDataSource, Dispatchers.Unconfined)
+    private val repository = AuthRepositoryImpl(
+        remoteDataSource, Dispatchers.Unconfined,
+        dataSource = mockk()
+    )
 
     @Test
     fun `loginWithEmail returns mapped User on success`() = runTest {

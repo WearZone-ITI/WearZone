@@ -1,0 +1,77 @@
+package com.example.wearzone.data.repository
+
+import com.example.wearzone.data.di.IoDispatcher
+import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.common.runCatchingCancellable
+import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+class AuthRepositoryImpl @Inject constructor(
+    private val remoteDataSource: IAuthRemoteDataSource,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val dataSource: IOnboardingPreferencesDataSource,
+) : IAuthRepository {
+
+    override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.signInWithEmail(email, password).toDomain()
+            }
+        }
+
+    override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.signInWithGoogleCredential(idToken).toDomain()
+            }
+        }
+
+    override suspend fun isLoggedIn(): Boolean =
+        withContext(ioDispatcher) {
+            remoteDataSource.getCurrentUser() != null
+        }
+
+    override suspend fun getCurrentUser(): User? =
+        withContext(ioDispatcher) {
+            remoteDataSource.getCurrentUser()?.toDomain()
+        }
+
+    override suspend fun register(
+        name: String,
+        email: String,
+        password: String,
+    ): Result<User> = withContext(ioDispatcher) {
+        runCatchingCancellable {
+            remoteDataSource.register(name, email, password).toDomain()
+        }
+    }
+    private fun FirebaseUser.toDomain(): User {
+        return User(
+            uid = this.uid,
+            email = this.email ?: "",
+            displayName = this.displayName,
+            photoUrl = this.photoUrl?.toString()
+        )
+    }
+
+    override fun observeOnboardingCompleted(): Flow<Boolean> =
+        dataSource.observeOnboardingCompleted()
+
+    override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatching {
+                dataSource.setOnboardingCompleted(completed)
+            }.onFailure { error ->
+                if (error is CancellationException) {
+                    throw error
+                }
+            }
+        }
+}

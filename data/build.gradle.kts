@@ -30,8 +30,6 @@ dependencies {
     //Omar
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     //Omar
 

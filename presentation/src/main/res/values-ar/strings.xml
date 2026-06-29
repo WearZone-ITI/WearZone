@@ -1,4 +1,5 @@
 <resources>
+    <!--Alaa -->
     <string name="onboarding_back">رجوع</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_get_started">ابدأ الآن</string>
@@ -31,4 +32,77 @@
     <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
     <string name="content_desc_product_image">صورة المنتج</string>
     <string name="content_desc_star_rating">تقييم النجوم</string>
+    <!--Alaa-->
+
+    <!--Hend-->
+    <string name="create_account">إنشاء حساب</string>
+    <string name="register_subtitle">انضم إلى WearZone لتجربة تسوق فاخرة وسهلة الوصول.</string>
+    <string name="full_name">الاسم الكامل</string>
+    <string name="full_name_placeholder">محمد أحمد</string>
+    <string name="email_address">البريد الإلكتروني</string>
+    <string name="email_placeholder">example@email.com</string>
+    <string name="password">كلمة المرور</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="password_placeholder">••••••••</string>
+    <string name="hide_password">إخفاء كلمة المرور</string>
+    <string name="show_password">إظهار كلمة المرور</string>
+    <string name="already_have_account">لديك حساب بالفعل؟</string>
+    <string name="log_in">تسجيل الدخول</string>
+    <string name="error_blank_name">الاسم الكامل مطلوب</string>
+    <string name="error_invalid_email">يرجى إدخال بريد إلكتروني صحيح</string>
+    <string name="error_short_password">يجب أن تكون كلمة المرور 8 أحرف على الأقل</string>
+    <string name="error_password_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="error_terms_not_accepted">يجب الموافقة على شروط الاستخدام</string>
+    <string name="error_register_failed">فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.</string>
+    <string name="terms_agreement_prefix">أوافق على </string>
+    <string name="terms_of_service">شروط الاستخدام</string>
+    <string name="terms_and"> و </string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="terms_period">.</string>
+    <string name="password_strength">قوة كلمة المرور: %1$s</string>
+    <string name="password_strength_weak">ضعيفة</string>
+    <string name="password_strength_fair">مقبولة</string>
+    <string name="password_strength_good">جيدة</string>
+    <string name="password_strength_strong">قوية</string>
+    <string name="empty"></string>
+    <!--Hend-->
+
+    <!--Ahmed-->
+    <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
+    <string name="unexpected_credential_type">نوع بيانات الاعتماد غير متوقع</string>
+    <string name="google_sign_in_failed">فشل تسجيل الدخول باستخدام Google</string>
+    <string name="welcome_back">مرحبًا بعودتك</string>
+    <string name="login_subtitle">سجل الدخول للوصول إلى مجموعتك المختارة.</string>
+    <string name="forgot_password">هل نسيت كلمة المرور؟</string>
+    <string name="sign_in">تسجيل الدخول</string>
+    <string name="or_continue_with">أو المتابعة باستخدام</string>
+    <string name="dont_have_account">ليس لديك حساب؟</string>
+    <string name="register">إنشاء حساب</string>
+    <!--Ahmed-->
+
+    <!--Omar-->
+    <string name="hero_banner_default_title">مجموعة Midnight Slate</string>
+    <string name="hero_banner_shop_now">تسوق الآن</string>
+    <string name="hero_banner_recommended">موصى به لك</string>
+    <string name="hero_banner_description">صورة البانر الرئيسي</string>
+    <string name="home_new_arrivals">وصل حديثًا</string>
+    <string name="content_desc_favorite">المفضلة</string>
+    <string name="content_desc_add_to_cart">إضافة إلى السلة</string>
+    <string name="content_desc_search">بحث</string>
+    <string name="search_placeholder">ابحث عن المصممين أو التصنيفات…</string>
+    <string name="app_name">وير زون</string>
+    <string name="content_desc_menu">القائمة</string>
+    <string name="content_desc_cart">عربة التسوق</string>
+    <string name="dummy_cart_count">3</string>
+    <string name="home_greeting">مرحبًا، %1$s</string>
+    <string name="home_subtitle">اكتشف تشكيلات اليوم المختارة.</string>
+    <string name="home_top_brands">أفضل العلامات التجارية</string>
+    <string name="home_see_all">عرض الكل</string>
+    <string name="home_trending_now">الأكثر رواجًا</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_categories">التصنيفات</string>
+    <string name="nav_search">البحث</string>
+    <string name="nav_wishlist">المفضلة</string>
+    <string name="nav_profile">الملف الشخصي</string>
+    <!--Omar-->
 </resources>

@@ -1,11 +1,15 @@
 package com.example.presentation.onboarding
 
-import com.example.domain.auth.repository.IAuthRepository
-import com.example.domain.auth.model.User
-import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
-import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
+import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
+import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.presentation.onboarding.OnboardingUiEffect
+import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
+import com.example.wearzone.presentation.onboarding.OnboardingUiState
+import com.example.wearzone.presentation.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -98,6 +102,33 @@ class OnboardingViewModelTest {
         var savedCompletion = false
             private set
 
+        override suspend fun loginWithEmail(
+            email: String,
+            password: String
+        ): Result<User> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun isLoggedIn(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getCurrentUser(): User? {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun register(
+            name: String,
+            email: String,
+            password: String
+        ): Result<User> {
+            TODO("Not yet implemented")
+        }
+
         override fun observeOnboardingCompleted(): Flow<Boolean> = completed
 
         override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> {
@@ -107,11 +138,5 @@ class OnboardingViewModelTest {
             savedCompletion = completed
             return Result.success(Unit)
         }
-
-        override suspend fun loginWithEmail(email: String, password: String): Result<User> = TODO("Not yet implemented")
-        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> = TODO("Not yet implemented")
-        override suspend fun isLoggedIn(): Boolean = TODO("Not yet implemented")
-        override suspend fun getCurrentUser(): User? = TODO("Not yet implemented")
-        override suspend fun register(name: String, email: String, password: String): Result<User> = TODO("Not yet implemented")
     }
 }

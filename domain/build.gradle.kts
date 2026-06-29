@@ -11,9 +11,12 @@ kotlin {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
-dependencies{ implementation(libs.javax.inject) }
-
-dependencies {
+dependencies{
     implementation(libs.kotlinx.coroutines.core)
-    implementation("javax.inject:javax.inject:1")
+    // JUnit
+    testImplementation(libs.junit)
+    // Coroutines Test
+    testImplementation(libs.kotlinx.coroutines.test)
+    // MockK
+    testImplementation(libs.mockk)
 }
