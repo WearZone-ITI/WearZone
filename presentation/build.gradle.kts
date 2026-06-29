@@ -98,7 +98,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     //icons
     implementation(libs.androidx.compose.material.icons.extended)

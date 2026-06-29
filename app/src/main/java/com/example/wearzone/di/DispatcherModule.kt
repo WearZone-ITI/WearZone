@@ -2,15 +2,13 @@ package com.example.wearzone.di
 
 import com.wearzone.domain.common.dispatchers.DefaultDispatcher
 import com.wearzone.domain.common.dispatchers.IoDispatcher
-import com.example.data.db.di.DefaultDispatcher
-import com.example.data.db.di.IoDispatcher
+
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Qualifier
 import javax.inject.Named
 import javax.inject.Singleton
 
