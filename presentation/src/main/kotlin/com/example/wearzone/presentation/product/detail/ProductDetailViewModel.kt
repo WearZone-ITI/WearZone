@@ -3,7 +3,7 @@ package com.example.wearzone.presentation.product.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
