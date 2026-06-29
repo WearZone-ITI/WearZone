@@ -454,26 +454,26 @@ Every screen folder **must** contain exactly these three contract files:
 ```kotlin
 // presentation/product/list/ProductListUiState.kt
 sealed interface ProductListUiState {
-    data object Loading : ProductListUiState
-    data object Empty   : ProductListUiState
+  data object Loading : ProductListUiState
+  data object Empty   : ProductListUiState
 
-    // ✅ ImmutableList REQUIRED — standard List<T> is BANNED in UiState
-    data class Success(
-        val products: ImmutableList<ProductUiModel>,
-        val isLoadingMore: Boolean = false,
-    ) : ProductListUiState
+  // ✅ ImmutableList REQUIRED — standard List<T> is BANNED in UiState
+  data class Success(
+    val products: ImmutableList<ProductUiModel>,
+    val isLoadingMore: Boolean = false,
+  ) : ProductListUiState
 
-    data class Error(val message: String) : ProductListUiState
+  data class Error(val message: String) : ProductListUiState
 }
 
 // UiModel — what the presentation layer maps domain models to
 data class ProductUiModel(
-    val id: String,
-    val title: String,
-    val vendor: String,
-    val formattedPrice: String,   // pre-formatted for display
-    val imageUrl: String,
-    val isInWishlist: Boolean,
+  val id: String,
+  val title: String,
+  val vendor: String,
+  val formattedPrice: String,   // pre-formatted for display
+  val imageUrl: String,
+  val isInWishlist: Boolean,
 )
 ```
 
@@ -482,12 +482,12 @@ data class ProductUiModel(
 ```kotlin
 // presentation/product/list/ProductListUiIntent.kt
 sealed interface ProductListUiIntent {
-    data class OnProductClicked(val productId: String)  : ProductListUiIntent
-    data class OnFilterApplied(val filter: ProductFilter) : ProductListUiIntent
-    data class OnSortSelected(val sort: SortOption)     : ProductListUiIntent
-    data class OnWishlistToggled(val productId: String) : ProductListUiIntent
-    data object OnRetry                                  : ProductListUiIntent
-    data object OnLoadMore                               : ProductListUiIntent
+  data class OnProductClicked(val productId: String)  : ProductListUiIntent
+  data class OnFilterApplied(val filter: ProductFilter) : ProductListUiIntent
+  data class OnSortSelected(val sort: SortOption)     : ProductListUiIntent
+  data class OnWishlistToggled(val productId: String) : ProductListUiIntent
+  data object OnRetry                                  : ProductListUiIntent
+  data object OnLoadMore                               : ProductListUiIntent
 }
 ```
 
@@ -496,9 +496,9 @@ sealed interface ProductListUiIntent {
 ```kotlin
 // presentation/product/list/ProductListUiEffect.kt
 sealed interface ProductListUiEffect {
-    data class NavigateToDetail(val productId: String) : ProductListUiEffect
-    data class ShowError(val message: String)          : ProductListUiEffect
-    data object NavigateToLogin                         : ProductListUiEffect
+  data class NavigateToDetail(val productId: String) : ProductListUiEffect
+  data class ShowError(val message: String)          : ProductListUiEffect
+  data object NavigateToLogin                         : ProductListUiEffect
 }
 ```
 
@@ -508,67 +508,67 @@ sealed interface ProductListUiEffect {
 // presentation/product/list/ProductListViewModel.kt
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase,
-    private val toggleWishlistUseCase: ToggleWishlistUseCase,
-    // ✅ NO dispatcher injected here — ViewModel is threading-agnostic
+  private val getProductsUseCase: GetProductsUseCase,
+  private val toggleWishlistUseCase: ToggleWishlistUseCase,
+  // ✅ NO dispatcher injected here — ViewModel is threading-agnostic
 ) : ViewModel() {
 
-    // ── State ─────────────────────────────────────────────────────────────
-    private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
-    val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
+  // ── State ─────────────────────────────────────────────────────────────
+  private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
+  val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
 
-    // ── Effects ───────────────────────────────────────────────────────────
-    // Channel guarantees delivery — no event is ever dropped
-    private val _uiEffect = Channel<ProductListUiEffect>(Channel.BUFFERED)
-    val uiEffect: Flow<ProductListUiEffect> = _uiEffect.receiveAsFlow()
+  // ── Effects ───────────────────────────────────────────────────────────
+  // Channel guarantees delivery — no event is ever dropped
+  private val _uiEffect = Channel<ProductListUiEffect>(Channel.BUFFERED)
+  val uiEffect: Flow<ProductListUiEffect> = _uiEffect.receiveAsFlow()
 
-    init { loadProducts() }
+  init { loadProducts() }
 
-    // ── Intent Handler ────────────────────────────────────────────────────
-    // ✅ handleIntent is a lean dispatcher — all logic in private functions
-    fun handleIntent(intent: ProductListUiIntent) {
-        when (intent) {
-            is ProductListUiIntent.OnProductClicked   -> navigateToDetail(intent.productId)
-            is ProductListUiIntent.OnFilterApplied    -> applyFilter(intent.filter)
-            is ProductListUiIntent.OnSortSelected     -> applySort(intent.sort)
-            is ProductListUiIntent.OnWishlistToggled  -> toggleWishlist(intent.productId)
-            is ProductListUiIntent.OnRetry            -> loadProducts()
-            is ProductListUiIntent.OnLoadMore         -> loadMoreProducts()
+  // ── Intent Handler ────────────────────────────────────────────────────
+  // ✅ handleIntent is a lean dispatcher — all logic in private functions
+  fun handleIntent(intent: ProductListUiIntent) {
+    when (intent) {
+      is ProductListUiIntent.OnProductClicked   -> navigateToDetail(intent.productId)
+      is ProductListUiIntent.OnFilterApplied    -> applyFilter(intent.filter)
+      is ProductListUiIntent.OnSortSelected     -> applySort(intent.sort)
+      is ProductListUiIntent.OnWishlistToggled  -> toggleWishlist(intent.productId)
+      is ProductListUiIntent.OnRetry            -> loadProducts()
+      is ProductListUiIntent.OnLoadMore         -> loadMoreProducts()
+    }
+  }
+
+  // ── Private Functions — each does ONE thing ───────────────────────────
+  private fun loadProducts() {
+    viewModelScope.launch {          // ✅ No dispatcher — Main by default; repo handles IO
+      _uiState.value = ProductListUiState.Loading
+      getProductsUseCase()
+        .onSuccess { products ->
+          _uiState.value = if (products.isEmpty())
+            ProductListUiState.Empty
+          else
+            ProductListUiState.Success(products.map { it.toUiModel() }.toImmutableList())
+        }
+        .onFailure { error ->
+          _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Unknown error")
         }
     }
+  }
 
-    // ── Private Functions — each does ONE thing ───────────────────────────
-    private fun loadProducts() {
-        viewModelScope.launch {          // ✅ No dispatcher — Main by default; repo handles IO
-            _uiState.value = ProductListUiState.Loading
-            getProductsUseCase()
-                .onSuccess { products ->
-                    _uiState.value = if (products.isEmpty())
-                        ProductListUiState.Empty
-                    else
-                        ProductListUiState.Success(products.map { it.toUiModel() }.toImmutableList())
-                }
-                .onFailure { error ->
-                    _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Unknown error")
-                }
-        }
+  private fun navigateToDetail(productId: String) {
+    viewModelScope.launch {
+      _uiEffect.send(ProductListUiEffect.NavigateToDetail(productId))
     }
+  }
 
-    private fun navigateToDetail(productId: String) {
-        viewModelScope.launch {
-            _uiEffect.send(ProductListUiEffect.NavigateToDetail(productId))
-        }
+  private fun toggleWishlist(productId: String) {
+    viewModelScope.launch {
+      toggleWishlistUseCase(productId).onFailure {
+        _uiEffect.send(ProductListUiEffect.NavigateToLogin)
+      }
     }
+  }
 
-    private fun toggleWishlist(productId: String) {
-        viewModelScope.launch {
-            toggleWishlistUseCase(productId).onFailure {
-                _uiEffect.send(ProductListUiEffect.NavigateToLogin)
-            }
-        }
-    }
-
-    // ... applyFilter, applySort, loadMoreProducts — each a private function
+  // ... applyFilter, applySort, loadMoreProducts — each a private function
 }
 ```
 
@@ -580,48 +580,48 @@ class ProductListViewModel @Inject constructor(
 // ✅ Stateful root — only this level touches the ViewModel
 @Composable
 fun ProductListScreen(
-    viewModel: ProductListViewModel = hiltViewModel(),
-    onNavigateToDetail: (String) -> Unit,
-    onNavigateToLogin: () -> Unit,
+  viewModel: ProductListViewModel = hiltViewModel(),
+  onNavigateToDetail: (String) -> Unit,
+  onNavigateToLogin: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // ✅ Effects collected in LaunchedEffect(Unit) — runs once, tied to composition
-    LaunchedEffect(Unit) {
-        viewModel.uiEffect.collect { effect ->
-            when (effect) {
-                is ProductListUiEffect.NavigateToDetail -> onNavigateToDetail(effect.productId)
-                is ProductListUiEffect.NavigateToLogin  -> onNavigateToLogin()
-                is ProductListUiEffect.ShowError        -> { /* show snackbar */ }
-            }
-        }
+  // ✅ Effects collected in LaunchedEffect(Unit) — runs once, tied to composition
+  LaunchedEffect(Unit) {
+    viewModel.uiEffect.collect { effect ->
+      when (effect) {
+        is ProductListUiEffect.NavigateToDetail -> onNavigateToDetail(effect.productId)
+        is ProductListUiEffect.NavigateToLogin  -> onNavigateToLogin()
+        is ProductListUiEffect.ShowError        -> { /* show snackbar */ }
+      }
     }
+  }
 
-    // ✅ State hoisting — pass state down, events up; content is stateless
-    ProductListContent(
-        uiState  = uiState,
-        onIntent = viewModel::handleIntent,
-    )
+  // ✅ State hoisting — pass state down, events up; content is stateless
+  ProductListContent(
+    uiState  = uiState,
+    onIntent = viewModel::handleIntent,
+  )
 }
 
 // ✅ Stateless content composable — pure rendering, no ViewModel reference
 @Composable
 private fun ProductListContent(
-    uiState: ProductListUiState,
-    onIntent: (ProductListUiIntent) -> Unit,
+  uiState: ProductListUiState,
+  onIntent: (ProductListUiIntent) -> Unit,
 ) {
-    when (uiState) {
-        is ProductListUiState.Loading -> AppLoadingOverlay()
-        is ProductListUiState.Empty   -> EmptyStateWidget()
-        is ProductListUiState.Error   -> AppErrorWidget(
-            message = uiState.message,
-            onRetry = { onIntent(ProductListUiIntent.OnRetry) },
-        )
-        is ProductListUiState.Success -> ProductGrid(
-            products = uiState.products,
-            onIntent = onIntent,
-        )
-    }
+  when (uiState) {
+    is ProductListUiState.Loading -> AppLoadingOverlay()
+    is ProductListUiState.Empty   -> EmptyStateWidget()
+    is ProductListUiState.Error   -> AppErrorWidget(
+      message = uiState.message,
+      onRetry = { onIntent(ProductListUiIntent.OnRetry) },
+    )
+    is ProductListUiState.Success -> ProductGrid(
+      products = uiState.products,
+      onIntent = onIntent,
+    )
+  }
 }
 ```
 
@@ -658,24 +658,24 @@ private fun ProductListContent(
 // app/WearZoneApplication.kt
 @HiltAndroidApp
 class WearZoneApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
-    }
+  override fun onCreate() {
+    super.onCreate()
+    if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+  }
 }
 
 // app/MainActivity.kt
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            WearZoneTheme {
-                AppNavHost()
-            }
-        }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    enableEdgeToEdge()
+    setContent {
+      WearZoneTheme {
+        AppNavHost()
+      }
     }
+  }
 }
 ```
 
@@ -687,14 +687,14 @@ class MainActivity : ComponentActivity() {
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
-    @Binds @Singleton
-    abstract fun bindProductRepository(impl: ProductRepositoryImpl): IProductRepository
+  @Binds @Singleton
+  abstract fun bindProductRepository(impl: ProductRepositoryImpl): IProductRepository
 
-    @Binds @Singleton
-    abstract fun bindCartRepository(impl: CartRepositoryImpl): ICartRepository
+  @Binds @Singleton
+  abstract fun bindCartRepository(impl: CartRepositoryImpl): ICartRepository
 
-    @Binds @Singleton
-    abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): IWishlistRepository
+  @Binds @Singleton
+  abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): IWishlistRepository
 }
 
 // ✅ @Provides — for third-party classes or types you don't own (object module)
@@ -702,29 +702,29 @@ abstract class RepositoryModule {
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides @Singleton
-    @Named("storefront_token")
-    fun provideStorefrontToken(): String = BuildConfig.SHOPIFY_STOREFRONT_TOKEN
+  @Provides @Singleton
+  @Named("storefront_token")
+  fun provideStorefrontToken(): String = BuildConfig.SHOPIFY_STOREFRONT_TOKEN
 
-    @Provides @Singleton
-    fun provideOkHttpClient(
-        authInterceptor: AuthInterceptor,
-        errorInterceptor: ErrorInterceptor,
-    ): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(authInterceptor)
-        .addInterceptor(errorInterceptor)
-        .addInterceptor(HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-                    else HttpLoggingInterceptor.Level.NONE
-        })
-        .build()
+  @Provides @Singleton
+  fun provideOkHttpClient(
+    authInterceptor: AuthInterceptor,
+    errorInterceptor: ErrorInterceptor,
+  ): OkHttpClient = OkHttpClient.Builder()
+    .addInterceptor(authInterceptor)
+    .addInterceptor(errorInterceptor)
+    .addInterceptor(HttpLoggingInterceptor().apply {
+      level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+      else HttpLoggingInterceptor.Level.NONE
+    })
+    .build()
 
-    @Provides @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.SHOPIFY_BASE_URL)
-        .client(client)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
+  @Provides @Singleton
+  fun provideRetrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
+    .baseUrl(BuildConfig.SHOPIFY_BASE_URL)
+    .client(client)
+    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    .build()
 }
 ```
 
@@ -741,39 +741,39 @@ object NetworkModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object DispatcherModule {
-    @Provides @IoDispatcher
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+  @Provides @IoDispatcher
+  fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-    @Provides @DefaultDispatcher
-    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+  @Provides @DefaultDispatcher
+  fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }
 
 // Step 3 — Inject ONLY into Repository and DataSource implementations
 class ProductRepositoryImpl @Inject constructor(
-    private val localDataSource: IProductLocalDataSource,
-    private val remoteDataSource: IProductRemoteDataSource,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,   // ✅ here
+  private val localDataSource: IProductLocalDataSource,
+  private val remoteDataSource: IProductRemoteDataSource,
+  @IoDispatcher private val ioDispatcher: CoroutineDispatcher,   // ✅ here
 ) : IProductRepository {
 
-    override suspend fun getProducts(): Result<List<Product>> =
-        withContext(ioDispatcher) {            // ✅ dispatcher switch lives here
-            runCatchingCancellable {           // ✅ safe — re-throws CancellationException
-                val dto = remoteDataSource.fetchProducts()
-                dto.map { it.toDomain() }
-            }
-        }
+  override suspend fun getProducts(): Result<List<Product>> =
+    withContext(ioDispatcher) {            // ✅ dispatcher switch lives here
+      runCatchingCancellable {           // ✅ safe — re-throws CancellationException
+        val dto = remoteDataSource.fetchProducts()
+        dto.map { it.toDomain() }
+      }
+    }
 }
 
 // ✅ ViewModel — zero dispatcher knowledge
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase,
+  private val getProductsUseCase: GetProductsUseCase,
 ) : ViewModel() {
-    private fun loadProducts() {
-        viewModelScope.launch {             // ✅ main — repo handles IO internally
-            /* ... */
-        }
+  private fun loadProducts() {
+    viewModelScope.launch {             // ✅ main — repo handles IO internally
+      /* ... */
     }
+  }
 }
 ```
 
@@ -791,9 +791,9 @@ class ProductListViewModel @Inject constructor(
 // ✅ Always @HiltViewModel + @Inject constructor
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val getCartUseCase: GetCartUseCase,
-    private val addToCartUseCase: AddToCartUseCase,
-    private val removeFromCartUseCase: RemoveFromCartUseCase,
+  private val getCartUseCase: GetCartUseCase,
+  private val addToCartUseCase: AddToCartUseCase,
+  private val removeFromCartUseCase: RemoveFromCartUseCase,
 ) : ViewModel()
 
 // ✅ In Composable — always hiltViewModel()
@@ -809,14 +809,14 @@ val viewModel = CartViewModel(...)
 ```kotlin
 // In every module's build.gradle.kts that uses annotation processing:
 plugins {
-    id("com.google.devtools.ksp")    // ✅ KSP
-    // id("kotlin-kapt")             // ❌ KAPT is BANNED
+  id("com.google.devtools.ksp")    // ✅ KSP
+  // id("kotlin-kapt")             // ❌ KAPT is BANNED
 }
 
 dependencies {
-    ksp("com.google.dagger:hilt-compiler:$hiltVersion")      // ✅ KSP
-    ksp("androidx.room:room-compiler:$roomVersion")           // ✅ KSP
-    // kapt("...") is BANNED everywhere
+  ksp("com.google.dagger:hilt-compiler:$hiltVersion")      // ✅ KSP
+  ksp("androidx.room:room-compiler:$roomVersion")           // ✅ KSP
+  // kapt("...") is BANNED everywhere
 }
 ```
 
@@ -875,181 +875,181 @@ dependencies {
 
 @Composable
 fun AppNavHost(
-    navController: NavHostController = rememberNavController(),
-    startDestination: Any = AuthGraph,
+  navController: NavHostController = rememberNavController(),
+  startDestination: Any = AuthGraph,
 ) {
-    NavHost(
-        navController    = navController,
-        startDestination = startDestination,
-    ) {
+  NavHost(
+    navController    = navController,
+    startDestination = startDestination,
+  ) {
 
-        // ════════════════════════════════════════════════════════════════════
-        // AUTH GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<AuthGraph>(startDestination = LoginRoute) {
+    // ════════════════════════════════════════════════════════════════════
+    // AUTH GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<AuthGraph>(startDestination = LoginRoute) {
 
-            composable<LoginRoute> {
-                LoginScreen(
-                    onLoginSuccess       = {
-                        navController.navigate(HomeGraph) {
-                            popUpTo<AuthGraph> { inclusive = true }
-                        }
-                    },
-                    onNavigateToRegister = { navController.navigate(RegisterRoute) },
-                )
+      composable<LoginRoute> {
+        LoginScreen(
+          onLoginSuccess       = {
+            navController.navigate(HomeGraph) {
+              popUpTo<AuthGraph> { inclusive = true }
             }
+          },
+          onNavigateToRegister = { navController.navigate(RegisterRoute) },
+        )
+      }
 
-            composable<RegisterRoute> {
-                RegisterScreen(
-                    onNavigateBack    = { navController.popBackStack() },
-                    onRegisterSuccess = {
-                        navController.navigate(HomeGraph) {
-                            popUpTo<AuthGraph> { inclusive = true }
-                        }
-                    },
-                )
+      composable<RegisterRoute> {
+        RegisterScreen(
+          onNavigateBack    = { navController.popBackStack() },
+          onRegisterSuccess = {
+            navController.navigate(HomeGraph) {
+              popUpTo<AuthGraph> { inclusive = true }
             }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // HOME GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<HomeGraph>(startDestination = HomeRoute) {
-
-            composable<HomeRoute> {
-                HomeScreen(
-                    onNavigateToProductList = { brand, category ->
-                        navController.navigate(ProductListRoute(brand = brand, category = category))
-                    },
-                    onNavigateToSearch   = { navController.navigate(SearchGraph) },
-                    onNavigateToCart     = { navController.navigate(CartGraph) },
-                    onNavigateToAccount  = { navController.navigate(AccountGraph) },
-                    onNavigateToWishlist = { navController.navigate(WishlistGraph) },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // PRODUCT GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<ProductGraph>(startDestination = ProductListRoute()) {
-
-            composable<ProductListRoute> { backStackEntry ->
-                val route = backStackEntry.toRoute<ProductListRoute>()
-                ProductListScreen(
-                    brand              = route.brand,
-                    category           = route.category,
-                    onNavigateToDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
-                    onNavigateBack     = { navController.popBackStack() },
-                )
-            }
-
-            composable<ProductDetailRoute> { backStackEntry ->
-                val route = backStackEntry.toRoute<ProductDetailRoute>()
-                ProductDetailScreen(
-                    productId         = route.productId,
-                    onNavigateBack    = { navController.popBackStack() },
-                    onNavigateToCart  = { navController.navigate(CartGraph) },
-                    onNavigateToLogin = {
-                        navController.navigate(AuthGraph) {
-                            popUpTo<HomeGraph> { inclusive = false }
-                        }
-                    },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // SEARCH GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<SearchGraph>(startDestination = SearchRoute) {
-
-            composable<SearchRoute> {
-                SearchScreen(
-                    onNavigateBack            = { navController.popBackStack() },
-                    onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // CART GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<CartGraph>(startDestination = CartRoute) {
-
-            composable<CartRoute> {
-                CartScreen(
-                    onNavigateBack       = { navController.popBackStack() },
-                    onNavigateToCheckout = { navController.navigate(CheckoutGraph) },
-                    onNavigateToLogin    = {
-                        navController.navigate(AuthGraph) {
-                            popUpTo<HomeGraph> { inclusive = false }
-                        }
-                    },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // WISHLIST GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<WishlistGraph>(startDestination = WishlistRoute) {
-
-            composable<WishlistRoute> {
-                WishlistScreen(
-                    onNavigateBack            = { navController.popBackStack() },
-                    onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
-                    onNavigateToLogin         = {
-                        navController.navigate(AuthGraph) {
-                            popUpTo<HomeGraph> { inclusive = false }
-                        }
-                    },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // CHECKOUT GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<CheckoutGraph>(startDestination = CheckoutRoute) {
-
-            composable<CheckoutRoute> {
-                CheckoutScreen(
-                    onNavigateBack                = { navController.popBackStack() },
-                    onNavigateToAddress           = { navController.navigate(AddressRoute) },
-                    onNavigateToOrderConfirmation = {
-                        navController.navigate(AccountGraph) {
-                            popUpTo<CheckoutGraph> { inclusive = true }
-                        }
-                    },
-                )
-            }
-
-            composable<AddressRoute> {
-                AddressScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                )
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════════
-        // ACCOUNT GRAPH
-        // ════════════════════════════════════════════════════════════════════
-        navigation<AccountGraph>(startDestination = AccountRoute) {
-
-            composable<AccountRoute> {
-                AccountScreen(
-                    onNavigateToLogin       = {
-                        navController.navigate(AuthGraph) {
-                            popUpTo<HomeGraph> { inclusive = true }
-                        }
-                    },
-                    onNavigateToWishlist    = { navController.navigate(WishlistGraph) },
-                    onNavigateToOrderDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
-                )
-            }
-        }
+          },
+        )
+      }
     }
+
+    // ════════════════════════════════════════════════════════════════════
+    // HOME GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<HomeGraph>(startDestination = HomeRoute) {
+
+      composable<HomeRoute> {
+        HomeScreen(
+          onNavigateToProductList = { brand, category ->
+            navController.navigate(ProductListRoute(brand = brand, category = category))
+          },
+          onNavigateToSearch   = { navController.navigate(SearchGraph) },
+          onNavigateToCart     = { navController.navigate(CartGraph) },
+          onNavigateToAccount  = { navController.navigate(AccountGraph) },
+          onNavigateToWishlist = { navController.navigate(WishlistGraph) },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // PRODUCT GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<ProductGraph>(startDestination = ProductListRoute()) {
+
+      composable<ProductListRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<ProductListRoute>()
+        ProductListScreen(
+          brand              = route.brand,
+          category           = route.category,
+          onNavigateToDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+          onNavigateBack     = { navController.popBackStack() },
+        )
+      }
+
+      composable<ProductDetailRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<ProductDetailRoute>()
+        ProductDetailScreen(
+          productId         = route.productId,
+          onNavigateBack    = { navController.popBackStack() },
+          onNavigateToCart  = { navController.navigate(CartGraph) },
+          onNavigateToLogin = {
+            navController.navigate(AuthGraph) {
+              popUpTo<HomeGraph> { inclusive = false }
+            }
+          },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // SEARCH GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<SearchGraph>(startDestination = SearchRoute) {
+
+      composable<SearchRoute> {
+        SearchScreen(
+          onNavigateBack            = { navController.popBackStack() },
+          onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // CART GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<CartGraph>(startDestination = CartRoute) {
+
+      composable<CartRoute> {
+        CartScreen(
+          onNavigateBack       = { navController.popBackStack() },
+          onNavigateToCheckout = { navController.navigate(CheckoutGraph) },
+          onNavigateToLogin    = {
+            navController.navigate(AuthGraph) {
+              popUpTo<HomeGraph> { inclusive = false }
+            }
+          },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // WISHLIST GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<WishlistGraph>(startDestination = WishlistRoute) {
+
+      composable<WishlistRoute> {
+        WishlistScreen(
+          onNavigateBack            = { navController.popBackStack() },
+          onNavigateToProductDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+          onNavigateToLogin         = {
+            navController.navigate(AuthGraph) {
+              popUpTo<HomeGraph> { inclusive = false }
+            }
+          },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // CHECKOUT GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<CheckoutGraph>(startDestination = CheckoutRoute) {
+
+      composable<CheckoutRoute> {
+        CheckoutScreen(
+          onNavigateBack                = { navController.popBackStack() },
+          onNavigateToAddress           = { navController.navigate(AddressRoute) },
+          onNavigateToOrderConfirmation = {
+            navController.navigate(AccountGraph) {
+              popUpTo<CheckoutGraph> { inclusive = true }
+            }
+          },
+        )
+      }
+
+      composable<AddressRoute> {
+        AddressScreen(
+          onNavigateBack = { navController.popBackStack() },
+        )
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    // ACCOUNT GRAPH
+    // ════════════════════════════════════════════════════════════════════
+    navigation<AccountGraph>(startDestination = AccountRoute) {
+
+      composable<AccountRoute> {
+        AccountScreen(
+          onNavigateToLogin       = {
+            navController.navigate(AuthGraph) {
+              popUpTo<HomeGraph> { inclusive = true }
+            }
+          },
+          onNavigateToWishlist    = { navController.navigate(WishlistGraph) },
+          onNavigateToOrderDetail = { id -> navController.navigate(ProductDetailRoute(id)) },
+        )
+      }
+    }
+  }
 }
 ```
 
@@ -1109,23 +1109,23 @@ production code changes needed.
 // ✅ CORRECT — Room returns cold Flow; ViewModel converts to hot StateFlow
 @Dao
 interface CartDao {
-    @Query("SELECT * FROM cart_items")
-    fun observeCart(): Flow<List<CartItemEntity>>    // cold
+  @Query("SELECT * FROM cart_items")
+  fun observeCart(): Flow<List<CartItemEntity>>    // cold
 }
 
 // In ViewModel — stateIn converts cold Flow to hot StateFlow
 val cartUiState: StateFlow<CartUiState> = getCartUseCase()
-    .map { result ->
-        result.fold(
-            onSuccess = { items -> CartUiState.Success(items.map { it.toUiModel() }.toImmutableList()) },
-            onFailure = { CartUiState.Error(it.localizedMessage ?: "Error") },
-        )
-    }
-    .stateIn(
-        scope        = viewModelScope,
-        started      = SharingStarted.WhileSubscribed(5_000),
-        initialValue = CartUiState.Loading,
+  .map { result ->
+    result.fold(
+      onSuccess = { items -> CartUiState.Success(items.map { it.toUiModel() }.toImmutableList()) },
+      onFailure = { CartUiState.Error(it.localizedMessage ?: "Error") },
     )
+  }
+  .stateIn(
+    scope        = viewModelScope,
+    started      = SharingStarted.WhileSubscribed(5_000),
+    initialValue = CartUiState.Loading,
+  )
 
 // ✅ CORRECT — Channel for effects (never SharedFlow for one-shot events)
 private val _uiEffect = Channel<CartUiEffect>(Channel.BUFFERED)
@@ -1133,9 +1133,9 @@ val uiEffect: Flow<CartUiEffect> = _uiEffect.receiveAsFlow()
 
 // ✅ Sending an effect
 private fun confirmRemoveItem(itemId: String) {
-    viewModelScope.launch {
-        _uiEffect.send(CartUiEffect.ShowConfirmDialog(itemId))
-    }
+  viewModelScope.launch {
+    _uiEffect.send(CartUiEffect.ShowConfirmDialog(itemId))
+  }
 }
 
 // ❌ BANNED — SharedFlow for one-shot effects (events can be dropped)
@@ -1146,14 +1146,14 @@ private val _uiEffect = MutableSharedFlow<CartUiEffect>(replay = 0)
 
 ```kotlin
 .map { }               // transform
-.filter { }            // filter
-.catch { e -> }        // error handling in flow chain (do NOT let it propagate unhandled)
-.onStart { }           // emit loading state before first item
-.combine(other) { a, b -> }   // merge two streams (e.g. cartItems + discount)
-.flatMapLatest { }     // cancel previous, switch to new (search: new query cancels old)
-.debounce(300)         // throttle search input — always 300ms
-.distinctUntilChanged()// skip duplicate emissions
-.stateIn(...)          // cold Flow → hot StateFlow for ViewModel exposure
+  .filter { }            // filter
+  .catch { e -> }        // error handling in flow chain (do NOT let it propagate unhandled)
+  .onStart { }           // emit loading state before first item
+  .combine(other) { a, b -> }   // merge two streams (e.g. cartItems + discount)
+  .flatMapLatest { }     // cancel previous, switch to new (search: new query cancels old)
+  .debounce(300)         // throttle search input — always 300ms
+  .distinctUntilChanged()// skip duplicate emissions
+  .stateIn(...)          // cold Flow → hot StateFlow for ViewModel exposure
 ```
 
 ### 6.4 Exception Handling
@@ -1168,36 +1168,36 @@ private val _uiEffect = MutableSharedFlow<CartUiEffect>(replay = 0)
 ```kotlin
 // domain/common/RunCatchingCancellable.kt  ← add this utility once, use everywhere
 suspend fun <T> runCatchingCancellable(block: suspend () -> T): Result<T> =
-    runCatching { block() }.also { result ->
-        result.exceptionOrNull()?.let { e ->
-            if (e is CancellationException) throw e   // re-propagate cancellation
-        }
+  runCatching { block() }.also { result ->
+    result.exceptionOrNull()?.let { e ->
+      if (e is CancellationException) throw e   // re-propagate cancellation
     }
+  }
 ```
 
 ```kotlin
 // ✅ In suspend repository functions — use runCatchingCancellable, NOT runCatching
 override suspend fun getProducts(): Result<List<Product>> =
-    withContext(ioDispatcher) {
-        runCatchingCancellable {
-            remoteDataSource.fetchProducts().map { it.toDomain() }
-        }
+  withContext(ioDispatcher) {
+    runCatchingCancellable {
+      remoteDataSource.fetchProducts().map { it.toDomain() }
     }
+  }
 
 // ✅ In Flow chains — use .catch (never .runCatching inside flow)
 fun observeCart(): Flow<List<CartItem>> = cartDao
-    .observeCart()
-    .map { it.map { entity -> entity.toDomain() } }
-    .catch { e ->
-        Timber.e(e, "Cart observation error")
-        emit(emptyList())
-    }
+  .observeCart()
+  .map { it.map { entity -> entity.toDomain() } }
+  .catch { e ->
+    Timber.e(e, "Cart observation error")
+    emit(emptyList())
+  }
 
 // ✅ In ViewModel — handle Result from UseCase
 viewModelScope.launch {
-    getProductsUseCase()
-        .onSuccess { products -> _uiState.value = ProductListUiState.Success(...) }
-        .onFailure { error   -> _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Error") }
+  getProductsUseCase()
+    .onSuccess { products -> _uiState.value = ProductListUiState.Success(...) }
+    .onFailure { error   -> _uiState.value = ProductListUiState.Error(error.localizedMessage ?: "Error") }
 }
 
 // ❌ BANNED — bare runCatching in suspend functions (swallows CancellationException)
@@ -1222,15 +1222,15 @@ try { ... } catch (e: Exception) { /* empty */ }
 ```kotlin
 // data/remote/interceptor/AuthInterceptor.kt
 class AuthInterceptor @Inject constructor(
-    @Named("storefront_token") private val storefrontToken: String,
+  @Named("storefront_token") private val storefrontToken: String,
 ) : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request().newBuilder()
-            // ✅ Storefront API header — safe for public distribution
-            .header("X-Shopify-Storefront-Access-Token", storefrontToken)
-            .build()
-        return chain.proceed(request)
-    }
+  override fun intercept(chain: Interceptor.Chain): Response {
+    val request = chain.request().newBuilder()
+      // ✅ Storefront API header — safe for public distribution
+      .header("X-Shopify-Storefront-Access-Token", storefrontToken)
+      .build()
+    return chain.proceed(request)
+  }
 }
 ```
 
@@ -1267,12 +1267,12 @@ Expose via `BuildConfig` in `build.gradle.kts`:
 
 ```kotlin
 android {
-    defaultConfig {
-        buildConfigField("String", "SHOPIFY_BASE_URL",
-            "\"${localProperties["SHOPIFY_BASE_URL"]}\"")
-        buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN",
-            "\"${localProperties["SHOPIFY_STOREFRONT_TOKEN"]}\"")
-    }
+  defaultConfig {
+    buildConfigField("String", "SHOPIFY_BASE_URL",
+      "\"${localProperties["SHOPIFY_BASE_URL"]}\"")
+    buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN",
+      "\"${localProperties["SHOPIFY_STOREFRONT_TOKEN"]}\"")
+  }
 }
 ```
 
@@ -1281,16 +1281,16 @@ android {
 ```kotlin
 // ✅ Suspend only — no Call<T>, no blocking
 interface ProductApiService {
-    @GET("products.json")
-    suspend fun getProducts(
-        @Query("vendor")       vendor: String?  = null,
-        @Query("product_type") type: String?    = null,
-        @Query("limit")        limit: Int       = 20,
-        @Query("page_info")    pageInfo: String? = null,
-    ): ProductsResponseDto
+  @GET("products.json")
+  suspend fun getProducts(
+    @Query("vendor")       vendor: String?  = null,
+    @Query("product_type") type: String?    = null,
+    @Query("limit")        limit: Int       = 20,
+    @Query("page_info")    pageInfo: String? = null,
+  ): ProductsResponseDto
 
-    @GET("products/{id}.json")
-    suspend fun getProductById(@Path("id") id: Long): ProductResponseDto
+  @GET("products/{id}.json")
+  suspend fun getProductById(@Path("id") id: Long): ProductResponseDto
 }
 ```
 
@@ -1312,17 +1312,17 @@ class ValidationException(body: String?) : ShopifyHttpException("422 Unprocessab
 class ServerException(code: Int)         : ShopifyHttpException("5xx Server Error: $code")
 
 class ErrorInterceptor @Inject constructor() : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val response = chain.proceed(chain.request())
-        when (response.code) {
-            401          -> throw UnauthorizedException()
-            403          -> throw ForbiddenException()
-            404          -> throw NotFoundException()
-            422          -> throw ValidationException(response.body?.string())
-            in 500..599  -> throw ServerException(response.code)
-        }
-        return response
+  override fun intercept(chain: Interceptor.Chain): Response {
+    val response = chain.proceed(chain.request())
+    when (response.code) {
+      401          -> throw UnauthorizedException()
+      403          -> throw ForbiddenException()
+      404          -> throw NotFoundException()
+      422          -> throw ValidationException(response.body?.string())
+      in 500..599  -> throw ServerException(response.code)
     }
+    return response
+  }
 }
 ```
 
@@ -1336,13 +1336,13 @@ class ErrorInterceptor @Inject constructor() : Interceptor {
 // ✅ @Entity classes live in data/db/ — suffix: Entity
 @Entity(tableName = "cart_items")
 data class CartItemEntity(
-    @PrimaryKey val variantId: Long,
-    val productId: Long,
-    val title: String,
-    val price: Double,
-    val quantity: Int,
-    val maxQuantity: Int,
-    val imageUrl: String,
+  @PrimaryKey val variantId: Long,
+  val productId: Long,
+  val title: String,
+  val price: Double,
+  val quantity: Int,
+  val maxQuantity: Int,
+  val imageUrl: String,
 )
 // ❌ NEVER put @Entity in domain/model/ — domain is pure Kotlin
 ```
@@ -1353,20 +1353,20 @@ data class CartItemEntity(
 // ✅ All DAO methods: suspend OR return Flow
 @Dao
 interface CartDao {
-    @Query("SELECT * FROM cart_items")
-    fun observeCartItems(): Flow<List<CartItemEntity>>             // hot stream
+  @Query("SELECT * FROM cart_items")
+  fun observeCartItems(): Flow<List<CartItemEntity>>             // hot stream
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplace(item: CartItemEntity)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertOrReplace(item: CartItemEntity)
 
-    @Delete
-    suspend fun delete(item: CartItemEntity)
+  @Delete
+  suspend fun delete(item: CartItemEntity)
 
-    @Query("UPDATE cart_items SET quantity = :qty WHERE variantId = :id")
-    suspend fun updateQuantity(id: Long, qty: Int)
+  @Query("UPDATE cart_items SET quantity = :qty WHERE variantId = :id")
+  suspend fun updateQuantity(id: Long, qty: Int)
 
-    @Query("DELETE FROM cart_items")
-    suspend fun clearAll()
+  @Query("DELETE FROM cart_items")
+  suspend fun clearAll()
 }
 ```
 
@@ -1378,18 +1378,18 @@ interface CartDao {
 
 ```kotlin
 class UserPreferencesDataSource @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
+  private val dataStore: DataStore<Preferences>,
 ) {
-    val selectedCurrency: Flow<String> = dataStore.data.map { it[CURRENCY_KEY] ?: "USD" }
+  val selectedCurrency: Flow<String> = dataStore.data.map { it[CURRENCY_KEY] ?: "USD" }
 
-    suspend fun setSelectedCurrency(code: String) {
-        dataStore.edit { it[CURRENCY_KEY] = code }
-    }
+  suspend fun setSelectedCurrency(code: String) {
+    dataStore.edit { it[CURRENCY_KEY] = code }
+  }
 
-    companion object {
-        val CURRENCY_KEY = stringPreferencesKey("currency_code")
-        // ❌ AUTH_TOKEN_KEY must NOT exist here — use Proto DataStore (§8.4)
-    }
+  companion object {
+    val CURRENCY_KEY = stringPreferencesKey("currency_code")
+    // ❌ AUTH_TOKEN_KEY must NOT exist here — use Proto DataStore (§8.4)
+  }
 }
 ```
 
@@ -1424,29 +1424,29 @@ local data emits immediately from Room.
 ```kotlin
 // ✅ CORRECT — channelFlow lets local emit first; remote refresh is concurrent
 class ProductRepositoryImpl @Inject constructor(
-    private val localDs: IProductLocalDataSource,
-    private val remoteDs: IProductRemoteDataSource,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+  private val localDs: IProductLocalDataSource,
+  private val remoteDs: IProductRemoteDataSource,
+  @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IProductRepository {
 
-    override fun observeProducts(brand: String?): Flow<List<Product>> = channelFlow {
-        launch(ioDispatcher) {
-            runCatchingCancellable { remoteDs.fetchProducts(brand) }
-                .onSuccess { dto -> localDs.cacheProducts(dto.map { it.toEntity() }) }
-        }
-        emitAll(
-            localDs.observeProducts(brand).map { list -> list.map { it.toDomain() } }
-        )
-    }.flowOn(ioDispatcher)
+  override fun observeProducts(brand: String?): Flow<List<Product>> = channelFlow {
+    launch(ioDispatcher) {
+      runCatchingCancellable { remoteDs.fetchProducts(brand) }
+        .onSuccess { dto -> localDs.cacheProducts(dto.map { it.toEntity() }) }
+    }
+    emitAll(
+      localDs.observeProducts(brand).map { list -> list.map { it.toDomain() } }
+    )
+  }.flowOn(ioDispatcher)
 }
 ```
 
 ```kotlin
 // ❌ WRONG — onStart blocks local emission until the network call finishes
 override fun observeProducts(brand: String?): Flow<List<Product>> =
-    localDs.observeProducts(brand)
-        .map { it.map { entity -> entity.toDomain() } }
-        .onStart { refreshFromRemote(brand) }
+  localDs.observeProducts(brand)
+    .map { it.map { entity -> entity.toDomain() } }
+    .onStart { refreshFromRemote(brand) }
 ```
 
 **Rules:**
@@ -1467,7 +1467,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 data class Success(
-    val products: ImmutableList<ProductUiModel>,   // ✅
+  val products: ImmutableList<ProductUiModel>,   // ✅
 ) : ProductListUiState
 
 // ❌ BANNED in UiState
@@ -1480,19 +1480,19 @@ data class Success(val products: List<ProductUiModel>)   // ← Compose sees thi
 // ✅ CORRECT — stateless leaf component; all state owned by parent
 @Composable
 fun QuantitySelector(
-    quantity: Int,
-    maxQuantity: Int,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
-    modifier: Modifier = Modifier,
+  quantity: Int,
+  maxQuantity: Int,
+  onIncrease: () -> Unit,
+  onDecrease: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-    // pure rendering only
+  // pure rendering only
 }
 
 // ❌ WRONG — local uncontrolled state in a component that should be controlled
 @Composable
 fun QuantitySelector(...) {
-    var count by remember { mutableStateOf(0) }
+  var count by remember { mutableStateOf(0) }
 }
 ```
 
@@ -1501,14 +1501,14 @@ fun QuantitySelector(...) {
 ```kotlin
 // ✅ Keys in LazyColumn prevent full recomposition on list change
 LazyColumn {
-    items(products, key = { it.id }) { product ->
-        ProductCard(product = product, onIntent = onIntent)
-    }
+  items(products, key = { it.id }) { product ->
+    ProductCard(product = product, onIntent = onIntent)
+  }
 }
 
 // ✅ derivedStateOf for values computable from existing state
 val total by remember(cartItems) {
-    derivedStateOf { cartItems.sumOf { it.price * it.quantity } }
+  derivedStateOf { cartItems.sumOf { it.price * it.quantity } }
 }
 ```
 
@@ -1517,7 +1517,7 @@ val total by remember(cartItems) {
 ```kotlin
 // LaunchedEffect(Unit)          — collect UiEffects from Channel (runs once)
 LaunchedEffect(Unit) {
-    viewModel.uiEffect.collect { effect -> /* navigate, show snackbar */ }
+  viewModel.uiEffect.collect { effect -> /* navigate, show snackbar */ }
 }
 
 // LaunchedEffect(key)           — re-run when key changes
@@ -1528,9 +1528,9 @@ SideEffect { analyticsTracker.setCurrentScreen("ProductList") }
 
 // DisposableEffect              — setup/teardown paired resources
 DisposableEffect(lifecycleOwner) {
-    val observer = LifecycleEventObserver { _, event -> /* ... */ }
-    lifecycleOwner.lifecycle.addObserver(observer)
-    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+  val observer = LifecycleEventObserver { _, event -> /* ... */ }
+  lifecycleOwner.lifecycle.addObserver(observer)
+  onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
 }
 ```
 
@@ -1552,14 +1552,14 @@ DisposableEffect(lifecycleOwner) {
 ```kotlin
 @OptIn(ExperimentalCoroutinesApi::class)
 class TestCoroutineRule : TestWatcher() {
-    val testDispatcher = UnconfinedTestDispatcher()
+  val testDispatcher = UnconfinedTestDispatcher()
 
-    override fun starting(description: Description) {
-        Dispatchers.setMain(testDispatcher)
-    }
-    override fun finished(description: Description) {
-        Dispatchers.resetMain()
-    }
+  override fun starting(description: Description) {
+    Dispatchers.setMain(testDispatcher)
+  }
+  override fun finished(description: Description) {
+    Dispatchers.resetMain()
+  }
 }
 ```
 
@@ -1574,37 +1574,37 @@ Stubs  ← simple scenarios with fixed return values
 ```kotlin
 // ✅ CORRECT — Fake repository (preferred over mock)
 class FakeProductRepository : IProductRepository {
-    var productsToReturn: List<Product> = emptyList()
-    var errorToThrow: Throwable? = null
+  var productsToReturn: List<Product> = emptyList()
+  var errorToThrow: Throwable? = null
 
-    override suspend fun getProducts(): Result<List<Product>> =
-        errorToThrow?.let { Result.failure(it) } ?: Result.success(productsToReturn)
+  override suspend fun getProducts(): Result<List<Product>> =
+    errorToThrow?.let { Result.failure(it) } ?: Result.success(productsToReturn)
 
-    override fun observeProducts(brand: String?): Flow<List<Product>> = flow {
-        errorToThrow?.let { throw it }
-        emit(productsToReturn)
-    }
+  override fun observeProducts(brand: String?): Flow<List<Product>> = flow {
+    errorToThrow?.let { throw it }
+    emit(productsToReturn)
+  }
 }
 
 // ✅ CORRECT — ViewModel test with Turbine + FakeRepo
 @ExtendWith(TestCoroutineExtension::class)
 class ProductListViewModelTest {
 
-    private val fakeRepo = FakeProductRepository()
-    private val getProductsUseCase = GetProductsUseCase(fakeRepo)
+  private val fakeRepo = FakeProductRepository()
+  private val getProductsUseCase = GetProductsUseCase(fakeRepo)
 
-    @Test
-    fun `when products load successfully, state transitions to Success`() = runTest {
-        fakeRepo.productsToReturn = listOf(TestFixtures.product)
-        val viewModel = ProductListViewModel(getProductsUseCase)
+  @Test
+  fun `when products load successfully, state transitions to Success`() = runTest {
+    fakeRepo.productsToReturn = listOf(TestFixtures.product)
+    val viewModel = ProductListViewModel(getProductsUseCase)
 
-        viewModel.uiState.test {
-            assertEquals(ProductListUiState.Loading, awaitItem())
-            val success = awaitItem() as ProductListUiState.Success
-            assertEquals(1, success.products.size)
-            cancelAndIgnoreRemainingEvents()
-        }
+    viewModel.uiState.test {
+      assertEquals(ProductListUiState.Loading, awaitItem())
+      val success = awaitItem() as ProductListUiState.Success
+      assertEquals(1, success.products.size)
+      cancelAndIgnoreRemainingEvents()
     }
+  }
 }
 ```
 
@@ -1616,13 +1616,13 @@ fun `clicking product emits NavigateToDetail effect`() = runTest {
     val viewModel = ProductListViewModel(getProductsUseCase)
 
     viewModel.uiEffect.test {
-        viewModel.handleIntent(ProductListUiIntent.OnProductClicked("p_123"))
-        val effect = awaitItem()
-        assertIs<ProductListUiEffect.NavigateToDetail>(effect)
-        assertEquals("p_123", (effect as ProductListUiEffect.NavigateToDetail).productId)
-        cancelAndIgnoreRemainingEvents()
+      viewModel.handleIntent(ProductListUiIntent.OnProductClicked("p_123"))
+      val effect = awaitItem()
+      assertIs<ProductListUiEffect.NavigateToDetail>(effect)
+      assertEquals("p_123", (effect as ProductListUiEffect.NavigateToDetail).productId)
+      cancelAndIgnoreRemainingEvents()
     }
-}
+  }
 ```
 
 ### 11.5 Test File Locations
@@ -1756,14 +1756,14 @@ Destructive actions list:
 ```kotlin
 // ✅ CORRECT — ViewModel emits dialog effect; execution is a separate intent
 private fun requestRemoveCartItem(itemId: String) {
-    viewModelScope.launch {
-        _uiEffect.send(
-            CartUiEffect.ShowConfirmDialog(
-                message   = "Remove this item from your bag?",
-                onConfirm = CartUiIntent.ConfirmRemoveItem(itemId),
-            )
-        )
-    }
+  viewModelScope.launch {
+    _uiEffect.send(
+      CartUiEffect.ShowConfirmDialog(
+        message   = "Remove this item from your bag?",
+        onConfirm = CartUiIntent.ConfirmRemoveItem(itemId),
+      )
+    )
+  }
 }
 ```
 
@@ -1776,17 +1776,17 @@ private fun requestRemoveCartItem(itemId: String) {
 ```kotlin
 // presentation/common/theme/AppColors.kt
 object AppColors {
-    val Primary        = Color(0xFF1A1A2E)
-    val Accent         = Color(0xFFE94560)
-    val Surface        = Color(0xFFFFFFFF)
-    val SurfaceVariant = Color(0xFFF5F5F5)
-    val Background     = Color(0xFFFAFAFA)
-    val OnPrimary      = Color(0xFFFFFFFF)
-    val TextPrimary    = Color(0xFF1C1C1E)
-    val TextSecondary  = Color(0xFF8E8E93)
-    val Success        = Color(0xFF34C759)
-    val Error          = Color(0xFFFF3B30)
-    val Divider        = Color(0xFFE5E5EA)
+  val Primary        = Color(0xFF1A1A2E)
+  val Accent         = Color(0xFFE94560)
+  val Surface        = Color(0xFFFFFFFF)
+  val SurfaceVariant = Color(0xFFF5F5F5)
+  val Background     = Color(0xFFFAFAFA)
+  val OnPrimary      = Color(0xFFFFFFFF)
+  val TextPrimary    = Color(0xFF1C1C1E)
+  val TextSecondary  = Color(0xFF8E8E93)
+  val Success        = Color(0xFF34C759)
+  val Error          = Color(0xFFFF3B30)
+  val Divider        = Color(0xFFE5E5EA)
 }
 // ❌ NEVER hardcode Color(0xFF...) inside a Composable
 ```
@@ -1795,10 +1795,10 @@ object AppColors {
 
 ```kotlin
 val AppTypography = Typography(
-    headlineLarge = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Bold,     fontSize = 28.sp),
-    titleMedium   = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
-    bodyMedium    = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Normal,   fontSize = 14.sp),
-    labelSmall    = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Medium,   fontSize = 11.sp),
+  headlineLarge = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Bold,     fontSize = 28.sp),
+  titleMedium   = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.SemiBold, fontSize = 18.sp),
+  bodyMedium    = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Normal,   fontSize = 14.sp),
+  labelSmall    = TextStyle(fontFamily = PoppinsFamily, fontWeight = FontWeight.Medium,   fontSize = 11.sp),
 )
 ```
 
@@ -1816,7 +1816,28 @@ ProductCard(product, onProductClick, onWishlistToggle)
 LoadingShimmer(modifier, shape)
 ```
 
-### 14.4 Accessibility Checklist
+### 14.4 Localization — MANDATORY
+
+Every string displayed to the user **must** be defined in `res/values/strings.xml` and referenced via `stringResource(R.string.xxx)`.
+
+```kotlin
+// ✅ CORRECT
+Text(text = stringResource(R.string.add_to_cart))
+AppButton(text = stringResource(R.string.checkout))
+
+// ❌ BANNED — hardcoded strings anywhere in Composables
+Text(text = "Add to Cart")
+AppButton(text = "Checkout")
+Text(text = "Remove this item from your bag?")
+```
+
+**Rules:**
+- Zero hardcoded user-facing strings in any `.kt` file — no exceptions
+- Error messages, labels, button text, dialog messages, empty state text, snackbar messages — all must use `stringResource`
+- String keys follow `snake_case`: `R.string.product_list_empty_title`
+- Plurals use `pluralStringResource` — never manual `if/else` string building
+
+### 14.5 Accessibility Checklist
 
 - Every `Image` and `AsyncImage` must have a non-empty `contentDescription`
 - Every tappable element: minimum touch target `48.dp × 48.dp`
@@ -1838,6 +1859,7 @@ LoadingShimmer(modifier, shape)
 | Functions > 40 lines             | Extract private functions               |
 | Files > 300 lines                | Extract components or helpers           |
 | Hardcoded strings in Composables | `stringResource(R.string.xxx)`          |
+| Hardcoded user-facing strings in `.kt` files | `stringResource(R.string.xxx)` — zero exceptions |
 | Hardcoded dimensions             | `dimensionResource` or theme tokens     |
 | Hardcoded colors                 | `AppColors.*` only                      |
 
@@ -1854,6 +1876,7 @@ LoadingShimmer(modifier, shape)
 - ✅ Work on ONE feature or layer at a time
 - ✅ Show the list of files to create/change BEFORE writing code
 - ✅ Map every feature implementation to its section in `Shopify_Project_Specs.pdf`
+- ✅ Every user-facing string must use `stringResource(R.string.xxx)` — no hardcoded strings in any `.kt` file
 - ✅ Every ViewModel must have a test file before the feature is marked done
 - ✅ Every UseCase must reach 100% test coverage before a PR is raised
 
