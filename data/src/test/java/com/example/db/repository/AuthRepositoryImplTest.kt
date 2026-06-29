@@ -15,7 +15,10 @@ import org.junit.Test
 class AuthRepositoryImplTest {
 
     private val remoteDataSource = mockk<IAuthRemoteDataSource>()
-    private val repository = AuthRepositoryImpl(remoteDataSource, Dispatchers.Unconfined)
+    private val repository = AuthRepositoryImpl(
+        remoteDataSource, Dispatchers.Unconfined,
+        dataSource = mockk()
+    )
 
     @Test
     fun `loginWithEmail returns mapped User on success`() = runTest {

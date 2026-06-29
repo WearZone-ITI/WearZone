@@ -13,5 +13,10 @@ kotlin {
 }
 dependencies{
     implementation(libs.kotlinx.coroutines.core)
-
+    // JUnit
+    testImplementation(libs.junit)
+    // Coroutines Test
+    testImplementation(libs.kotlinx.coroutines.test)
+    // MockK
+    testImplementation(libs.mockk)
 }

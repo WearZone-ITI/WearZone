@@ -4,6 +4,10 @@ import app.cash.turbine.test
 import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
+import com.example.wearzone.presentation.auth.login.LoginUiEffect
+import com.example.wearzone.presentation.auth.login.LoginUiIntent
+import com.example.wearzone.presentation.auth.login.LoginUiState
+import com.example.wearzone.presentation.auth.login.LoginViewModel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

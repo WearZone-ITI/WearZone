@@ -4,6 +4,8 @@ import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompleted
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.presentation.onboarding.OnboardingUiEffect
 import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
 import com.example.wearzone.presentation.onboarding.OnboardingUiState
@@ -99,6 +101,33 @@ class OnboardingViewModelTest {
             private set
         var savedCompletion = false
             private set
+
+        override suspend fun loginWithEmail(
+            email: String,
+            password: String
+        ): Result<User> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun isLoggedIn(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun getCurrentUser(): User? {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun register(
+            name: String,
+            email: String,
+            password: String
+        ): Result<User> {
+            TODO("Not yet implemented")
+        }
 
         override fun observeOnboardingCompleted(): Flow<Boolean> = completed
 
