@@ -25,12 +25,13 @@ object UseCaseModule {
         repository: IAuthRepository,
     ): SetOnboardingCompletedUseCase =
         SetOnboardingCompletedUseCase(repository)
-}
 
-    @Singleton
+
+    @Provides
     fun provideGetProductsUseCase(
         repository: IProductRepository
     ): GetProductsUseCase {
         return GetProductsUseCase(repository)
     }
+}
 

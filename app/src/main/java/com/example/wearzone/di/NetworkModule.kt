@@ -1,5 +1,6 @@
 package com.example.wearzone.di
 
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.wearzone.data.remote.api.ProductApiService
 import dagger.Module
 import dagger.Provides
@@ -9,7 +10,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Singleton
 
 @Module
