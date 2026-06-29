@@ -7,12 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.presentation.onboarding.OnboardingScreen
 import com.wearzone.presentation.home.HomeScreen
 
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
-) {
+){
 
     val navController = rememberNavController()
 
@@ -44,7 +46,8 @@ fun NavGraph(
 
         // Ahmed
         composable<Route.LoginRoute> {
-            val viewModel: com.example.presentation.auth.login.LoginViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val viewModel: com.example.presentation.auth.login.LoginViewModel =
+                androidx.hilt.navigation.compose.hiltViewModel()
             com.example.presentation.auth.login.LoginScreen(
                 viewModel = viewModel,
                 onLoginSuccess = {
@@ -58,7 +61,6 @@ fun NavGraph(
         // Ahmed
 
         // Omar
-        // Omar
         composable<Route.HomeRoute> {
             HomeScreen(
                 onNavigateToProductDetail = { productId -> },
@@ -69,4 +71,5 @@ fun NavGraph(
         }
         // Omar
     }
+  
 }
