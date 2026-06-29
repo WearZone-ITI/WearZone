@@ -41,9 +41,11 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
     implementation(project(":domain"))
     //Omar
     implementation(libs.androidx.activity.compose)
@@ -95,6 +97,15 @@ dependencies {
     //Hend
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     implementation(libs.material)
 
     // Compose
@@ -120,6 +131,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }
