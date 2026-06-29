@@ -3,6 +3,8 @@ package com.example.wearzone.di
 import com.wearzone.data.remote.api.ProductApiService
 import com.wearzone.domain.product.repository.IProductRepository
 import com.wearzone.domain.product.usecase.GetProductsUseCase
+
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +14,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module

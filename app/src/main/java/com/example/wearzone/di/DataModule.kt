@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.data.local.datastore.IOnboardingPreferencesDataSource
 import com.example.data.local.datastore.OnboardingPreferencesDataSourceImpl
+import com.example.data.db.datasource.AuthRemoteDataSourceImpl
+import com.example.data.db.datasource.IAuthRemoteDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -19,9 +21,9 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindAuthRemoteDataSource(
-        impl: com.example.data.remote.datasource.AuthRemoteDataSourceImpl
-    ): com.example.data.remote.datasource.IAuthRemoteDataSource
-        
+        impl: AuthRemoteDataSourceImpl
+    ): IAuthRemoteDataSource
+
     companion object {
 
         @Provides

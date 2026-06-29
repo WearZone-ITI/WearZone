@@ -44,8 +44,12 @@ kotlinxCoroutinesTest = "1.9.0"
 #Ahmed
 
 #Hend
-
+hiltNavigationComposeVersion = "1.2.0"
+coilVersion = "3.1.0"
+lifecycleVersion = "2.9.1"
+javaxInject = "1"
 #Hend
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -110,6 +114,9 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 #Ahmed
 
 #Hend
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilVersion" }
+javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
+androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 #Hend
 [plugins]
