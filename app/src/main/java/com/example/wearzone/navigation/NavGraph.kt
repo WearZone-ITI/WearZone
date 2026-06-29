@@ -12,6 +12,7 @@ import com.example.presentation.auth.register.RegisterScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.onboarding.OnboardingScreen
 import com.wearzone.presentation.home.HomeScreen
+import com.wearzone.presentation.product.detail.ProductDetailScreen
 
 @Composable
 fun NavGraph(
@@ -22,7 +23,7 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.OnboardingRoute,
+        startDestination = Route.ProductDetailRoute(productId = 9091143729380L),
         modifier = modifier
     ) {
         // Aalaa
@@ -81,6 +82,13 @@ fun NavGraph(
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
                 onShowSnackbar = { message -> }
+            )
+        }
+
+        composable<Route.ProductDetailRoute> {
+            ProductDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCart = { /* TODO: Navigate to cart */ }
             )
         }
         // Omar

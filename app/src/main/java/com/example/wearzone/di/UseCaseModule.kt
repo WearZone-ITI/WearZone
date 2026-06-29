@@ -5,6 +5,7 @@ import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import dagger.Module
 import com.wearzone.domain.product.repository.IProductRepository
+import com.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.wearzone.domain.product.usecase.GetProductsUseCase
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,5 +34,13 @@ object UseCaseModule {
     ): GetProductsUseCase {
         return GetProductsUseCase(repository)
     }
+
+    @Provides
+    fun provideGetProductDetailUseCase(
+        repository: IProductRepository
+    ): GetProductDetailUseCase {
+        return GetProductDetailUseCase(repository)
+    }
 }
+
 

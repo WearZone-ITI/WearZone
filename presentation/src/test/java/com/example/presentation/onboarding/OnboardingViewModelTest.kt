@@ -1,5 +1,7 @@
 package com.example.presentation.onboarding
 
+import com.example.domain.auth.repository.IAuthRepository
+import com.example.domain.auth.model.User
 import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.MainDispatcherRule
@@ -105,5 +107,11 @@ class OnboardingViewModelTest {
             savedCompletion = completed
             return Result.success(Unit)
         }
+
+        override suspend fun loginWithEmail(email: String, password: String): Result<User> = TODO("Not yet implemented")
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> = TODO("Not yet implemented")
+        override suspend fun isLoggedIn(): Boolean = TODO("Not yet implemented")
+        override suspend fun getCurrentUser(): User? = TODO("Not yet implemented")
+        override suspend fun register(name: String, email: String, password: String): Result<User> = TODO("Not yet implemented")
     }
 }

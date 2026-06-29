@@ -86,6 +86,23 @@
     <!--Ahmed-->
 
     <!--Omar-->
+    <!-- Product Detail Screen — Omar -->
+    <string name="product_detail_select_size">Select Size</string>
+    <string name="product_detail_size_guide">Size Guide</string>
+    <string name="product_detail_description">Description</string>
+    <string name="product_detail_add_to_cart">Add to Cart</string>
+    <string name="product_detail_buy_now">Buy Now</string>
+    <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
+    <string name="product_detail_retry">Retry</string>
+    <string name="product_detail_added_to_cart">Added to cart!</string>
+    <string name="product_detail_select_size_first">Please select a size first.</string>
+    <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
+    <string name="product_detail_auth_required">Please log in to continue.</string>
+    <string name="content_desc_back">Back</string>
+    <string name="content_desc_wishlist_add">Add to wishlist</string>
+    <string name="content_desc_wishlist_remove">Remove from wishlist</string>
+    <string name="content_desc_product_image">Product image</string>
+    <string name="content_desc_star_rating">Star rating</string>
     <!--Omar-->
 
 </resources>

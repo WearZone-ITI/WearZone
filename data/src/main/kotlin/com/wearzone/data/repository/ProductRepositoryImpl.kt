@@ -6,7 +6,9 @@ import com.wearzone.domain.common.result.DataResult
 import com.wearzone.domain.product.model.Brand
 import com.wearzone.domain.product.model.Category
 import com.wearzone.domain.product.model.Product
+import com.wearzone.domain.product.model.ProductDetail
 import com.wearzone.domain.product.repository.IProductRepository
+import com.wearzone.domain.common.result.runCatchingCancellable
 import com.wearzone.domain.common.dispatchers.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -44,4 +46,18 @@ class ProductRepositoryImpl @Inject constructor(
             DataResult.Error(DomainError.Unknown(e))
         }
     }
+
+    override suspend fun getProductDetail(productId: Long): Result<ProductDetail> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                val shopifyProduct = remoteDataSource.getProductDetail(productId)
+                shopifyProduct.toDomain(
+                    // TODO: Replace with real Shopify Metafields API call for live ratings
+                    rating = 4.8,
+                    reviewsCount = 120,
+                    // TODO: Replace with real IWishlistRepository.isInWishlist(productId) call
+                    isFavorite = false,
+                )
+            }
+        }
 }
