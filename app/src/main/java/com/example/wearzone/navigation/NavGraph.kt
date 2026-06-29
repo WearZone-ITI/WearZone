@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.wearzone.presentation.home.HomeScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.onboarding.OnboardingScreen
 import com.wearzone.presentation.home.HomeScreen
@@ -14,51 +15,54 @@ import com.wearzone.presentation.home.HomeScreen
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
-){
+) {
 
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Route.SplashRoute,
+        startDestination = Route.OnboardingRoute,
         modifier = modifier
     ) {
         // Aalaa
-        composable<Route.SplashRoute> {
-            androidx.compose.runtime.LaunchedEffect(Unit) {
-                kotlinx.coroutines.delay(1000)
-                navController.navigate(Route.LoginRoute) {
-                    popUpTo(Route.SplashRoute) { inclusive = true }
-                }
-            }
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Text(text = "Splash Screen")
-            }
+
+        composable<Route.OnboardingRoute> {
+            OnboardingScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.OnboardingRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToGuest = {
+                    // TODO: Navigate to GuestRoute when guest mode is implemented.
+                },
+            )
         }
-        // Aalaa
 
-        // Hend
+            // Aalaa
 
-        // Hend
+            // Hend
 
-        // Ahmed
+            // Hend
+
+            // Ahmed
         composable<Route.LoginRoute> {
             val viewModel: com.example.presentation.auth.login.LoginViewModel =
                 androidx.hilt.navigation.compose.hiltViewModel()
             com.example.presentation.auth.login.LoginScreen(
                 viewModel = viewModel,
                 onLoginSuccess = {
-                    
+
                 },
                 onNavigateToRegister = {
-                    
+
                 }
             )
         }
-        // Ahmed
+
+            // Ahmed
 
         // Omar
         composable<Route.HomeRoute> {
@@ -71,5 +75,5 @@ fun NavGraph(
         }
         // Omar
     }
-  
+
 }

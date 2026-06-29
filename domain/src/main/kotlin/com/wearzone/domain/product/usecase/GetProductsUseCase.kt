@@ -7,7 +7,7 @@ import com.wearzone.domain.product.model.Product
 import com.wearzone.domain.product.repository.IProductRepository
 import javax.inject.Inject
 
-class GetProductsUseCase (
+class GetProductsUseCase @Inject constructor(
     private val repository: IProductRepository
 ) {
     suspend fun getCategories(): DataResult<List<Category>> {

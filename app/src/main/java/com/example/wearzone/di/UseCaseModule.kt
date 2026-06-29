@@ -1,6 +1,8 @@
 package com.example.wearzone.di
 
 import com.example.domain.auth.repository.IAuthRepository
+import com.example.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
+import com.example.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import dagger.Module
 import com.wearzone.domain.product.repository.IProductRepository
 import com.wearzone.domain.product.usecase.GetProductsUseCase
@@ -31,4 +33,4 @@ object UseCaseModule {
     ): GetProductsUseCase {
         return GetProductsUseCase(repository)
     }
-}
+
