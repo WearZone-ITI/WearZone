@@ -33,7 +33,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -91,7 +91,9 @@ dependencies {
     //Alaa
 
     //Hend
-
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
     //Hend
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
