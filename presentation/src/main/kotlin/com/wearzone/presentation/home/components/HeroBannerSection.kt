@@ -1,5 +1,6 @@
 package com.wearzone.presentation.home.components
 
+import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +48,7 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
     ) {
         AsyncImage(
             model = product?.imageUrl ?: R.drawable.place_holder_hero,
-            contentDescription = product?.title ?: "Hero",
+            contentDescription = (product?.title ?: R.string.hero_banner_default_title).toString(),
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -62,7 +64,6 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                 .align(Alignment.BottomStart)
                 .padding(24.dp)
         ) {
-            Text(product?.title ?: "The Midnight Slate Collection", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
@@ -75,7 +76,10 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                     shape = CircleShape
                 ) {
-                    Text("Shop Now", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = stringResource(id = R.string.hero_banner_shop_now),
+                        fontWeight = FontWeight.SemiBold
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
                 }
@@ -86,8 +90,12 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                         .background(Color(0xFFE9C349))
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("RECOMMENDED FOR YOU", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                }
+                    Text(
+                        text = stringResource(id = R.string.hero_banner_recommended),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )                }
             }
         }
     }

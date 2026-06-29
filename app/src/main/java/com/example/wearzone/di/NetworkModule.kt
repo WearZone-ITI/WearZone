@@ -58,12 +58,4 @@ object NetworkModule {
     fun provideProductApiService(retrofit: Retrofit): ProductApiService {
         return retrofit.create(ProductApiService::class.java)
     }
-
-    @Provides
-    @Singleton
-    fun provideGetProductsUseCase(
-        repository: IProductRepository
-    ): GetProductsUseCase {
-        return GetProductsUseCase(repository)
-    }
 }

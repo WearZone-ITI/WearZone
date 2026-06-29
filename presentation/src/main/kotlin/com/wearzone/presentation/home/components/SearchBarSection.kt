@@ -17,8 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.presentation.R
 
 @Composable
 fun SearchBarSection() {
@@ -26,13 +29,19 @@ fun SearchBarSection() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(Color(0xFFEFEDED))
+            .background(colorResource(id = R.color.search_bar_background))
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
+            Icon(Icons.Default.Search,
+                contentDescription = stringResource(id = R.string.content_desc_search),
+                tint = Color.Gray)
             Spacer(modifier = Modifier.width(12.dp))
-            Text("Search designers, categories...", color = Color.Gray, fontSize = 16.sp)
+            Text(
+                text = stringResource(id = R.string.search_placeholder),
+                color = Color.Gray,
+                fontSize = 16.sp
+            )
         }
     }
 }

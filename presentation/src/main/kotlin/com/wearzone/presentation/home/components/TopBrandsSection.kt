@@ -23,14 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.presentation.R
 import com.wearzone.domain.product.model.Brand
-
 
 @Composable
 fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
@@ -41,16 +43,16 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
             verticalAlignment = Alignment.Bottom
         ) {
             Text(
-                text = "Top Brands",
+                text = stringResource(id = R.string.home_top_brands),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
             Text(
-                text = "See all",
+                text = stringResource(id = R.string.home_see_all),
                 fontSize = 14.sp,
                 color = Color.Gray,
-                modifier = Modifier.clickable { /* Handle See All */ }
+                modifier = Modifier.clickable { }
             )
         }
 
@@ -69,7 +71,9 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                     Card(
                         modifier = Modifier.size(72.dp),
                         shape = CircleShape,
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFDCDCDC)),
+                        colors = CardDefaults.cardColors(
+                            containerColor = colorResource(id = R.color.brand_avatar_background)
+                        ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Box(
@@ -77,7 +81,7 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                             contentAlignment = Alignment.Center
                         ) {
                             AsyncImage(
-                                model = brand.imageUrl ?: "https://via.placeholder.com/150",
+                                model = brand.imageUrl ?: R.drawable.placeholder,
                                 contentDescription = brand.title,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
@@ -93,7 +97,7 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                         text = brand.title,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF1A1A1A),
+                        color = colorResource(id = R.color.text_dark),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,

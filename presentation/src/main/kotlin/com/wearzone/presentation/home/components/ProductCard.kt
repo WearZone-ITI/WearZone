@@ -30,11 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.presentation.R
 import com.wearzone.domain.product.model.Product
 
 @Composable
@@ -52,10 +55,10 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.95f)
-                    .background(Color(0xFFF7F7F7))
+                    .background(colorResource(id = R.color.card_background_gray))
             ) {
                 AsyncImage(
-                    model = product.imageUrl ?: "https://via.placeholder.com/150",
+                    model = product.imageUrl ?: R.drawable.placeholder,
                     contentDescription = product.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -65,13 +68,14 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                     onClick = { /* Handle Favorite */ },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp)                         .size(30.dp)
+                        .padding(8.dp)
+                        .size(30.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.9f))
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favorite",
+                        contentDescription = stringResource(id = R.string.content_desc_favorite),
                         tint = Color.Black,
                         modifier = Modifier.size(16.dp)
                     )
@@ -96,7 +100,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                 Text(
                     text = product.title,
                     fontSize = 14.sp,
-                    color = Color(0xFF1A1A1A),
+                    color = colorResource(id = R.color.text_dark),
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

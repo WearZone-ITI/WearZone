@@ -28,8 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.presentation.R
 import com.wearzone.presentation.home.components.GreetingSection
 import com.wearzone.presentation.home.components.HeroBannerSection
 import com.wearzone.presentation.home.components.NewArrivalsSection
@@ -61,12 +64,10 @@ fun HomeScreen(
         }
     }
 
-    val backgroundColor = Color(0xFFFBF9F9)
-    
     Scaffold(
         topBar = { TopBar() },
         bottomBar = { BottomBar() },
-        containerColor = backgroundColor
+        containerColor = colorResource(id = R.color.top_bar_background)
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (val state = uiState) {
@@ -89,32 +90,32 @@ fun HomeScreen(
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item { SearchBarSection() }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-                        item { 
+                        item {
                             HeroBannerSection(
                                 product = state.heroProduct,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
-                            ) 
+                            )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-                        item { 
+                        item {
                             TrendingSection(
                                 products = state.trendingProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
-                            ) 
+                            )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-                        item { 
+                        item {
                             TopBrandsSection(
                                 brands = state.brands,
                                 onBrandClick = { viewModel.handleIntent(HomeUiIntent.OnBrandClicked(it)) }
-                            ) 
+                            )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-                        item { 
+                        item {
                             NewArrivalsSection(
                                 products = state.newArrivalProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
-                            ) 
+                            )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                     }
@@ -124,12 +125,6 @@ fun HomeScreen(
     }
 }
 
-
-
-
-
-
-
 @Composable
 fun BottomBar() {
     NavigationBar(
@@ -137,32 +132,32 @@ fun BottomBar() {
         tonalElevation = 8.dp
     ) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Home") },
+            icon = { Icon(Icons.Default.Home, contentDescription = stringResource(id = R.string.nav_home)) },
+            label = { Text(stringResource(id = R.string.nav_home)) },
             selected = true,
             onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.List, contentDescription = "Categories") },
-            label = { Text("Categories") },
+            icon = { Icon(Icons.Outlined.List, contentDescription = stringResource(id = R.string.nav_categories)) },
+            label = { Text(stringResource(id = R.string.nav_categories)) },
             selected = false,
             onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Search, contentDescription = "Search") },
-            label = { Text("Search") },
+            icon = { Icon(Icons.Outlined.Search, contentDescription = stringResource(id = R.string.content_desc_search)) },
+            label = { Text(stringResource(id = R.string.nav_search)) },
             selected = false,
             onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = "Wishlist") },
-            label = { Text("Wishlist") },
+            icon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = stringResource(id = R.string.nav_wishlist)) },
+            label = { Text(stringResource(id = R.string.nav_wishlist)) },
             selected = false,
             onClick = { }
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
+            icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(id = R.string.nav_profile)) },
+            label = { Text(stringResource(id = R.string.nav_profile)) },
             selected = false,
             onClick = { }
         )

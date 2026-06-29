@@ -36,10 +36,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.presentation.R
 import com.wearzone.domain.product.model.Product
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +52,7 @@ fun TopBar() {
         title = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "WearZone",
+                    text = stringResource(id = R.string.app_name),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -58,33 +61,52 @@ fun TopBar() {
         },
         navigationIcon = {
             IconButton(onClick = { }) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = stringResource(id = R.string.content_desc_menu),
+                    tint = Color.Black
+                )
             }
         },
         actions = {
             Box(modifier = Modifier.padding(end = 8.dp)) {
                 IconButton(onClick = { }) {
-                    Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart", tint = Color.Black)
+                    Icon(
+                        imageVector = Icons.Outlined.ShoppingCart,
+                        contentDescription = stringResource(id = R.string.content_desc_cart),
+                        tint = Color.Black
+                    )
                 }
                 Badge(
                     modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
                     containerColor = Color.Black,
                     contentColor = Color.White
                 ) {
-                    Text("3")
+                    Text(text = stringResource(id = R.string.dummy_cart_count))
                 }
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFBF9F9))
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = colorResource(id = R.color.top_bar_background)
+        )
     )
 }
 
 @Composable
 fun GreetingSection() {
     Column {
-        Text("Hello, Omar", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-        Text("Discover today's curated styles.", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
-    }
+        Text(
+            text = stringResource(id = R.string.home_greeting, "Omar"),
+            fontSize = 28.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black
+        )
+        Text(
+            text = stringResource(id = R.string.home_subtitle),
+            fontSize = 16.sp,
+            color = Color.Gray,
+            modifier = Modifier.padding(top = 4.dp)
+        )    }
 }
 
 
