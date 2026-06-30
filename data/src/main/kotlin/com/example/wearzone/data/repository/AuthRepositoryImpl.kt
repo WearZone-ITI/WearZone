@@ -1,11 +1,12 @@
 package com.example.wearzone.data.repository
 
 import com.example.wearzone.data.di.IoDispatcher
+import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
+import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.common.runCatchingCancellable
-import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,6 +18,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val remoteDataSource: IAuthRemoteDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val dataSource: IOnboardingPreferencesDataSource,
+    private val settingsDataSource: ISettingsPreferencesDataSource
 ) : IAuthRepository {
 
     override suspend fun loginWithEmail(email: String, password: String): Result<User> =
@@ -33,22 +35,19 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun isLoggedIn(): Boolean =
-        withContext(ioDispatcher) {
-            remoteDataSource.getCurrentUser() != null
-        }
+    override suspend fun isLoggedIn(): Boolean = withContext(ioDispatcher) {
+        remoteDataSource.getCurrentUser() != null
+    }
 
-    override suspend fun getCurrentUser(): User? =
-        withContext(ioDispatcher) {
-            remoteDataSource.getCurrentUser()?.toDomain()
-        }
+    override suspend fun getCurrentUser(): User? = withContext(ioDispatcher) {
+        remoteDataSource.getCurrentUser()?.toDomain()
+    }
 
-    override suspend fun logout(): Result<Unit> =
-        withContext(ioDispatcher) {
-            runCatchingCancellable {
-                remoteDataSource.signOut()
-            }
+    override suspend fun logout(): Result<Unit> = withContext(ioDispatcher) {
+        runCatchingCancellable {
+            remoteDataSource.signOut()
         }
+    }
 
     override suspend fun register(
         name: String,
@@ -56,9 +55,12 @@ class AuthRepositoryImpl @Inject constructor(
         password: String,
     ): Result<User> = withContext(ioDispatcher) {
         runCatchingCancellable {
-            remoteDataSource.register(name, email, password).toDomain()
+            val result = remoteDataSource.register(name, email, password)
+            settingsDataSource.setCustomerId(result.customerId)
+            result.firebaseUser.toDomain()
         }
     }
+
     private fun FirebaseUser.toDomain(): User {
         return User(
             uid = this.uid,
