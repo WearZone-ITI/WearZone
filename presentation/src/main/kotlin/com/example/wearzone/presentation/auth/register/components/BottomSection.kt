@@ -16,8 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import com.example.presentation.R
-import com.example.wearzone.presentation.common.theme.MidnightSlate
-import com.example.wearzone.presentation.common.theme.OnSurfaceVariant
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun BottomSection(
@@ -36,7 +35,7 @@ fun BottomSection(
                 R.string.already_have_account,
             ),
             style = MaterialTheme.typography.bodyMedium,
-            color = OnSurfaceVariant,
+            color = AppTheme.colors.textSecondary,
         )
         val loginText = buildAnnotatedString {
 
@@ -47,7 +46,7 @@ fun BottomSection(
 
             withStyle(
                 SpanStyle(
-                    color = MidnightSlate,
+                    color = AppTheme.colors.selected,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline,
                 ),

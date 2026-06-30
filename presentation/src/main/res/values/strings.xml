@@ -2,6 +2,7 @@
 
 <resources>
 
+    <!--Aalaa-->
     <string name="onboarding_back">Back</string>
 
     <string name="onboarding_next">Next</string>
@@ -35,6 +36,61 @@
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
 
 
+    <!--Profile and Settings-->
+    <string name="profile_brand_title">WearZone</string>
+    <string name="profile_guest_name">Guest</string>
+    <string name="profile_guest_email">Sign in to view your account</string>
+    <string name="profile_greeting">Hello, %1$s</string>
+    <string name="profile_avatar_content_description">Profile avatar</string>
+    <string name="profile_static_avatar_content_description">Static profile avatar</string>
+    <string name="profile_recent_orders">RECENT ORDERS</string>
+    <string name="profile_view_all">View All</string>
+    <string name="profile_recent_order_delivered">Delivered Oct 12</string>
+    <string name="profile_recent_order_processing">Processing</string>
+    <string name="profile_recent_order_bag">Noir Structura Bag</string>
+    <string name="profile_recent_order_earrings">Aura Hoop Earrings</string>
+    <string name="profile_recent_order_bag_image_description">Recent order fashion item</string>
+    <string name="profile_recent_order_earrings_image_description">Recent order accessory item</string>
+    <string name="profile_my_orders">My Orders</string>
+    <string name="profile_wishlist">Wishlist</string>
+    <string name="profile_saved_addresses">Saved Addresses</string>
+    <string name="profile_currency">Currency</string>
+    <string name="profile_currency_usd">USD</string>
+    <string name="profile_currency_todo">Currency selection is coming soon.</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_logout_dialog_title">Sign Out?</string>
+    <string name="profile_logout_dialog_message">Are you sure you want to sign out of your account?</string>
+    <string name="profile_logout_dialog_confirm">Sign Out</string>
+    <string name="profile_logout_dialog_cancel">Cancel</string>
+    <string name="profile_logout_failed">Unable to sign out. Please try again.</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">Manage your app preferences</string>
+    <string name="settings_back_content_description">Go back</string>
+    <string name="settings_appearance_section">APPEARANCE</string>
+    <string name="settings_preferences_section">PREFERENCES</string>
+    <string name="settings_about_section">ABOUT</string>
+    <string name="settings_theme_system">System Default</string>
+    <string name="settings_theme_light">Light Mode</string>
+    <string name="settings_theme_dark">Dark Mode</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_arabic">Arabic</string>
+    <string name="settings_language_dialog_title">Choose language</string>
+    <string name="settings_language_updated">Language updated.</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_terms_conditions">Terms &amp; Conditions</string>
+    <string name="settings_privacy_policy_body">WearZone may use your account information, email, saved preferences, orders, wishlist, and addresses to provide shopping features, personalize your experience, and support account services. This temporary in-app notice will be replaced when approved legal content is available.</string>
+    <string name="settings_terms_conditions_body">By using WearZone, you are responsible for your account activity and the accuracy of information you provide. Orders, prices, product availability, wishlist items, and saved addresses may change as store data changes. This temporary in-app notice will be replaced when approved legal content is available.</string>
+    <string name="settings_dialog_done">Done</string>
+    <string name="settings_app_version">App Version</string>
+    <string name="settings_app_version_value">1.0.0</string>
+    <string name="settings_language_todo">Language selection is coming soon.</string>
+    <string name="settings_error_load_failed">Unable to load settings. Please try again.</string>
+    <string name="settings_error_save_failed">Unable to save settings. Please try again.</string>
+    <!--Profile and Settings-->
+    <!--Aalaa-->
 
     <!--Hend-->
 
@@ -110,6 +166,7 @@
 
 
 
+
     <!--Ahmed-->
 
     <string name="login_successful">Login successful!</string>
@@ -118,6 +175,8 @@
 
     <string name="google_sign_in_failed">Google Sign-In failed</string>
 
+    <string name="content_desc_google_sign_in">Sign in with Google</string>
+    <string name="content_desc_apple_sign_in">Sign in with Apple</string>
     <string name="welcome_back">Welcome Back</string>
 
     <string name="login_subtitle">Sign in to access your curated collection.</string>

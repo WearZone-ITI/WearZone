@@ -27,11 +27,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.wearzone.presentation.common.theme.AppColors
-import com.example.wearzone.presentation.common.theme.ErrorRed
-import com.example.wearzone.presentation.common.theme.MidnightSlate
-import com.example.wearzone.presentation.common.theme.OnSurface
-import com.example.wearzone.presentation.common.theme.OnSurfaceVariant
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun LuxeTextField(
@@ -52,8 +48,8 @@ fun LuxeTextField(
 
     val borderColor by animateColorAsState(
         targetValue = when {
-            isError  -> ErrorRed
-            else -> MidnightSlate
+            isError -> AppTheme.colors.error
+            else -> AppTheme.colors.selected
         },
         animationSpec = tween(durationMillis = 200),
         label = "border_color",
@@ -64,7 +60,7 @@ fun LuxeTextField(
         Text(
             text  = label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = AppTheme.colors.textPrimary,
             fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(6.dp))
@@ -76,13 +72,13 @@ fun LuxeTextField(
             keyboardOptions     = keyboardOptions,
             visualTransformation= visualTransformation,
             interactionSource   = interactionSource,
-            textStyle           = MaterialTheme.typography.bodyMedium.copy(color = OnSurface),
-            cursorBrush         = SolidColor(MidnightSlate),
+            textStyle           = MaterialTheme.typography.bodyMedium.copy(color = AppTheme.colors.textPrimary),
+            cursorBrush         = SolidColor(AppTheme.colors.selected),
             decorationBox       = { innerTextField ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(AppColors.InputBackground, RoundedCornerShape(8.dp))
+                        .background(AppTheme.colors.surface, RoundedCornerShape(8.dp))
                         .border(borderWidth, borderColor, RoundedCornerShape(8.dp))
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                 ) {
@@ -94,7 +90,7 @@ fun LuxeTextField(
                                 Text(
                                     text  = placeholder,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = OnSurfaceVariant,
+                                    color = AppTheme.colors.textSecondary,
                                 )
                             }
                             innerTextField()
@@ -110,7 +106,7 @@ fun LuxeTextField(
             Text(
                 text  = errorMessage,
                 style = MaterialTheme.typography.labelSmall,
-                color = ErrorRed,
+                color = AppTheme.colors.error,
             )
         }
     }

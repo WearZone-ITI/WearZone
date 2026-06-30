@@ -43,6 +43,13 @@ class AuthRepositoryImpl @Inject constructor(
             remoteDataSource.getCurrentUser()?.toDomain()
         }
 
+    override suspend fun logout(): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.signOut()
+            }
+        }
+
     override suspend fun register(
         name: String,
         email: String,

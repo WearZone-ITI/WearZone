@@ -18,8 +18,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
-import com.example.wearzone.presentation.common.theme.MidnightSlate
-import com.example.wearzone.presentation.common.theme.OnSurfaceVariant
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun TermsCheckbox(
@@ -47,7 +46,7 @@ fun TermsCheckbox(
 
         withStyle(
             SpanStyle(
-                color = MidnightSlate,
+                color = AppTheme.colors.selected,
                 textDecoration = TextDecoration.Underline,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             ),
@@ -67,7 +66,7 @@ fun TermsCheckbox(
 
         withStyle(
             SpanStyle(
-                color = MidnightSlate,
+                color = AppTheme.colors.selected,
                 textDecoration = TextDecoration.Underline,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             ),
@@ -91,8 +90,8 @@ fun TermsCheckbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = MidnightSlate,
-                uncheckedColor = OnSurfaceVariant,
+                checkedColor = AppTheme.colors.selected,
+                uncheckedColor = AppTheme.colors.textSecondary,
             ),
         )
 
@@ -101,7 +100,7 @@ fun TermsCheckbox(
         ClickableText(
             text = annotatedText,
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = OnSurfaceVariant,
+                color = AppTheme.colors.textSecondary,
             ),
         ) { offset ->
 

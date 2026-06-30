@@ -13,9 +13,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.LoginUiIntent
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun SocialLoginButtons(
@@ -32,12 +34,12 @@ fun SocialLoginButtons(
                 .weight(1f)
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(1.dp, AppColors.Primary),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.TextPrimary)
+            border = BorderStroke(1.dp, AppTheme.colors.border),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppTheme.colors.textPrimary)
         ) {
             Icon(
-                painter = painterResource(id = com.example.presentation.R.drawable.ic_google),
-                contentDescription = "Sign in with Google",
+                painter = painterResource(id = R.drawable.ic_google),
+                contentDescription = stringResource(R.string.content_desc_google_sign_in),
                 tint = Color.Unspecified
             )
         }
@@ -48,12 +50,12 @@ fun SocialLoginButtons(
                 .weight(1f)
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(1.dp, AppColors.Primary),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.TextPrimary)
+            border = BorderStroke(1.dp, AppTheme.colors.border),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppTheme.colors.textPrimary)
         ) {
             Icon(
-                painter = painterResource(id = com.example.presentation.R.drawable.ic_apple),
-                contentDescription = "Sign in with Apple",
+                painter = painterResource(id = R.drawable.ic_apple),
+                contentDescription = stringResource(R.string.content_desc_apple_sign_in),
                 tint = Color.Unspecified
             )
         }
