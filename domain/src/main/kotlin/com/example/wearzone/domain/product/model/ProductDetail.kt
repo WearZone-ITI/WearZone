@@ -8,9 +8,7 @@ data class ProductDetail(
     val price: String,
     val images: List<String>,
     val availableSizes: List<String>,
-    // JETS Lab Requirement 2
     val rating: Double,
     val reviewsCount: Int,
-    // JETS Lab Requirement 4
     val isFavorite: Boolean
 )

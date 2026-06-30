@@ -15,23 +15,6 @@
     <string name="onboarding_delivery_moment_title">افتح أناقتك</string>
     <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
     <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
-    <!-- Product Detail Screen -->
-    <string name="product_detail_select_size">اختر المقاس</string>
-    <string name="product_detail_size_guide">دليل المقاسات</string>
-    <string name="product_detail_description">الوصف</string>
-    <string name="product_detail_add_to_cart">أضف إلى السلة</string>
-    <string name="product_detail_buy_now">اشتري الآن</string>
-    <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
-    <string name="product_detail_retry">إعادة المحاولة</string>
-    <string name="product_detail_added_to_cart">تمت الإضافة إلى السلة!</string>
-    <string name="product_detail_select_size_first">يرجى اختيار المقاس أولاً.</string>
-    <string name="product_detail_reviews">%1$.1f (%2$d تقييمات)</string>
-    <string name="product_detail_auth_required">يرجى تسجيل الدخول للمتابعة.</string>
-    <string name="content_desc_back">رجوع</string>
-    <string name="content_desc_wishlist_add">أضف إلى المفضلة</string>
-    <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
-    <string name="content_desc_product_image">صورة المنتج</string>
-    <string name="content_desc_star_rating">تقييم النجوم</string>
     <!--Alaa-->
 
     <!--Hend-->
@@ -78,6 +61,23 @@
     <string name="or_continue_with">أو المتابعة باستخدام</string>
     <string name="dont_have_account">ليس لديك حساب؟</string>
     <string name="register">إنشاء حساب</string>
+    <!-- Product Detail Screen -->
+    <string name="product_detail_select_size">اختر المقاس</string>
+    <string name="product_detail_size_guide">دليل المقاسات</string>
+    <string name="product_detail_description">الوصف</string>
+    <string name="product_detail_add_to_cart">أضف إلى السلة</string>
+    <string name="product_detail_buy_now">اشتري الآن</string>
+    <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
+    <string name="product_detail_retry">إعادة المحاولة</string>
+    <string name="product_detail_added_to_cart">تمت الإضافة إلى السلة!</string>
+    <string name="product_detail_select_size_first">يرجى اختيار المقاس أولاً.</string>
+    <string name="product_detail_reviews">%1$.1f (%2$d تقييمات)</string>
+    <string name="product_detail_auth_required">يرجى تسجيل الدخول للمتابعة.</string>
+    <string name="content_desc_back">رجوع</string>
+    <string name="content_desc_wishlist_add">أضف إلى المفضلة</string>
+    <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
+    <string name="content_desc_product_image">صورة المنتج</string>
+    <string name="content_desc_star_rating">تقييم النجوم</string>
     <!--Ahmed-->
 
     <!--Omar-->

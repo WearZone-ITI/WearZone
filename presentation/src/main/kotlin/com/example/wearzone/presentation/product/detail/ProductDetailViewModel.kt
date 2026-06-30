@@ -65,7 +65,7 @@ class ProductDetailViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    _uiState.value = ProductDetailUiState.Error(error.message ?: "Failed to load product")
+                    _uiState.value = ProductDetailUiState.Error(com.example.presentation.R.string.product_detail_error_loading)
                 }
             )
         }
@@ -90,11 +90,11 @@ class ProductDetailViewModel @Inject constructor(
             
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
             if (state.selectedSize == null) {
-                _uiEffect.send(ProductDetailUiEffect.ShowToast("Please select a size first."))
+                _uiEffect.send(ProductDetailUiEffect.ShowToast(com.example.presentation.R.string.product_detail_select_size_first))
                 return@launch
             }
             
-            _uiEffect.send(ProductDetailUiEffect.NavigateToCart)
+            _uiEffect.send(ProductDetailUiEffect.ShowToast(com.example.presentation.R.string.product_detail_added_to_cart))
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,9 +40,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.wearzone.presentation.common.theme.AppColors
 import com.example.presentation.R
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
@@ -50,10 +56,10 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun ProductDetailScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToCart: () -> Unit,
     viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     
     val authRequiredMessage = stringResource(id = R.string.product_detail_auth_required)
@@ -61,8 +67,7 @@ fun ProductDetailScreen(
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
             when (effect) {
-                is ProductDetailUiEffect.NavigateToCart -> onNavigateToCart()
-                is ProductDetailUiEffect.ShowToast -> snackbarHostState.showSnackbar(effect.message)
+                is ProductDetailUiEffect.ShowToast -> snackbarHostState.showSnackbar(context.getString(effect.messageRes))
                 is ProductDetailUiEffect.ShowAuthRequiredError -> snackbarHostState.showSnackbar(authRequiredMessage)
             }
         }
@@ -77,7 +82,7 @@ fun ProductDetailScreen(
                 )
             }
         },
-        containerColor = Color(0xFFFBF9F9) // Off-white per VogueVibe spec
+        containerColor = AppColors.Background
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (val state = uiState) {
@@ -89,16 +94,37 @@ fun ProductDetailScreen(
                 }
                 is ProductDetailUiState.Error -> {
                     Column(
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
+                        Icon(
+                            imageVector = Icons.Outlined.WifiOff,
+                            contentDescription = null,
+                            modifier = Modifier.padding(bottom = 16.dp).size(120.dp),
+                            tint = AppColors.Error
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.handleIntent(ProductDetailUiIntent.Retry) }) {
-                            Text(text = stringResource(id = R.string.product_detail_retry))
+                        Text(
+                            text = stringResource(id = state.messageRes),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = AppColors.TextSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { viewModel.handleIntent(ProductDetailUiIntent.Retry) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppColors.Primary,
+                                contentColor = AppColors.OnPrimary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth(0.5f).height(48.dp)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.product_detail_retry),
+                                style = MaterialTheme.typography.titleSmall
+                            )
                         }
                     }
                 }

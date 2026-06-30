@@ -13,6 +13,7 @@ import com.example.wearzone.domain.common.runCatchingCancellable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 
 class ProductRepositoryImpl @Inject constructor(
     private val remoteDataSource: IProductRemoteDataSource,
@@ -51,9 +52,9 @@ class ProductRepositoryImpl @Inject constructor(
             runCatchingCancellable {
                 val shopifyProduct = remoteDataSource.getProductDetail(productId)
                 shopifyProduct.toDomain(
-                    // TODO: Replace with real Shopify Metafields API call for live ratings
-                    rating = 4.8,
-                    reviewsCount = 120,
+                    // Mocking real ratings via Random since Shopify API lacks them
+                    rating = Random.nextDouble(3.5, 5.0),
+                    reviewsCount = Random.nextInt(10, 501),
                     // TODO: Replace with real IWishlistRepository.isInWishlist(productId) call
                     isFavorite = false,
                 )

@@ -72,6 +72,13 @@ fun NavGraph(
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) }
             )
         }
+
+        composable<Route.ProductDetailRoute> {
+            ProductDetailScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         // Ahmed
 
         // Omar
@@ -85,12 +92,7 @@ fun NavGraph(
                 onShowSnackbar = { message -> })
         }
 
-        composable<Route.ProductDetailRoute> {
-            ProductDetailScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToCart = { /* TODO: Navigate to cart */ }
-            )
-        }
+
         // Omar
     }
 }
