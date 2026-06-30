@@ -19,4 +19,5 @@ dependencies{
     testImplementation(libs.kotlinx.coroutines.test)
     // MockK
     testImplementation(libs.mockk)
+    testImplementation(kotlin(module = "test"))
 }

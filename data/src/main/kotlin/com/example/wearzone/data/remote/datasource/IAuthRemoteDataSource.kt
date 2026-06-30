@@ -7,4 +7,5 @@ interface IAuthRemoteDataSource {
     suspend fun signInWithGoogleCredential(idToken: String): FirebaseUser
     suspend fun register(name: String, email: String, password: String): FirebaseUser
     fun getCurrentUser(): FirebaseUser?
+    fun signOut()
 }

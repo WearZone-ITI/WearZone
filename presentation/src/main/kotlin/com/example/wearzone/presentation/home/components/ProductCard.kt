@@ -28,9 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
@@ -47,7 +46,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
             .width(170.dp)
             .clickable { onProductClick(product.id) },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = AppTheme.colors.card),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column {
@@ -55,7 +54,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.95f)
-                    .background(colorResource(id = R.color.card_background_gray))
+                    .background(AppTheme.colors.surfaceVariant)
             ) {
                 AsyncImage(
                     model = product.imageUrl ?: R.drawable.placeholder,
@@ -71,12 +70,12 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                         .padding(8.dp)
                         .size(30.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.9f))
+                        .background(AppTheme.colors.surface.copy(alpha = 0.9f))
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.FavoriteBorder,
                         contentDescription = stringResource(id = R.string.content_desc_favorite),
-                        tint = Color.Black,
+                        tint = AppTheme.colors.textPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -90,7 +89,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                 Text(
                     text = product.vendor.uppercase(),
                     fontSize = 10.sp,
-                    color = Color.Gray,
+                    color = AppTheme.colors.textSecondary,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
                 )
@@ -100,7 +99,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                 Text(
                     text = product.title,
                     fontSize = 14.sp,
-                    color = colorResource(id = R.color.text_dark),
+                    color = AppTheme.colors.textPrimary,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -117,21 +116,21 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit) {
                         text = "${product.price} ${product.currencyCode}",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = AppTheme.colors.textPrimary,
                     )
 
                     Box(
                         modifier = Modifier
                             .size(26.dp)
                             .clip(CircleShape)
-                            .background(Color.Black)
+                            .background(AppTheme.colors.selected)
                             .clickable { /* Add to Cart */ },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add to Cart",
-                            tint = Color.White,
+                            contentDescription = stringResource(id = R.string.content_desc_add_to_cart),
+                            tint = AppTheme.colors.onAccent,
                             modifier = Modifier.size(14.dp)
                         )
                     }

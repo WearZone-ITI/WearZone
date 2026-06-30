@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,12 +29,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.components.GreetingSection
 import com.example.wearzone.presentation.home.components.HeroBannerSection
 import com.example.wearzone.presentation.home.components.NewArrivalsSection
@@ -49,6 +52,7 @@ fun HomeScreen(
     onNavigateToProductDetail: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
+    onNavigateToProfile: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -66,18 +70,21 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar() },
-        containerColor = colorResource(id = R.color.top_bar_background)
+        bottomBar = { BottomBar(onNavigateToProfile = onNavigateToProfile) },
+        containerColor = AppTheme.colors.background,
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (val state = uiState) {
                 is HomeUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.Black)
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = AppTheme.colors.selected,
+                    )
                 }
                 is HomeUiState.Error -> {
                     Text(
                         text = state.message,
-                        color = MaterialTheme.colorScheme.error,
+                        color = AppTheme.colors.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -126,40 +133,79 @@ fun HomeScreen(
 }
 
 @Composable
-fun BottomBar() {
+private fun BottomNavLabel(textRes: Int) {
+    Text(
+        text = stringResource(id = textRes),
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.labelSmall,
+    )
+}
+
+@Composable
+private fun BottomNavIcon(
+    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescriptionRes: Int,
+) {
+    Icon(
+        imageVector = imageVector,
+        contentDescription = stringResource(id = contentDescriptionRes),
+        modifier = Modifier.size(24.dp),
+    )
+}
+
+@Composable
+fun BottomBar(
+    onNavigateToProfile: () -> Unit,
+) {
+    val itemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = AppTheme.colors.selected,
+        selectedTextColor = AppTheme.colors.selected,
+        indicatorColor = AppTheme.colors.surfaceVariant,
+        unselectedIconColor = AppTheme.colors.textSecondary,
+        unselectedTextColor = AppTheme.colors.textSecondary,
+    )
+
     NavigationBar(
-        containerColor = Color.White,
+        containerColor = AppTheme.colors.surface,
         tonalElevation = 8.dp
     ) {
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = stringResource(id = R.string.nav_home)) },
-            label = { Text(stringResource(id = R.string.nav_home)) },
+            icon = { BottomNavIcon(Icons.Default.Home, R.string.nav_home) },
+            label = { BottomNavLabel(R.string.nav_home) },
             selected = true,
-            onClick = { }
+            onClick = { },
+            colors = itemColors,
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.List, contentDescription = stringResource(id = R.string.nav_categories)) },
-            label = { Text(stringResource(id = R.string.nav_categories)) },
+            icon = { BottomNavIcon(Icons.Outlined.List, R.string.nav_categories) },
+            label = { BottomNavLabel(R.string.nav_categories) },
             selected = false,
-            onClick = { }
+            onClick = { },
+            colors = itemColors,
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Search, contentDescription = stringResource(id = R.string.content_desc_search)) },
-            label = { Text(stringResource(id = R.string.nav_search)) },
+            icon = { BottomNavIcon(Icons.Outlined.Search, R.string.content_desc_search) },
+            label = { BottomNavLabel(R.string.nav_search) },
             selected = false,
-            onClick = { }
+            onClick = { },
+            colors = itemColors,
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = stringResource(id = R.string.nav_wishlist)) },
-            label = { Text(stringResource(id = R.string.nav_wishlist)) },
+            icon = { BottomNavIcon(Icons.Outlined.FavoriteBorder, R.string.nav_wishlist) },
+            label = { BottomNavLabel(R.string.nav_wishlist) },
             selected = false,
-            onClick = { }
+            onClick = { },
+            colors = itemColors,
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(id = R.string.nav_profile)) },
-            label = { Text(stringResource(id = R.string.nav_profile)) },
+            icon = { BottomNavIcon(Icons.Outlined.Person, R.string.nav_profile) },
+            label = { BottomNavLabel(R.string.nav_profile) },
             selected = false,
-            onClick = { }
+            onClick = onNavigateToProfile,
+            colors = itemColors,
         )
     }
 }

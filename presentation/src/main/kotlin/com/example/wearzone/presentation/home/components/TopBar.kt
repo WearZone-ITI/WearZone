@@ -1,6 +1,5 @@
 package com.example.wearzone.presentation.home.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +17,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +36,12 @@ fun TopBar() {
                     text = stringResource(id = R.string.app_name),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = AppTheme.colors.textPrimary,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         },
@@ -45,7 +50,7 @@ fun TopBar() {
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = stringResource(id = R.string.content_desc_menu),
-                    tint = Color.Black
+                    tint = AppTheme.colors.textPrimary,
                 )
             }
         },
@@ -55,20 +60,20 @@ fun TopBar() {
                     Icon(
                         imageVector = Icons.Outlined.ShoppingCart,
                         contentDescription = stringResource(id = R.string.content_desc_cart),
-                        tint = Color.Black
+                        tint = AppTheme.colors.textPrimary,
                     )
                 }
                 Badge(
                     modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
-                    containerColor = Color.Black,
-                    contentColor = Color.White
+                    containerColor = AppTheme.colors.selected,
+                    contentColor = AppTheme.colors.onAccent,
                 ) {
                     Text(text = stringResource(id = R.string.dummy_cart_count))
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colorResource(id = R.color.top_bar_background)
+            containerColor = AppTheme.colors.background,
         )
     )
 }
@@ -77,18 +82,17 @@ fun TopBar() {
 fun GreetingSection(
     userName : String
 ) {
-    Log.e("name",userName)
     Column {
         Text(
             text = stringResource(id = R.string.home_greeting, userName),
             fontSize = 28.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color.Black
+            color = AppTheme.colors.textPrimary,
         )
         Text(
             text = stringResource(id = R.string.home_subtitle),
             fontSize = 16.sp,
-            color = Color.Gray,
+            color = AppTheme.colors.textSecondary,
             modifier = Modifier.padding(top = 4.dp)
         )    }
 }

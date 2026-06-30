@@ -30,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,9 +43,7 @@ import com.example.wearzone.presentation.auth.register.components.BottomSection
 import com.example.wearzone.presentation.auth.register.components.LuxeTextField
 import com.example.wearzone.presentation.auth.register.components.PasswordStrengthBar
 import com.example.wearzone.presentation.auth.register.components.TermsCheckbox
-import com.example.wearzone.presentation.common.theme.AppColors
-import com.example.wearzone.presentation.common.theme.MidnightSlate
-import com.example.wearzone.presentation.common.theme.OnSurfaceVariant
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.toMessage
 
 @Composable
@@ -76,7 +73,7 @@ fun RegisterScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = AppColors.Background,
+        containerColor = AppTheme.colors.background,
     ) { innerPadding ->
         RegisterScreenContent(
             formState = formState,
@@ -104,7 +101,7 @@ private fun RegisterScreenContent(
         Text(
             text = stringResource(R.string.create_account),
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = AppTheme.colors.textPrimary,
         )
 
         Spacer(Modifier.height(8.dp))
@@ -112,7 +109,7 @@ private fun RegisterScreenContent(
         Text(
             text = stringResource(R.string.register_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = OnSurfaceVariant,
+            color = AppTheme.colors.textSecondary,
         )
 
         Spacer(Modifier.height(32.dp))
@@ -170,7 +167,7 @@ private fun RegisterScreenContent(
                         contentDescription = if (formState.isPasswordVisible) stringResource(R.string.hide_password)
                         else stringResource(R.string.show_password),
 
-                        tint = OnSurfaceVariant,
+                        tint = AppTheme.colors.textSecondary,
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -204,7 +201,7 @@ private fun RegisterScreenContent(
                             R.string.hide_password
                         )
                         else stringResource(R.string.show_password),
-                        tint = OnSurfaceVariant,
+                        tint = AppTheme.colors.textSecondary,
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -232,17 +229,17 @@ private fun RegisterScreenContent(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MidnightSlate,
-                contentColor = Color.White,
-                disabledContainerColor = MidnightSlate.copy(alpha = 0.5f),
-                disabledContentColor = Color.White.copy(alpha = 0.5f),
+                containerColor = AppTheme.colors.selected,
+                contentColor = AppTheme.colors.onAccent,
+                disabledContainerColor = AppTheme.colors.selected.copy(alpha = 0.5f),
+                disabledContentColor = AppTheme.colors.onAccent.copy(alpha = 0.5f),
             ),
         ) {
             if (isLoading) {
 
                 CircularProgressIndicator(
                     modifier = Modifier.size(16.dp),
-                    color = Color.White,
+                    color = AppTheme.colors.onAccent,
                     strokeWidth = 2.dp,
                 )
 

@@ -9,13 +9,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun NewArrivalsSection(products: List<Product>, onProductClick: (String) -> Unit) {
@@ -24,7 +24,7 @@ fun NewArrivalsSection(products: List<Product>, onProductClick: (String) -> Unit
             text = stringResource(id = R.string.home_new_arrivals),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = AppTheme.colors.textPrimary,
         )
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(

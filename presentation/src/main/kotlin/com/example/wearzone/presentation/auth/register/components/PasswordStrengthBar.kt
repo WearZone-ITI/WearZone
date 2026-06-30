@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.StrengthFair
 import com.example.wearzone.presentation.common.theme.StrengthGood
 import com.example.wearzone.presentation.common.theme.StrengthStrong
@@ -30,6 +31,7 @@ fun PasswordStrengthBar(
     modifier: Modifier = Modifier,
 ) {
     val strength = evaluatePasswordStrength(password)
+    val inactiveSegmentColor = AppTheme.colors.surfaceVariant
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -37,7 +39,12 @@ fun PasswordStrengthBar(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             repeat(4) { index ->
-                val targetColor = segmentColor(index, strength.segments, strength)
+                val targetColor = segmentColor(
+                    segmentIndex = index,
+                    activeSegments = strength.segments,
+                    strength = strength,
+                    inactiveColor = inactiveSegmentColor,
+                )
                 val animatedColor by animateColorAsState(
                     targetValue = targetColor,
                     animationSpec = tween(300),
@@ -59,7 +66,12 @@ fun PasswordStrengthBar(
                     stringResource(strength.label)
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = segmentColor(0, strength.segments, strength),
+                color = segmentColor(
+                    segmentIndex = 0,
+                    activeSegments = strength.segments,
+                    strength = strength,
+                    inactiveColor = inactiveSegmentColor,
+                ),
             )
         }
     }
@@ -91,14 +103,15 @@ private fun evaluatePasswordStrength(password: String): PasswordStrength {
 private fun segmentColor(
     segmentIndex: Int,
     activeSegments: Int,
-    strength: PasswordStrength
+    strength: PasswordStrength,
+    inactiveColor: Color,
 ): Color {
-    if (segmentIndex >= activeSegments) return Color(0xFFE3E2E2)
+    if (segmentIndex >= activeSegments) return inactiveColor
     return when (strength) {
         PasswordStrength.Weak -> StrengthWeak
         PasswordStrength.Fair -> StrengthFair
         PasswordStrength.Good -> StrengthGood
         PasswordStrength.Strong -> StrengthStrong
-        PasswordStrength.Empty -> Color(0xFFE3E2E2)
+        PasswordStrength.Empty -> inactiveColor
     }
 }

@@ -121,6 +121,8 @@ class OnboardingViewModelTest {
             TODO("Not yet implemented")
         }
 
+        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+
         override suspend fun register(
             name: String,
             email: String,
