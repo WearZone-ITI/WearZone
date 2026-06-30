@@ -1,8 +1,8 @@
 package com.example.wearzone.data.repository.search
 
 import com.example.wearzone.data.di.IoDispatcher
+import com.example.wearzone.data.local.search.RecentSearchDao
 import com.example.wearzone.data.local.search.RecentSearchEntity
-import com.example.wearzone.data.local.search.RecentSearchDto
 import com.example.wearzone.domain.search.model.RecentSearch
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RecentSearchRepositoryImpl @Inject constructor(
-    private val dao: RecentSearchEntity,
+    private val dao: RecentSearchDao,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IRecentSearchRepository {
 
@@ -28,7 +28,7 @@ class RecentSearchRepositoryImpl @Inject constructor(
             val normalizedQuery = query.trim()
             if (normalizedQuery.isNotBlank()) {
                 dao.upsertRecentSearch(
-                    RecentSearchDto(
+                    RecentSearchEntity(
                         query = normalizedQuery,
                         searchedAt = System.currentTimeMillis(),
                     )

@@ -3,7 +3,7 @@ package com.example.wearzone.di
 import android.content.Context
 import androidx.room.Room
 import com.example.wearzone.data.db.WearZoneDatabase
-import com.example.wearzone.data.local.search.RecentSearchEntity
+import com.example.wearzone.data.local.search.RecentSearchDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,7 +17,6 @@ object DatabaseModule {
     private const val DATABASE_NAME = "wear_zone_database"
 
     @Provides
-    @Singleton
     fun provideWearZoneDatabase(
         @ApplicationContext context: Context,
     ): WearZoneDatabase {
@@ -29,7 +28,8 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideRecentSearchDao(database: WearZoneDatabase): RecentSearchEntity {
+    @Singleton
+    fun provideRecentSearchDao(database: WearZoneDatabase): RecentSearchDao {
         return database.recentSearchDao()
     }
 }

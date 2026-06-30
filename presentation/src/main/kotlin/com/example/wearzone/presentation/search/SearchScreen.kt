@@ -17,17 +17,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.search.components.RecentSearches
 import com.example.wearzone.presentation.search.components.SearchField
 import com.example.wearzone.presentation.search.components.SearchFilterSheet
-import com.example.wearzone.presentation.search.components.RecentSearches
 import com.example.wearzone.presentation.search.components.SearchResults
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +37,7 @@ fun SearchScreen(
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
@@ -64,19 +64,17 @@ fun SearchScreen(
         },
         containerColor = AppColors.Background,
     ) { paddingValues ->
-        when (val state = uiState) {
-            is SearchUiState.Content -> SearchContent(
-                state = state,
-                modifier = Modifier.padding(paddingValues),
-                onIntent = viewModel::handleIntent,
-            )
-        }
+        SearchContent(
+            state = uiState,
+            modifier = Modifier.padding(paddingValues),
+            onIntent = viewModel::handleIntent,
+        )
     }
 }
 
 @Composable
 private fun SearchContent(
-    state: SearchUiState.Content,
+    state: SearchUiState,
     modifier: Modifier = Modifier,
     onIntent: (SearchUiIntent) -> Unit,
 ) {

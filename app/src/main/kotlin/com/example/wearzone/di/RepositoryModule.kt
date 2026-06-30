@@ -16,14 +16,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds
-    @Singleton
     abstract fun bindProductRepository(productRepositoryImpl: ProductRepositoryImpl): IProductRepository
 
     @Binds
-    @Singleton
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): IAuthRepository
 
     @Binds
-    @Singleton
     abstract fun bindRecentSearchRepository(impl: RecentSearchRepositoryImpl): IRecentSearchRepository
 }

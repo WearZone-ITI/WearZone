@@ -36,7 +36,7 @@ import kotlinx.collections.immutable.ImmutableList
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchFilterSheet(
-    state: SearchUiState.Content,
+    state: SearchUiState,
     onIntent: (SearchUiIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -93,7 +93,7 @@ fun SearchFilterSheet(
 
 @Composable
 private fun PriceFilterRow(
-    state: SearchUiState.Content,
+    state: SearchUiState,
     onIntent: (SearchUiIntent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -20,7 +20,7 @@ import com.example.wearzone.presentation.search.SearchUiState
 
 @Composable
 fun SearchResults(
-    state: SearchUiState.Content,
+    state: SearchUiState,
     onIntent: (SearchUiIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {

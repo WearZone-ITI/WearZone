@@ -7,12 +7,12 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface RecentSearchEntity {
+interface RecentSearchDao {
     @Query("SELECT * FROM recent_searches ORDER BY searched_at DESC LIMIT :limit")
-    fun observeRecentSearches(limit: Int = 8): Flow<List<RecentSearchDto>>
+    fun observeRecentSearches(limit: Int = 8): Flow<List<RecentSearchEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertRecentSearch(entity: RecentSearchDto)
+    suspend fun upsertRecentSearch(entity: RecentSearchEntity)
 
     @Query("DELETE FROM recent_searches")
     suspend fun clearRecentSearches()
