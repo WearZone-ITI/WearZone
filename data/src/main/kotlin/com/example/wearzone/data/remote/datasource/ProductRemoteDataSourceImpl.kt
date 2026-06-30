@@ -4,6 +4,7 @@ import com.example.wearzone.data.remote.api.ProductApiService
 import com.example.wearzone.data.remote.dto.BrandDto
 import com.example.wearzone.data.remote.dto.CategoryDto
 import com.example.wearzone.data.remote.dto.ProductDto
+import com.example.wearzone.data.remote.dto.ShopifyProductDetail
 import javax.inject.Inject
 
 class ProductRemoteDataSourceImpl @Inject constructor(
@@ -23,5 +24,10 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     override suspend fun getProducts(): List<ProductDto> {
         val response = apiService.getProducts()
         return response.products.map { it.toProductDto() }
+    }
+
+    override suspend fun getProductDetail(productId: Long): ShopifyProductDetail {
+        val response = apiService.getProductDetail(productId)
+        return response.product
     }
 }

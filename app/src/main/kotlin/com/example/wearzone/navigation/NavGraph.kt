@@ -10,6 +10,8 @@ import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.product.detail.ProductDetailScreen
+import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 
@@ -21,7 +23,9 @@ fun NavGraph(
     val navController = rememberNavController()
 
     NavHost(
-        navController = navController, startDestination = Route.OnboardingRoute, modifier = modifier
+        navController = navController,
+        startDestination = Route.OnboardingRoute,
+        modifier = modifier,
     ) {
         // Aalaa
         composable<Route.OnboardingRoute> {
@@ -38,31 +42,6 @@ fun NavGraph(
                 },
             )
         }
-
-
-        composable<Route.ProfileRoute> {
-            ProfileScreen(
-                onNavigateToLogin = {
-                    navController.navigate(Route.LoginRoute) {
-                        popUpTo<Route.HomeRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
-                onNavigateToSettings = { navController.navigate(Route.SettingsRoute) },
-                onNavigateToWishlist = { },
-                onNavigateToOrders = { },
-                onNavigateToSavedAddresses = { },
-                onNavigateToHome = {
-                    navController.navigate(Route.HomeRoute) {
-                        popUpTo<Route.HomeRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
-            )
-        }
-
         composable<Route.SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -70,13 +49,15 @@ fun NavGraph(
             )
         }
 
+
+
         // Aalaa
 
         // Hend
         composable<Route.RegisterRoute> {
-           RegisterScreen(
-               onNavigateToHome = {
-                    navController.navigate(Route.HomeRoute) {
+            RegisterScreen(
+                onNavigateToHome = {
+                    navController.navigate(Route.MainRoute) {
                         popUpTo<Route.RegisterRoute> {
                             inclusive = true
                         }
@@ -88,33 +69,54 @@ fun NavGraph(
                             inclusive = true
                         }
                     }
-                })
+                },
+            )
         }
         // Hend
 
         // Ahmed
         composable<Route.LoginRoute> {
-            LoginScreen(onNavigateToHome = {
-                navController.navigate(Route.HomeRoute) {
-                    popUpTo<Route.LoginRoute> {
-                        inclusive = true
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.LoginRoute> {
+                            inclusive = true
+                        }
                     }
-                }
-            },
-                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) }
+                },
+                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
             )
         }
+
+        composable<Route.ProductDetailRoute> {
+            ProductDetailScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Ahmed
         // Ahmed
 
         // Omar
-        composable<Route.HomeRoute> {
-            HomeScreen(
-                onNavigateToProductDetail = { productId -> },
-                onNavigateToCategory = { categoryId -> },
-                onNavigateToBrand = { brandId -> },
-                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
-                onShowSnackbar = { message -> })
+        composable<Route.MainRoute> {
+            MainScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.MainRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Route.SettingsRoute)
+                },
+               onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
+                }
+            )
         }
+
+
         // Omar
     }
 }

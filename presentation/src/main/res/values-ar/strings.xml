@@ -119,7 +119,24 @@
     <string name="or_continue_with">أو المتابعة باستخدام</string>
     <string name="dont_have_account">ليس لديك حساب؟</string>
     <string name="register">إنشاء حساب</string>
-    <!-- Ahmed -->
+    <!-- Product Detail Screen -->
+    <string name="product_detail_select_size">اختر المقاس</string>
+    <string name="product_detail_size_guide">دليل المقاسات</string>
+    <string name="product_detail_description">الوصف</string>
+    <string name="product_detail_add_to_cart">أضف إلى السلة</string>
+    <string name="product_detail_buy_now">اشتري الآن</string>
+    <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
+    <string name="product_detail_retry">إعادة المحاولة</string>
+    <string name="product_detail_added_to_cart">تمت الإضافة إلى السلة!</string>
+    <string name="product_detail_select_size_first">يرجى اختيار المقاس أولاً.</string>
+    <string name="product_detail_reviews">%1$.1f (%2$d تقييمات)</string>
+    <string name="product_detail_auth_required">يرجى تسجيل الدخول للمتابعة.</string>
+
+    <string name="content_desc_wishlist_add">أضف إلى المفضلة</string>
+    <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
+    <string name="content_desc_product_image">صورة المنتج</string>
+    <string name="content_desc_star_rating">تقييم النجوم</string>
+    <!--Ahmed-->
 
     <!-- Omar -->
     <string name="hero_banner_default_title">مجموعة Midnight Slate</string>
@@ -145,5 +162,27 @@
     <string name="nav_search">البحث</string>
     <string name="nav_wishlist">المفضلة</string>
     <string name="nav_profile">حسابي</string>
+    <string name="search_title">البحث</string>
+    <string name="content_desc_back">الرجوع</string>
+    <string name="content_desc_clear_search">مسح البحث</string>
+    <string name="search_recent_title">عمليات البحث الأخيرة</string>
+    <string name="search_clear_recent">مسح الكل</string>
+    <string name="search_recent_item">بحث أخير</string>
+    <string name="search_filters">الفلاتر</string>
+    <string name="search_filter_price">نطاق السعر</string>
+    <string name="search_min_price">الأدنى</string>
+    <string name="search_max_price">الأقصى</string>
+    <string name="search_filter_brand">الماركة</string>
+    <string name="search_filter_category">الفئة</string>
+    <string name="search_filter_all">الكل</string>
+    <string name="search_apply_filters">تطبيق</string>
+    <string name="search_reset_filters">إعادة تعيين</string>
+    <string name="search_start_title">ابحث عن قطعتك القادمة</string>
+    <string name="search_start_subtitle">ابحث عن طريق المنتج، المصمم، الماركة، أو الفئة.</string>
+    <string name="search_empty_title">لم نجد تصاميم مطابقة</string>
+    <string name="search_empty_subtitle">جرّب كلمة مفتاحية أخرى أو خفف قيود الفلاتر.</string>
+    <string name="search_error_title">البحث غير متاح حالياً</string>
+    <string name="search_error_subtitle">لم نتمكن من تحميل المنتجات في الوقت الحالي.</string>
+    <string name="search_retry">إعادة المحاولة</string>
     <!-- Omar -->
 </resources>

@@ -1,9 +1,13 @@
-package com.example.wearzone.presentation.home.components
+package com.example.wearzone.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -30,6 +34,7 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 @Composable
 fun TopBar() {
     TopAppBar(
+        windowInsets = WindowInsets(0, 0, 0, 0),
         title = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(

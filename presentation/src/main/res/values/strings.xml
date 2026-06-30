@@ -1,21 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
     <!--Aalaa-->
     <string name="onboarding_back">Back</string>
+
     <string name="onboarding_next">Next</string>
+
     <string name="onboarding_get_started">Get Started</string>
+
     <string name="onboarding_continue_as_guest">Continue as Guest</string>
+
     <string name="onboarding_error_unable_to_continue">Unable to continue. Please try again.</string>
+
     <string name="onboarding_style_discovery_image_description">Woman wearing a cream outfit</string>
+
     <string name="onboarding_style_discovery_title">Discover Curated Fashion</string>
+
     <string name="onboarding_style_discovery_description">Explore refined looks selected for your everyday wardrobe.</string>
+
     <string name="onboarding_shopping_flow_image_description">Woman shopping from her phone</string>
+
     <string name="onboarding_shopping_flow_title">Shop With Ease</string>
+
     <string name="onboarding_shopping_flow_description">Browse collections, compare styles, and keep your favorites close.</string>
+
     <string name="onboarding_delivery_moment_image_description">Woman opening a fashion package</string>
+
     <string name="onboarding_delivery_moment_title">Unbox Your Style</string>
+
     <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
+
     <string name="login_placeholder_title">Login Screen</string>
+
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
 
 
@@ -76,80 +93,202 @@
     <!--Aalaa-->
 
     <!--Hend-->
+
     <string name="create_account">Create Account</string>
+
     <string name="register_subtitle">Join WearZone for an accessible luxury experience.</string>
+
     <string name="full_name">Full Name</string>
+
     <string name="full_name_placeholder">Jane Doe</string>
+
     <string name="email_address">Email Address</string>
+
     <string name="email_placeholder">jane@example.com</string>
+
     <string name="password">Password</string>
+
     <string name="confirm_password">Confirm Password</string>
+
     <string name="password_placeholder">••••••••</string>
+
     <string name="hide_password">Hide</string>
+
     <string name="show_password">Show</string>
+
     <string name="already_have_account">Already have an account?</string>
+
     <string name="log_in">Log in</string>
+
     <string name="error_blank_name">Full name is required</string>
+
     <string name="error_invalid_email">Please enter a valid email address</string>
+
     <string name="error_short_password">Password must be at least 8 characters</string>
+
     <string name="error_password_mismatch">Passwords do not match</string>
+
     <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
+
     <string name="error_register_failed">Registration failed. Please try again.</string>
+
     <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
+
     <string name="terms_of_service">  Terms of Service</string>
+
     <string name="terms_and"> and </string>
+
     <string name="privacy_policy"> Privacy Policy</string>
+
     <string name="terms_period">.</string>
+
     <string name="password_strength">Password strength: %1$s</string>
+
     <string name="password_strength_weak">Weak</string>
+
     <string name="password_strength_fair">Fair</string>
+
     <string name="password_strength_good">Good</string>
+
     <string name="password_strength_strong">Strong</string>
 
+
+
     <string name="empty">&quot;&quot;</string>
+
     <!--Hend-->
 
 
+
+    <!--Alaa-->
+
+    <!--Alaa-->
+
+
+
+
     <!--Ahmed-->
+
     <string name="login_successful">Login successful!</string>
+
     <string name="unexpected_credential_type">Unexpected credential type</string>
+
     <string name="google_sign_in_failed">Google Sign-In failed</string>
+
     <string name="content_desc_google_sign_in">Sign in with Google</string>
     <string name="content_desc_apple_sign_in">Sign in with Apple</string>
     <string name="welcome_back">Welcome Back</string>
+
     <string name="login_subtitle">Sign in to access your curated collection.</string>
+
     <string name="forgot_password">Forgot Password?</string>
+
     <string name="sign_in">Sign In</string>
+
     <string name="or_continue_with">OR CONTINUE WITH</string>
+
     <string name="dont_have_account">Don\'t have an account?</string>
+
     <string name="register">Register</string>
 
+    <!-- Product Detail Screen -->
+    <string name="product_detail_select_size">Select Size</string>
+    <string name="product_detail_size_guide">Size Guide</string>
+    <string name="product_detail_description">Description</string>
+    <string name="product_detail_add_to_cart">Add to Cart</string>
+    <string name="product_detail_buy_now">Buy Now</string>
+    <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
+    <string name="product_detail_retry">Retry</string>
+    <string name="product_detail_added_to_cart">Added to cart!</string>
+    <string name="product_detail_select_size_first">Please select a size first.</string>
+    <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
+    <string name="product_detail_auth_required">Please log in to continue.</string>
+
+    <string name="content_desc_wishlist_add">Add to wishlist</string>
+    <string name="content_desc_wishlist_remove">Remove from wishlist</string>
+    <string name="content_desc_product_image">Product image</string>
+    <string name="content_desc_star_rating">Star rating</string>
     <!--Ahmed-->
 
+
+
+
+
     <!--Omar-->
+
     <string name="hero_banner_default_title">The Midnight Slate Collection</string>
+
     <string name="hero_banner_shop_now">Shop Now</string>
+
     <string name="hero_banner_recommended">RECOMMENDED FOR YOU</string>
+
     <string name="hero_banner_description">Hero Banner Image</string>
+
     <string name="home_new_arrivals">New Arrivals</string>
+
     <string name="content_desc_favorite">Favorite</string>
+
     <string name="content_desc_add_to_cart">Add to Cart</string>
+
     <string name="content_desc_search">Search</string>
-    <string name="search_placeholder">Search designers, categories…</string>
+
+    <string name="search_placeholder">Search here</string>
+
     <string name="app_name">WearZone</string>
+
     <string name="content_desc_menu">Menu</string>
+
     <string name="content_desc_cart">Cart</string>
+
     <string name="dummy_cart_count">3</string>
+
     <string name="home_greeting">Hello, %1$s</string>
+
     <string name="home_subtitle">Discover today\'s curated styles.</string>
+
     <string name="home_top_brands">Top Brands</string>
+
     <string name="home_see_all">See all</string>
+
     <string name="home_trending_now">Trending Now</string>
+
     <string name="nav_home">Home</string>
+
     <string name="nav_categories">Categories</string>
+
     <string name="nav_search">Search</string>
+
     <string name="nav_wishlist">Wishlist</string>
+
     <string name="nav_profile">Profile</string>
+
+    <!--Search-->
+    <string name="search_title">Search</string>
+    <string name="content_desc_back">Back</string>
+    <string name="content_desc_clear_search">Clear search</string>
+    <string name="search_recent_title">Recent searches</string>
+    <string name="search_clear_recent">Clear</string>
+    <string name="search_recent_item">Recent search</string>
+    <string name="search_filters">Filters</string>
+    <string name="search_filter_price">Price range</string>
+    <string name="search_min_price">Min</string>
+    <string name="search_max_price">Max</string>
+    <string name="search_filter_brand">Brand</string>
+    <string name="search_filter_category">Category</string>
+    <string name="search_filter_all">All</string>
+    <string name="search_apply_filters">Apply</string>
+    <string name="search_reset_filters">Reset</string>
+    <string name="search_start_title">Find your next piece</string>
+    <string name="search_start_subtitle">Search by product, designer, brand, or category.</string>
+    <string name="search_empty_title">No matching styles</string>
+    <string name="search_empty_subtitle">Try another keyword or loosen the filters.</string>
+    <string name="search_error_title">Search unavailable</string>
+    <string name="search_error_subtitle">We could not load products right now.</string>
+    <string name="search_retry">Retry</string>
+    <!--Search-->
+
     <!--Omar-->
+
+
 
 </resources>

@@ -7,10 +7,13 @@ import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.model.Brand
 import com.example.wearzone.domain.product.model.Category
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.repository.IProductRepository
+import com.example.wearzone.domain.common.runCatchingCancellable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 
 class ProductRepositoryImpl @Inject constructor(
     private val remoteDataSource: IProductRemoteDataSource,
@@ -43,4 +46,22 @@ class ProductRepositoryImpl @Inject constructor(
             DataResult.Error(DomainError.Unknown(e))
         }
     }
+
+    override suspend fun getProductDetail(productId: Long): DataResult<ProductDetail> =
+        withContext(ioDispatcher) {
+            try {
+                val shopifyProduct = remoteDataSource.getProductDetail(productId)
+                DataResult.Success(
+                    shopifyProduct.toDomain(
+                        // Mocking real ratings via Random since Shopify API lacks them
+                        rating = Random.nextDouble(3.5, 5.0),
+                        reviewsCount = Random.nextInt(10, 501),
+                        // TODO: Replace with real IWishlistRepository.isInWishlist(productId) call
+                        isFavorite = false,
+                    )
+                )
+            } catch (e: Exception) {
+                DataResult.Error(DomainError.Unknown(e))
+            }
+        }
 }

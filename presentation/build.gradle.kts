@@ -36,8 +36,8 @@ android {
         buildConfig = true
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
@@ -85,6 +85,7 @@ dependencies {
     //icons
     implementation(libs.androidx.compose.material.icons.extended)
     //Hend
+
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
