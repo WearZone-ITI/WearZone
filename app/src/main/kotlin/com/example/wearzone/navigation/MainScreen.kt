@@ -84,9 +84,10 @@ fun MainScreen(
                     } == true
 
                     val isSelected = when (item.labelRes) {
-                        R.string.nav_home -> isRouteMatch && currentDestination?.hasRoute(Route.HomeRoute::class) == true
+                        R.string.nav_home -> currentDestination?.hasRoute(Route.HomeRoute::class) == true
                         R.string.nav_categories -> false
                         R.string.nav_wishlist -> false
+                        R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
                         else -> isRouteMatch
                     }
 
@@ -110,13 +111,30 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            if (!isSelected && item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
-                                bottomNavController.navigate(item.route) {
-                                    popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                        saveState = true
+                            if (item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
+
+                                if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
+                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+                                }
+                                else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
+                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+
+                                    bottomNavController.navigate(item.route) {
+                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                }
+                                else if (!isSelected) {
+                                    bottomNavController.navigate(item.route) {
+                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             }
                         },

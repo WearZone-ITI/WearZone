@@ -42,32 +42,14 @@ fun NavGraph(
                 },
             )
         }
-
-
-        composable<Route.MainRoute> {
-            MainScreen(
-                onNavigateToLogin = {
-                    navController.navigate(Route.LoginRoute) {
-                        popUpTo<Route.MainRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Route.SettingsRoute)
-                },
-                onNavigateToProductDetail = { productId ->
-                    navController.navigate(Route.ProductDetailRoute(productId))
-                }
-            )
-        }
-
         composable<Route.SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 appVersion = BuildConfig.VERSION_NAME,
             )
         }
+
+
 
         // Aalaa
 
@@ -113,6 +95,27 @@ fun NavGraph(
         }
 
         // Ahmed
+        // Ahmed
+
+        // Omar
+        composable<Route.MainRoute> {
+            MainScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.MainRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Route.SettingsRoute)
+                },
+               onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
+                }
+            )
+        }
+
 
         // Omar
     }
