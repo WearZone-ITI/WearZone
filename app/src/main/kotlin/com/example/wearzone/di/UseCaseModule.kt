@@ -9,6 +9,7 @@ import com.example.wearzone.domain.auth.usecase.RegisterUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
+import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
@@ -62,6 +63,13 @@ object UseCaseModule {
     fun provideClearRecentSearchesUseCase(
         repository: IRecentSearchRepository,
     ): ClearRecentSearchesUseCase = ClearRecentSearchesUseCase(repository)
+
+    @Provides
+    fun provideGetProductDetailUseCase(
+        repository: IProductRepository
+    ): GetProductDetailUseCase {
+        return GetProductDetailUseCase(repository)
+    }
 
     @Provides
     fun provideLoginWithEmailUseCase(

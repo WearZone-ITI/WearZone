@@ -8,3 +8,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+data/build.gradle.kts
+gradle.properties
+presentation/build.gradle.kts
+app/build.gradle.kts

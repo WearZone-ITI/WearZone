@@ -10,6 +10,7 @@ import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.product.detail.ProductDetailScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
@@ -86,6 +87,14 @@ fun NavGraph(
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
             )
         }
+
+        composable<Route.ProductDetailRoute> {
+            ProductDetailScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Ahmed
         // Ahmed
 
         // Omar
@@ -100,6 +109,9 @@ fun NavGraph(
                 },
                 onNavigateToSettings = {
                     navController.navigate(Route.SettingsRoute)
+                },
+               onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
                 }
             )
         }

@@ -35,6 +35,9 @@ sealed interface Route {
     data object HomeRoute : Route
 
     @Serializable
+    data class ProductDetailRoute(val productId: Long) : Route
+
+    @Serializable
     data object SearchRoute : Route
     // Omar
 }
