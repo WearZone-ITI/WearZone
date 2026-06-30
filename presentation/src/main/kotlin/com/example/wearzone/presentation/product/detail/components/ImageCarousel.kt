@@ -25,6 +25,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -62,7 +63,7 @@ fun ImageCarousel(
                     val color = if (pagerState.currentPage == iteration) {
                         MaterialTheme.colorScheme.primary
                     } else {
-                        Color.LightGray
+                        AppTheme.colors.textSecondary.copy(alpha = 0.5f)
                     }
                     Box(
                         modifier = Modifier

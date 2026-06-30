@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.presentation.R
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
@@ -82,14 +82,14 @@ fun ProductDetailScreen(
                 )
             }
         },
-        containerColor = AppColors.Background
+        containerColor = AppTheme.colors.background
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (val state = uiState) {
                 is ProductDetailUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Color.Black
+                        color = AppTheme.colors.textPrimary
                     )
                 }
                 is ProductDetailUiState.Error -> {
@@ -103,20 +103,20 @@ fun ProductDetailScreen(
                             imageVector = Icons.Outlined.WifiOff,
                             contentDescription = null,
                             modifier = Modifier.padding(bottom = 16.dp).size(120.dp),
-                            tint = AppColors.Error
+                            tint = AppTheme.colors.error
                         )
                         Text(
                             text = stringResource(id = state.messageRes),
                             style = MaterialTheme.typography.titleMedium,
-                            color = AppColors.TextSecondary,
+                            color = AppTheme.colors.textSecondary,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(
                             onClick = { viewModel.handleIntent(ProductDetailUiIntent.Retry) },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = AppColors.Primary,
-                                contentColor = AppColors.OnPrimary
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth(0.5f).height(48.dp)
@@ -168,7 +168,7 @@ private fun ProductDetailContent(
                         .padding(start = 16.dp, top = 16.dp)
                         .align(Alignment.TopStart)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.7f))
+                        .background(AppTheme.colors.surface.copy(alpha = 0.7f))
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -183,14 +183,14 @@ private fun ProductDetailContent(
                         .padding(end = 16.dp, top = 16.dp)
                         .align(Alignment.TopEnd)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.7f))
+                        .background(AppTheme.colors.surface.copy(alpha = 0.7f))
                 ) {
                     Icon(
                         imageVector = if (state.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                         contentDescription = stringResource(
                             id = if (state.isFavorite) R.string.content_desc_wishlist_remove else R.string.content_desc_wishlist_add
                         ),
-                        tint = if (state.isFavorite) Color.Red else Color.Black
+                        tint = if (state.isFavorite) AppTheme.colors.error else AppTheme.colors.textPrimary
                     )
                 }
             }
@@ -282,7 +282,7 @@ private fun ProductDetailBottomBar(
     onAddToCartClick: () -> Unit
 ) {
     BottomAppBar(
-        containerColor = Color.White,
+        containerColor = AppTheme.colors.surface,
         tonalElevation = 8.dp,
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
     ) {
@@ -293,8 +293,8 @@ private fun ProductDetailBottomBar(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1A1A1B), // Midnight Slate
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
             Text(
