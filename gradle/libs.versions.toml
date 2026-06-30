@@ -69,6 +69,7 @@ androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = 
 
 
 #Omar
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
 #Omar
 
