@@ -109,7 +109,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 #Ahmed
 
 #Hend
-javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 #Hend
 
