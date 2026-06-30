@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -49,8 +50,9 @@ class ProductDetailViewModel @Inject constructor(
     private fun loadProduct() {
         viewModelScope.launch {
             _uiState.value = ProductDetailUiState.Loading
-            getProductDetailUseCase(productId).fold(
-                onSuccess = { productDetail ->
+            when (val result = getProductDetailUseCase(productId)) {
+                is DataResult.Success -> {
+                    val productDetail = result.data
                     _uiState.value = ProductDetailUiState.Success(
                         id = productDetail.id,
                         title = productDetail.title,
@@ -63,11 +65,11 @@ class ProductDetailViewModel @Inject constructor(
                         reviewsCount = productDetail.reviewsCount,
                         isFavorite = productDetail.isFavorite
                     )
-                },
-                onFailure = { error ->
+                }
+                is DataResult.Error -> {
                     _uiState.value = ProductDetailUiState.Error(com.example.presentation.R.string.product_detail_error_loading)
                 }
-            )
+            }
         }
     }
 

@@ -10,5 +10,5 @@ interface IProductRepository {
     suspend fun getCategories(): DataResult<List<Category>>
     suspend fun getBrands(): DataResult<List<Brand>>
     suspend fun getProducts(): DataResult<List<Product>>
-    suspend fun getProductDetail(productId: Long): Result<ProductDetail>
+    suspend fun getProductDetail(productId: Long): DataResult<ProductDetail>
 }

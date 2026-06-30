@@ -3,6 +3,8 @@ package com.wearzone.presentation.product.detail
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.common.DataResult
+import com.example.wearzone.domain.common.DomainError
 import com.wearzone.domain.product.model.ProductDetail
 import com.wearzone.domain.product.usecase.GetProductDetailUseCase
 import io.mockk.coEvery
@@ -57,7 +59,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `init loads product and emits Loading then Success`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
 
         val viewModel = createViewModel()
 
@@ -75,7 +77,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `init loads product and emits Error on failure`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.failure(Exception("Error message"))
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Error(DomainError.Unknown(Exception("Error message")))
 
         val viewModel = createViewModel()
 
@@ -90,7 +92,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `SelectSize intent updates selectedSize in Success state`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         
         val viewModel = createViewModel()
         
@@ -108,7 +110,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `AddToCart without size emits ShowToast effect`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         coEvery { authRepository.isLoggedIn() } returns true
         
         val viewModel = createViewModel()
@@ -129,7 +131,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `AddToCart by guest emits ShowAuthRequiredError`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         coEvery { authRepository.isLoggedIn() } returns false
         
         val viewModel = createViewModel()
@@ -144,7 +146,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `OnToggleFavorite by guest emits ShowAuthRequiredError`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         coEvery { authRepository.isLoggedIn() } returns false
         
         val viewModel = createViewModel()
@@ -159,7 +161,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `AddToCart with size by logged-in user emits NavigateToCart`() = runTest {
-        coEvery { getProductDetailUseCase(1L) } returns Result.success(dummyProduct)
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         coEvery { authRepository.isLoggedIn() } returns true
         
         val viewModel = createViewModel()

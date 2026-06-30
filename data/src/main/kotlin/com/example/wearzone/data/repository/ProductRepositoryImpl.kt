@@ -47,17 +47,21 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getProductDetail(productId: Long): Result<ProductDetail> =
+    override suspend fun getProductDetail(productId: Long): DataResult<ProductDetail> =
         withContext(ioDispatcher) {
-            runCatchingCancellable {
+            try {
                 val shopifyProduct = remoteDataSource.getProductDetail(productId)
-                shopifyProduct.toDomain(
-                    // Mocking real ratings via Random since Shopify API lacks them
-                    rating = Random.nextDouble(3.5, 5.0),
-                    reviewsCount = Random.nextInt(10, 501),
-                    // TODO: Replace with real IWishlistRepository.isInWishlist(productId) call
-                    isFavorite = false,
+                DataResult.Success(
+                    shopifyProduct.toDomain(
+                        // Mocking real ratings via Random since Shopify API lacks them
+                        rating = Random.nextDouble(3.5, 5.0),
+                        reviewsCount = Random.nextInt(10, 501),
+                        // TODO: Replace with real IWishlistRepository.isInWishlist(productId) call
+                        isFavorite = false,
+                    )
                 )
+            } catch (e: Exception) {
+                DataResult.Error(DomainError.Unknown(e))
             }
         }
 }
