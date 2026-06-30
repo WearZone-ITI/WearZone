@@ -4,7 +4,7 @@ import com.example.wearzone.domain.product.model.ProductDetail
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SingleProductResponse(
+data class ProductDetailDto(
     val product: ShopifyProductDetail
 )
 

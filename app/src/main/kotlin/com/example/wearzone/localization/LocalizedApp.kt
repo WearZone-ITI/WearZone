@@ -23,17 +23,17 @@ fun LocalizedApp(
     val localizedConfiguration = remember(languageCode, configuration) {
         Configuration(configuration).apply {
             val locale = Locale.forLanguageTag(languageCode)
+            Locale.setDefault(locale)
             setLocale(locale)
             setLayoutDirection(locale)
         }
     }
 
-    SideEffect {
-        context.resources.updateConfiguration(
-            localizedConfiguration,
-            context.resources.displayMetrics,
-        )
-    }
+    // Update resources BEFORE composition of children so stringResource() reads the correct language instantly
+    context.resources.updateConfiguration(
+        localizedConfiguration,
+        context.resources.displayMetrics,
+    )
 
     val layoutDirection =
         if (localizedConfiguration.layoutDirection == View.LAYOUT_DIRECTION_RTL) {
