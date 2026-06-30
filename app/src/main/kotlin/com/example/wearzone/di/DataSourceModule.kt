@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
+import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
+import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
+import com.example.wearzone.data.local.datasource.SettingsPreferencesDataSourceImpl
 import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
-import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
-import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
 import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ProductRemoteDataSourceImpl
 import dagger.Binds
@@ -16,9 +18,22 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class OnboardingDataStore
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SettingsDataStore
 
 private val Context.onboardingDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "onboarding_preferences",
+)
+
+private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "settings_preferences",
 )
 
 @Module
@@ -26,18 +41,43 @@ private val Context.onboardingDataStore: DataStore<Preferences> by preferencesDa
 abstract class DataSourceModule {
 
     @Binds
-    abstract fun bindProductRemoteDataSource(productRemoteDataSourceImpl: ProductRemoteDataSourceImpl): IProductRemoteDataSource
+    abstract fun bindProductRemoteDataSource(
+        productRemoteDataSourceImpl: ProductRemoteDataSourceImpl,
+    ): IProductRemoteDataSource
+
     @Binds
-    abstract fun bindAuthRemoteDataSource(impl: AuthRemoteDataSourceImpl): IAuthRemoteDataSource
+    abstract fun bindAuthRemoteDataSource(
+        impl: AuthRemoteDataSourceImpl,
+    ): IAuthRemoteDataSource
 
     companion object {
+
         @Provides
-        fun provideOnboardingPreferencesDataSource(dataStore: DataStore<Preferences>): IOnboardingPreferencesDataSource {
+        @OnboardingDataStore
+        fun provideOnboardingDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            context.onboardingDataStore
+
+        @Provides
+        fun provideOnboardingPreferencesDataSource(
+            @OnboardingDataStore dataStore: DataStore<Preferences>,
+        ): IOnboardingPreferencesDataSource {
             return OnboardingPreferencesDataSourceImpl(dataStore)
         }
 
         @Provides
-        fun provideOnboardingDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
-            context.onboardingDataStore
+        @SettingsDataStore
+        fun provideSettingsDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            context.settingsDataStore
+
+        @Provides
+        fun provideSettingsPreferencesDataSource(
+            @SettingsDataStore dataStore: DataStore<Preferences>,
+        ): ISettingsPreferencesDataSource {
+            return SettingsPreferencesDataSourceImpl(dataStore)
+        }
     }
 }

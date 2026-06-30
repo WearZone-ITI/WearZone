@@ -1,5 +1,5 @@
 <resources>
-    <!--Alaa -->
+    <!-- Aalaa  -->
     <string name="onboarding_back">رجوع</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_get_started">ابدأ الآن</string>
@@ -15,9 +15,65 @@
     <string name="onboarding_delivery_moment_title">افتح أناقتك</string>
     <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
     <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
-    <!--Alaa-->
 
-    <!--Hend-->
+
+    <!-- Profile and Settings -->
+    <string name="profile_brand_title">WearZone</string>
+    <string name="profile_guest_name">ضيف</string>
+    <string name="profile_guest_email">سجل الدخول لعرض حسابك</string>
+    <string name="profile_greeting">مرحباً، %1$s</string>
+    <string name="profile_avatar_content_description">صورة الملف الشخصي</string>
+    <string name="profile_static_avatar_content_description">صورة الملف الشخصي الثابتة</string>
+    <string name="profile_recent_orders">الطلبات الأخيرة</string>
+    <string name="profile_view_all">عرض الكل</string>
+    <string name="profile_recent_order_delivered">تم التسليم 12 أكتوبر</string>
+    <string name="profile_recent_order_processing">قيد المعالجة</string>
+    <string name="profile_recent_order_bag">حقيبة Noir Structura</string>
+    <string name="profile_recent_order_earrings">أقراط Aura Hoop</string>
+    <string name="profile_recent_order_bag_image_description">عنصر أزياء من طلب حديث</string>
+    <string name="profile_recent_order_earrings_image_description">إكسسوار من طلب حديث</string>
+    <string name="profile_my_orders">طلباتي</string>
+    <string name="profile_wishlist">المفضلة</string>
+    <string name="profile_saved_addresses">العناوين المحفوظة</string>
+    <string name="profile_currency">العملة</string>
+    <string name="profile_currency_usd">USD</string>
+    <string name="profile_currency_todo">اختيار العملة قريباً.</string>
+    <string name="profile_settings">الإعدادات</string>
+    <string name="profile_logout">تسجيل الخروج</string>
+    <string name="profile_logout_dialog_title">تسجيل الخروج؟</string>
+    <string name="profile_logout_dialog_message">هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟</string>
+    <string name="profile_logout_dialog_confirm">تسجيل الخروج</string>
+    <string name="profile_logout_dialog_cancel">إلغاء</string>
+    <string name="profile_logout_failed">تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى.</string>
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_subtitle">إدارة تفضيلات التطبيق</string>
+    <string name="settings_back_content_description">رجوع</string>
+    <string name="settings_appearance_section">المظهر</string>
+    <string name="settings_preferences_section">التفضيلات</string>
+    <string name="settings_about_section">حول</string>
+    <string name="settings_theme_system">النظام الافتراضي</string>
+    <string name="settings_theme_light">الوضع الفاتح</string>
+    <string name="settings_theme_dark">الوضع الداكن</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_arabic">العربية</string>
+    <string name="settings_language_dialog_title">اختر اللغة</string>
+    <string name="settings_language_updated">تم تحديث اللغة.</string>
+    <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="settings_terms_conditions">الشروط والأحكام</string>
+    <string name="settings_privacy_policy_body">قد يستخدم WearZone معلومات حسابك وبريدك الإلكتروني وتفضيلاتك المحفوظة وطلباتك وقائمة رغباتك وعناوينك لتقديم ميزات التسوق وتخصيص تجربتك ودعم خدمات الحساب. سيتم استبدال هذا النص المؤقت عند توفر محتوى قانوني معتمد.</string>
+    <string name="settings_terms_conditions_body">باستخدام WearZone، تكون مسؤولاً عن نشاط حسابك ودقة المعلومات التي تقدمها. قد تتغير الطلبات والأسعار وتوفر المنتجات وعناصر قائمة الرغبات والعناوين المحفوظة حسب تغيّر بيانات المتجر. سيتم استبدال هذا النص المؤقت عند توفر محتوى قانوني معتمد.</string>
+    <string name="settings_dialog_done">تم</string>
+    <string name="settings_app_version">إصدار التطبيق</string>
+    <string name="settings_app_version_value">1.0.0</string>
+    <string name="settings_language_todo">اختيار اللغة قريباً.</string>
+    <string name="settings_error_load_failed">تعذر تحميل الإعدادات. يرجى المحاولة مرة أخرى.</string>
+    <string name="settings_error_save_failed">تعذر حفظ الإعدادات. يرجى المحاولة مرة أخرى.</string>
+    <!-- Profile and Settings -->
+    <!-- Aalaa -->
+
+    <!-- Hend -->
     <string name="create_account">إنشاء حساب</string>
     <string name="register_subtitle">انضم إلى WearZone لتجربة تسوق فاخرة وسهلة الوصول.</string>
     <string name="full_name">الاسم الكامل</string>
@@ -47,13 +103,15 @@
     <string name="password_strength_fair">مقبولة</string>
     <string name="password_strength_good">جيدة</string>
     <string name="password_strength_strong">قوية</string>
-    <string name="empty"></string>
-    <!--Hend-->
+    <string name="empty"/>
+    <!-- Hend -->
 
-    <!--Ahmed-->
+    <!-- Ahmed -->
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="unexpected_credential_type">نوع بيانات الاعتماد غير متوقع</string>
     <string name="google_sign_in_failed">فشل تسجيل الدخول باستخدام Google</string>
+    <string name="content_desc_google_sign_in">تسجيل الدخول باستخدام Google</string>
+    <string name="content_desc_apple_sign_in">تسجيل الدخول باستخدام Apple</string>
     <string name="welcome_back">مرحبًا بعودتك</string>
     <string name="login_subtitle">سجل الدخول للوصول إلى مجموعتك المختارة.</string>
     <string name="forgot_password">هل نسيت كلمة المرور؟</string>
@@ -61,9 +119,9 @@
     <string name="or_continue_with">أو المتابعة باستخدام</string>
     <string name="dont_have_account">ليس لديك حساب؟</string>
     <string name="register">إنشاء حساب</string>
-    <!--Ahmed-->
+    <!-- Ahmed -->
 
-    <!--Omar-->
+    <!-- Omar -->
     <string name="hero_banner_default_title">مجموعة Midnight Slate</string>
     <string name="hero_banner_shop_now">تسوق الآن</string>
     <string name="hero_banner_recommended">موصى به لك</string>
@@ -73,7 +131,7 @@
     <string name="content_desc_add_to_cart">إضافة إلى السلة</string>
     <string name="content_desc_search">بحث</string>
     <string name="search_placeholder">ابحث عن المصممين أو التصنيفات…</string>
-    <string name="app_name">وير زون</string>
+    <string name="app_name">WearZone</string>
     <string name="content_desc_menu">القائمة</string>
     <string name="content_desc_cart">عربة التسوق</string>
     <string name="dummy_cart_count">3</string>
@@ -86,6 +144,6 @@
     <string name="nav_categories">التصنيفات</string>
     <string name="nav_search">البحث</string>
     <string name="nav_wishlist">المفضلة</string>
-    <string name="nav_profile">الملف الشخصي</string>
-    <!--Omar-->
+    <string name="nav_profile">حسابي</string>
+    <!-- Omar -->
 </resources>

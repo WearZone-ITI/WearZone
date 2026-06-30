@@ -41,4 +41,8 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     override fun getCurrentUser(): FirebaseUser? {
         return firebaseAuth.currentUser
     }
+
+    override fun signOut() {
+        firebaseAuth.signOut()
+    }
 }

@@ -25,9 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.LoginFormState
 import com.example.wearzone.presentation.auth.login.LoginUiIntent
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.AppTypography
-import com.example.wearzone.presentation.common.theme.OnSurfaceVariant
 
 @Composable
 fun LoginForm(
@@ -42,7 +41,13 @@ fun LoginForm(
         TextField(
             value = formState.email,
             onValueChange = { onIntent(LoginUiIntent.OnEmailChanged(it)) },
-            label = { Text( text = stringResource(R.string.email_address), style = AppTypography.bodyMedium, color = AppColors.TextPrimary) },
+            label = {
+                Text(
+                    text = stringResource(R.string.email_address),
+                    style = AppTypography.bodyMedium,
+                    color = AppTheme.colors.textPrimary,
+                )
+            },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -50,19 +55,25 @@ fun LoginForm(
             ),
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = AppColors.InputBackground,
-                unfocusedContainerColor = AppColors.InputBackground,
-                focusedIndicatorColor = AppColors.TextPrimary,
-                unfocusedIndicatorColor = AppColors.InputBorder,
-                focusedTextColor = AppColors.TextPrimary,
-                unfocusedTextColor = AppColors.TextPrimary
+                focusedContainerColor = AppTheme.colors.surface,
+                unfocusedContainerColor = AppTheme.colors.surface,
+                focusedIndicatorColor = AppTheme.colors.selected,
+                unfocusedIndicatorColor = AppTheme.colors.border,
+                focusedTextColor = AppTheme.colors.textPrimary,
+                unfocusedTextColor = AppTheme.colors.textPrimary,
             )
         )
 
         TextField(
             value = formState.password,
             onValueChange = { onIntent(LoginUiIntent.OnPasswordChanged(it)) },
-            label = { Text( text = stringResource(R.string.password), style = AppTypography.bodyMedium, color = AppColors.TextPrimary) },
+            label = {
+                Text(
+                    text = stringResource(R.string.password),
+                    style = AppTypography.bodyMedium,
+                    color = AppTheme.colors.textPrimary,
+                )
+            },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             visualTransformation = if (formState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
@@ -71,12 +82,12 @@ fun LoginForm(
             ),
             singleLine = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = AppColors.InputBackground,
-                unfocusedContainerColor = AppColors.InputBackground,
-                focusedIndicatorColor = AppColors.TextPrimary,
-                unfocusedIndicatorColor = AppColors.InputBorder,
-                focusedTextColor = AppColors.TextPrimary,
-                unfocusedTextColor = AppColors.TextPrimary
+                focusedContainerColor = AppTheme.colors.surface,
+                unfocusedContainerColor = AppTheme.colors.surface,
+                focusedIndicatorColor = AppTheme.colors.selected,
+                unfocusedIndicatorColor = AppTheme.colors.border,
+                focusedTextColor = AppTheme.colors.textPrimary,
+                unfocusedTextColor = AppTheme.colors.textPrimary,
             ),
             trailingIcon = {
                 IconButton(onClick = { onIntent(LoginUiIntent.OnTogglePasswordVisibility) }) {
@@ -87,7 +98,7 @@ fun LoginForm(
                         contentDescription = if (formState.isPasswordVisible) stringResource(R.string.hide_password)
                         else stringResource(R.string.show_password),
 
-                        tint = OnSurfaceVariant,
+                        tint = AppTheme.colors.textSecondary,
                         modifier = Modifier.size(16.dp),
                     )
                 }
