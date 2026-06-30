@@ -34,11 +34,7 @@ fun NavGraph(
                     }
                 },
                 onNavigateToGuest = {
-                    navController.navigate(Route.HomeRoute) {
-                        popUpTo<Route.OnboardingRoute> {
-                            inclusive = true
-                        }
-                    }
+                    // TODO: Navigate to GuestRoute when guest mode is implemented.
                 },
             )
         }
