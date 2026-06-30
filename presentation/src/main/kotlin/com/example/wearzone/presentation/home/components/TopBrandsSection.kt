@@ -21,9 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Brand
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
@@ -46,12 +45,12 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                 text = stringResource(id = R.string.home_top_brands),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = AppTheme.colors.textPrimary,
             )
             Text(
                 text = stringResource(id = R.string.home_see_all),
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = AppTheme.colors.textSecondary,
                 modifier = Modifier.clickable { }
             )
         }
@@ -72,7 +71,7 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                         modifier = Modifier.size(72.dp),
                         shape = CircleShape,
                         colors = CardDefaults.cardColors(
-                            containerColor = colorResource(id = R.color.brand_avatar_background)
+                            containerColor = AppTheme.colors.surfaceVariant,
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
@@ -97,7 +96,7 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                         text = brand.title,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = colorResource(id = R.color.text_dark),
+                        color = AppTheme.colors.textPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,

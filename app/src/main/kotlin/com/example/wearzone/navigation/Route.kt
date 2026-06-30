@@ -10,6 +10,12 @@ sealed interface Route{
     @Serializable
     data object OnboardingRoute : Route
 
+    @Serializable
+    data object ProfileRoute : Route
+
+    @Serializable
+    data object SettingsRoute : Route
+
     // Aalaa
 
     // Hend

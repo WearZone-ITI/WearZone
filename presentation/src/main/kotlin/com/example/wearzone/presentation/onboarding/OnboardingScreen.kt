@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.presentation.R
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun OnboardingScreen(
@@ -61,7 +60,7 @@ fun OnboardingScreen(
     }
 
     Scaffold(
-        containerColor = AppColors.Background
+        containerColor = AppTheme.colors.background,
     ) { innerPadding ->
         OnboardingContent(
             uiState = uiState,
@@ -86,7 +85,7 @@ private fun OnboardingContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppColors.Background)
+            .background(AppTheme.colors.background)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -108,7 +107,7 @@ private fun OnboardingContent(
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(page.titleRes),
-            color = MaterialTheme.colorScheme.onBackground,
+            color = AppTheme.colors.textPrimary,
             fontFamily = FontFamily.Serif,
             fontSize = 34.sp,
             fontWeight = FontWeight.Bold,
@@ -118,7 +117,7 @@ private fun OnboardingContent(
         Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = stringResource(page.descriptionRes),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = AppTheme.colors.textSecondary,
             fontSize = 16.sp,
             lineHeight = 24.sp,
             textAlign = TextAlign.Center,
@@ -139,7 +138,7 @@ private fun OnboardingContent(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(uiState.messageRes),
-                color = MaterialTheme.colorScheme.error,
+                color = AppTheme.colors.error,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
             )
@@ -165,9 +164,9 @@ private fun PageIndicators(
                         .clip(CircleShape)
                         .background(
                             if (index == currentPage) {
-                                MaterialTheme.colorScheme.onBackground
+                                AppTheme.colors.selected
                             } else {
-                                MaterialTheme.colorScheme.outlineVariant
+                                AppTheme.colors.divider
                             },
                         ),
                 )
@@ -199,8 +198,8 @@ private fun PageNavigationActions(
             onClick = { onIntent(OnboardingUiIntent.OnNextPageClicked) },
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onBackground,
-                contentColor = MaterialTheme.colorScheme.background,
+                containerColor = AppTheme.colors.selected,
+                contentColor = AppTheme.colors.onAccent,
             ),
             modifier = Modifier
                 .weight(1f)
@@ -224,8 +223,8 @@ private fun FinalPageActions(
         enabled = !isSaving,
         shape = RoundedCornerShape(18.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onBackground,
-            contentColor = MaterialTheme.colorScheme.background,
+            containerColor = AppTheme.colors.selected,
+            contentColor = AppTheme.colors.onAccent,
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -233,7 +232,7 @@ private fun FinalPageActions(
     ) {
         if (isSaving) {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.background,
+                color = AppTheme.colors.onAccent,
                 strokeWidth = 2.dp,
                 modifier = Modifier.size(22.dp),
             )
@@ -252,7 +251,7 @@ private fun FinalPageActions(
     ) {
         Text(
             text = stringResource(R.string.onboarding_continue_as_guest),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = AppTheme.colors.textSecondary,
             textAlign = TextAlign.Center,
         )
     }

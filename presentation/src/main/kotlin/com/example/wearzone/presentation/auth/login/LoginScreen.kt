@@ -18,7 +18,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -30,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -40,7 +41,7 @@ import com.example.presentation.BuildConfig
 import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.components.LoginForm
 import com.example.wearzone.presentation.auth.login.components.SocialLoginButtons
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.AppTypography
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -107,14 +108,14 @@ fun LoginScreen(
                 val isSuccess = data.visuals.message.contains("success", ignoreCase = true)
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (isSuccess) AppColors.Success
-                    else AppColors.Primary,
-                    contentColor = AppColors.OnPrimary,
+                    containerColor = if (isSuccess) AppTheme.colors.success
+                    else AppTheme.colors.selected,
+                    contentColor = AppTheme.colors.onAccent,
                 )
             }
         },
-        containerColor = AppColors.Background,
-        ) { paddingValues ->
+        containerColor = AppTheme.colors.background,
+    ) { paddingValues ->
         LoginContent(
             uiState = uiState,
             formState = formState,
@@ -131,31 +132,38 @@ private fun LoginContent(
     onIntent: (LoginUiIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize().background(AppColors.Background)) {
+    Box(modifier = modifier.fillMaxSize().background(AppTheme.colors.background)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppColors.Background)
+                .background(AppTheme.colors.background)
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = stringResource(R.string.app_name),
+            Text(
+                text = stringResource(R.string.app_name),
                 style = AppTypography.headlineLarge,
-                color = AppColors.TextPrimary,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                color = AppTheme.colors.textPrimary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = stringResource(R.string.welcome_back),
                 style = AppTypography.titleLarge,
-                color = AppColors.TextPrimary,
+                color = AppTheme.colors.textPrimary,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.login_subtitle),
                 style = AppTypography.bodyLarge,
-                color = AppColors.TextSecondary,
+                color = AppTheme.colors.textSecondary,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -169,7 +177,7 @@ private fun LoginContent(
             Text(text = stringResource(R.string.forgot_password),
 
                 style = AppTypography.labelMedium,
-                color = AppColors.TextSecondary,
+                color = AppTheme.colors.textSecondary,
                 modifier = Modifier
                     .align(Alignment.End)
                     .clickable { onIntent(LoginUiIntent.OnForgotPasswordClicked) }
@@ -185,15 +193,16 @@ private fun LoginContent(
                 shape = RoundedCornerShape(18.dp),
 
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppColors.Primary
+                    containerColor = AppTheme.colors.selected,
+                    contentColor = AppTheme.colors.onAccent,
                 ),
             ) {
                 if (uiState is LoginUiState.Loading) {
-                    CircularProgressIndicator(color = AppColors.OnPrimary)
+                    CircularProgressIndicator(color = AppTheme.colors.onAccent)
                 } else {
                     Text(text = stringResource(R.string.sign_in),
                         style = AppTypography.labelMedium,
-                        color = AppColors.OnPrimary,
+                        color = AppTheme.colors.onAccent,
                     )
                 }
             }
@@ -204,7 +213,7 @@ private fun LoginContent(
                 Text(
                     text = uiState.message,
                     style = AppTypography.bodyMedium,
-                    color = if (isWarning) AppColors.Warning else AppColors.Error
+                    color = if (isWarning) AppTheme.colors.warning else AppTheme.colors.error
                 )
             }
 
@@ -217,9 +226,9 @@ private fun LoginContent(
                 Text(text = stringResource(R.string.or_continue_with),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = AppTypography.labelSmall,
-                    color = AppColors.TextSecondary,
+                    color = AppTheme.colors.textSecondary,
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = AppColors.Divider)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = AppTheme.colors.divider)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -235,12 +244,12 @@ private fun LoginContent(
                 Text(
                     text = stringResource(R.string.dont_have_account) + " ",
                     style = AppTypography.labelMedium,
-                    color = AppColors.TextSecondary,
+                    color = AppTheme.colors.textSecondary,
                 )
 
                 Text(text = stringResource(R.string.register),
                     style = AppTypography.labelMedium,
-                    color = AppColors.TextPrimary,
+                    color = AppTheme.colors.textPrimary,
                     modifier = Modifier.clickable { onIntent(LoginUiIntent.OnRegisterClicked) }
                 )
             }

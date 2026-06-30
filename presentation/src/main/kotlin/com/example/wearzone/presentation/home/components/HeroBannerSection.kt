@@ -35,9 +35,11 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
+    val fallbackTitle = stringResource(id = R.string.hero_banner_default_title)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -47,14 +49,14 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
     ) {
         AsyncImage(
             model = product?.imageUrl ?: R.drawable.place_holder_hero,
-            contentDescription = (product?.title ?: R.string.hero_banner_default_title).toString(),
+            contentDescription = product?.title ?: fallbackTitle,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))))
+                .background(Brush.verticalGradient(listOf(Color.Transparent, AppTheme.colors.scrim)))
         )
 
         Column(
@@ -72,7 +74,10 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
             ) {
                 Button(
                     onClick = { product?.id?.let(onProductClick) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AppTheme.colors.surface,
+                        contentColor = AppTheme.colors.textPrimary,
+                    ),
                     shape = CircleShape
                 ) {
                     Text(
@@ -86,14 +91,14 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(Color(0xFFE9C349))
+                        .background(AppTheme.colors.accent)
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = stringResource(id = R.string.hero_banner_recommended),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = AppTheme.colors.onAccent,
                     )                }
             }
         }

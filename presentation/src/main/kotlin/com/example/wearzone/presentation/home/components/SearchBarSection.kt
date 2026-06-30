@@ -16,12 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun SearchBarSection() {
@@ -29,17 +28,17 @@ fun SearchBarSection() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(colorResource(id = R.color.search_bar_background))
+            .background(AppTheme.colors.surface)
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Search,
                 contentDescription = stringResource(id = R.string.content_desc_search),
-                tint = Color.Gray)
+                tint = AppTheme.colors.textSecondary)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = stringResource(id = R.string.search_placeholder),
-                color = Color.Gray,
+                color = AppTheme.colors.textSecondary,
                 fontSize = 16.sp
             )
         }

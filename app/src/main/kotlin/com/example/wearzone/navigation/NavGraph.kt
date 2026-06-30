@@ -5,11 +5,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
+import com.example.wearzone.presentation.profile.ProfileScreen
+import com.example.wearzone.presentation.settings.SettingsScreen
 
 @Composable
 fun NavGraph(
@@ -38,6 +41,38 @@ fun NavGraph(
                 },
             )
         }
+
+
+        composable<Route.ProfileRoute> {
+            ProfileScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.HomeRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToSettings = { navController.navigate(Route.SettingsRoute) },
+                onNavigateToWishlist = { },
+                onNavigateToOrders = { },
+                onNavigateToSavedAddresses = { },
+                onNavigateToHome = {
+                    navController.navigate(Route.HomeRoute) {
+                        popUpTo<Route.HomeRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
+
+        composable<Route.SettingsRoute> {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                appVersion = BuildConfig.VERSION_NAME,
+            )
+        }
+
         // Aalaa
 
         // Hend
@@ -89,6 +124,7 @@ fun NavGraph(
                 },
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
+                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
                 onShowSnackbar = { message -> })
         }
 
