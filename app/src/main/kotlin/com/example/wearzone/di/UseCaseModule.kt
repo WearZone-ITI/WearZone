@@ -10,6 +10,11 @@ import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompleted
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
+import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
+import com.example.wearzone.domain.search.repository.IRecentSearchRepository
+import com.example.wearzone.domain.search.usecase.ClearRecentSearchesUseCase
+import com.example.wearzone.domain.search.usecase.GetRecentSearchesUseCase
+import com.example.wearzone.domain.search.usecase.SaveRecentSearchUseCase
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
 import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
@@ -33,37 +38,50 @@ object UseCaseModule {
         repository: IAuthRepository,
     ): SetOnboardingCompletedUseCase = SetOnboardingCompletedUseCase(repository)
 
-
     @Provides
     fun provideGetProductsUseCase(
-        repository: IProductRepository
-    ): GetProductsUseCase {
-        return GetProductsUseCase(repository)
-    }
+        repository: IProductRepository,
+    ): GetProductsUseCase = GetProductsUseCase(repository)
+
+    @Provides
+    fun provideSearchProductsUseCase(
+        repository: IProductRepository,
+    ): SearchProductsUseCase = SearchProductsUseCase(repository)
+
+    @Provides
+    fun provideGetRecentSearchesUseCase(
+        repository: IRecentSearchRepository,
+    ): GetRecentSearchesUseCase = GetRecentSearchesUseCase(repository)
+
+    @Provides
+    fun provideSaveRecentSearchUseCase(
+        repository: IRecentSearchRepository,
+    ): SaveRecentSearchUseCase = SaveRecentSearchUseCase(repository)
+
+    @Provides
+    fun provideClearRecentSearchesUseCase(
+        repository: IRecentSearchRepository,
+    ): ClearRecentSearchesUseCase = ClearRecentSearchesUseCase(repository)
 
     @Provides
     fun provideLoginWithEmailUseCase(
-        repository: IAuthRepository
-    ): LoginWithEmailUseCase {
-        return LoginWithEmailUseCase(repository)
-    }
+        repository: IAuthRepository,
+    ): LoginWithEmailUseCase = LoginWithEmailUseCase(repository)
 
     @Provides
     fun provideLoginWithGoogleUseCase(
-        repository: IAuthRepository
-    ): LoginWithGoogleUseCase {
-        return LoginWithGoogleUseCase(repository)
-    }
+        repository: IAuthRepository,
+    ): LoginWithGoogleUseCase = LoginWithGoogleUseCase(repository)
 
     @Provides
     fun provideRegisterUseCase(
-        repository: IAuthRepository
-    ): RegisterUseCase {
-        return RegisterUseCase(repository)
-    }
+        repository: IAuthRepository,
+    ): RegisterUseCase = RegisterUseCase(repository)
 
     @Provides
     fun provideGetCurrentUserUseCase(
+        repository: IAuthRepository,
+    ): GetCurrentUserUseCase = GetCurrentUserUseCase(repository)
         repository: IAuthRepository
     ): GetCurrentUserUseCase {
         return GetCurrentUserUseCase(repository)
@@ -104,4 +122,3 @@ object UseCaseModule {
         return SetLanguageUseCase(repository)
     }
 }
-

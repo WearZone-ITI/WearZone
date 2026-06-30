@@ -10,6 +10,7 @@ import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 
@@ -21,7 +22,9 @@ fun NavGraph(
     val navController = rememberNavController()
 
     NavHost(
-        navController = navController, startDestination = Route.OnboardingRoute, modifier = modifier
+        navController = navController,
+        startDestination = Route.OnboardingRoute,
+        modifier = modifier,
     ) {
         // Aalaa
         composable<Route.OnboardingRoute> {
@@ -74,8 +77,8 @@ fun NavGraph(
 
         // Hend
         composable<Route.RegisterRoute> {
-           RegisterScreen(
-               onNavigateToHome = {
+            RegisterScreen(
+                onNavigateToHome = {
                     navController.navigate(Route.HomeRoute) {
                         popUpTo<Route.RegisterRoute> {
                             inclusive = true
@@ -88,20 +91,22 @@ fun NavGraph(
                             inclusive = true
                         }
                     }
-                })
+                },
+            )
         }
         // Hend
 
         // Ahmed
         composable<Route.LoginRoute> {
-            LoginScreen(onNavigateToHome = {
-                navController.navigate(Route.HomeRoute) {
-                    popUpTo<Route.LoginRoute> {
-                        inclusive = true
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Route.HomeRoute) {
+                        popUpTo<Route.LoginRoute> {
+                            inclusive = true
+                        }
                     }
-                }
-            },
-                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) }
+                },
+                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
             )
         }
         // Ahmed
@@ -112,6 +117,16 @@ fun NavGraph(
                 onNavigateToProductDetail = { productId -> },
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
+                onNavigateToSearch = { navController.navigate(Route.SearchRoute) },
+                onShowSnackbar = { message -> },
+            )
+        }
+
+        composable<Route.SearchRoute> {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId -> },
+            )
                 onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
                 onShowSnackbar = { message -> })
         }

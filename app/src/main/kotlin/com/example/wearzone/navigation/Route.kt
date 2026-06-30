@@ -3,12 +3,12 @@ package com.example.wearzone.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface Route{
+sealed interface Route {
 
     // Aalaa
-
     @Serializable
     data object OnboardingRoute : Route
+=======
 
     @Serializable
     data object ProfileRoute : Route
@@ -31,8 +31,8 @@ sealed interface Route{
     // Omar
     @Serializable
     data object HomeRoute : Route
+
+    @Serializable
+    data object SearchRoute : Route
     // Omar
-
-
-
 }

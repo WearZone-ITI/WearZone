@@ -52,6 +52,8 @@ fun HomeScreen(
     onNavigateToProductDetail: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onShowSnackbar: (String) -> Unit,
     onNavigateToProfile: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
@@ -70,6 +72,8 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { TopBar() },
+        bottomBar = { BottomBar(onSearchClick = onNavigateToSearch) },
+        containerColor = colorResource(id = R.color.top_bar_background),
         bottomBar = { BottomBar(onNavigateToProfile = onNavigateToProfile) },
         containerColor = AppTheme.colors.background,
     ) { paddingValues ->
@@ -84,6 +88,8 @@ fun HomeScreen(
                 is HomeUiState.Error -> {
                     Text(
                         text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center),
                         color = AppTheme.colors.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -91,37 +97,37 @@ fun HomeScreen(
                 is HomeUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
                     ) {
                         item { GreetingSection(state.userName) }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-                        item { SearchBarSection() }
+                        item { SearchBarSection(onClick = onNavigateToSearch) }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item {
                             HeroBannerSection(
                                 product = state.heroProduct,
-                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
+                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item {
                             TrendingSection(
                                 products = state.trendingProducts,
-                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
+                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item {
                             TopBrandsSection(
                                 brands = state.brands,
-                                onBrandClick = { viewModel.handleIntent(HomeUiIntent.OnBrandClicked(it)) }
+                                onBrandClick = { viewModel.handleIntent(HomeUiIntent.OnBrandClicked(it)) },
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item {
                             NewArrivalsSection(
                                 products = state.newArrivalProducts,
-                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) }
+                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -133,6 +139,12 @@ fun HomeScreen(
 }
 
 @Composable
+fun BottomBar(
+    onSearchClick: () -> Unit,
+) {
+    NavigationBar(
+        containerColor = Color.White,
+        tonalElevation = 8.dp,
 private fun BottomNavLabel(textRes: Int) {
     Text(
         text = stringResource(id = textRes),
@@ -190,6 +202,7 @@ fun BottomBar(
             icon = { BottomNavIcon(Icons.Outlined.Search, R.string.content_desc_search) },
             label = { BottomNavLabel(R.string.nav_search) },
             selected = false,
+            onClick = onSearchClick,
             onClick = { },
             colors = itemColors,
         )
@@ -204,6 +217,7 @@ fun BottomBar(
             icon = { BottomNavIcon(Icons.Outlined.Person, R.string.nav_profile) },
             label = { BottomNavLabel(R.string.nav_profile) },
             selected = false,
+            onClick = { },
             onClick = onNavigateToProfile,
             colors = itemColors,
         )
