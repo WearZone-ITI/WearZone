@@ -41,29 +41,14 @@ fun NavGraph(
                 },
             )
         }
-
-
-        composable<Route.MainRoute> {
-            MainScreen(
-                onNavigateToLogin = {
-                    navController.navigate(Route.LoginRoute) {
-                        popUpTo<Route.MainRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
-                onNavigateToSettings = {
-                    navController.navigate(Route.SettingsRoute)
-                }
-            )
-        }
-
         composable<Route.SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 appVersion = BuildConfig.VERSION_NAME,
             )
         }
+
+
 
         // Aalaa
 
@@ -104,24 +89,22 @@ fun NavGraph(
         // Ahmed
 
         // Omar
-        composable<Route.HomeRoute> {
-            HomeScreen(
-                onNavigateToProductDetail = { productId -> },
-                onNavigateToCategory = { categoryId -> },
-                onNavigateToBrand = { brandId -> },
-                onNavigateToSearch = { navController.navigate(Route.SearchRoute) },
-                onShowSnackbar = { message -> },
-                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
-
+        composable<Route.MainRoute> {
+            MainScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.MainRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Route.SettingsRoute)
+                }
             )
         }
 
-        composable<Route.SearchRoute> {
-            SearchScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToProductDetail = { productId -> },
-            )
-        }
+
         // Omar
     }
 }
