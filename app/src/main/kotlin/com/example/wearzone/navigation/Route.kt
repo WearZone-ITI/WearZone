@@ -8,7 +8,6 @@ sealed interface Route {
     // Aalaa
     @Serializable
     data object OnboardingRoute : Route
-=======
 
     @Serializable
     data object ProfileRoute : Route
@@ -29,6 +28,9 @@ sealed interface Route {
     // Ahmed
 
     // Omar
+
+    @Serializable
+    data object MainRoute : Route
     @Serializable
     data object HomeRoute : Route
 

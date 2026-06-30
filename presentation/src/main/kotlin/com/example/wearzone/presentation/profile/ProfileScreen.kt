@@ -90,17 +90,17 @@ fun ProfileScreen(
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(effect.messageRes))
-                }
+                    showCustomSnackbar(
+                        context = context,
+                        resId = effect.messageRes,
+                        snackbarHostState = snackbarHostState
+                    )                }
             }
         }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            ProfileBottomBar(onNavigateToHome = onNavigateToHome)
-        },
         containerColor = AppTheme.colors.background,
     ) { innerPadding ->
         ProfileContent(
@@ -273,79 +273,13 @@ private fun RecentOrdersHeader(
     }
 }
 
-@Composable
-private fun ProfileBottomNavLabel(textRes: Int) {
-    Text(
-        text = stringResource(textRes),
-        maxLines = 1,
-        softWrap = false,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.labelSmall,
-    )
-}
-
-@Composable
-private fun ProfileBottomNavIcon(
-    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescriptionRes: Int,
+private suspend fun showCustomSnackbar(
+    context: android.content.Context,
+    resId: Int,
+    snackbarHostState: SnackbarHostState
 ) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = stringResource(contentDescriptionRes),
-        modifier = Modifier.size(24.dp),
-    )
-}
-
-@Composable
-private fun ProfileBottomBar(
-    onNavigateToHome: () -> Unit,
-) {
-    val itemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = AppTheme.colors.selected,
-        selectedTextColor = AppTheme.colors.selected,
-        indicatorColor = AppTheme.colors.surfaceVariant,
-        unselectedIconColor = AppTheme.colors.textSecondary,
-        unselectedTextColor = AppTheme.colors.textSecondary,
-    )
-
-    NavigationBar(containerColor = AppTheme.colors.surface) {
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.Home, R.string.nav_home) },
-            label = { ProfileBottomNavLabel(R.string.nav_home) },
-            selected = false,
-            onClick = onNavigateToHome,
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.List, R.string.nav_categories) },
-            label = { ProfileBottomNavLabel(R.string.nav_categories) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.Search, R.string.nav_search) },
-            label = { ProfileBottomNavLabel(R.string.nav_search) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.FavoriteBorder, R.string.nav_wishlist) },
-            label = { ProfileBottomNavLabel(R.string.nav_wishlist) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Filled.Person, R.string.nav_profile) },
-            label = { ProfileBottomNavLabel(R.string.nav_profile) },
-            selected = true,
-            onClick = { },
-            colors = itemColors,
-        )
-    }
+    val message = context.getString(resId)
+    snackbarHostState.showSnackbar(message = message)
 }
 
 private data class ProfileRow(

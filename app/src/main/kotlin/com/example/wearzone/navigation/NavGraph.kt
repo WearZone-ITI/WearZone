@@ -43,26 +43,18 @@ fun NavGraph(
         }
 
 
-        composable<Route.ProfileRoute> {
-            ProfileScreen(
+        composable<Route.MainRoute> {
+            MainScreen(
                 onNavigateToLogin = {
                     navController.navigate(Route.LoginRoute) {
-                        popUpTo<Route.HomeRoute> {
+                        popUpTo<Route.MainRoute> {
                             inclusive = true
                         }
                     }
                 },
-                onNavigateToSettings = { navController.navigate(Route.SettingsRoute) },
-                onNavigateToWishlist = { },
-                onNavigateToOrders = { },
-                onNavigateToSavedAddresses = { },
-                onNavigateToHome = {
-                    navController.navigate(Route.HomeRoute) {
-                        popUpTo<Route.HomeRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
+                onNavigateToSettings = {
+                    navController.navigate(Route.SettingsRoute) // الانتقال لشاشة الإعدادات فوق الـ Bottom Bar بالكامل
+                }
             )
         }
 
@@ -79,7 +71,7 @@ fun NavGraph(
         composable<Route.RegisterRoute> {
             RegisterScreen(
                 onNavigateToHome = {
-                    navController.navigate(Route.HomeRoute) {
+                    navController.navigate(Route.MainRoute) {
                         popUpTo<Route.RegisterRoute> {
                             inclusive = true
                         }
@@ -100,7 +92,7 @@ fun NavGraph(
         composable<Route.LoginRoute> {
             LoginScreen(
                 onNavigateToHome = {
-                    navController.navigate(Route.HomeRoute) {
+                    navController.navigate(Route.MainRoute) {
                         popUpTo<Route.LoginRoute> {
                             inclusive = true
                         }
@@ -119,6 +111,8 @@ fun NavGraph(
                 onNavigateToBrand = { brandId -> },
                 onNavigateToSearch = { navController.navigate(Route.SearchRoute) },
                 onShowSnackbar = { message -> },
+                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
+
             )
         }
 
@@ -127,8 +121,6 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToProductDetail = { productId -> },
             )
-                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
-                onShowSnackbar = { message -> })
         }
         // Omar
     }

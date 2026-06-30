@@ -80,12 +80,8 @@ object UseCaseModule {
 
     @Provides
     fun provideGetCurrentUserUseCase(
-        repository: IAuthRepository,
-    ): GetCurrentUserUseCase = GetCurrentUserUseCase(repository)
         repository: IAuthRepository
-    ): GetCurrentUserUseCase {
-        return GetCurrentUserUseCase(repository)
-    }
+    ): GetCurrentUserUseCase = GetCurrentUserUseCase(repository)
 
     @Provides
     fun provideLogoutUseCase(

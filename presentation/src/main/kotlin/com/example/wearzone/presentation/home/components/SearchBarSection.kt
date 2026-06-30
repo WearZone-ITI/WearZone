@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,23 +32,16 @@ fun SearchBarSection(
         modifier = Modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(colorResource(id = R.color.search_bar_background))
-            .clickable(onClick = onClick)
             .background(AppTheme.colors.surface)
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                Icons.Default.Search,
+                imageVector = Icons.Default.Search,
                 contentDescription = stringResource(id = R.string.content_desc_search),
-                tint = Color.Gray,
+                tint = AppTheme.colors.textSecondary
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(id = R.string.search_placeholder),
-                color = Color.Gray,
-                fontSize = 16.sp,
-                tint = AppTheme.colors.textSecondary)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = stringResource(id = R.string.search_placeholder),
