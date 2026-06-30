@@ -7,7 +7,7 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface RecentSearchDao {
+interface RecentSearchEntity {
     @Query("SELECT * FROM recent_searches ORDER BY searched_at DESC LIMIT :limit")
     fun observeRecentSearches(limit: Int = 8): Flow<List<RecentSearchDto>>
 

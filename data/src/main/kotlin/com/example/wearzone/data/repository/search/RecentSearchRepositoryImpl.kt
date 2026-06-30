@@ -1,7 +1,7 @@
 package com.example.wearzone.data.repository.search
 
 import com.example.wearzone.data.di.IoDispatcher
-import com.example.wearzone.data.local.search.RecentSearchDao
+import com.example.wearzone.data.local.search.RecentSearchEntity
 import com.example.wearzone.data.local.search.RecentSearchDto
 import com.example.wearzone.domain.search.model.RecentSearch
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RecentSearchRepositoryImpl @Inject constructor(
-    private val dao: RecentSearchDao,
+    private val dao: RecentSearchEntity,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IRecentSearchRepository {
 
