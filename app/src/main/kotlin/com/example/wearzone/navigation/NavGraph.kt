@@ -23,7 +23,7 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.OnboardingRoute,
+        startDestination = Route.MainRoute,
         modifier = modifier,
     ) {
         // Aalaa
@@ -53,7 +53,7 @@ fun NavGraph(
                     }
                 },
                 onNavigateToSettings = {
-                    navController.navigate(Route.SettingsRoute) // الانتقال لشاشة الإعدادات فوق الـ Bottom Bar بالكامل
+                    navController.navigate(Route.SettingsRoute)
                 }
             )
         }

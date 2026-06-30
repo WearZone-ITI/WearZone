@@ -1,5 +1,6 @@
 package com.example.wearzone.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -58,6 +59,8 @@ fun MainScreen(
     )
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = AppTheme.colors.background,
         bottomBar = {
             val itemColors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AppTheme.colors.selected,
@@ -125,7 +128,7 @@ fun MainScreen(
         NavHost(
             navController = bottomNavController,
             startDestination = Route.HomeRoute,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
         ) {
             composable<Route.HomeRoute> {
                 HomeScreen(
