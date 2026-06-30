@@ -5,42 +5,26 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
-import com.example.wearzone.presentation.home.components.GreetingSection
+import com.example.wearzone.presentation.common.GreetingSection
 import com.example.wearzone.presentation.home.components.HeroBannerSection
 import com.example.wearzone.presentation.home.components.NewArrivalsSection
 import com.example.wearzone.presentation.home.components.SearchBarSection
-import com.example.wearzone.presentation.home.components.TopBar
+import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
 import kotlinx.coroutines.flow.collectLatest
@@ -53,7 +37,6 @@ fun HomeScreen(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
     onNavigateToSearch: () -> Unit,
-    onShowSnackbar: (String) -> Unit,
     onNavigateToProfile: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
@@ -72,9 +55,6 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { TopBar() },
-        bottomBar = { BottomBar(onSearchClick = onNavigateToSearch) },
-        containerColor = colorResource(id = R.color.top_bar_background),
-        bottomBar = { BottomBar(onNavigateToProfile = onNavigateToProfile) },
         containerColor = AppTheme.colors.background,
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -88,8 +68,6 @@ fun HomeScreen(
                 is HomeUiState.Error -> {
                     Text(
                         text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center),
                         color = AppTheme.colors.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -135,91 +113,5 @@ fun HomeScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun BottomBar(
-    onSearchClick: () -> Unit,
-) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 8.dp,
-private fun BottomNavLabel(textRes: Int) {
-    Text(
-        text = stringResource(id = textRes),
-        maxLines = 1,
-        softWrap = false,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.labelSmall,
-    )
-}
-
-@Composable
-private fun BottomNavIcon(
-    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescriptionRes: Int,
-) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = stringResource(id = contentDescriptionRes),
-        modifier = Modifier.size(24.dp),
-    )
-}
-
-@Composable
-fun BottomBar(
-    onNavigateToProfile: () -> Unit,
-) {
-    val itemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = AppTheme.colors.selected,
-        selectedTextColor = AppTheme.colors.selected,
-        indicatorColor = AppTheme.colors.surfaceVariant,
-        unselectedIconColor = AppTheme.colors.textSecondary,
-        unselectedTextColor = AppTheme.colors.textSecondary,
-    )
-
-    NavigationBar(
-        containerColor = AppTheme.colors.surface,
-        tonalElevation = 8.dp
-    ) {
-        NavigationBarItem(
-            icon = { BottomNavIcon(Icons.Default.Home, R.string.nav_home) },
-            label = { BottomNavLabel(R.string.nav_home) },
-            selected = true,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { BottomNavIcon(Icons.Outlined.List, R.string.nav_categories) },
-            label = { BottomNavLabel(R.string.nav_categories) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { BottomNavIcon(Icons.Outlined.Search, R.string.content_desc_search) },
-            label = { BottomNavLabel(R.string.nav_search) },
-            selected = false,
-            onClick = onSearchClick,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { BottomNavIcon(Icons.Outlined.FavoriteBorder, R.string.nav_wishlist) },
-            label = { BottomNavLabel(R.string.nav_wishlist) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { BottomNavIcon(Icons.Outlined.Person, R.string.nav_profile) },
-            label = { BottomNavLabel(R.string.nav_profile) },
-            selected = false,
-            onClick = { },
-            onClick = onNavigateToProfile,
-            colors = itemColors,
-        )
     }
 }

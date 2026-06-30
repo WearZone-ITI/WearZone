@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.TopBar
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.search.components.RecentSearches
 import com.example.wearzone.presentation.search.components.SearchField
 import com.example.wearzone.presentation.search.components.SearchFilterSheet
@@ -48,21 +49,10 @@ fun SearchScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(id = R.string.search_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.content_desc_back),
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppColors.Background),
-            )
-        },
-        containerColor = AppColors.Background,
+
+        topBar = { TopBar() }
+        ,
+        containerColor = AppTheme.colors.background,
     ) { paddingValues ->
         SearchContent(
             state = uiState,

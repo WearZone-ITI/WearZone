@@ -3,38 +3,28 @@ package com.example.wearzone.presentation.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -51,13 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
+import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.profile.components.LogoutConfirmationDialog
 import com.example.wearzone.presentation.profile.components.ProfileHeader
 import com.example.wearzone.presentation.profile.components.ProfileMenuRow
@@ -90,17 +79,20 @@ fun ProfileScreen(
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(effect.messageRes))
-                }
+                    showCustomSnackbar(
+                        context = context,
+                        resId = effect.messageRes,
+                        snackbarHostState = snackbarHostState
+                    )                }
             }
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            ProfileBottomBar(onNavigateToHome = onNavigateToHome)
+        topBar = {
+            TopBar()
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = AppTheme.colors.background,
     ) { innerPadding ->
         ProfileContent(
@@ -162,10 +154,8 @@ private fun ProfileLoadedContent(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        item { ProfileTopBar() }
-        item { Spacer(modifier = Modifier.height(64.dp)) }
         item {
             ProfileHeader(
                 displayName = uiState.displayName,
@@ -209,40 +199,6 @@ private fun ProfileLoadedContent(
 }
 
 @Composable
-private fun ProfileTopBar() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Outlined.Menu,
-                contentDescription = stringResource(R.string.content_desc_menu),
-                tint = AppTheme.colors.textPrimary,
-            )
-        }
-        Text(
-            text = stringResource(R.string.profile_brand_title),
-            style = MaterialTheme.typography.headlineLarge,
-            color = AppTheme.colors.textPrimary,
-            modifier = Modifier.weight(1f),
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingBag,
-                contentDescription = stringResource(R.string.content_desc_cart),
-                tint = AppTheme.colors.textPrimary,
-            )
-        }
-    }
-}
-
-@Composable
 private fun RecentOrdersHeader(
     onViewAllClicked: () -> Unit,
 ) {
@@ -273,79 +229,13 @@ private fun RecentOrdersHeader(
     }
 }
 
-@Composable
-private fun ProfileBottomNavLabel(textRes: Int) {
-    Text(
-        text = stringResource(textRes),
-        maxLines = 1,
-        softWrap = false,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.labelSmall,
-    )
-}
-
-@Composable
-private fun ProfileBottomNavIcon(
-    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescriptionRes: Int,
+private suspend fun showCustomSnackbar(
+    context: android.content.Context,
+    resId: Int,
+    snackbarHostState: SnackbarHostState
 ) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = stringResource(contentDescriptionRes),
-        modifier = Modifier.size(24.dp),
-    )
-}
-
-@Composable
-private fun ProfileBottomBar(
-    onNavigateToHome: () -> Unit,
-) {
-    val itemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = AppTheme.colors.selected,
-        selectedTextColor = AppTheme.colors.selected,
-        indicatorColor = AppTheme.colors.surfaceVariant,
-        unselectedIconColor = AppTheme.colors.textSecondary,
-        unselectedTextColor = AppTheme.colors.textSecondary,
-    )
-
-    NavigationBar(containerColor = AppTheme.colors.surface) {
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.Home, R.string.nav_home) },
-            label = { ProfileBottomNavLabel(R.string.nav_home) },
-            selected = false,
-            onClick = onNavigateToHome,
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.List, R.string.nav_categories) },
-            label = { ProfileBottomNavLabel(R.string.nav_categories) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.Search, R.string.nav_search) },
-            label = { ProfileBottomNavLabel(R.string.nav_search) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Outlined.FavoriteBorder, R.string.nav_wishlist) },
-            label = { ProfileBottomNavLabel(R.string.nav_wishlist) },
-            selected = false,
-            onClick = { },
-            colors = itemColors,
-        )
-        NavigationBarItem(
-            icon = { ProfileBottomNavIcon(Icons.Filled.Person, R.string.nav_profile) },
-            label = { ProfileBottomNavLabel(R.string.nav_profile) },
-            selected = true,
-            onClick = { },
-            colors = itemColors,
-        )
-    }
+    val message = context.getString(resId)
+    snackbarHostState.showSnackbar(message = message)
 }
 
 private data class ProfileRow(
