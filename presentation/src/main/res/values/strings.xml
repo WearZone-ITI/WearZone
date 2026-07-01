@@ -288,6 +288,14 @@
     <!--Search-->
 
     <!--Omar-->
+    <string name="wishlist_title">Your Wishlist</string>
+    <string name="wishlist_items_saved">%1$d items saved</string>
+    <string name="wishlist_sold_out">Sold Out</string>
+    <string name="wishlist_out_of_stock">Out of Stock</string>
+    <string name="wishlist_empty_title">Your wishlist is empty</string>
+    <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
+    <string name="wishlist_item_removed">Item removed from wishlist</string>
+    <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
 
 
 

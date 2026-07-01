@@ -185,4 +185,12 @@
     <string name="search_error_subtitle">لم نتمكن من تحميل المنتجات في الوقت الحالي.</string>
     <string name="search_retry">إعادة المحاولة</string>
     <!-- Omar -->
+    <string name="wishlist_title">قائمة أمنياتك</string>
+    <string name="wishlist_items_saved">%1$d عناصر محفوظة</string>
+    <string name="wishlist_sold_out">مباع</string>
+    <string name="wishlist_out_of_stock">نفذت الكمية</string>
+    <string name="wishlist_empty_title">قائمة أمنياتك فارغة</string>
+    <string name="wishlist_empty_subtitle">احفظ العناصر التي تحبها لعرضها لاحقًا.</string>
+    <string name="wishlist_item_removed">تمت إزالة العنصر من المفضلة</string>
+    <string name="wishlist_sign_in_required">قم بتسجيل الدخول لمزامنة قائمتك</string>
 </resources>

@@ -55,7 +55,7 @@ fun MainScreen(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
         BottomNavItem(Route.HomeRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
         BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
-        BottomNavItem(Route.HomeRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
+        BottomNavItem(Route.WishlistRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
         BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
     )
 
@@ -86,7 +86,7 @@ fun MainScreen(
                     val isSelected = when (item.labelRes) {
                         R.string.nav_home -> currentDestination?.hasRoute(Route.HomeRoute::class) == true
                         R.string.nav_categories -> false
-                        R.string.nav_wishlist -> false
+                        R.string.nav_wishlist -> currentDestination?.hasRoute(Route.WishlistRoute::class) == true
                         R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
                         else -> isRouteMatch
                     }
@@ -111,7 +111,7 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            if (item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
+                            if (item.labelRes != R.string.nav_categories) {
 
                                 if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
                                     bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
@@ -171,7 +171,9 @@ fun MainScreen(
                 ProfileScreen(
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToWishlist = { },
+                    onNavigateToWishlist = { 
+                        bottomNavController.navigate(Route.WishlistRoute)
+                    },
                     onNavigateToOrders = { },
                     onNavigateToSavedAddresses = { },
                     onNavigateToHome = {
@@ -179,6 +181,13 @@ fun MainScreen(
                             popUpTo<Route.HomeRoute> { inclusive = true }
                         }
                     }
+                )
+            }
+
+            composable<Route.WishlistRoute> {
+                com.example.wearzone.presentation.wishlist.WishlistScreen(
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onShowSnackbar = { /* Scaffold state not passed, would handle via LocalSnackbarHostState */ }
                 )
             }
         }

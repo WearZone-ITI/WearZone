@@ -27,6 +27,7 @@ import com.example.wearzone.presentation.home.components.SearchBarSection
 import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
+import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +74,13 @@ fun HomeScreen(
                     )
                 }
                 is HomeUiState.Success -> {
+                    if (state.productToRemove != null) {
+                        RemoveFavoriteDialog(
+                            onConfirm = { viewModel.handleIntent(HomeUiIntent.OnConfirmRemove) },
+                            onDismiss = { viewModel.handleIntent(HomeUiIntent.OnCancelRemove) }
+                        )
+                    }
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -92,6 +100,7 @@ fun HomeScreen(
                             TrendingSection(
                                 products = state.trendingProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
+                                onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -106,6 +115,7 @@ fun HomeScreen(
                             NewArrivalsSection(
                                 products = state.newArrivalProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
+                                onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
