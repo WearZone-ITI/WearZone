@@ -32,7 +32,7 @@ data class ProductDto(
     val currencyCode: String,
     val imageUrl: String? = null
 ) {
-    fun toDomain(): Product = Product(id, title, vendor, price, currencyCode, imageUrl)
+    fun toDomain(): Product = Product(id, title, vendor, price, currencyCode, imageUrl, isFavorite = false)
 }
 
 @Serializable

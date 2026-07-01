@@ -31,6 +31,10 @@ import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUs
 import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
 import com.example.wearzone.domain.settings.usecase.SetNotificationsEnabledUseCase
 import com.example.wearzone.domain.settings.usecase.SetThemeModeUseCase
+import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
+import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.SyncWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -189,4 +193,17 @@ object UseCaseModule {
         setDefaultAddress = setDefaultAddress,
         deleteAddress = deleteAddress,
     )
+    fun provideObserveWishlistUseCase(
+        repository: IWishlistRepository
+    ): ObserveWishlistUseCase = ObserveWishlistUseCase(repository)
+
+    @Provides
+    fun provideToggleFavoriteUseCase(
+        repository: IWishlistRepository
+    ): ToggleFavoriteUseCase = ToggleFavoriteUseCase(repository)
+
+    @Provides
+    fun provideSyncWishlistUseCase(
+        repository: IWishlistRepository
+    ): SyncWishlistUseCase = SyncWishlistUseCase(repository)
 }

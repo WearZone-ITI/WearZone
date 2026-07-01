@@ -3,9 +3,13 @@ package com.example.wearzone.presentation.product.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.presentation.R
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
+import com.example.wearzone.domain.wishlist.model.WishlistItem
+import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -23,6 +27,8 @@ class ProductDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getProductDetailUseCase: GetProductDetailUseCase,
     private val authRepository: IAuthRepository,
+    private val observeWishlistUseCase: ObserveWishlistUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     private val productId: Long = savedStateHandle["productId"] ?: 9091143729380L
@@ -43,7 +49,29 @@ class ProductDetailViewModel @Inject constructor(
             is ProductDetailUiIntent.Retry -> loadProduct()
             is ProductDetailUiIntent.SelectSize -> selectSize(intent.size)
             is ProductDetailUiIntent.AddToCart -> addToCart()
-            is ProductDetailUiIntent.OnToggleFavorite -> toggleFavorite()
+            is ProductDetailUiIntent.OnToggleFavorite -> {
+                val state = _uiState.value
+                if (state is ProductDetailUiState.Success) {
+                    if (state.isFavorite) {
+                        _uiState.value = state.copy(showRemoveDialog = true)
+                    } else {
+                        toggleFavorite(isAdding = true)
+                    }
+                }
+            }
+            is ProductDetailUiIntent.OnCancelRemove -> {
+                val state = _uiState.value
+                if (state is ProductDetailUiState.Success) {
+                    _uiState.value = state.copy(showRemoveDialog = false)
+                }
+            }
+            is ProductDetailUiIntent.OnConfirmRemove -> {
+                val state = _uiState.value
+                if (state is ProductDetailUiState.Success) {
+                    _uiState.value = state.copy(showRemoveDialog = false)
+                    toggleFavorite(isAdding = false)
+                }
+            }
         }
     }
 
@@ -53,6 +81,8 @@ class ProductDetailViewModel @Inject constructor(
             when (val result = getProductDetailUseCase(productId)) {
                 is DataResult.Success -> {
                     val productDetail = result.data
+                    val user = authRepository.getCurrentUser()
+                    
                     _uiState.value = ProductDetailUiState.Success(
                         id = productDetail.id,
                         title = productDetail.title,
@@ -65,9 +95,22 @@ class ProductDetailViewModel @Inject constructor(
                         reviewsCount = productDetail.reviewsCount,
                         isFavorite = productDetail.isFavorite
                     )
+                    
+                    if (user != null && user.uid.isNotEmpty()) {
+                        launch {
+                            observeWishlistUseCase(user.uid).collect { wishlistItems ->
+                                val isFav = wishlistItems.any { it.id == productDetail.id.toString() }
+                                _uiState.update { state ->
+                                    if (state is ProductDetailUiState.Success) {
+                                        state.copy(isFavorite = isFav)
+                                    } else state
+                                }
+                            }
+                        }
+                    }
                 }
                 is DataResult.Error -> {
-                    _uiState.value = ProductDetailUiState.Error(com.example.presentation.R.string.product_detail_error_loading)
+                    _uiState.value = ProductDetailUiState.Error(R.string.product_detail_error_loading)
                 }
             }
         }
@@ -92,27 +135,38 @@ class ProductDetailViewModel @Inject constructor(
             
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
             if (state.selectedSize == null) {
-                _uiEffect.send(ProductDetailUiEffect.ShowToast(com.example.presentation.R.string.product_detail_select_size_first))
+                _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.product_detail_select_size_first))
                 return@launch
             }
             
-            _uiEffect.send(ProductDetailUiEffect.ShowToast(com.example.presentation.R.string.product_detail_added_to_cart))
+            _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.product_detail_added_to_cart))
         }
     }
 
-    private fun toggleFavorite() {
+    private fun toggleFavorite(isAdding: Boolean = true) {
         viewModelScope.launch {
             if (!authRepository.isLoggedIn()) {
                 _uiEffect.send(ProductDetailUiEffect.ShowAuthRequiredError)
                 return@launch
             }
             
-            _uiState.update { state ->
-                if (state is ProductDetailUiState.Success) {
-                    state.copy(isFavorite = !state.isFavorite)
-                } else {
-                    state
-                }
+            val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
+            val user = authRepository.getCurrentUser() ?: return@launch
+            
+            val item = WishlistItem(
+                id = state.id.toString(),
+                title = state.title,
+                vendor = state.vendor,
+                price = state.price,
+                currencyCode = "EGP", // Provide a default currency if not in ProductDetail
+                imageUrl = state.images.firstOrNull() ?: "",
+                isOutOfStock = false
+            )
+            
+            toggleFavoriteUseCase(item, user.uid)
+            
+            if (isAdding) {
+                _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.product_detail_added_to_cart))
             }
         }
     }
