@@ -1,7 +1,7 @@
 package com.example.wearzone.data.remote.dto
 
+import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.product.model.Brand
-import com.example.wearzone.domain.product.model.Category
 import com.example.wearzone.domain.product.model.Product
 import kotlinx.serialization.Serializable
 
@@ -9,9 +9,10 @@ import kotlinx.serialization.Serializable
 data class CategoryDto(
     val id: String,
     val title: String,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val productsCount: Int? = null
 ) {
-    fun toDomain(): Category = Category(id, title, imageUrl)
+    fun toDomain(): Category = Category(id, title, imageUrl, productsCount)
 }
 
 @Serializable
@@ -45,7 +46,7 @@ data class SmartCollectionsResponse(val smart_collections: List<ShopifyCollectio
 data class ShopifyCollection(
     val id: Long,
     val title: String,
-    val image: ShopifyImage? = null
+    val image: ShopifyImage? = null,
 ) {
     fun toCategoryDto() = CategoryDto(id.toString(), title, image?.src)
     fun toBrandDto() = BrandDto(id.toString(), title, image?.src)

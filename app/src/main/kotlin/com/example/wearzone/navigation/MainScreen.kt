@@ -31,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.presentation.R
+import com.example.wearzone.presentation.categories.CategoriesScreen
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
@@ -53,7 +54,7 @@ fun MainScreen(
 
     val navItems = listOf(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
-        BottomNavItem(Route.HomeRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
+        BottomNavItem(Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
         BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
         BottomNavItem(Route.HomeRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
         BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
@@ -85,7 +86,7 @@ fun MainScreen(
 
                     val isSelected = when (item.labelRes) {
                         R.string.nav_home -> currentDestination?.hasRoute(Route.HomeRoute::class) == true
-                        R.string.nav_categories -> false
+                        R.string.nav_categories -> currentDestination?.hasRoute(Route.CategoriesRoute::class) == true
                         R.string.nav_wishlist -> false
                         R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
                         else -> isRouteMatch
@@ -111,7 +112,7 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            if (item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
+                            if (item.labelRes != R.string.nav_wishlist) {
 
                                 if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
                                     bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
@@ -152,12 +153,15 @@ fun MainScreen(
             composable<Route.HomeRoute> {
                 HomeScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
-                    onNavigateToCategory = { },
+                    onNavigateToCategory = { bottomNavController.navigate(Route.CategoriesRoute) },
                     onNavigateToBrand = { },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
                     onShowSnackbar = { },
                     onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) }
                 )
+            }
+            composable<Route.CategoriesRoute> {
+                CategoriesScreen()
             }
 
             composable<Route.SearchRoute> {

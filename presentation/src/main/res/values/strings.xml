@@ -287,6 +287,18 @@
     <string name="search_retry">Retry</string>
     <!--Search-->
 
+    <string name="categories_title">Categories</string>
+    <string name="categories_search_placeholder">Search categories…</string>
+    <string name="categories_search_content_description">Search Categories</string>
+    <string name="categories_clear_search_content_description">Clear Search</string>
+    <string name="categories_retry_button">Retry</string>
+    <string name="categories_no_results_found">No categories found for \"%1$s\"</string>
+    <string name="categories_no_data_available">No categories available</string>
+    <string name="categories_products_available">%1$d Products Available</string>
+
+    <string name="error_network">Network error, please check your connection</string>
+    <string name="error_server">Server error (%1$s)</string>
+    <string name="error_unknown">Something went wrong</string>
     <!--Omar-->
 
 
