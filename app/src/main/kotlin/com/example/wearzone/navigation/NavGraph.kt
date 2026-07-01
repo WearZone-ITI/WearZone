@@ -23,7 +23,7 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.HomeRoute,
+        startDestination = Route.OnboardingRoute,
         modifier = modifier,
     ) {
         // Aalaa

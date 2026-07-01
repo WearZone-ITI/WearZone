@@ -18,6 +18,7 @@ object DatabaseModule {
     private const val DATABASE_NAME = "wear_zone_database"
 
     @Provides
+    @Singleton
     fun provideWearZoneDatabase(
         @ApplicationContext context: Context,
     ): WearZoneDatabase {
@@ -35,5 +36,6 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideCartDao(database: WearZoneDatabase): CartDao = database.cartDao()
 }

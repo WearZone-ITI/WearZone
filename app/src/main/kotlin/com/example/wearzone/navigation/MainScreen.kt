@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,7 +39,7 @@ import com.example.wearzone.presentation.search.SearchScreen
 
 data class BottomNavItem<T : Any>(
     val route: T,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val icon: ImageVector,
     val labelRes: Int,
     val contentDescriptionRes: Int
 )
@@ -184,7 +185,9 @@ fun MainScreen(
             composable<Route.SearchRoute> {
                 SearchScreen(
                     onNavigateBack = { bottomNavController.popBackStack() },
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) })
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onNavigateToCart = {onNavigateToCard()}
+                )
             }
 
             composable<Route.ProfileRoute> {
@@ -194,11 +197,6 @@ fun MainScreen(
                     onNavigateToWishlist = { },
                     onNavigateToOrders = { },
                     onNavigateToSavedAddresses = { },
-                    onNavigateToHome = {
-                        bottomNavController.navigate(Route.HomeRoute) {
-                            popUpTo<Route.HomeRoute> { inclusive = true }
-                        }
-                    },
                     onNavigateToCard = { bottomNavController.navigate(Route.CartRoute) })
             }
         }
