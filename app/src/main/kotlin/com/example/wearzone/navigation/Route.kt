@@ -39,5 +39,8 @@ sealed interface Route {
 
     @Serializable
     data object SearchRoute : Route
+    
+    @Serializable
+    data object WishlistRoute : Route
     // Omar
 }
