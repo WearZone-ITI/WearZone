@@ -32,7 +32,10 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar() {
+fun TopBar(
+    cartItemCount: Int,
+    onAddToCartClick : ()->Unit
+) {
     TopAppBar(
         windowInsets = WindowInsets(0, 0, 0, 0),
         title = {
@@ -61,19 +64,22 @@ fun TopBar() {
         },
         actions = {
             Box(modifier = Modifier.padding(end = 8.dp)) {
-                IconButton(onClick = { }) {
+                IconButton(onClick = { onAddToCartClick()
+                }) {
                     Icon(
                         imageVector = Icons.Outlined.ShoppingCart,
                         contentDescription = stringResource(id = R.string.content_desc_cart),
                         tint = AppTheme.colors.textPrimary,
                     )
                 }
-                Badge(
-                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
-                    containerColor = AppTheme.colors.selected,
-                    contentColor = AppTheme.colors.onAccent,
-                ) {
-                    Text(text = stringResource(id = R.string.dummy_cart_count))
+                if (cartItemCount > 0) {
+                    Badge(
+                        modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
+                        containerColor = AppTheme.colors.selected,
+                        contentColor = AppTheme.colors.onAccent,
+                    ) {
+                        Text(text = cartItemCount.toString())
+                    }
                 }
             }
         },

@@ -18,7 +18,11 @@ import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
-fun NewArrivalsSection(products: List<Product>, onProductClick: (String) -> Unit) {
+fun NewArrivalsSection(
+    products: List<Product>,
+    onProductClick: (String) -> Unit,
+    onAddToCartClick: (Product) -> Unit = {}
+) {
     Column {
         Text(
             text = stringResource(id = R.string.home_new_arrivals),
@@ -31,7 +35,7 @@ fun NewArrivalsSection(products: List<Product>, onProductClick: (String) -> Unit
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(products) { product ->
-                ProductCard(product, onProductClick)
+                ProductCard(product, onProductClick, onAddToCartClick)
             }
         }
     }
