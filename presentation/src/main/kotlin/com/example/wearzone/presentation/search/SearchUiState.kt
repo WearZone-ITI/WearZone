@@ -18,6 +18,7 @@ data class SearchUiState(
     val hasSearched: Boolean = false,
     val hasError: Boolean = false,
     val errorMessage: String? = null,
+    val cartItemCount: Int = 0,
 )
 
 data class ProductSearchUiModel(

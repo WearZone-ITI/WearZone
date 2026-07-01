@@ -3,6 +3,7 @@ package com.example.wearzone.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.Brand
@@ -38,6 +39,7 @@ class SearchViewModel @Inject constructor(
     private val getRecentSearchesUseCase: GetRecentSearchesUseCase,
     private val saveRecentSearchUseCase: SaveRecentSearchUseCase,
     private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase,
+    private val observeCartUseCase: ObserveCartUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -53,6 +55,7 @@ class SearchViewModel @Inject constructor(
         observeQueryChanges()
         loadFilterOptions()
         searchProducts()
+        observeCart()
     }
 
     fun handleIntent(intent: SearchUiIntent) {
@@ -234,5 +237,16 @@ class SearchViewModel @Inject constructor(
 
     private fun String.filterPriceInput(): String {
         return filterIndexed { index, char -> char.isDigit() || (char == '.' && indexOf('.') == index) }
+    }
+
+    private fun observeCart() {
+        viewModelScope.launch {
+            observeCartUseCase().collect { cartItems ->
+                val count = cartItems.sumOf { it.quantity }
+                _uiState.update { state ->
+                    state.copy(cartItemCount = count)
+                }
+            }
+        }
     }
 }
