@@ -67,8 +67,6 @@ class SettingsPreferencesDataSourceImpl(
     override suspend fun getCustomerId(): Long? =
         dataStore.data.map { it[CUSTOMER_ID_KEY] }.first()
 
-    override fun observeCustomerId(): Flow<Long?> = dataStore.data.map { it[CUSTOMER_ID_KEY] }
-
     private fun String?.toThemeMode(): ThemeMode =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SystemDefault
 

@@ -11,5 +11,4 @@ interface ISettingsPreferencesDataSource {
     suspend fun setLanguage(languageCode: String)
     suspend fun setCustomerId(id: Long?)
     suspend fun getCustomerId(): Long?
-    fun observeCustomerId(): Flow<Long?>
 }
