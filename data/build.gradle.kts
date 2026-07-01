@@ -52,6 +52,8 @@ dependencies {
 
     //Hend
     testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.database.ktx)
     //Hend
 
     implementation(libs.androidx.appcompat)

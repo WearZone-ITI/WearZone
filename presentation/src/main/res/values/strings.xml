@@ -90,6 +90,69 @@
     <string name="settings_error_load_failed">Unable to load settings. Please try again.</string>
     <string name="settings_error_save_failed">Unable to save settings. Please try again.</string>
     <!--Profile and Settings-->
+
+
+    <!--Customer Addresses-->
+    <string name="address_list_title">Saved Addresses</string>
+    <string name="address_list_subtitle">Manage your shipping destinations.</string>
+    <string name="address_refresh">Refresh addresses</string>
+    <string name="address_card_label">Shipping Address</string>
+    <string name="address_default_badge">DEFAULT</string>
+    <string name="address_edit">Edit address</string>
+    <string name="address_delete">Delete address</string>
+    <string name="address_set_default">Set as default</string>
+    <string name="address_add_new">Add New Address</string>
+    <string name="address_empty_title">No saved addresses</string>
+    <string name="address_empty_subtitle">Add a shipping destination to make checkout faster.</string>
+    <string name="address_delete_dialog_title">Delete Address?</string>
+    <string name="address_delete_dialog_message">Are you sure you want to delete this address?</string>
+    <string name="address_delete_dialog_confirm">Delete Address</string>
+    <string name="address_delete_dialog_cancel">Cancel</string>
+    <string name="address_add_title">Add Address</string>
+    <string name="address_edit_title">Edit Address</string>
+    <string name="address_contact_information">CONTACT INFORMATION</string>
+    <string name="address_delivery_address">DELIVERY ADDRESS</string>
+    <string name="address_recipient_name">Recipient Name</string>
+    <string name="address_recipient_name_hint">Full name on the order</string>
+    <string name="address_country_code">Country code</string>
+    <string name="address_country_code_egypt">Egypt %1$s</string>
+    <string name="address_mobile_number">Mobile Number</string>
+    <string name="address_mobile_number_hint">01XXXXXXXXX</string>
+    <string name="address_country">Country</string>
+    <string name="address_country_hint">Egypt</string>
+    <string name="address_city">City</string>
+    <string name="address_city_hint">Cairo</string>
+    <string name="address_postal_code">Postal Code</string>
+    <string name="address_postal_code_hint">5 digits</string>
+    <string name="address_street">Street / Full Address</string>
+    <string name="address_street_hint">Building, street, area</string>
+    <string name="address_address2">Apartment, suite, or floor</string>
+    <string name="address_address2_hint">Optional apartment or floor</string>
+    <string name="address_province">Province / Governorate</string>
+    <string name="address_province_hint">Cairo Governorate</string>
+    <string name="address_company">Company</string>
+    <string name="address_company_hint">Optional company name</string>
+    <string name="address_set_as_default">Set as default address</string>
+    <string name="address_set_as_default_subtitle">Use this address for future orders</string>
+    <string name="address_save">Save Address</string>
+    <string name="address_save_success">Address saved.</string>
+    <string name="address_delete_success">Address deleted.</string>
+    <string name="address_set_default_success">Default address updated.</string>
+    <string name="address_error_required_field">This field is required.</string>
+    <string name="address_error_invalid_phone">Phone number must be exactly 11 digits.</string>
+    <string name="address_error_invalid_egypt_phone">Enter a valid Egyptian mobile number, like 01012345678.</string>
+    <string name="address_error_invalid_recipient_name">Enter the recipient name using at least 2 letters.</string>
+    <string name="address_error_invalid_city">Enter a valid city.</string>
+    <string name="address_error_invalid_province">Enter a valid governorate.</string>
+    <string name="address_error_invalid_street">Enter a complete street address.</string>
+    <string name="address_error_invalid_postal_code">Postal code must contain digits only.</string>
+    <string name="address_error_unsupported_country">WearZone currently supports Egypt addresses only.</string>
+    <string name="address_error_unsupported_country_code">WearZone currently supports Egypt +20 only.</string>
+    <string name="address_error_cannot_delete_default">Default addresses cannot be deleted. Set another address as default first.</string>
+    <string name="address_error_customer_id_unavailable">Shopify customer id is not available yet. Please connect account mapping before managing addresses.</string>
+    <string name="address_error_generic">Unable to update addresses right now. Please try again.</string>
+    <!--Customer Addresses-->
+
     <!--Aalaa-->
 
     <!--Hend-->
@@ -131,6 +194,16 @@
     <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
 
     <string name="error_register_failed">Registration failed. Please try again.</string>
+
+    <string name="error_firebase_sign_up_failed">Unable to create your Firebase account. Please try again.</string>
+
+    <string name="error_shopify_customer_creation_failed">Unable to create your Shopify customer profile. Please try again.</string>
+
+    <string name="error_firestore_profile_save_failed">Unable to save your customer profile. Please try again.</string>
+
+    <string name="error_firestore_profile_fetch_failed">Unable to load your customer profile. Please try again.</string>
+
+    <string name="error_local_customer_id_save_failed">Unable to save your customer session. Please try again.</string>
 
     <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
 
@@ -203,11 +276,24 @@
     <string name="product_detail_select_size_first">Please select a size first.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
     <string name="product_detail_auth_required">Please log in to continue.</string>
-
     <string name="content_desc_wishlist_add">Add to wishlist</string>
     <string name="content_desc_wishlist_remove">Remove from wishlist</string>
     <string name="content_desc_product_image">Product image</string>
     <string name="content_desc_star_rating">Star rating</string>
+    <!-- Wish List Screen -->
+    <string name="wishlist_title">Your Wishlist</string>
+    <string name="wishlist_items_saved">%1$d items saved</string>
+    <string name="wishlist_sold_out">Sold Out</string>
+    <string name="wishlist_out_of_stock">Out of Stock</string>
+    <string name="wishlist_empty_title">Your wishlist is empty</string>
+    <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
+    <string name="wishlist_item_removed">Item removed from wishlist</string>
+    <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
+    <string name="wishlist_remove_dialog_title">Remove Item?</string>
+    <string name="wishlist_remove_dialog_subtitle">This item will be removed from your wishlist.</string>
+    <string name="wishlist_remove_dialog_confirm">Remove</string>
+    <string name="wishlist_remove_dialog_cancel">Keep in Wishlist</string>
+    <string name="wishlist_item_added">Added to favorites</string>
     <!--Ahmed-->
 
 
@@ -287,6 +373,12 @@
     <string name="search_retry">Retry</string>
     <!--Search-->
 
+    <string name="address_error_permission">Address permission is not available. Please check Shopify Admin API access.</string>
+    <string name="address_error_customer_not_found">Shopify customer was not found for this account.</string>
+    <string name="address_error_invalid_shopify_address">Shopify rejected this address. Please check country, city, zip code, and phone.</string>
+    <string name="address_error_response_parse">Address was saved but the response format could not be read.</string>
+    <string name="address_error_network">Network error. Please check your connection and try again.</string>
+
     <string name="categories_title">Categories</string>
     <string name="categories_search_placeholder">Search categories…</string>
     <string name="categories_search_content_description">Search Categories</string>
@@ -300,6 +392,7 @@
     <string name="error_server">Server error (%1$s)</string>
     <string name="error_unknown">Something went wrong</string>
     <!--Omar-->
+
 
 
 

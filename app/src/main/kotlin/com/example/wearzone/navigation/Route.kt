@@ -15,6 +15,15 @@ sealed interface Route {
     @Serializable
     data object SettingsRoute : Route
 
+    @Serializable
+    data object AddressListRoute : Route
+
+    @Serializable
+    data object AddressAddRoute : Route
+
+    @Serializable
+    data class AddressEditRoute(val addressId: Long) : Route
+
     // Aalaa
 
     // Hend
@@ -43,5 +52,8 @@ sealed interface Route {
 
     @Serializable
     data object SearchRoute : Route
+    
+    @Serializable
+    data object WishlistRoute : Route
     // Omar
 }

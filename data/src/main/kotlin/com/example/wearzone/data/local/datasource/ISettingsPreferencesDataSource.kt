@@ -9,4 +9,6 @@ interface ISettingsPreferencesDataSource {
     suspend fun setThemeMode(themeMode: ThemeMode)
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setLanguage(languageCode: String)
+    suspend fun setCustomerId(id: Long?)
+    suspend fun getCustomerId(): Long?
 }

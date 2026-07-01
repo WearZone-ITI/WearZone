@@ -19,5 +19,6 @@ sealed interface ProductDetailUiState {
         val rating: Double,
         val reviewsCount: Int,
         val isFavorite: Boolean,
+        val showRemoveDialog: Boolean = false
     ) : ProductDetailUiState
 }

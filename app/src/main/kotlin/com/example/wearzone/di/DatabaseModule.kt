@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.wearzone.data.db.WearZoneDatabase
 import com.example.wearzone.data.local.search.RecentSearchDao
+import com.example.wearzone.data.local.wishlist.WishlistDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,5 +32,11 @@ object DatabaseModule {
     @Singleton
     fun provideRecentSearchDao(database: WearZoneDatabase): RecentSearchDao {
         return database.recentSearchDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWishlistDao(database: WearZoneDatabase): WishlistDao {
+        return database.wishlistDao()
     }
 }

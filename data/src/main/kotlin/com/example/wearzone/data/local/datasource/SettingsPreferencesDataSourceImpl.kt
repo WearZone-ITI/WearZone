@@ -5,11 +5,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.wearzone.domain.settings.model.SettingsPreferences
 import com.example.wearzone.domain.settings.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -52,6 +54,19 @@ class SettingsPreferencesDataSourceImpl(
         }
     }
 
+    override suspend fun setCustomerId(id: Long?) {
+        dataStore.edit { preferences ->
+            if (id == null) {
+                preferences.remove(CUSTOMER_ID_KEY)
+            } else {
+                preferences[CUSTOMER_ID_KEY] = id
+            }
+        }
+    }
+
+    override suspend fun getCustomerId(): Long? =
+        dataStore.data.map { it[CUSTOMER_ID_KEY] }.first()
+
     private fun String?.toThemeMode(): ThemeMode =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SystemDefault
 
@@ -60,5 +75,6 @@ class SettingsPreferencesDataSourceImpl(
         val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
         val LANGUAGE_CODE_KEY = stringPreferencesKey("language_code")
+        val CUSTOMER_ID_KEY = longPreferencesKey("customer_id")
     }
 }

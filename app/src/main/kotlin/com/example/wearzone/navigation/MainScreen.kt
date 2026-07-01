@@ -15,9 +15,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -30,12 +34,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.categories.CategoriesScreen
+import com.example.wearzone.presentation.address.form.AddressFormScreen
+import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
+import kotlinx.coroutines.launch
 
 data class BottomNavItem<T : Any>(
     val route: T,
@@ -44,6 +53,8 @@ data class BottomNavItem<T : Any>(
     val contentDescriptionRes: Int
 )
 
+private const val ADDRESS_CHANGED_KEY = "address_changed"
+
 @Composable
 fun MainScreen(
     onNavigateToLogin: () -> Unit,
@@ -51,18 +62,21 @@ fun MainScreen(
     onNavigateToProductDetail: (Long) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val navItems = listOf(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
         BottomNavItem(Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
         BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
-        BottomNavItem(Route.HomeRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
+        BottomNavItem(Route.WishlistRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
         BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
     )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = AppTheme.colors.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             val itemColors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AppTheme.colors.selected,
@@ -87,7 +101,7 @@ fun MainScreen(
                     val isSelected = when (item.labelRes) {
                         R.string.nav_home -> currentDestination?.hasRoute(Route.HomeRoute::class) == true
                         R.string.nav_categories -> currentDestination?.hasRoute(Route.CategoriesRoute::class) == true
-                        R.string.nav_wishlist -> false
+                        R.string.nav_wishlist -> currentDestination?.hasRoute(Route.WishlistRoute::class) == true
                         R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
                         else -> isRouteMatch
                     }
@@ -112,9 +126,25 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            if (item.labelRes != R.string.nav_wishlist) {
-
-                                if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
+                            if (item.labelRes != R.string.nav_wishlist && item.labelRes != R.string.nav_categories) {
+                                if (item.route == Route.ProfileRoute &&
+                                    currentDestination?.hasRoute(Route.ProfileRoute::class) != true
+                                ) {
+                                    val returnedToProfile = bottomNavController.popBackStack(
+                                        Route.ProfileRoute,
+                                        inclusive = false,
+                                    )
+                                    if (!returnedToProfile) {
+                                        bottomNavController.navigate(Route.ProfileRoute) {
+                                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                                else if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
                                     bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
                                 }
                                 else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
@@ -156,7 +186,11 @@ fun MainScreen(
                     onNavigateToCategory = { bottomNavController.navigate(Route.CategoriesRoute) },
                     onNavigateToBrand = { },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
-                    onShowSnackbar = { },
+                    onShowSnackbar = { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    },
                     onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) }
                 )
             }
@@ -175,12 +209,72 @@ fun MainScreen(
                 ProfileScreen(
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToWishlist = { },
+                    onNavigateToWishlist = {
+                        bottomNavController.navigate(Route.WishlistRoute)
+                    },
                     onNavigateToOrders = { },
-                    onNavigateToSavedAddresses = { },
+                    onNavigateToSavedAddresses = {
+                        bottomNavController.navigate(Route.AddressListRoute) {
+                            launchSingleTop = true
+                        }
+                    },
                     onNavigateToHome = {
                         bottomNavController.navigate(Route.HomeRoute) {
                             popUpTo<Route.HomeRoute> { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable<Route.AddressListRoute> { backStackEntry ->
+                val refreshAfterChange by backStackEntry.savedStateHandle
+                    .getStateFlow(ADDRESS_CHANGED_KEY, false)
+                    .collectAsStateWithLifecycle()
+
+                AddressListScreen(
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
+                    onNavigateToEditAddress = { addressId ->
+                        bottomNavController.navigate(Route.AddressEditRoute(addressId))
+                    },
+                    refreshAfterChange = refreshAfterChange,
+                    onRefreshAfterChangeConsumed = {
+                        backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
+                    },
+                )
+            }
+
+            composable<Route.AddressAddRoute> {
+                AddressFormScreen(
+                    addressId = null,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                    },
+                )
+            }
+
+            composable<Route.AddressEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.AddressEditRoute>()
+                AddressFormScreen(
+                    addressId = route.addressId,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                                     },
+                    )
+            }
+
+            composable<Route.WishlistRoute> {
+                com.example.wearzone.presentation.wishlist.WishlistScreen(
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onShowSnackbar = { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
                         }
                     }
                 )

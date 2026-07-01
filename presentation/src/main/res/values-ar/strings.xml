@@ -16,6 +16,66 @@
     <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
     <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
 
+    <!-- Customer Addresses -->
+    <string name="address_list_title">العناوين المحفوظة</string>
+    <string name="address_list_subtitle">أدر وجهات الشحن الخاصة بك.</string>
+    <string name="address_refresh">تحديث العناوين</string>
+    <string name="address_card_label">عنوان الشحن</string>
+    <string name="address_default_badge">افتراضي</string>
+    <string name="address_edit">تعديل العنوان</string>
+    <string name="address_delete">حذف العنوان</string>
+    <string name="address_set_default">تعيين كافتراضي</string>
+    <string name="address_add_new">إضافة عنوان جديد</string>
+    <string name="address_empty_title">لا توجد عناوين محفوظة</string>
+    <string name="address_empty_subtitle">أضف وجهة شحن لتسهيل إتمام الطلب لاحقًا.</string>
+    <string name="address_delete_dialog_title">حذف العنوان؟</string>
+    <string name="address_delete_dialog_message">هل أنت متأكد أنك تريد حذف هذا العنوان؟</string>
+    <string name="address_delete_dialog_confirm">حذف العنوان</string>
+    <string name="address_delete_dialog_cancel">إلغاء</string>
+    <string name="address_add_title">إضافة عنوان</string>
+    <string name="address_edit_title">تعديل العنوان</string>
+    <string name="address_contact_information">معلومات التواصل</string>
+    <string name="address_delivery_address">عنوان التوصيل</string>
+    <string name="address_recipient_name">اسم المستلم</string>
+    <string name="address_recipient_name_hint">الاسم الكامل على الطلب</string>
+    <string name="address_country_code">كود الدولة</string>
+    <string name="address_country_code_egypt">مصر %1$s</string>
+    <string name="address_mobile_number">رقم الهاتف المحمول</string>
+    <string name="address_mobile_number_hint">01XXXXXXXXX</string>
+    <string name="address_country">الدولة</string>
+    <string name="address_country_hint">مصر</string>
+    <string name="address_city">المدينة</string>
+    <string name="address_city_hint">القاهرة</string>
+    <string name="address_postal_code">الرمز البريدي</string>
+    <string name="address_postal_code_hint">5 أرقام</string>
+    <string name="address_street">الشارع / العنوان الكامل</string>
+    <string name="address_street_hint">المبنى، الشارع، المنطقة</string>
+    <string name="address_address2">الشقة أو الجناح أو الطابق</string>
+    <string name="address_address2_hint">الشقة أو الطابق اختياري</string>
+    <string name="address_province">المحافظة</string>
+    <string name="address_province_hint">محافظة القاهرة</string>
+    <string name="address_company">الشركة</string>
+    <string name="address_company_hint">اسم الشركة اختياري</string>
+    <string name="address_set_as_default">تعيين كعنوان افتراضي</string>
+    <string name="address_set_as_default_subtitle">استخدم هذا العنوان للطلبات القادمة</string>
+    <string name="address_save">حفظ العنوان</string>
+    <string name="address_save_success">تم حفظ العنوان.</string>
+    <string name="address_delete_success">تم حذف العنوان.</string>
+    <string name="address_set_default_success">تم تحديث العنوان الافتراضي.</string>
+    <string name="address_error_required_field">هذا الحقل مطلوب.</string>
+    <string name="address_error_invalid_phone">يجب أن يتكون رقم الهاتف من 11 رقمًا بالضبط.</string>
+    <string name="address_error_invalid_egypt_phone">أدخل رقم هاتف مصري صحيح مثل 01012345678.</string>
+    <string name="address_error_invalid_recipient_name">أدخل اسم المستلم باستخدام حرفين على الأقل.</string>
+    <string name="address_error_invalid_city">أدخل مدينة صحيحة.</string>
+    <string name="address_error_invalid_province">أدخل محافظة صحيحة.</string>
+    <string name="address_error_invalid_street">أدخل عنوان شارع كامل.</string>
+    <string name="address_error_invalid_postal_code">يجب أن يحتوي الرمز البريدي على أرقام فقط.</string>
+    <string name="address_error_unsupported_country">يدعم WearZone عناوين مصر فقط حاليًا.</string>
+    <string name="address_error_unsupported_country_code">يدعم WearZone كود مصر +20 فقط حاليًا.</string>
+    <string name="address_error_cannot_delete_default">لا يمكن حذف العنوان الافتراضي. عيّن عنوانًا آخر كافتراضي أولًا.</string>
+    <string name="address_error_customer_id_unavailable">معرف عميل Shopify غير متاح بعد. يرجى ربط الحساب قبل إدارة العناوين.</string>
+    <string name="address_error_generic">تعذر تحديث العناوين الآن. يرجى المحاولة مرة أخرى.</string>
+    <!-- Customer Addresses -->
 
     <!-- Profile and Settings -->
     <string name="profile_brand_title">WearZone</string>
@@ -93,6 +153,11 @@
     <string name="error_password_mismatch">كلمتا المرور غير متطابقتين</string>
     <string name="error_terms_not_accepted">يجب الموافقة على شروط الاستخدام</string>
     <string name="error_register_failed">فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firebase_sign_up_failed">تعذر إنشاء حساب Firebase. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_shopify_customer_creation_failed">تعذر إنشاء ملف عميل Shopify. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firestore_profile_save_failed">تعذر حفظ ملف العميل. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firestore_profile_fetch_failed">تعذر تحميل ملف العميل. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_local_customer_id_save_failed">تعذر حفظ جلسة العميل. يرجى المحاولة مرة أخرى.</string>
     <string name="terms_agreement_prefix">أوافق على </string>
     <string name="terms_of_service">شروط الاستخدام</string>
     <string name="terms_and"> و </string>
@@ -131,11 +196,25 @@
     <string name="product_detail_select_size_first">يرجى اختيار المقاس أولاً.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d تقييمات)</string>
     <string name="product_detail_auth_required">يرجى تسجيل الدخول للمتابعة.</string>
-
     <string name="content_desc_wishlist_add">أضف إلى المفضلة</string>
     <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
     <string name="content_desc_product_image">صورة المنتج</string>
     <string name="content_desc_star_rating">تقييم النجوم</string>
+    <!-- Wish List Screen -->
+    <string name="wishlist_title">قائمة أمنياتك</string>
+    <string name="wishlist_items_saved">%1$d عناصر محفوظة</string>
+    <string name="wishlist_sold_out">مباع</string>
+    <string name="wishlist_out_of_stock">نفذت الكمية</string>
+    <string name="wishlist_empty_title">قائمة أمنياتك فارغة</string>
+    <string name="wishlist_empty_subtitle">احفظ العناصر التي تحبها لعرضها لاحقًا.</string>
+    <string name="wishlist_item_removed">تمت إزالة العنصر من المفضلة</string>
+    <string name="wishlist_sign_in_required">قم بتسجيل الدخول لمزامنة قائمتك</string>
+    <string name="wishlist_remove_dialog_title">إزالة العنصر؟</string>
+    <string name="wishlist_remove_dialog_subtitle">سيتم إزالة هذا العنصر من قائمة أمنياتك.</string>
+    <string name="wishlist_remove_dialog_confirm">إزالة</string>
+    <string name="wishlist_remove_dialog_cancel">الاحتفاظ في المفضلة</string>
+    <string name="wishlist_item_added">تمت الإضافة إلى المفضلة</string>
+
     <!--Ahmed-->
 
     <!-- Omar -->

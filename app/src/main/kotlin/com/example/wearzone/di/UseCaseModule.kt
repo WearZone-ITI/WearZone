@@ -8,6 +8,16 @@ import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
+import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
+import com.example.wearzone.domain.customer.address.usecase.DeleteCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
+import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -23,6 +33,10 @@ import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUs
 import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
 import com.example.wearzone.domain.settings.usecase.SetNotificationsEnabledUseCase
 import com.example.wearzone.domain.settings.usecase.SetThemeModeUseCase
+import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
+import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.SyncWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -134,4 +148,73 @@ object UseCaseModule {
     ): GetCategoriesUseCase {
         return GetCategoriesUseCase(repository)
     }
+
+    @Provides
+    fun provideGetCurrentCustomerIdUseCase(
+        customerIdProvider: ICustomerIdProvider,
+    ): GetCurrentCustomerIdUseCase = GetCurrentCustomerIdUseCase(customerIdProvider)
+
+    @Provides
+    fun provideGetCustomerAddressesUseCase(
+        repository: ICustomerAddressRepository,
+    ): GetCustomerAddressesUseCase = GetCustomerAddressesUseCase(repository)
+
+    @Provides
+    fun provideGetCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): GetCustomerAddressUseCase = GetCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideCreateCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): CreateCustomerAddressUseCase = CreateCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideUpdateCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): UpdateCustomerAddressUseCase = UpdateCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideSetDefaultCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): SetDefaultCustomerAddressUseCase = SetDefaultCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideDeleteCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): DeleteCustomerAddressUseCase = DeleteCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideCustomerAddressUseCases(
+        getCurrentCustomerId: GetCurrentCustomerIdUseCase,
+        getAddresses: GetCustomerAddressesUseCase,
+        getAddress: GetCustomerAddressUseCase,
+        createAddress: CreateCustomerAddressUseCase,
+        updateAddress: UpdateCustomerAddressUseCase,
+        setDefaultAddress: SetDefaultCustomerAddressUseCase,
+        deleteAddress: DeleteCustomerAddressUseCase,
+    ): CustomerAddressUseCases = CustomerAddressUseCases(
+        getCurrentCustomerId = getCurrentCustomerId,
+        getAddresses = getAddresses,
+        getAddress = getAddress,
+        createAddress = createAddress,
+        updateAddress = updateAddress,
+        setDefaultAddress = setDefaultAddress,
+        deleteAddress = deleteAddress,
+    )
+
+    @Provides
+    fun provideObserveWishlistUseCase(
+        repository: IWishlistRepository
+    ): ObserveWishlistUseCase = ObserveWishlistUseCase(repository)
+
+    @Provides
+    fun provideToggleFavoriteUseCase(
+        repository: IWishlistRepository
+    ): ToggleFavoriteUseCase = ToggleFavoriteUseCase(repository)
+
+    @Provides
+    fun provideSyncWishlistUseCase(
+        repository: IWishlistRepository
+    ): SyncWishlistUseCase = SyncWishlistUseCase(repository)
 }

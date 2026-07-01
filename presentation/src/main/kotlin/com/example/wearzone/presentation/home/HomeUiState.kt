@@ -13,7 +13,8 @@ sealed interface HomeUiState {
         val brands: ImmutableList<Brand>,
         val trendingProducts: ImmutableList<Product>,
         val newArrivalProducts: ImmutableList<Product>,
-        val heroProduct: Product? = null
+        val heroProduct: Product? = null,
+        val productToRemove: Product? = null
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
