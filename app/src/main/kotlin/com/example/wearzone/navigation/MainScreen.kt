@@ -126,16 +126,31 @@ fun MainScreen(
                             )
                         },
                         onClick = {
-                            if (item.labelRes != R.string.nav_wishlist && item.labelRes != R.string.nav_categories) {
-                                if (item.route == Route.ProfileRoute &&
-                                    currentDestination?.hasRoute(Route.ProfileRoute::class) != true
-                                ) {
-                                    val returnedToProfile = bottomNavController.popBackStack(
-                                        Route.ProfileRoute,
-                                        inclusive = false,
-                                    )
-                                    if (!returnedToProfile) {
-                                        bottomNavController.navigate(Route.ProfileRoute) {
+                            when {
+                                item.route == Route.ProfileRoute -> {
+                                    if (currentDestination?.hasRoute(Route.ProfileRoute::class) != true) {
+                                        val returnedToProfile = bottomNavController.popBackStack(
+                                            Route.ProfileRoute,
+                                            inclusive = false,
+                                        )
+                                        if (!returnedToProfile) {
+                                            bottomNavController.navigate(Route.ProfileRoute) {
+                                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    }
+                                }
+
+                                currentDestination?.hasRoute(Route.SearchRoute::class) == true -> {
+                                    if (item.route == Route.HomeRoute) {
+                                        bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+                                    } else {
+                                        bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+                                        bottomNavController.navigate(item.route) {
                                             popUpTo(bottomNavController.graph.findStartDestination().id) {
                                                 saveState = true
                                             }
@@ -144,21 +159,8 @@ fun MainScreen(
                                         }
                                     }
                                 }
-                                else if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
-                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
-                                }
-                                else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
-                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
 
-                                    bottomNavController.navigate(item.route) {
-                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                                else if (!isSelected) {
+                                !isSelected -> {
                                     bottomNavController.navigate(item.route) {
                                         popUpTo(bottomNavController.graph.findStartDestination().id) {
                                             saveState = true
