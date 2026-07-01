@@ -30,7 +30,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.address.form.AddressFormScreen
+import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
@@ -42,6 +46,8 @@ data class BottomNavItem<T : Any>(
     val labelRes: Int,
     val contentDescriptionRes: Int
 )
+
+private const val ADDRESS_CHANGED_KEY = "address_changed"
 
 @Composable
 fun MainScreen(
@@ -113,7 +119,24 @@ fun MainScreen(
                         onClick = {
                             if (item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
 
-                                if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
+                                if (item.route == Route.ProfileRoute &&
+                                    currentDestination?.hasRoute(Route.ProfileRoute::class) != true
+                                ) {
+                                    val returnedToProfile = bottomNavController.popBackStack(
+                                        Route.ProfileRoute,
+                                        inclusive = false,
+                                    )
+                                    if (!returnedToProfile) {
+                                        bottomNavController.navigate(Route.ProfileRoute) {
+                                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                                else if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
                                     bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
                                 }
                                 else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
@@ -173,12 +196,59 @@ fun MainScreen(
                     onNavigateToSettings = onNavigateToSettings,
                     onNavigateToWishlist = { },
                     onNavigateToOrders = { },
-                    onNavigateToSavedAddresses = { },
+                    onNavigateToSavedAddresses = {
+                        bottomNavController.navigate(Route.AddressListRoute) {
+                            launchSingleTop = true
+                        }
+                    },
                     onNavigateToHome = {
                         bottomNavController.navigate(Route.HomeRoute) {
                             popUpTo<Route.HomeRoute> { inclusive = true }
                         }
                     }
+                )
+            }
+
+            composable<Route.AddressListRoute> { backStackEntry ->
+                val refreshAfterChange by backStackEntry.savedStateHandle
+                    .getStateFlow(ADDRESS_CHANGED_KEY, false)
+                    .collectAsStateWithLifecycle()
+
+                AddressListScreen(
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
+                    onNavigateToEditAddress = { addressId ->
+                        bottomNavController.navigate(Route.AddressEditRoute(addressId))
+                    },
+                    refreshAfterChange = refreshAfterChange,
+                    onRefreshAfterChangeConsumed = {
+                        backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
+                    },
+                )
+            }
+
+            composable<Route.AddressAddRoute> {
+                AddressFormScreen(
+                    addressId = null,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                    },
+                )
+            }
+
+            composable<Route.AddressEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.AddressEditRoute>()
+                AddressFormScreen(
+                    addressId = route.addressId,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                    },
                 )
             }
         }

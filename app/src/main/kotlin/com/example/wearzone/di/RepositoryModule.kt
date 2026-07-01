@@ -1,9 +1,13 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.data.repository.AuthRepositoryImpl
+import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
+import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
@@ -28,4 +32,14 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): ISettingsRepository
+
+    @Binds
+    abstract fun bindCustomerAddressRepository(
+        impl: CustomerAddressRepositoryImpl,
+    ): ICustomerAddressRepository
+
+    @Binds
+    abstract fun bindCurrentCustomerIdProvider(
+        impl: CurrentCustomerIdProviderImpl,
+    ): ICustomerIdProvider
 }

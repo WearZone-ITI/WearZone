@@ -29,6 +29,17 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         return result.user ?: throw Exception("User is null after Google sign in")
     }
 
+    override suspend fun getSavedShopifyCustomerId(uid: String): Long? {
+        val snapshot = firestore.collection("users").document(uid).get().await()
+        return when (val value = snapshot.get("customerId")) {
+            is Long -> value
+            is Int -> value.toLong()
+            is Double -> value.toLong()
+            is String -> value.toLongOrNull()
+            else -> null
+        }
+    }
+
     override suspend fun register(
         name: String,
         email: String,

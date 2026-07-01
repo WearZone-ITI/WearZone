@@ -11,6 +11,7 @@ import com.example.wearzone.domain.settings.model.SettingsPreferences
 import com.example.wearzone.domain.settings.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -63,7 +64,11 @@ class SettingsPreferencesDataSourceImpl(
         }
     }
 
+    override suspend fun getCustomerId(): Long? =
+        dataStore.data.map { it[CUSTOMER_ID_KEY] }.first()
+
     override fun observeCustomerId(): Flow<Long?> = dataStore.data.map { it[CUSTOMER_ID_KEY] }
+
     private fun String?.toThemeMode(): ThemeMode =
         ThemeMode.entries.firstOrNull { it.name == this } ?: ThemeMode.SystemDefault
 

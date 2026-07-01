@@ -6,6 +6,16 @@ import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
+import com.example.wearzone.domain.customer.address.usecase.DeleteCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
+import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -125,4 +135,58 @@ object UseCaseModule {
     ): SetLanguageUseCase {
         return SetLanguageUseCase(repository)
     }
+
+    @Provides
+    fun provideGetCurrentCustomerIdUseCase(
+        customerIdProvider: ICustomerIdProvider,
+    ): GetCurrentCustomerIdUseCase = GetCurrentCustomerIdUseCase(customerIdProvider)
+
+    @Provides
+    fun provideGetCustomerAddressesUseCase(
+        repository: ICustomerAddressRepository,
+    ): GetCustomerAddressesUseCase = GetCustomerAddressesUseCase(repository)
+
+    @Provides
+    fun provideGetCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): GetCustomerAddressUseCase = GetCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideCreateCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): CreateCustomerAddressUseCase = CreateCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideUpdateCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): UpdateCustomerAddressUseCase = UpdateCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideSetDefaultCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): SetDefaultCustomerAddressUseCase = SetDefaultCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideDeleteCustomerAddressUseCase(
+        repository: ICustomerAddressRepository,
+    ): DeleteCustomerAddressUseCase = DeleteCustomerAddressUseCase(repository)
+
+    @Provides
+    fun provideCustomerAddressUseCases(
+        getCurrentCustomerId: GetCurrentCustomerIdUseCase,
+        getAddresses: GetCustomerAddressesUseCase,
+        getAddress: GetCustomerAddressUseCase,
+        createAddress: CreateCustomerAddressUseCase,
+        updateAddress: UpdateCustomerAddressUseCase,
+        setDefaultAddress: SetDefaultCustomerAddressUseCase,
+        deleteAddress: DeleteCustomerAddressUseCase,
+    ): CustomerAddressUseCases = CustomerAddressUseCases(
+        getCurrentCustomerId = getCurrentCustomerId,
+        getAddresses = getAddresses,
+        getAddress = getAddress,
+        createAddress = createAddress,
+        updateAddress = updateAddress,
+        setDefaultAddress = setDefaultAddress,
+        deleteAddress = deleteAddress,
+    )
 }
