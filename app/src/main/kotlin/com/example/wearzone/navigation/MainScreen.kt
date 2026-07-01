@@ -15,9 +15,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +39,7 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
+import kotlinx.coroutines.launch
 
 data class BottomNavItem<T : Any>(
     val route: T,
@@ -50,6 +55,8 @@ fun MainScreen(
     onNavigateToProductDetail: (Long) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val navItems = listOf(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
@@ -62,6 +69,7 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = AppTheme.colors.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             val itemColors = NavigationBarItemDefaults.colors(
                 selectedIconColor = AppTheme.colors.selected,
@@ -155,7 +163,11 @@ fun MainScreen(
                     onNavigateToCategory = { },
                     onNavigateToBrand = { },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
-                    onShowSnackbar = { },
+                    onShowSnackbar = { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    },
                     onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) }
                 )
             }
@@ -187,7 +199,11 @@ fun MainScreen(
             composable<Route.WishlistRoute> {
                 com.example.wearzone.presentation.wishlist.WishlistScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
-                    onShowSnackbar = { /* Scaffold state not passed, would handle via LocalSnackbarHostState */ }
+                    onShowSnackbar = { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
                 )
             }
         }

@@ -203,11 +203,24 @@
     <string name="product_detail_select_size_first">Please select a size first.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
     <string name="product_detail_auth_required">Please log in to continue.</string>
-
     <string name="content_desc_wishlist_add">Add to wishlist</string>
     <string name="content_desc_wishlist_remove">Remove from wishlist</string>
     <string name="content_desc_product_image">Product image</string>
     <string name="content_desc_star_rating">Star rating</string>
+    <!-- Wish List Screen -->
+    <string name="wishlist_title">Your Wishlist</string>
+    <string name="wishlist_items_saved">%1$d items saved</string>
+    <string name="wishlist_sold_out">Sold Out</string>
+    <string name="wishlist_out_of_stock">Out of Stock</string>
+    <string name="wishlist_empty_title">Your wishlist is empty</string>
+    <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
+    <string name="wishlist_item_removed">Item removed from wishlist</string>
+    <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
+    <string name="wishlist_remove_dialog_title">Remove Item?</string>
+    <string name="wishlist_remove_dialog_subtitle">This item will be removed from your wishlist.</string>
+    <string name="wishlist_remove_dialog_confirm">Remove</string>
+    <string name="wishlist_remove_dialog_cancel">Keep in Wishlist</string>
+    <string name="wishlist_item_added">Added to favorites</string>
     <!--Ahmed-->
 
 
@@ -288,14 +301,7 @@
     <!--Search-->
 
     <!--Omar-->
-    <string name="wishlist_title">Your Wishlist</string>
-    <string name="wishlist_items_saved">%1$d items saved</string>
-    <string name="wishlist_sold_out">Sold Out</string>
-    <string name="wishlist_out_of_stock">Out of Stock</string>
-    <string name="wishlist_empty_title">Your wishlist is empty</string>
-    <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
-    <string name="wishlist_item_removed">Item removed from wishlist</string>
-    <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
+
 
 
 

@@ -50,7 +50,7 @@ class WishlistRepositoryImpl @Inject constructor(
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Log or handle error
+                android.util.Log.e("WishlistRepo", "Database error: ${error.message}", error.toException())
             }
         }
         

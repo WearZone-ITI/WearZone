@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -42,6 +43,7 @@ fun HomeScreen(
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -49,7 +51,7 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToBrand -> onNavigateToBrand(effect.brandId)
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
-                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(effect.message)
+                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.getString(effect.messageResId))
             }
         }
     }

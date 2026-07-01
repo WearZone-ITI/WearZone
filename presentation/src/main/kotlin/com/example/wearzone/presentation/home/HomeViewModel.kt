@@ -8,6 +8,7 @@ import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
+import com.example.presentation.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -77,7 +78,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val user = getCurrentUserUseCase()
             if (user == null || user.uid.isEmpty()) {
-                sendEffect(HomeUiEffect.ShowSnackbar("Sign in to add to wishlist"))
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_sign_in_required))
                 return@launch
             }
             val item = WishlistItem(
@@ -91,9 +92,9 @@ class HomeViewModel @Inject constructor(
             )
             toggleFavoriteUseCase(item, user.uid)
             if (isAdding) {
-                sendEffect(HomeUiEffect.ShowSnackbar("Added to favorites"))
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_item_added))
             } else {
-                sendEffect(HomeUiEffect.ShowSnackbar("Item removed from wishlist"))
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_item_removed))
             }
         }
     }

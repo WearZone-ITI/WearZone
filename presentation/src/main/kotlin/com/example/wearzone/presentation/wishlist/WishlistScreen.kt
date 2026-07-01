@@ -61,13 +61,12 @@ fun WishlistScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(top = 24.dp)
         ) {
             // Header
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -76,7 +75,7 @@ fun WishlistScreen(
                     color = AppTheme.colors.textPrimary
                 )
                 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 
                 val subtitle = when (uiState) {
                     is WishlistUiState.Success -> stringResource(id = R.string.wishlist_items_saved, (uiState as WishlistUiState.Success).items.size)
@@ -90,7 +89,7 @@ fun WishlistScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Content
             when (val state = uiState) {

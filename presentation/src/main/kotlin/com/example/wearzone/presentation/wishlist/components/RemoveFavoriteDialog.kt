@@ -25,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +75,7 @@ fun RemoveFavoriteDialog(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Remove Item?",
+                text = stringResource(R.string.wishlist_remove_dialog_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = AppTheme.colors.textPrimary,
                 textAlign = TextAlign.Center
@@ -82,7 +84,7 @@ fun RemoveFavoriteDialog(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "This item will be removed from your wishlist.",
+                text = stringResource(R.string.wishlist_remove_dialog_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AppTheme.colors.textSecondary,
                 textAlign = TextAlign.Center
@@ -101,7 +103,7 @@ fun RemoveFavoriteDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Remove",
+                    text = stringResource(R.string.wishlist_remove_dialog_confirm),
                     style = MaterialTheme.typography.labelMedium,
                     color = AppTheme.colors.onAccent
                 )
@@ -120,7 +122,7 @@ fun RemoveFavoriteDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Keep in Wishlist",
+                    text = stringResource(R.string.wishlist_remove_dialog_cancel),
                     style = MaterialTheme.typography.labelMedium,
                     color = AppTheme.colors.selected
                 )
