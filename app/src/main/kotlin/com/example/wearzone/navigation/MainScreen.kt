@@ -262,7 +262,10 @@ fun MainScreen(
                         bottomNavController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set(ADDRESS_CHANGED_KEY, true)
-                    },
+                                     },
+                    )
+            }
+
             composable<Route.WishlistRoute> {
                 com.example.wearzone.presentation.wishlist.WishlistScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },

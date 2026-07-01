@@ -193,6 +193,8 @@ object UseCaseModule {
         setDefaultAddress = setDefaultAddress,
         deleteAddress = deleteAddress,
     )
+
+    @Provides
     fun provideObserveWishlistUseCase(
         repository: IWishlistRepository
     ): ObserveWishlistUseCase = ObserveWishlistUseCase(repository)

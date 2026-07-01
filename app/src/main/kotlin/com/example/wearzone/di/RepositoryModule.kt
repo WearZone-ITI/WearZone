@@ -44,5 +44,7 @@ abstract class RepositoryModule {
     abstract fun bindCurrentCustomerIdProvider(
         impl: CurrentCustomerIdProviderImpl,
     ): ICustomerIdProvider
+
+    @Binds
     abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): IWishlistRepository
 }
