@@ -1,4 +1,5 @@
 package com.example.wearzone.presentation.home
+import com.example.wearzone.domain.product.model.Product
 
 sealed interface HomeUiIntent {
     data object LoadHomeData : HomeUiIntent
@@ -7,4 +8,7 @@ sealed interface HomeUiIntent {
     data class OnBrandClicked(val brandId: String) : HomeUiIntent
     data object OnCartClicked : HomeUiIntent
     data class OnAddToCartClicked(val product: com.example.wearzone.domain.product.model.Product) : HomeUiIntent
+    data class OnFavoriteClicked(val product: Product) : HomeUiIntent
+    data object OnConfirmRemove : HomeUiIntent
+    data object OnCancelRemove : HomeUiIntent
 }

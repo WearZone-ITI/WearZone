@@ -1,15 +1,21 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.data.repository.AuthRepositoryImpl
+import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
+import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
 import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
+import com.example.wearzone.data.repository.WishlistRepositoryImpl
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
+import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +39,17 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindCartRepository(cartRepositoryImpl: CartRepositoryImpl): ICartRepository
+
+    @Binds
+    abstract fun bindCustomerAddressRepository(
+        impl: CustomerAddressRepositoryImpl,
+    ): ICustomerAddressRepository
+
+    @Binds
+    abstract fun bindCurrentCustomerIdProvider(
+        impl: CurrentCustomerIdProviderImpl,
+    ): ICustomerIdProvider
+
+    @Binds
+    abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): IWishlistRepository
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,7 +44,8 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 fun ProductCard(
     product: Product,
     onProductClick: (String) -> Unit,
-    onAddToCartClick: (Product) -> Unit = {}
+    onAddToCartClick: (Product) -> Unit = {},
+    onFavoriteClick: (Product) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -68,7 +70,7 @@ fun ProductCard(
                 )
 
                 IconButton(
-                    onClick = { /* Handle Favorite */ },
+                    onClick = { onFavoriteClick(product) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
@@ -77,9 +79,9 @@ fun ProductCard(
                         .background(AppTheme.colors.surface.copy(alpha = 0.9f))
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.FavoriteBorder,
+                        imageVector = if (product.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                         contentDescription = stringResource(id = R.string.content_desc_favorite),
-                        tint = AppTheme.colors.textPrimary,
+                        tint = if (product.isFavorite) AppTheme.colors.selected else AppTheme.colors.textPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                 }

@@ -15,6 +15,7 @@ sealed interface HomeUiState {
         val newArrivalProducts: ImmutableList<Product>,
         val heroProduct: Product? = null,
         val cartItemCount: Int = 0
+        val productToRemove: Product? = null
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }

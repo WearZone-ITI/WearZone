@@ -51,6 +51,7 @@ import com.example.presentation.R
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
 import com.example.wearzone.presentation.product.detail.components.StarRatingRow
+import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -129,6 +130,12 @@ fun ProductDetailScreen(
                     }
                 }
                 is ProductDetailUiState.Success -> {
+                    if (state.showRemoveDialog) {
+                        RemoveFavoriteDialog(
+                            onConfirm = { viewModel.handleIntent(ProductDetailUiIntent.OnConfirmRemove) },
+                            onDismiss = { viewModel.handleIntent(ProductDetailUiIntent.OnCancelRemove) }
+                        )
+                    }
                     ProductDetailContent(
                         state = state,
                         onNavigateBack = onNavigateBack,

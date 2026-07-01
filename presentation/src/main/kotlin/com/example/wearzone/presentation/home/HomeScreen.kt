@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -27,6 +28,7 @@ import com.example.wearzone.presentation.home.components.SearchBarSection
 import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
+import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +43,7 @@ fun HomeScreen(
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -48,8 +51,8 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToBrand -> onNavigateToBrand(effect.brandId)
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
-                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(effect.message)
                 is HomeUiEffect.NavigateToCart -> onNavigateToCard()
+                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.getString(effect.messageResId))
             }
         }
     }
@@ -79,6 +82,13 @@ fun HomeScreen(
                     )
                 }
                 is HomeUiState.Success -> {
+                    if (state.productToRemove != null) {
+                        RemoveFavoriteDialog(
+                            onConfirm = { viewModel.handleIntent(HomeUiIntent.OnConfirmRemove) },
+                            onDismiss = { viewModel.handleIntent(HomeUiIntent.OnCancelRemove) }
+                        )
+                    }
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -99,6 +109,7 @@ fun HomeScreen(
                                 products = state.trendingProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
                                 onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
+                                onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -114,6 +125,7 @@ fun HomeScreen(
                                 products = state.newArrivalProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
                                 onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
+                                onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }

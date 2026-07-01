@@ -21,7 +21,8 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 fun NewArrivalsSection(
     products: List<Product>,
     onProductClick: (String) -> Unit,
-    onAddToCartClick: (Product) -> Unit = {}
+    onAddToCartClick: (Product) -> Unit = {},
+    onFavoriteClick: (Product) -> Unit = {}
 ) {
     Column {
         Text(
@@ -35,7 +36,7 @@ fun NewArrivalsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(products) { product ->
-                ProductCard(product, onProductClick, onAddToCartClick)
+                ProductCard(product, onProductClick, onAddToCartClick,onFavoriteClick)
             }
         }
     }

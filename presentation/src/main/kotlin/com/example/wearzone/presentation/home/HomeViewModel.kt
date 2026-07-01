@@ -8,6 +8,10 @@ import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
+import com.example.wearzone.domain.wishlist.model.WishlistItem
+import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
+import com.example.presentation.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
@@ -17,6 +21,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -28,6 +34,8 @@ class HomeViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
     private val addToCartUseCase: AddToCartUseCase
+    private val observeWishlistUseCase: ObserveWishlistUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     private val homeDataState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -93,6 +101,57 @@ class HomeViewModel @Inject constructor(
                     sendEffect(HomeUiEffect.ShowSnackbar("Failed to add to cart"))
                 }
             }
+            is HomeUiIntent.OnFavoriteClicked -> {
+                if (intent.product.isFavorite) {
+                    val currentState = _uiState.value
+                    if (currentState is HomeUiState.Success) {
+                        _uiState.value = currentState.copy(productToRemove = intent.product)
+                    }
+                } else {
+                    toggleFavorite(intent.product)
+                }
+            }
+            is HomeUiIntent.OnCancelRemove -> {
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Success) {
+                    _uiState.value = currentState.copy(productToRemove = null)
+                }
+            }
+            is HomeUiIntent.OnConfirmRemove -> {
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Success) {
+                    val product = currentState.productToRemove
+                    if (product != null) {
+                        _uiState.value = currentState.copy(productToRemove = null)
+                        toggleFavorite(product, isAdding = false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun toggleFavorite(product: com.example.wearzone.domain.product.model.Product, isAdding: Boolean = true) {
+        viewModelScope.launch {
+            val user = getCurrentUserUseCase()
+            if (user == null || user.uid.isEmpty()) {
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_sign_in_required))
+                return@launch
+            }
+            val item = WishlistItem(
+                id = product.id,
+                title = product.title,
+                vendor = product.vendor,
+                price = product.price.toString(),
+                currencyCode = product.currencyCode,
+                imageUrl = product.imageUrl ?: "",
+                isOutOfStock = false
+            )
+            toggleFavoriteUseCase(item, user.uid)
+            if (isAdding) {
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_item_added))
+            } else {
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_item_removed))
+            }
         }
     }
 
@@ -103,6 +162,7 @@ class HomeViewModel @Inject constructor(
             val categoriesResult = getProductsUseCase.getCategories()
             val brandsResult = getProductsUseCase.getBrands()
             val productsResult = getProductsUseCase.getProducts()
+            val user = getCurrentUserUseCase()
 
             if (categoriesResult is DataResult.Success &&
                 brandsResult is DataResult.Success &&
@@ -125,6 +185,58 @@ class HomeViewModel @Inject constructor(
             } else {
                 homeDataState.update { HomeUiState.Error("Failed to load home data") }
             }
+                if (user != null && user.uid.isNotEmpty()) {
+                    launch {
+                        observeWishlistUseCase(user.uid).collect { wishlistItems ->
+                            val wishlistIds = wishlistItems.map { it.id }.toSet()
+                            updateStateWithWishlist(
+                                categoriesResult.data,
+                                brandsResult.data,
+                                productsResult.data,
+                                wishlistIds,
+                                user.displayName ?: "Guest"
+                            )
+                        }
+                    }
+                } else {
+                    updateStateWithWishlist(
+                        categoriesResult.data,
+                        brandsResult.data,
+                        productsResult.data,
+                        emptySet(),
+                        "Guest"
+                    )
+                }
+            } else {
+                _uiState.update {
+                    HomeUiState.Error("Failed to load home data")
+                }
+            }
+        }
+    }
+
+    private fun updateStateWithWishlist(
+        categories: List<com.example.wearzone.domain.product.model.Category>,
+        brands: List<com.example.wearzone.domain.product.model.Brand>,
+        products: List<com.example.wearzone.domain.product.model.Product>,
+        wishlistIds: Set<String>,
+        userName: String
+    ) {
+        val updatedProducts = products.map { it.copy(isFavorite = wishlistIds.contains(it.id)) }
+        val hero = updatedProducts.firstOrNull()
+        val trending = updatedProducts.take(5)
+        val newArrivals = updatedProducts.takeLast(4)
+        _uiState.update { currentState ->
+            val productToRemove = if (currentState is HomeUiState.Success) currentState.productToRemove else null
+            HomeUiState.Success(
+                userName = userName,
+                categories = categories.toImmutableList(),
+                brands = brands.toImmutableList(),
+                trendingProducts = trending.toImmutableList(),
+                newArrivalProducts = newArrivals.toImmutableList(),
+                heroProduct = hero,
+                productToRemove = productToRemove
+            )
         }
     }
 

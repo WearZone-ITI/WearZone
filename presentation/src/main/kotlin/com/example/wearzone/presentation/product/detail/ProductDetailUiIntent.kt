@@ -6,4 +6,6 @@ sealed interface ProductDetailUiIntent {
     data class SelectSize(val size: String) : ProductDetailUiIntent
     data object AddToCart : ProductDetailUiIntent
     data object OnToggleFavorite : ProductDetailUiIntent
+    data object OnConfirmRemove : ProductDetailUiIntent
+    data object OnCancelRemove : ProductDetailUiIntent
 }

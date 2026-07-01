@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.coil.compose)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.database.ktx)
     //Hend
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

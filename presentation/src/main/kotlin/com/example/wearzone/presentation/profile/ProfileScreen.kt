@@ -250,7 +250,6 @@ private data class ProfileRow(
 
 private fun profileRows(currencyRes: Int) = listOf(
     ProfileRow(Icons.Outlined.List, R.string.profile_my_orders, ProfileUiIntent.OnMyOrdersClicked),
-    ProfileRow(Icons.Outlined.FavoriteBorder, R.string.profile_wishlist, ProfileUiIntent.OnWishlistClicked),
     ProfileRow(Icons.Outlined.LocationOn, R.string.profile_saved_addresses, ProfileUiIntent.OnSavedAddressesClicked),
     ProfileRow(Icons.Outlined.CreditCard, R.string.profile_currency, ProfileUiIntent.OnCurrencyClicked, currencyRes),
     ProfileRow(Icons.Outlined.Settings, R.string.profile_settings, ProfileUiIntent.OnSettingsClicked),

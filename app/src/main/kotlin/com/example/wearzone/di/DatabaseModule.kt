@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.wearzone.data.db.WearZoneDatabase
 import com.example.wearzone.data.local.dao.CartDao
 import com.example.wearzone.data.local.search.RecentSearchDao
+import com.example.wearzone.data.local.wishlist.WishlistDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,4 +39,10 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideCartDao(database: WearZoneDatabase): CartDao = database.cartDao()
+
+    @Provides
+    @Singleton
+    fun provideWishlistDao(database: WearZoneDatabase): WishlistDao {
+        return database.wishlistDao()
+    }
 }

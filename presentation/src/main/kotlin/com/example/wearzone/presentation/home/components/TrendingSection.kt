@@ -22,11 +22,7 @@ import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
-fun TrendingSection(
-    products: List<Product>,
-    onProductClick: (String) -> Unit,
-    onAddToCartClick: (Product) -> Unit = {}
-) {
+fun TrendingSection(products: List<Product>, onProductClick: (String) -> Unit, onFavoriteClick: (Product) -> Unit = {},    onAddToCartClick: (Product) -> Unit = {}) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -49,7 +45,7 @@ fun TrendingSection(
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             items(products) { product ->
-                ProductCard(product, onProductClick, onAddToCartClick)
+                ProductCard(product, onProductClick, onFavoriteClick,onAddToCartClick)
             }
         }
     }
