@@ -16,6 +16,7 @@ sealed interface ProfileUiState {
         val recentOrders: ImmutableList<RecentOrderUiModel>,
         @param:StringRes val currencyRes: Int = R.string.profile_currency_usd,
         val isAuthenticated: Boolean,
+        val cartItemCount: Int = 0,
     ) : ProfileUiState
 
     data class Error(@param:StringRes val messageRes: Int) : ProfileUiState

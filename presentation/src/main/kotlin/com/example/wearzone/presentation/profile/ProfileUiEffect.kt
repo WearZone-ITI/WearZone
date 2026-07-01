@@ -9,5 +9,6 @@ sealed interface ProfileUiEffect {
     data object NavigateToOrders : ProfileUiEffect
     data object NavigateToSavedAddresses : ProfileUiEffect
     data object ShowLogoutConfirmation : ProfileUiEffect
+    data object NavigateToCard : ProfileUiEffect
     data class ShowError(@param:StringRes val messageRes: Int) : ProfileUiEffect
 }

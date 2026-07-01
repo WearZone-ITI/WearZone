@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
-import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.TopBar
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.profile.components.LogoutConfirmationDialog
 import com.example.wearzone.presentation.profile.components.ProfileHeader
 import com.example.wearzone.presentation.profile.components.ProfileMenuRow
@@ -60,7 +60,7 @@ fun ProfileScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToSavedAddresses: () -> Unit,
-    onNavigateToHome: () -> Unit,
+    onNavigateToCard: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,6 +76,7 @@ fun ProfileScreen(
                 ProfileUiEffect.NavigateToSettings -> onNavigateToSettings()
                 ProfileUiEffect.NavigateToWishlist -> onNavigateToWishlist()
                 ProfileUiEffect.NavigateToOrders -> onNavigateToOrders()
+                ProfileUiEffect.NavigateToCard -> onNavigateToCard()
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {
@@ -90,7 +91,8 @@ fun ProfileScreen(
 
     Scaffold(
         topBar = {
-            TopBar()
+            val cartCount = (uiState as? ProfileUiState.Content)?.cartItemCount ?: 0
+            TopBar(cartItemCount = cartCount, onAddToCartClick = { viewModel.handleIntent(ProfileUiIntent.OnCardClicked) })
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = AppTheme.colors.background,

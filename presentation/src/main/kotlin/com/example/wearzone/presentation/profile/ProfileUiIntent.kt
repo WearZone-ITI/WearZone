@@ -9,5 +9,6 @@ sealed interface ProfileUiIntent {
     data object OnLogoutClicked : ProfileUiIntent
     data object OnLogoutConfirmed : ProfileUiIntent
     data object OnLogoutCancelled : ProfileUiIntent
+    data object OnCardClicked : ProfileUiIntent
     data object OnRetry : ProfileUiIntent
 }
