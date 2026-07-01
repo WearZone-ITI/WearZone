@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -33,7 +31,7 @@ class HomeViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
-    private val addToCartUseCase: AddToCartUseCase
+    private val addToCartUseCase: AddToCartUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
@@ -44,7 +42,7 @@ class HomeViewModel @Inject constructor(
             .map { items -> items.sumOf { it.quantity } }
             .stateIn(
                 viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
+                SharingStarted.Eagerly,
                 0
             )
 
@@ -57,7 +55,7 @@ class HomeViewModel @Inject constructor(
             }
         }.stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
+            SharingStarted.Eagerly,
             HomeUiState.Loading
         )
 
@@ -76,6 +74,32 @@ class HomeViewModel @Inject constructor(
             is HomeUiIntent.OnProductClicked -> sendEffect(HomeUiEffect.NavigateToProductDetail(intent.productId))
             is HomeUiIntent.OnCartClicked -> sendEffect(HomeUiEffect.NavigateToCart)
             is HomeUiIntent.OnAddToCartClicked -> addToCart(intent.product)
+            is HomeUiIntent.OnFavoriteClicked -> {
+                if (intent.product.isFavorite) {
+                    val currentState = homeDataState.value
+                    if (currentState is HomeUiState.Success) {
+                        homeDataState.value = currentState.copy(productToRemove = intent.product)
+                    }
+                } else {
+                    toggleFavorite(intent.product)
+                }
+            }
+            is HomeUiIntent.OnCancelRemove -> {
+                val currentState = homeDataState.value
+                if (currentState is HomeUiState.Success) {
+                    homeDataState.value = currentState.copy(productToRemove = null)
+                }
+            }
+            is HomeUiIntent.OnConfirmRemove -> {
+                val currentState = homeDataState.value
+                if (currentState is HomeUiState.Success) {
+                    val product = currentState.productToRemove
+                    if (product != null) {
+                        homeDataState.value = currentState.copy(productToRemove = null)
+                        toggleFavorite(product, isAdding = false)
+                    }
+                }
+            }
         }
     }
 
@@ -95,36 +119,10 @@ class HomeViewModel @Inject constructor(
             )
             when (addToCartUseCase(item)) {
                 is DataResult.Success -> {
-                    sendEffect(HomeUiEffect.ShowSnackbar("Added to cart"))
+                    sendEffect(HomeUiEffect.ShowSnackbar(R.string.add_to_cart))
                 }
                 is DataResult.Error -> {
-                    sendEffect(HomeUiEffect.ShowSnackbar("Failed to add to cart"))
-                }
-            }
-            is HomeUiIntent.OnFavoriteClicked -> {
-                if (intent.product.isFavorite) {
-                    val currentState = _uiState.value
-                    if (currentState is HomeUiState.Success) {
-                        _uiState.value = currentState.copy(productToRemove = intent.product)
-                    }
-                } else {
-                    toggleFavorite(intent.product)
-                }
-            }
-            is HomeUiIntent.OnCancelRemove -> {
-                val currentState = _uiState.value
-                if (currentState is HomeUiState.Success) {
-                    _uiState.value = currentState.copy(productToRemove = null)
-                }
-            }
-            is HomeUiIntent.OnConfirmRemove -> {
-                val currentState = _uiState.value
-                if (currentState is HomeUiState.Success) {
-                    val product = currentState.productToRemove
-                    if (product != null) {
-                        _uiState.value = currentState.copy(productToRemove = null)
-                        toggleFavorite(product, isAdding = false)
-                    }
+                    sendEffect(HomeUiEffect.ShowSnackbar(R.string.failed_to_add_to_cart))
                 }
             }
         }
@@ -168,23 +166,6 @@ class HomeViewModel @Inject constructor(
                 brandsResult is DataResult.Success &&
                 productsResult is DataResult.Success
             ) {
-                val products = productsResult.data
-                val hero = products.firstOrNull()
-                val trending = products.take(5)
-                val newArrivals = products.takeLast(4)
-                homeDataState.update {
-                    HomeUiState.Success(
-                        userName = getCurrentUserUseCase.invoke()?.displayName ?: "Guest",
-                        categories = categoriesResult.data.toImmutableList(),
-                        brands = brandsResult.data.toImmutableList(),
-                        trendingProducts = trending.toImmutableList(),
-                        newArrivalProducts = newArrivals.toImmutableList(),
-                        heroProduct = hero
-                    )
-                }
-            } else {
-                homeDataState.update { HomeUiState.Error("Failed to load home data") }
-            }
                 if (user != null && user.uid.isNotEmpty()) {
                     launch {
                         observeWishlistUseCase(user.uid).collect { wishlistItems ->
@@ -208,7 +189,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } else {
-                _uiState.update {
+                homeDataState.update {
                     HomeUiState.Error("Failed to load home data")
                 }
             }
@@ -226,7 +207,7 @@ class HomeViewModel @Inject constructor(
         val hero = updatedProducts.firstOrNull()
         val trending = updatedProducts.take(5)
         val newArrivals = updatedProducts.takeLast(4)
-        _uiState.update { currentState ->
+        homeDataState.update { currentState ->
             val productToRemove = if (currentState is HomeUiState.Success) currentState.productToRemove else null
             HomeUiState.Success(
                 userName = userName,

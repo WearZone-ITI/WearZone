@@ -206,6 +206,8 @@
     <string name="cart_shipping_next_step">يُحسب في الخطوة التالية</string>
     <string name="cart_decrease_quantity">تقليل الكمية</string>
     <string name="cart_increase_quantity">زيادة الكمية</string>
+    <string name="add_to_cart">تمت الاضافه الى الكارت</string>
+    <string name="failed_to_add_to_cart">فشل الاضافة الى الكارت</string>
 
     <!-- Hend -->
 

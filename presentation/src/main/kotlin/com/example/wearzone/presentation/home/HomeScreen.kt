@@ -1,5 +1,6 @@
 package com.example.wearzone.presentation.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
+@SuppressLint("LocalContextResourcesRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -45,14 +47,14 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(viewModel.uiEffect) {
+    LaunchedEffect(Unit) {
         viewModel.uiEffect.collectLatest { effect ->
             when (effect) {
                 is HomeUiEffect.NavigateToBrand -> onNavigateToBrand(effect.brandId)
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
                 is HomeUiEffect.NavigateToCart -> onNavigateToCard()
-                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.getString(effect.messageResId))
+                is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.resources.getString(effect.messageResId))
             }
         }
     }
@@ -108,7 +110,7 @@ fun HomeScreen(
                             TrendingSection(
                                 products = state.trendingProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
-                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
+                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) },
                                 onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }
@@ -124,7 +126,7 @@ fun HomeScreen(
                             NewArrivalsSection(
                                 products = state.newArrivalProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
-                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
+                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) },
                                 onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
                             )
                         }

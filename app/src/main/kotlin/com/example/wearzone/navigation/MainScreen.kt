@@ -233,16 +233,10 @@ fun MainScreen(
                         bottomNavController.navigate(Route.WishlistRoute)
                     },
                     onNavigateToOrders = { },
-                    onNavigateToSavedAddresses = { },
-                    onNavigateToCard = { bottomNavController.navigate(Route.CartRoute) })
+                    onNavigateToCard = { onNavigateToCard() },
                     onNavigateToSavedAddresses = {
                         bottomNavController.navigate(Route.AddressListRoute) {
                             launchSingleTop = true
-                        }
-                    },
-                    onNavigateToHome = {
-                        bottomNavController.navigate(Route.HomeRoute) {
-                            popUpTo<Route.HomeRoute> { inclusive = true }
                         }
                     }
                 )
@@ -293,12 +287,13 @@ fun MainScreen(
 
             composable<Route.WishlistRoute> {
                 com.example.wearzone.presentation.wishlist.WishlistScreen(
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onShowSnackbar = { message ->
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
-                    }
+                    },
+                    onNavigateToCard
                 )
             }
         }

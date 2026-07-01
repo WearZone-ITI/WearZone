@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun WishlistScreen(
     onNavigateToProductDetail: (String) -> Unit,
     onShowSnackbar: suspend (String) -> Unit,
+    onNavigateToCart : ()-> Unit,
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -54,7 +55,7 @@ fun WishlistScreen(
     }
 
     Scaffold(
-        topBar = { TopBar() },
+        topBar = { TopBar(cartItemCount =0 ,onNavigateToCart) },
         containerColor = AppTheme.colors.background
     ) { paddingValues ->
         Column(
