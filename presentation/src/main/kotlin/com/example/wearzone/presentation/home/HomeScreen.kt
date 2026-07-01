@@ -37,7 +37,7 @@ fun HomeScreen(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
     onNavigateToSearch: () -> Unit,
-    onNavigateToProfile: () -> Unit,
+    onNavigateToCard : ()->Unit,
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -49,12 +49,18 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
                 is HomeUiEffect.ShowSnackbar -> onShowSnackbar(effect.message)
+                is HomeUiEffect.NavigateToCart -> onNavigateToCard()
             }
         }
     }
 
     Scaffold(
-        topBar = { TopBar() },
+        topBar = {
+            TopBar(
+                cartItemCount = if (uiState is HomeUiState.Success) (uiState as HomeUiState.Success).cartItemCount else 0,
+                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnCartClicked) }
+            )
+        },
         containerColor = AppTheme.colors.background,
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -92,6 +98,7 @@ fun HomeScreen(
                             TrendingSection(
                                 products = state.trendingProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
+                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -106,6 +113,7 @@ fun HomeScreen(
                             NewArrivalsSection(
                                 products = state.newArrivalProducts,
                                 onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
+                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) }
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
