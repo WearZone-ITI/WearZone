@@ -179,7 +179,7 @@ fun MainScreen(
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
                     onShowSnackbar = { },
                     onNavigateToCard = { onNavigateToCard() },
-                    onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) })
+                )
             }
 
             composable<Route.SearchRoute> {

@@ -116,7 +116,6 @@ fun NavGraph(
                 onNavigateToProductDetail = { productId -> },
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
-                onNavigateToProfile = { navController.navigate(Route.ProfileRoute) },
                 onNavigateToCard = { navController.navigate(Route.CartRoute) },
                 onShowSnackbar = { message -> },
                 onNavigateToSearch = {}
