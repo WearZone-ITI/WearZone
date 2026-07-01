@@ -3,6 +3,7 @@ package com.example.wearzone.di
 import android.content.Context
 import androidx.room.Room
 import com.example.wearzone.data.db.WearZoneDatabase
+import com.example.wearzone.data.local.dao.CartDao
 import com.example.wearzone.data.local.search.RecentSearchDao
 import dagger.Module
 import dagger.Provides
@@ -32,4 +33,7 @@ object DatabaseModule {
     fun provideRecentSearchDao(database: WearZoneDatabase): RecentSearchDao {
         return database.recentSearchDao()
     }
+
+    @Provides
+    fun provideCartDao(database: WearZoneDatabase): CartDao = database.cartDao()
 }

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.wearzone.data.local.datasource.CartLocalDataSourceImpl
+import com.example.wearzone.data.local.datasource.ICartLocalDataSource
 import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
 import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
@@ -49,6 +51,16 @@ abstract class DataSourceModule {
     abstract fun bindAuthRemoteDataSource(
         impl: AuthRemoteDataSourceImpl,
     ): IAuthRemoteDataSource
+
+    @Binds
+    abstract fun bindCartLocalDataSource(
+        impl: CartLocalDataSourceImpl,
+    ): ICartLocalDataSource
+
+    @Binds
+    abstract fun bindCartRemoteDataSource(
+        impl: com.example.wearzone.data.remote.datasource.CartRemoteDataSourceImpl,
+    ): com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
 
     companion object {
 

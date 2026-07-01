@@ -20,6 +20,8 @@ sealed interface Route {
     // Hend
     @Serializable
     data object RegisterRoute : Route
+    @Serializable
+    data object CartRoute  : Route
     // Hend
 
     // Ahmed

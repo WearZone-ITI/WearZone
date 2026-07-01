@@ -53,6 +53,11 @@ object NetworkModule {
     }
 
     @Provides
+    fun provideCartApiService(retrofit: Retrofit): com.example.wearzone.data.remote.api.CartApiService {
+        return retrofit.create(com.example.wearzone.data.remote.api.CartApiService::class.java)
+    }
+
+    @Provides
     fun provideFirebaseAuth(): FirebaseAuth = Firebase.auth
 
     @Provides

@@ -47,16 +47,31 @@ data class BottomNavItem<T : Any>(
 fun MainScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToCard: () -> Unit,
     onNavigateToProductDetail: (Long) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
 
     val navItems = listOf(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
-        BottomNavItem(Route.HomeRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
-        BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
-        BottomNavItem(Route.HomeRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
-        BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
+        BottomNavItem(
+            Route.HomeRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories
+        ),
+        BottomNavItem(
+            Route.SearchRoute,
+            Icons.Outlined.Search,
+            R.string.nav_search,
+            R.string.content_desc_search
+        ),
+        BottomNavItem(
+            Route.HomeRoute,
+            Icons.Outlined.FavoriteBorder,
+            R.string.nav_wishlist,
+            R.string.nav_wishlist
+        ),
+        BottomNavItem(
+            Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile
+        )
     )
 
     Scaffold(
@@ -72,8 +87,7 @@ fun MainScreen(
             )
 
             NavigationBar(
-                containerColor = AppTheme.colors.surface,
-                tonalElevation = 8.dp
+                containerColor = AppTheme.colors.surface, tonalElevation = 8.dp
             ) {
                 val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -113,11 +127,20 @@ fun MainScreen(
                         onClick = {
                             if (item.labelRes != R.string.nav_categories && item.labelRes != R.string.nav_wishlist) {
 
-                                if (item.route == Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
-                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
-                                }
-                                else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(Route.SearchRoute::class) == true) {
-                                    bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+                                if (item.route == Route.HomeRoute && currentDestination?.hasRoute(
+                                        Route.SearchRoute::class
+                                    ) == true
+                                ) {
+                                    bottomNavController.popBackStack(
+                                        Route.HomeRoute, inclusive = false
+                                    )
+                                } else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(
+                                        Route.SearchRoute::class
+                                    ) == true
+                                ) {
+                                    bottomNavController.popBackStack(
+                                        Route.HomeRoute, inclusive = false
+                                    )
 
                                     bottomNavController.navigate(item.route) {
                                         popUpTo(bottomNavController.graph.findStartDestination().id) {
@@ -126,8 +149,7 @@ fun MainScreen(
                                         launchSingleTop = true
                                         restoreState = true
                                     }
-                                }
-                                else if (!isSelected) {
+                                } else if (!isSelected) {
                                     bottomNavController.navigate(item.route) {
                                         popUpTo(bottomNavController.graph.findStartDestination().id) {
                                             saveState = true
@@ -142,8 +164,7 @@ fun MainScreen(
                     )
                 }
             }
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         NavHost(
             navController = bottomNavController,
             startDestination = Route.HomeRoute,
@@ -156,15 +177,14 @@ fun MainScreen(
                     onNavigateToBrand = { },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
                     onShowSnackbar = { },
-                    onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) }
-                )
+                    onNavigateToCard = { onNavigateToCard() },
+                    onNavigateToProfile = { bottomNavController.navigate(Route.ProfileRoute) })
             }
 
             composable<Route.SearchRoute> {
                 SearchScreen(
                     onNavigateBack = { bottomNavController.popBackStack() },
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) }
-                )
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) })
             }
 
             composable<Route.ProfileRoute> {
@@ -178,8 +198,8 @@ fun MainScreen(
                         bottomNavController.navigate(Route.HomeRoute) {
                             popUpTo<Route.HomeRoute> { inclusive = true }
                         }
-                    }
-                )
+                    },
+                    onNavigateToCard = { bottomNavController.navigate(Route.CartRoute) })
             }
         }
     }

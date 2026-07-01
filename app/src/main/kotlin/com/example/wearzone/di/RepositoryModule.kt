@@ -3,9 +3,11 @@ package com.example.wearzone.di
 import com.example.wearzone.data.repository.AuthRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
+import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
+import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
 import dagger.Binds
@@ -28,4 +30,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): ISettingsRepository
+
+    @Binds
+    abstract fun bindCartRepository(cartRepositoryImpl: CartRepositoryImpl): ICartRepository
 }
