@@ -1,5 +1,6 @@
 package com.example.wearzone.di
 
+import com.example.wearzone.data.remote.api.AddressApiService
 import com.example.wearzone.data.remote.api.AuthApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -61,5 +62,10 @@ object NetworkModule {
     @Provides
     fun provideAuthService(retrofit: Retrofit) : AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+
+    @Provides
+    fun provideAddressApiService(retrofit: Retrofit): AddressApiService {
+        return retrofit.create(AddressApiService::class.java)
     }
 }

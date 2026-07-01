@@ -24,14 +24,18 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun loginWithEmail(email: String, password: String): Result<User> =
         withContext(ioDispatcher) {
             runCatchingCancellable {
-                remoteDataSource.signInWithEmail(email, password).toDomain()
+                val firebaseUser = remoteDataSource.signInWithEmail(email, password)
+                saveShopifyCustomerIdLocally(firebaseUser)
+                firebaseUser.toDomain()
             }
         }
 
     override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
         withContext(ioDispatcher) {
             runCatchingCancellable {
-                remoteDataSource.signInWithGoogleCredential(idToken).toDomain()
+                val firebaseUser = remoteDataSource.signInWithGoogleCredential(idToken)
+                saveShopifyCustomerIdLocally(firebaseUser)
+                firebaseUser.toDomain()
             }
         }
 
@@ -46,6 +50,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun logout(): Result<Unit> = withContext(ioDispatcher) {
         runCatchingCancellable {
             remoteDataSource.signOut()
+            settingsDataSource.setCustomerId(null)
         }
     }
 
@@ -59,6 +64,13 @@ class AuthRepositoryImpl @Inject constructor(
             settingsDataSource.setCustomerId(result.customerId)
             result.firebaseUser.toDomain()
         }
+    }
+
+    private suspend fun saveShopifyCustomerIdLocally(firebaseUser: FirebaseUser) {
+        val shopifyCustomerId = remoteDataSource
+            .getSavedShopifyCustomerId(firebaseUser.uid)
+            ?.takeIf { it > 0L }
+        settingsDataSource.setCustomerId(shopifyCustomerId)
     }
 
     private fun FirebaseUser.toDomain(): User {
