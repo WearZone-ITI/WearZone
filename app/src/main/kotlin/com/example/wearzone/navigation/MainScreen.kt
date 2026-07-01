@@ -49,7 +49,7 @@ fun MainScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToCard: () -> Unit,
-    onNavigateToProductDetail: (Long) -> Unit,
+    onNavigateToProductDetail: (String) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
 
@@ -173,7 +173,7 @@ fun MainScreen(
         ) {
             composable<Route.HomeRoute> {
                 HomeScreen(
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onNavigateToCategory = { },
                     onNavigateToBrand = { },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
@@ -185,7 +185,7 @@ fun MainScreen(
             composable<Route.SearchRoute> {
                 SearchScreen(
                     onNavigateBack = { bottomNavController.popBackStack() },
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId.toLong()) },
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onNavigateToCart = {onNavigateToCard()}
                 )
             }

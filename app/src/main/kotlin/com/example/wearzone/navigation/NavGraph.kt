@@ -12,6 +12,7 @@ import com.example.wearzone.presentation.cart.CartScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
+import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 
 @Composable
@@ -142,7 +143,15 @@ fun NavGraph(
             )
         }
 
-
+        composable<Route.SearchRoute> {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
+                },
+                onNavigateToCart = { navController.navigate(Route.CartRoute) }
+            )
+        }
         // Omar
     }
 }
