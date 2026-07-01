@@ -104,6 +104,44 @@
     <string name="password_strength_good">جيدة</string>
     <string name="password_strength_strong">قوية</string>
     <string name="empty"/>
+
+    <string name="cart_title">عربة التسوق</string>
+    <string name="cart_empty_title">عربة التسوق فارغة</string>
+    <string name="cart_empty_subtitle">يبدو أنك لم تضف أي شيء إلى عربة التسوق بعد.</string>
+    <string name="cart_shop_now">تسوق الآن</string>
+    <string name="cart_checkout">الدفع</string>
+    <string name="cart_total">الإجمالي</string>
+    <string name="cart_subtotal">المجموع الفرعي</string>
+    <string name="cart_remove">إزالة</string>
+    <string name="cart_remove_confirm_title">تأكيد الإزالة</string>
+    <string name="cart_remove_confirm_message">هل أنت متأكد أنك تريد إزالة هذا العنصر من عربة التسوق؟</string>
+    <string name="cart_cancel">إلغاء</string>
+    <string name="cart_quantity">الكمية:</string>
+    <string name="cart_size">المقاس:</string>
+    <string name="cart_size_format">المقاس: %1$s</string>
+    <string name="cart_price">السعر:</string>
+    <string name="cart_proceed_to_checkout">متابعة الدفع</string>
+    <string name="cart_out_of_stock">نفذت الكمية</string>
+    <string name="cart_low_stock">كمية محدودة</string>
+    <string name="cart_remove_dialog_title">تأكيد الإزالة</string>
+    <string name="cart_remove_dialog_message">هل أنت متأكد أنك تريد إزالة هذا العنصر من عربة التسوق؟</string>
+    <string name="cart_remove_dialog_confirm">إزالة</string>
+    <string name="cart_clear_dialog_title">إفراغ العربة</string>
+    <string name="cart_clear_dialog_message">هل أنت متأكد أنك تريد إزالة كل العناصر من عربة التسوق؟</string>
+    <string name="cart_clear_dialog_confirm">إفراغ</string>
+    <string name="cart_back_content_description">رجوع</string>
+    <string name="cart_clear_content_description">إفراغ العربة</string>
+    <string name="cart_login_required">يرجى تسجيل الدخول لعرض عربة التسوق.</string>
+    <string name="cart_item_count_format">%1$d عناصر</string>
+    <string name="cart_retry">إعادة المحاولة</string>
+    <string name="cart_dialog_cancel">إلغاء</string>
+    <string name="cart_remove_item">إزالة العنصر</string>
+    <string name="cart_low_stock_format">باقي %1$d فقط</string>
+    <string name="cart_shipping">الشحن</string>
+    <string name="cart_shipping_next_step">يُحسب في الخطوة التالية</string>
+    <string name="cart_decrease_quantity">تقليل الكمية</string>
+    <string name="cart_increase_quantity">زيادة الكمية</string>
+
     <!-- Hend -->
 
     <!-- Ahmed -->
