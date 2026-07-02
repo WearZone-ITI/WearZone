@@ -16,6 +16,8 @@ import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
+import com.example.wearzone.presentation.brands.BrandsScreen
+import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
 
 @Composable
 fun NavGraph(
@@ -145,6 +147,7 @@ fun NavGraph(
                 onNavigateToProductDetail = { productId -> },
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
+                onNavigateToBrands = {},
                 onNavigateToCart = { navController.navigate(Route.CartRoute) },
                 onShowSnackbar = { message -> },
                 onNavigateToSearch = {}
@@ -167,6 +170,30 @@ fun NavGraph(
                 },
                 onNavigateToCart = {
                     navController.navigate(Route.CartRoute)
+                },
+                onNavigateToBrands = {
+                    navController.navigate(Route.BrandsRoute)
+                },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
+                }
+            )
+        }
+
+        composable<Route.BrandsRoute> {
+            BrandsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
+                }
+            )
+        }
+
+        composable<Route.VendorProductsRoute> {
+            VendorProductsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
                 }
             )
         }

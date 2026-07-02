@@ -16,7 +16,7 @@ interface ProductApiService {
     suspend fun getSmartCollections(): SmartCollectionsResponse
 
     @GET("admin/api/2024-04/products.json")
-    suspend fun getProducts(): ProductsResponse
+    suspend fun getProducts(@Query("vendor") vendor: String? = null): ProductsResponse
 
     @GET("admin/api/2024-04/products.json")
     suspend fun getProductsByIds(
