@@ -63,6 +63,8 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToBrands: () -> Unit,
+    onNavigateToVendorProducts: (String) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -187,7 +189,8 @@ fun MainScreen(
                     HomeScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onNavigateToCategory = { bottomNavController.navigate(Route.CategoriesRoute) },
-                    onNavigateToBrand = { },
+                    onNavigateToBrand = { brandName -> onNavigateToVendorProducts(brandName) },
+                    onNavigateToBrands = { onNavigateToBrands() },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
                     onShowSnackbar = { message ->
                         coroutineScope.launch {

@@ -72,7 +72,15 @@ class HomeViewModel @Inject constructor(
     fun handleIntent(intent: HomeUiIntent) {
         when (intent) {
             is HomeUiIntent.LoadHomeData -> loadHomeData()
-            is HomeUiIntent.OnBrandClicked -> sendEffect(HomeUiEffect.NavigateToBrand(intent.brandId))
+            is HomeUiIntent.OnBrandClicked -> {
+                val currentState = homeDataState.value
+                val brandName = if (currentState is HomeUiState.Success) {
+                    currentState.brands.find { it.id == intent.brandId }?.title ?: intent.brandId
+                } else {
+                    intent.brandId
+                }
+                sendEffect(HomeUiEffect.NavigateToBrand(brandName))
+            }
             is HomeUiIntent.OnCategoryClicked -> sendEffect(HomeUiEffect.NavigateToCategory(intent.categoryId))
             is HomeUiIntent.OnProductClicked -> sendEffect(HomeUiEffect.NavigateToProductDetail(intent.productId))
             is HomeUiIntent.OnCartClicked -> sendEffect(HomeUiEffect.NavigateToCart)

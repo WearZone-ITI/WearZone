@@ -331,7 +331,11 @@
     <string name="wishlist_remove_dialog_subtitle">This item will be removed from your wishlist.</string>
     <string name="wishlist_remove_dialog_confirm">Remove</string>
     <string name="wishlist_remove_dialog_cancel">Keep in Wishlist</string>
+    <!-- Brands Screen -->
     <string name="wishlist_item_added">Added to favorites</string>
+    <string name="brands_title">Brands</string>
+    <string name="vendor_products_empty">No products found for this brand.</string>
+
     <!--Ahmed-->
 
 
@@ -430,8 +434,6 @@
     <string name="error_server">Server error (%1$s)</string>
     <string name="error_unknown">Something went wrong</string>
     <!--Omar-->
-
-
 
 
 </resources>

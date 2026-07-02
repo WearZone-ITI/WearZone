@@ -34,7 +34,11 @@ import com.example.wearzone.domain.product.model.Brand
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
-fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
+fun TopBrandsSection(
+    brands: List<Brand>,
+    onBrandClick: (String) -> Unit,
+    onSeeAllClick: () -> Unit
+) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -51,7 +55,7 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                 text = stringResource(id = R.string.home_see_all),
                 fontSize = 14.sp,
                 color = AppTheme.colors.textSecondary,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable { onSeeAllClick() }
             )
         }
 
@@ -80,12 +84,10 @@ fun TopBrandsSection(brands: List<Brand>, onBrandClick: (String) -> Unit) {
                             contentAlignment = Alignment.Center
                         ) {
                             AsyncImage(
-                                model = brand.imageUrl ?: R.drawable.placeholder,
+                                model = brand.imageUrl.takeIf { !it.isNullOrEmpty() } ?: R.drawable.wearzone_img,
                                 contentDescription = brand.title,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(10.dp)
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
