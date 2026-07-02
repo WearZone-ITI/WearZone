@@ -47,6 +47,15 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getProductsByVendor(vendor: String): DataResult<List<Product>> = withContext(ioDispatcher) {
+        try {
+            val dtoList = remoteDataSource.getProducts(vendor)
+            DataResult.Success(dtoList.map { it.toDomain() })
+        } catch (e: Exception) {
+            DataResult.Error(DomainError.Unknown(e))
+        }
+    }
+
     override suspend fun getProductDetail(productId: Long): DataResult<ProductDetail> =
         withContext(ioDispatcher) {
             try {
