@@ -3,12 +3,15 @@ package com.example.wearzone.domain.checkout.usecase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.checkout.model.CheckoutCartClearException
+import com.example.wearzone.domain.checkout.model.CheckoutDiscount
 import com.example.wearzone.domain.checkout.model.CheckoutLineItem
 import com.example.wearzone.domain.checkout.model.CheckoutOrder
 import com.example.wearzone.domain.checkout.model.CheckoutOrderRequest
+import com.example.wearzone.domain.checkout.model.CheckoutPaymentMethod
 import com.example.wearzone.domain.checkout.model.CheckoutShippingAddress
 import com.example.wearzone.domain.checkout.model.EmptyCartCheckoutException
 import com.example.wearzone.domain.checkout.model.InvalidCheckoutLineItemException
+import com.example.wearzone.domain.checkout.model.MissingCheckoutAddressException
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
@@ -22,7 +25,11 @@ class PlaceOrderUseCase(
     private val customerIdProvider: ICustomerIdProvider,
     private val customerAddressRepository: ICustomerAddressRepository,
 ) {
-    suspend operator fun invoke(): Result<CheckoutOrder> {
+    suspend operator fun invoke(
+        discount: CheckoutDiscount? = null,
+        selectedAddressId: Long? = null,
+        paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.CashOnDelivery,
+    ): Result<CheckoutOrder> {
         val items = cartRepository.observeCart().first()
         if (items.isEmpty()) return Result.failure(EmptyCartCheckoutException())
 
@@ -33,13 +40,16 @@ class PlaceOrderUseCase(
         val lineItems = items.toCheckoutLineItems().getOrElse {
             return Result.failure(it)
         }
-        val address = getDefaultAddress(customerId)
+        val address = resolveShippingAddress(customerId, selectedAddressId)
+            ?: return Result.failure(MissingCheckoutAddressException())
 
         return checkoutRepository.createOrder(
             CheckoutOrderRequest(
                 customerId = customerId,
                 lineItems = lineItems,
                 shippingAddress = address,
+                discount = discount,
+                paymentMethod = paymentMethod,
             )
         ).onSuccess {
             when (cartRepository.clearCart()) {
@@ -61,11 +71,19 @@ class PlaceOrderUseCase(
         return Result.success(lineItems)
     }
 
-    private suspend fun getDefaultAddress(customerId: Long): CheckoutShippingAddress? =
+    private suspend fun resolveShippingAddress(
+        customerId: Long,
+        selectedAddressId: Long?,
+    ): CheckoutShippingAddress? =
         customerAddressRepository.getAddresses(customerId)
             .getOrNull()
             ?.let { addresses ->
-                addresses.firstOrNull { it.isDefault } ?: addresses.firstOrNull()
+                when {
+                    selectedAddressId != null ->
+                        addresses.firstOrNull { it.id == selectedAddressId }
+                    else ->
+                        addresses.firstOrNull { it.isDefault } ?: addresses.firstOrNull()
+                }
             }
             ?.toCheckoutShippingAddress()
 

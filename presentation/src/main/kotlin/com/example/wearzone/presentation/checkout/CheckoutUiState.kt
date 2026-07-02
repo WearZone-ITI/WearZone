@@ -11,8 +11,16 @@ sealed interface CheckoutUiState {
         val items: ImmutableList<CheckoutCartItemUiModel>,
         val itemCount: Int,
         val subtotal: String,
+        val formattedDiscount: String?,
         val total: String,
+        val promoCodeText: String,
+        val appliedDiscountCode: String?,
+        @param:StringRes val discountErrorRes: Int?,
+        val isApplyingDiscount: Boolean,
         val isPlacingOrder: Boolean = false,
+        val deliveryAddress: CheckoutDeliveryAddressUiModel? = null,
+        val isLoadingAddress: Boolean = false,
+        val paymentMethod: CheckoutPaymentMethodUi = CheckoutPaymentMethodUi.CashOnDelivery,
     ) : CheckoutUiState
 
     data class Error(@param:StringRes val messageRes: Int) : CheckoutUiState
@@ -21,6 +29,8 @@ sealed interface CheckoutUiState {
 data class CheckoutCartItemUiModel(
     val variantId: String,
     val title: String,
+    val vendor: String,
     val quantity: Int,
     val formattedPrice: String,
+    val imageUrl: String?,
 )

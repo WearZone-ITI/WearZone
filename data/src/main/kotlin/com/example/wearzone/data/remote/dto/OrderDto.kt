@@ -25,6 +25,9 @@ data class ShopifyOrderPayloadDto(
     val customer: ShopifyOrderCustomerDto,
     @SerialName("shipping_address")
     val shippingAddress: ShopifyOrderShippingAddressDto? = null,
+    @SerialName("discount_codes")
+    val discountCodes: List<ShopifyOrderDiscountCodeDto>? = null,
+    val note: String? = null,
     @SerialName("financial_status")
     val financialStatus: String = "pending",
     @SerialName("inventory_behaviour")
