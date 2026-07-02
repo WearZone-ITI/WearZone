@@ -1,4 +1,4 @@
-package com.wearzone.presentation.product.detail
+package com.example.presentation.productdetails
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
@@ -100,7 +100,11 @@ class ProductDetailViewModelTest {
     fun `init loads product and emits Error on failure`() = runTest {
         // الـ ViewModel دايمًا بيبعت نفس resource id ثابت وقت الفشل،
         // مش بيمرر نص الـ exception الحقيقي - فمفيش داعي نغيره هنا
-        coEvery { getProductDetailUseCase(1L) } returns DataResult.Error(DomainError.Unknown(Exception("Error message")))
+        coEvery { getProductDetailUseCase(1L) } returns DataResult.Error(
+            DomainError.Unknown(
+                Exception("Error message")
+            )
+        )
 
         val viewModel = createViewModel()
 
@@ -176,7 +180,7 @@ class ProductDetailViewModelTest {
         coEvery { authRepository.isLoggedIn() } returns false
 
         val viewModel = createViewModel()
-        
+
         viewModel.uiState.test {
             awaitItem()
             awaitItem() // Wait for Success state
