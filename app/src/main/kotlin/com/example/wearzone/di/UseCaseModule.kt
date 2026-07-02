@@ -18,6 +18,8 @@ import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
+import com.example.wearzone.domain.checkout.repository.IDiscountRepository
+import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
@@ -199,6 +201,11 @@ object UseCaseModule {
     ): ClearCartUseCase {
         return ClearCartUseCase(repository)
     }
+
+    @Provides
+    fun provideApplyDiscountCodeUseCase(
+        discountRepository: IDiscountRepository,
+    ): ApplyDiscountCodeUseCase = ApplyDiscountCodeUseCase(discountRepository)
 
     @Provides
     fun providePlaceOrderUseCase(
