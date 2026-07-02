@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
+import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import com.example.wearzone.presentation.product.detail.ProductDetailUiEffect
 import com.example.wearzone.presentation.product.detail.ProductDetailUiIntent
 import com.example.wearzone.presentation.product.detail.ProductDetailUiState
@@ -31,13 +34,17 @@ class ProductDetailViewModelTest {
 
     private val getProductDetailUseCase = mockk<GetProductDetailUseCase>()
     private val authRepository = mockk<IAuthRepository>()
-    private val savedStateHandle = SavedStateHandle(mapOf("productId" to 1L))
+    private val observeWishlistUseCase = mockk<ObserveWishlistUseCase>()
+    private val toggleFavoriteUseCase = mockk<ToggleFavoriteUseCase>()
+    private val addToCartUseCase = mockk<AddToCartUseCase>()
+    private val savedStateHandle = SavedStateHandle(mapOf("productId" to "1"))
 
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { authRepository.getCurrentUser() } returns null
     }
 
     @After
@@ -46,7 +53,14 @@ class ProductDetailViewModelTest {
     }
 
     private fun createViewModel(): ProductDetailViewModel {
-        return ProductDetailViewModel(savedStateHandle, getProductDetailUseCase, authRepository)
+        return ProductDetailViewModel(
+            savedStateHandle,
+            getProductDetailUseCase,
+            authRepository,
+            observeWishlistUseCase,
+            toggleFavoriteUseCase,
+            addToCartUseCase
+        )
     }
 
     private val dummyProduct = ProductDetail(
@@ -134,7 +148,7 @@ class ProductDetailViewModelTest {
         }
 
         viewModel.uiEffect.test {
-            viewModel.handleIntent(ProductDetailUiIntent.AddToCart)
+            viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick)
 
             val effect = awaitItem()
             assertTrue(effect is ProductDetailUiEffect.ShowToast)
@@ -149,7 +163,7 @@ class ProductDetailViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.uiEffect.test {
-            viewModel.handleIntent(ProductDetailUiIntent.AddToCart)
+            viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick)
 
             val effect = awaitItem()
             assertTrue(effect is ProductDetailUiEffect.ShowAuthRequiredError)
@@ -162,6 +176,11 @@ class ProductDetailViewModelTest {
         coEvery { authRepository.isLoggedIn() } returns false
 
         val viewModel = createViewModel()
+        
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem() // Wait for Success state
+        }
 
         viewModel.uiEffect.test {
             viewModel.handleIntent(ProductDetailUiIntent.OnToggleFavorite)
@@ -175,6 +194,7 @@ class ProductDetailViewModelTest {
     fun `AddToCart with size by logged-in user emits ShowToast added to cart`() = runTest {
         coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
         coEvery { authRepository.isLoggedIn() } returns true
+        coEvery { addToCartUseCase(any()) } returns DataResult.Success(Unit)
 
         val viewModel = createViewModel()
 
@@ -187,7 +207,7 @@ class ProductDetailViewModelTest {
         }
 
         viewModel.uiEffect.test {
-            viewModel.handleIntent(ProductDetailUiIntent.AddToCart)
+            viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick)
 
             val effect = awaitItem()
             assertTrue(effect is ProductDetailUiEffect.ShowToast)

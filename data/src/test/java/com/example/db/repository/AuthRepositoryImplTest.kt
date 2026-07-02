@@ -17,7 +17,8 @@ class AuthRepositoryImplTest {
     private val remoteDataSource = mockk<IAuthRemoteDataSource>()
     private val repository = AuthRepositoryImpl(
         remoteDataSource, Dispatchers.Unconfined,
-        dataSource = mockk()
+        dataSource = mockk(),
+        settingsDataSource = mockk(relaxed = true)
     )
 
     @Test
