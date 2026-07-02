@@ -23,6 +23,8 @@ interface ProductApiService {
         @Query("ids") ids: String,
         @Query("fields") fields: String = "id,title,vendor,variants,image",
     ): ProductsResponse
+
+    @GET("admin/api/2024-04/products.json")
     suspend fun getProducts(
         @Query("collection_id") collectionId: Long? = null
     ): ProductsResponse

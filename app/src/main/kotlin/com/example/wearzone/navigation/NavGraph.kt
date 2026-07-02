@@ -167,12 +167,12 @@ fun NavGraph(
                 onNavigateToSettings = {
                     navController.navigate(Route.SettingsRoute)
                 },
-               onNavigateToProductDetail = { productId ->
+                onNavigateToProductDetail = { productId ->
                     navController.navigate(Route.ProductDetailRoute(productId))
                 },
                 onNavigateToCart = {
                     navController.navigate(Route.CartRoute)
-                } ,
+                },
                 onNavigateToProductList = { collectionId, categoryName ->
                     navController.navigate(
                         Route.ProductListRoute(
@@ -180,6 +180,12 @@ fun NavGraph(
                             categoryName = categoryName
                         )
                     )
+                },
+                onNavigateToBrands = {
+                    navController.navigate(Route.BrandsRoute)
+                },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
                 }
             )
         }
@@ -199,12 +205,7 @@ fun NavGraph(
                         Route.ProductDetailRoute(productId)
                     )
                 },
-                onNavigateToBrands = {
-                    navController.navigate(Route.BrandsRoute)
-                },
-                onNavigateToVendorProducts = { vendorName ->
-                    navController.navigate(Route.VendorProductsRoute(vendorName))
-                }
+
             )
         }
 

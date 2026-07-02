@@ -64,8 +64,7 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
-    onNavigateToProductList: (Long, String) -> Unit)
-{
+    onNavigateToProductList: (Long, String) -> Unit,
     onNavigateToBrands: () -> Unit,
     onNavigateToVendorProducts: (String) -> Unit,
 ) {

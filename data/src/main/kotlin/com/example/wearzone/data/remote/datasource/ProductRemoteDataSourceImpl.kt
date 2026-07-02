@@ -29,13 +29,16 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     override suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto> {
         if (productIds.isEmpty()) return emptyList()
         val response = apiService.getProductsByIds(productIds.distinct().joinToString(","))
+
         return response.products.map { it.toProductDto() }
+    }
+
     override suspend fun getProducts(
         collectionId: Long?
     ): List<ProductDto> {
 
         return apiService
-            .getProducts(collectionId)
+            .getProducts()
             .products
             .map { it.toProductDto() }
     }
