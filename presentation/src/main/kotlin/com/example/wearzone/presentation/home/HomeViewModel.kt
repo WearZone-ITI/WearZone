@@ -12,6 +12,7 @@ import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import com.example.presentation.R
+import com.example.wearzone.domain.product.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
@@ -103,7 +104,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun addToCart(product: com.example.wearzone.domain.product.model.Product) {
+    private fun addToCart(product: Product) {
         viewModelScope.launch {
             val item = CartItem(
                 variantId = product.variantId,

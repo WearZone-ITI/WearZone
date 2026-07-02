@@ -31,8 +31,7 @@ class ProductDetailViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
-    private val productId: Long = savedStateHandle["productId"] ?: 9091143729380L
-
+    private val productId: Long = savedStateHandle.get<String>("productId")?.toLongOrNull() ?: 9091143729380L
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
