@@ -203,7 +203,7 @@ class ProductDetailViewModel @Inject constructor(
             toggleFavoriteUseCase(item, user.uid)
             
             if (isAdding) {
-                _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.product_detail_added_to_cart))
+                _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.wishlist_item_added))
             }
         }
     }
