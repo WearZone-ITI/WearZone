@@ -278,6 +278,14 @@
     <string name="checkout_discount">Discount</string>
     <string name="checkout_place_order_with_total">Place Order - %1$s</string>
     <string name="checkout_discount_code_content_description">Discount code input</string>
+    <string name="checkout_delivery_address_title">Delivery Address</string>
+    <string name="checkout_change_address">Change</string>
+    <string name="checkout_add_address">Add address</string>
+    <string name="checkout_no_address_message">Add a delivery address to continue with checkout.</string>
+    <string name="checkout_error_no_address">Please add a delivery address before placing your order.</string>
+    <string name="checkout_payment_method_title">Payment Method</string>
+    <string name="checkout_payment_cash_on_delivery">Cash on Delivery</string>
+    <string name="checkout_payment_cash_on_delivery_description">Pay with cash when your order arrives.</string>
 
 
 

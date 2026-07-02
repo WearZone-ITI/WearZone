@@ -228,6 +228,14 @@
     <string name="checkout_discount">الخصم</string>
     <string name="checkout_place_order_with_total">إتمام الطلب - %1$s</string>
     <string name="checkout_discount_code_content_description">حقل إدخال رمز الخصم</string>
+    <string name="checkout_delivery_address_title">عنوان التوصيل</string>
+    <string name="checkout_change_address">تغيير</string>
+    <string name="checkout_add_address">إضافة عنوان</string>
+    <string name="checkout_no_address_message">أضف عنوان توصيل لمتابعة الدفع.</string>
+    <string name="checkout_error_no_address">يرجى إضافة عنوان توصيل قبل إتمام الطلب.</string>
+    <string name="checkout_payment_method_title">طريقة الدفع</string>
+    <string name="checkout_payment_cash_on_delivery">الدفع عند الاستلام</string>
+    <string name="checkout_payment_cash_on_delivery_description">ادفع نقدًا عند وصول طلبك.</string>
 
     <string name="cart_title">عربة التسوق</string>
     <string name="cart_empty_title">عربة التسوق فارغة</string>
