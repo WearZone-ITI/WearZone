@@ -8,7 +8,8 @@ sealed interface CategoriesUiState {
     data class Success(
         val categories: ImmutableList<CategoryUiModel>,
         val searchQuery: String = "",
-    ) : CategoriesUiState
+        val cartItemCount: Int = 0,
+        ) : CategoriesUiState
 
     data class Empty(val searchQuery: String = "") : CategoriesUiState
 

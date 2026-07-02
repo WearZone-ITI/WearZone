@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val observeCartUseCase: ObserveCartUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -29,6 +32,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         loadProfile()
+        observeCart()
     }
 
     fun handleIntent(intent: ProfileUiIntent) {
@@ -42,6 +46,7 @@ class ProfileViewModel @Inject constructor(
             ProfileUiIntent.OnLogoutConfirmed -> confirmLogout()
             ProfileUiIntent.OnLogoutCancelled -> Unit
             ProfileUiIntent.OnRetry -> loadProfile()
+            ProfileUiIntent.OnCardClicked -> sendEffect(ProfileUiEffect.NavigateToCart)
         }
     }
 
@@ -87,6 +92,21 @@ class ProfileViewModel @Inject constructor(
     private fun sendEffect(effect: ProfileUiEffect) {
         viewModelScope.launch {
             _uiEffect.send(effect)
+        }
+    }
+
+    private fun observeCart() {
+        viewModelScope.launch {
+            observeCartUseCase().collect { cartItems ->
+                val count = cartItems.sumOf { it.quantity }
+                _uiState.update { state ->
+                    if (state is ProfileUiState.Content) {
+                        state.copy(cartItemCount = count)
+                    } else {
+                        state
+                    }
+                }
+            }
         }
     }
 }

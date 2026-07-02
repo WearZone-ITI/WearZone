@@ -27,13 +27,14 @@ data class BrandDto(
 @Serializable
 data class ProductDto(
     val id: String,
+    val variantId: String,
     val title: String,
     val vendor: String,
     val price: Double,
     val currencyCode: String,
     val imageUrl: String? = null
 ) {
-    fun toDomain(): Product = Product(id, title, vendor, price, currencyCode, imageUrl, isFavorite = false)
+    fun toDomain(): Product = Product(id, variantId, title, vendor, price, currencyCode, imageUrl,isFavorite = false)
 }
 
 @Serializable
@@ -68,15 +69,17 @@ data class ShopifyProduct(
 ) {
     fun toProductDto() = ProductDto(
         id = id.toString(),
+        variantId = variants.firstOrNull()?.id?.toString() ?: id.toString(),
         title = title,
         vendor = vendor,
         price = variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0,
-        currencyCode = "EGP", // Shopify Admin REST returns amount, currency is usually store default. We assume EGP or USD.
+        currencyCode = "EGP",
         imageUrl = image?.src
     )
 }
 
 @Serializable
 data class ShopifyVariant(
+    val id: Long? = null,
     val price: String? = null
 )

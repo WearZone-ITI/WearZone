@@ -7,6 +7,10 @@ import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
+import com.example.wearzone.domain.cart.model.CartItem
+import com.example.wearzone.domain.cart.repository.ICartRepository
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.presentation.profile.ProfileUiEffect
 import com.example.wearzone.presentation.profile.ProfileUiIntent
 import com.example.wearzone.presentation.profile.ProfileUiState
@@ -89,13 +93,25 @@ class ProfileViewModelTest {
         }
     }
 
+    @Test
+    fun `cart item count is observed and displayed in profile`() = runTest {
+        val viewModel = createViewModel()
+
+        val state = viewModel.uiState.value as ProfileUiState.Content
+
+        assertEquals(0, state.cartItemCount)
+    }
+
     private fun createViewModel(
         repository: FakeAuthRepository = FakeAuthRepository(),
-    ): ProfileViewModel =
-        ProfileViewModel(
+    ): ProfileViewModel {
+        val cartRepository = FakeCartRepository()
+        return ProfileViewModel(
             getCurrentUserUseCase = GetCurrentUserUseCase(repository),
             logoutUseCase = LogoutUseCase(repository),
+            observeCartUseCase = ObserveCartUseCase(cartRepository),
         )
+    }
 
     private class FakeAuthRepository(
         private val currentUser: User? = User("1", "alexandra@example.com", "Alexandra", null),
@@ -126,5 +142,21 @@ class ProfileViewModelTest {
 
         override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
             Result.success(Unit)
+    }
+
+    private class FakeCartRepository(
+        private val items: List<CartItem> = emptyList(),
+    ) : ICartRepository {
+        override fun observeCart(): Flow<List<CartItem>> = flowOf(items)
+
+        override suspend fun addToCart(item: CartItem): DataResult<Unit> = DataResult.Success(Unit)
+
+        override suspend fun removeFromCart(variantId: String): DataResult<Unit> =
+            DataResult.Success(Unit)
+
+        override suspend fun updateQuantity(variantId: String, quantity: Int): DataResult<Unit> =
+            DataResult.Success(Unit)
+
+        override suspend fun clearCart(): DataResult<Unit> = DataResult.Success(Unit)
     }
 }

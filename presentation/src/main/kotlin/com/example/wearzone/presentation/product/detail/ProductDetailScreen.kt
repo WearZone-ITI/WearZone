@@ -33,21 +33,20 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.presentation.R
+import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
 import com.example.wearzone.presentation.product.detail.components.StarRatingRow
@@ -56,36 +55,40 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ProductDetailScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: ProductDetailViewModel = hiltViewModel()
+    onNavigateBack: () -> Unit, viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     val authRequiredMessage = stringResource(id = R.string.product_detail_auth_required)
 
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
             when (effect) {
-                is ProductDetailUiEffect.ShowToast -> snackbarHostState.showSnackbar(context.getString(effect.messageRes))
-                is ProductDetailUiEffect.ShowAuthRequiredError -> snackbarHostState.showSnackbar(authRequiredMessage)
+                is ProductDetailUiEffect.ShowToast -> snackbarHostState.showSnackbar(
+                    context.resources.getString(
+                        effect.messageRes
+                    )
+                )
+
+                is ProductDetailUiEffect.ShowAuthRequiredError -> snackbarHostState.showSnackbar(
+                    authRequiredMessage
+                )
             }
         }
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = {
-            if (uiState is ProductDetailUiState.Success) {
-                ProductDetailBottomBar(
-                    onAddToCartClick = { viewModel.handleIntent(ProductDetailUiIntent.AddToCart) }
-                )
-            }
-        },
-        containerColor = AppTheme.colors.background
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, bottomBar = {
+        if (uiState is ProductDetailUiState.Success) {
+            ProductDetailBottomBar(onAddToCartClick = { viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick) })
+        }
+    }, containerColor = AppTheme.colors.background
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)) {
             when (val state = uiState) {
                 is ProductDetailUiState.Loading -> {
                     CircularProgressIndicator(
@@ -93,6 +96,7 @@ fun ProductDetailScreen(
                         color = AppTheme.colors.textPrimary
                     )
                 }
+
                 is ProductDetailUiState.Error -> {
                     Column(
                         modifier = Modifier
@@ -103,7 +107,9 @@ fun ProductDetailScreen(
                         Icon(
                             imageVector = Icons.Outlined.WifiOff,
                             contentDescription = null,
-                            modifier = Modifier.padding(bottom = 16.dp).size(120.dp),
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .size(120.dp),
                             tint = AppTheme.colors.error
                         )
                         Text(
@@ -120,7 +126,9 @@ fun ProductDetailScreen(
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth(0.5f).height(48.dp)
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .height(48.dp)
                         ) {
                             Text(
                                 text = stringResource(id = R.string.product_detail_retry),
@@ -129,18 +137,17 @@ fun ProductDetailScreen(
                         }
                     }
                 }
+
                 is ProductDetailUiState.Success -> {
                     if (state.showRemoveDialog) {
                         RemoveFavoriteDialog(
                             onConfirm = { viewModel.handleIntent(ProductDetailUiIntent.OnConfirmRemove) },
-                            onDismiss = { viewModel.handleIntent(ProductDetailUiIntent.OnCancelRemove) }
-                        )
+                            onDismiss = { viewModel.handleIntent(ProductDetailUiIntent.OnCancelRemove) })
                     }
                     ProductDetailContent(
                         state = state,
                         onNavigateBack = onNavigateBack,
-                        onIntent = { viewModel.handleIntent(it) }
-                    )
+                        onIntent = { viewModel.handleIntent(it) })
                 }
             }
         }
@@ -163,8 +170,7 @@ private fun ProductDetailContent(
                     .height(400.dp) // ~50% of screen height
             ) {
                 ImageCarousel(
-                    images = state.images,
-                    modifier = Modifier.fillMaxSize()
+                    images = state.images, modifier = Modifier.fillMaxSize()
                 )
 
                 // Top Bar Overlays
@@ -216,18 +222,15 @@ private fun ProductDetailContent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = state.title,
-                    style = MaterialTheme.typography.headlineMedium
+                    text = state.title, style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = state.price,
-                    style = MaterialTheme.typography.titleLarge
+                    text = state.price, style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StarRatingRow(
-                    rating = state.rating,
-                    reviewsCount = state.reviewsCount
+                    rating = state.rating, reviewsCount = state.reviewsCount
                 )
             }
         }

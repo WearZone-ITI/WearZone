@@ -64,6 +64,18 @@ class SettingsPreferencesDataSourceImpl(
         }
     }
 
+    override suspend fun setDraftOrderId(id: Long?) {
+        dataStore.edit { preferences ->
+            if (id == null) {
+                preferences.remove(DRAFT_ORDER_ID_KEY)
+            } else {
+                preferences[DRAFT_ORDER_ID_KEY] = id
+            }
+        }
+    }
+
+    override fun observeDraftOrderId(): Flow<Long?> = dataStore.data.map { it[DRAFT_ORDER_ID_KEY] }
+
     override suspend fun getCustomerId(): Long? =
         dataStore.data.map { it[CUSTOMER_ID_KEY] }.first()
 
@@ -76,5 +88,6 @@ class SettingsPreferencesDataSourceImpl(
         val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
         val LANGUAGE_CODE_KEY = stringPreferencesKey("language_code")
         val CUSTOMER_ID_KEY = longPreferencesKey("customer_id")
+        val DRAFT_ORDER_ID_KEY = longPreferencesKey("draft_order_id")
     }
 }

@@ -6,11 +6,13 @@ import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
 import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
+import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
+import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.data.repository.WishlistRepositoryImpl
@@ -36,6 +38,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): ISettingsRepository
+
+    @Binds
+    abstract fun bindCartRepository(cartRepositoryImpl: CartRepositoryImpl): ICartRepository
 
     @Binds
     abstract fun bindCategoryRepository(impl: CategoryRepositoryImpl): ICategoryRepository

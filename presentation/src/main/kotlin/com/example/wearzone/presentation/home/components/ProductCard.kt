@@ -41,7 +41,12 @@ import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
-fun ProductCard(product: Product, onProductClick: (String) -> Unit, onFavoriteClick: (Product) -> Unit = {}) {
+fun ProductCard(
+    product: Product,
+    onProductClick: (String) -> Unit,
+    onAddToCartClick: (Product) -> Unit = {},
+    onFavoriteClick: (Product) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .width(170.dp)
@@ -125,7 +130,7 @@ fun ProductCard(product: Product, onProductClick: (String) -> Unit, onFavoriteCl
                             .size(26.dp)
                             .clip(CircleShape)
                             .background(AppTheme.colors.selected)
-                            .clickable { /* Add to Cart */ },
+                            .clickable { onAddToCartClick(product) },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

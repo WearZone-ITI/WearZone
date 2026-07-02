@@ -29,6 +29,8 @@ sealed interface Route {
     // Hend
     @Serializable
     data object RegisterRoute : Route
+    @Serializable
+    data object CartRoute  : Route
     // Hend
 
     // Ahmed
@@ -44,7 +46,7 @@ sealed interface Route {
     data object HomeRoute : Route
 
     @Serializable
-    data class ProductDetailRoute(val productId: Long) : Route
+    data class ProductDetailRoute(val productId: String) : Route
 
 
     @Serializable

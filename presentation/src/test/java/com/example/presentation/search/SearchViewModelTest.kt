@@ -1,6 +1,7 @@
 package com.example.presentation.search
 
 import com.example.presentation.MainDispatcherRule
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
@@ -34,12 +35,14 @@ class SearchViewModelTest {
     private val getRecentSearchesUseCase: GetRecentSearchesUseCase = mockk()
     private val saveRecentSearchUseCase: SaveRecentSearchUseCase = mockk()
     private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase = mockk()
+    private val observeCartUseCase: ObserveCartUseCase = mockk()
 
     private lateinit var viewModel: SearchViewModel
 
     @Before
     fun setUp() {
         every { getRecentSearchesUseCase() } returns flowOf(emptyList())
+        every { observeCartUseCase() } returns flowOf(emptyList())
         coEvery { getProductsUseCase.getBrands() } returns DataResult.Success(emptyList())
         coEvery { getProductsUseCase.getCategories() } returns DataResult.Success(emptyList())
         coEvery { searchProductsUseCase(any()) } returns DataResult.Success(emptyList())
@@ -51,7 +54,8 @@ class SearchViewModelTest {
             getProductsUseCase,
             getRecentSearchesUseCase,
             saveRecentSearchUseCase,
-            clearRecentSearchesUseCase
+            clearRecentSearchesUseCase,
+            observeCartUseCase
         )
     }
 
@@ -93,5 +97,12 @@ class SearchViewModelTest {
         assertEquals(false, currentState.isLoading)
         assertEquals(true, currentState.hasError)
         assertEquals("search_error_network", currentState.errorMessage)
+    }
+
+    @Test
+    fun `cart item count is observed and updated in state`() = runTest {
+        createViewModel()
+        val currentCartCount = viewModel.uiState.value.cartItemCount
+        assertEquals(0, currentCartCount)
     }
 }

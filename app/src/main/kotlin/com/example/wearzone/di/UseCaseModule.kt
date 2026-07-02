@@ -8,6 +8,12 @@ import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
+import com.example.wearzone.domain.cart.repository.ICartRepository
+import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
+import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
+import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
@@ -140,6 +146,41 @@ object UseCaseModule {
         repository: ISettingsRepository,
     ): SetLanguageUseCase {
         return SetLanguageUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveCartUseCase(
+        repository: ICartRepository,
+    ): ObserveCartUseCase {
+        return ObserveCartUseCase(repository)
+    }
+
+    @Provides
+    fun provideAddToCartUseCase(
+        repository: ICartRepository,
+    ): AddToCartUseCase {
+        return AddToCartUseCase(repository)
+    }
+
+    @Provides
+    fun provideRemoveFromCartUseCase(
+        repository: ICartRepository,
+    ): RemoveFromCartUseCase {
+        return RemoveFromCartUseCase(repository)
+    }
+
+    @Provides
+    fun provideUpdateCartQuantityUseCase(
+        repository: ICartRepository,
+    ): UpdateCartQuantityUseCase {
+        return UpdateCartQuantityUseCase(repository)
+    }
+
+    @Provides
+    fun provideClearCartUseCase(
+        repository: ICartRepository,
+    ): ClearCartUseCase {
+        return ClearCartUseCase(repository)
     }
 
     @Provides

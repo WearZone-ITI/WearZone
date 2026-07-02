@@ -8,7 +8,7 @@ sealed interface ProductDetailUiState {
     data class Error(@androidx.annotation.StringRes val messageRes: Int) : ProductDetailUiState
     
     data class Success(
-        val id: Long,
+        val id: String,
         val title: String,
         val vendor: String,
         val price: String,

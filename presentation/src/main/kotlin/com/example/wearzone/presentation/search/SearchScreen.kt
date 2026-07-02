@@ -37,6 +37,7 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToCart: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -49,9 +50,9 @@ fun SearchScreen(
     }
 
     Scaffold(
-
-        topBar = { TopBar() }
-        ,
+        topBar = { 
+            TopBar(cartItemCount = uiState.cartItemCount, onAddToCartClick = { onNavigateToCart() })
+        },
         containerColor = AppTheme.colors.background,
     ) { paddingValues ->
         SearchContent(

@@ -10,5 +10,7 @@ interface ISettingsPreferencesDataSource {
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setLanguage(languageCode: String)
     suspend fun setCustomerId(id: Long?)
+    suspend fun setDraftOrderId(id: Long?)
+    fun observeDraftOrderId(): Flow<Long?>
     suspend fun getCustomerId(): Long?
 }
