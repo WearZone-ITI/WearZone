@@ -266,6 +266,19 @@
 
     <string name="password_strength_strong">Strong</string>
 
+    <string name="checkout_promo_code_title">Promo Code</string>
+    <string name="checkout_promo_code_placeholder">Enter code</string>
+    <string name="checkout_apply_discount">Apply</string>
+    <string name="checkout_remove_discount">Remove</string>
+    <string name="checkout_discount_applied">Discount applied successfully.</string>
+    <string name="checkout_discount_invalid">This discount code is not valid.</string>
+    <string name="checkout_discount_required">Please enter a discount code.</string>
+    <string name="checkout_discount_unavailable">Unable to validate the discount code right now. Please try again.</string>
+    <string name="checkout_order_summary">Order Summary</string>
+    <string name="checkout_discount">Discount</string>
+    <string name="checkout_place_order_with_total">Place Order - %1$s</string>
+    <string name="checkout_discount_code_content_description">Discount code input</string>
+
 
 
     <string name="empty">&quot;&quot;</string>

@@ -216,6 +216,19 @@
     <string name="password_strength_strong">قوية</string>
     <string name="empty"/>
 
+    <string name="checkout_promo_code_title">رمز الخصم</string>
+    <string name="checkout_promo_code_placeholder">أدخل الرمز</string>
+    <string name="checkout_apply_discount">تطبيق</string>
+    <string name="checkout_remove_discount">إزالة</string>
+    <string name="checkout_discount_applied">تم تطبيق الخصم بنجاح.</string>
+    <string name="checkout_discount_invalid">رمز الخصم هذا غير صالح.</string>
+    <string name="checkout_discount_required">يرجى إدخال رمز الخصم.</string>
+    <string name="checkout_discount_unavailable">تعذر التحقق من رمز الخصم الآن. يرجى المحاولة مرة أخرى.</string>
+    <string name="checkout_order_summary">ملخص الطلب</string>
+    <string name="checkout_discount">الخصم</string>
+    <string name="checkout_place_order_with_total">إتمام الطلب - %1$s</string>
+    <string name="checkout_discount_code_content_description">حقل إدخال رمز الخصم</string>
+
     <string name="cart_title">عربة التسوق</string>
     <string name="cart_empty_title">عربة التسوق فارغة</string>
     <string name="cart_empty_subtitle">يبدو أنك لم تضف أي شيء إلى عربة التسوق بعد.</string>
