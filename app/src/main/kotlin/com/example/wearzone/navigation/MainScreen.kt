@@ -63,6 +63,7 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToProductList: (String?, String?) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -199,7 +200,10 @@ fun MainScreen(
                 }
                 composable<Route.CategoriesRoute> {
                     CategoriesScreen(
-                        navigateToCart = onNavigateToCart
+                        navigateToCart = onNavigateToCart,
+                        onNavigateToProductList = { brandId, categoryName ->
+                            onNavigateToProductList(brandId, categoryName)
+                        }
                     )
                 }
 

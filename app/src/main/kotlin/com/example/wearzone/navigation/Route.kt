@@ -54,8 +54,11 @@ sealed interface Route {
 
     @Serializable
     data object SearchRoute : Route
+    @Serializable
+    data class ProductListRoute(val brandId: String? = null, val categoryName: String? = null) : Route
     
     @Serializable
     data object WishlistRoute : Route
     // Omar
 }
+

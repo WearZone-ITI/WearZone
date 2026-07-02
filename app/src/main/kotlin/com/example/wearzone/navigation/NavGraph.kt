@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
@@ -12,6 +13,7 @@ import com.example.wearzone.presentation.cart.CartScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
+import com.example.wearzone.presentation.product.list.ProductListScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 
@@ -138,6 +140,20 @@ fun NavGraph(
                 },
                 onNavigateToCart = {
                     navController.navigate(Route.CartRoute)
+                } ,
+                onNavigateToProductList = { brandId, categoryName ->
+                    navController.navigate(Route.ProductListRoute(brandId = brandId, categoryName = categoryName))
+                }
+            )
+        }
+        composable<Route.ProductListRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.ProductListRoute>()
+            ProductListScreen(
+                brandId = route.brandId,
+                categoryName = route.categoryName,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
                 }
             )
         }
