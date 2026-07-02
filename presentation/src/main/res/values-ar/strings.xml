@@ -303,5 +303,18 @@
     <string name="search_error_title">البحث غير متاح حالياً</string>
     <string name="search_error_subtitle">لم نتمكن من تحميل المنتجات في الوقت الحالي.</string>
     <string name="search_retry">إعادة المحاولة</string>
+
+
+    <string name="categories_title">الأقسام</string>
+    <string name="categories_search_placeholder">البحث في الأقسام…</string>
+    <string name="categories_search_content_description">البحث في الأقسام</string>
+    <string name="categories_clear_search_content_description">مسح البحث</string>
+    <string name="categories_retry_button">إعادة المحاولة</string>
+    <string name="categories_no_results_found">لم يتم العثور على أقسام تطابق \"%1$s\"</string>
+    <string name="categories_no_data_available">لا توجد أقسام متاحة</string>
+    <string name="categories_products_available">%1$d منتج متاح</string>
+    <string name="error_network">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
+    <string name="error_server">خطأ في الخادم (%1$s)</string>
+    <string name="error_unknown">حدث خطأ ما، يرجى المحاولة لاحقاً</string>
     <!-- Omar -->
 </resources>

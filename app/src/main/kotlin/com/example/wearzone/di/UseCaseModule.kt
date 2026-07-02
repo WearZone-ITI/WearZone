@@ -6,6 +6,8 @@ import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.domain.category.repository.ICategoryRepository
+import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
 import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
@@ -179,6 +181,13 @@ object UseCaseModule {
         repository: ICartRepository,
     ): ClearCartUseCase {
         return ClearCartUseCase(repository)
+    }
+
+    @Provides
+    fun getCategoriesUseCase(
+        repository: ICategoryRepository
+    ): GetCategoriesUseCase {
+        return GetCategoriesUseCase(repository)
     }
 
     @Provides

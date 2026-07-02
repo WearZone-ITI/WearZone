@@ -13,6 +13,9 @@ import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.domain.common.Category
+import com.example.wearzone.domain.product.model.Brand
+import com.example.wearzone.domain.product.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
@@ -129,7 +132,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun toggleFavorite(product: com.example.wearzone.domain.product.model.Product, isAdding: Boolean = true) {
+    private fun toggleFavorite(product: Product, isAdding: Boolean = true) {
         viewModelScope.launch {
             val user = getCurrentUserUseCase()
             if (user == null || user.uid.isEmpty()) {
@@ -198,9 +201,9 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateStateWithWishlist(
-        categories: List<com.example.wearzone.domain.product.model.Category>,
-        brands: List<com.example.wearzone.domain.product.model.Brand>,
-        products: List<com.example.wearzone.domain.product.model.Product>,
+        categories: List<Category>,
+        brands: List<Brand>,
+        products: List<Product>,
         wishlistIds: Set<String>,
         userName: String
     ) {

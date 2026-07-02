@@ -1,8 +1,8 @@
 package com.example.wearzone.domain.product.repository
 
+import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.model.Brand
-import com.example.wearzone.domain.product.model.Category
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.model.ProductDetail
 

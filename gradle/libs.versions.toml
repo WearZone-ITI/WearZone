@@ -44,6 +44,8 @@ kotlinxCoroutinesTest = "1.9.0"
 
 #Hend
 javaxInject = "1"
+uiGraphics = "1.11.3"
+foundation = "1.11.3"
 #Hend
 
 [libraries]
@@ -113,6 +115,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 #Hend
 
 [plugins]
