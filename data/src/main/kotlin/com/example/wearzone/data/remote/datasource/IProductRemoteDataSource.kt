@@ -8,6 +8,8 @@ import com.example.wearzone.data.remote.dto.ShopifyProductDetail
 interface IProductRemoteDataSource {
     suspend fun getCategories(): List<CategoryDto>
     suspend fun getBrands(): List<BrandDto>
+    suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto>
+    suspend fun getProducts(vendor: String? = null): List<ProductDto>
 
      suspend fun getProducts(collectionId: Long?=null): List<ProductDto>
     suspend fun getProductDetail(productId: Long): ShopifyProductDetail

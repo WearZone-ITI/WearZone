@@ -10,12 +10,16 @@ import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
+import com.example.wearzone.presentation.checkout.CheckoutScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
 import com.example.wearzone.presentation.product.list.ProductListScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
+import com.example.wearzone.presentation.brands.BrandsScreen
+import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
 
 @Composable
 fun NavGraph(
@@ -26,7 +30,7 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.MainRoute,
+        startDestination = Route.OnboardingRoute,
         modifier = modifier,
     ) {
         // Aalaa
@@ -82,7 +86,34 @@ fun NavGraph(
                         }
                     }
                 }, 
-                onNavigateToCheckout = {/* TODO */}
+                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) }
+            )
+        }
+
+        composable<Route.CheckoutRoute> {
+            CheckoutScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToOrderHistory = {
+                    navController.navigate(Route.OrderHistoryRoute) {
+                        popUpTo<Route.CartRoute> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable<Route.OrderHistoryRoute> {
+            OrderHistoryScreen(
+                onNavigateBack = {
+                    val returnedToPrevious = navController.popBackStack()
+                    if (!returnedToPrevious) {
+                        navController.navigate(Route.MainRoute) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
             )
         }
 
@@ -118,6 +149,7 @@ fun NavGraph(
                 onNavigateToProductDetail = { productId -> },
                 onNavigateToCategory = { categoryId -> },
                 onNavigateToBrand = { brandId -> },
+                onNavigateToBrands = {},
                 onNavigateToCart = { navController.navigate(Route.CartRoute) },
                 onShowSnackbar = { message -> },
                 onNavigateToSearch = {}
@@ -166,6 +198,30 @@ fun NavGraph(
                     navController.navigate(
                         Route.ProductDetailRoute(productId)
                     )
+                },
+                onNavigateToBrands = {
+                    navController.navigate(Route.BrandsRoute)
+                },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
+                }
+            )
+        }
+
+        composable<Route.BrandsRoute> {
+            BrandsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
+                }
+            )
+        }
+
+        composable<Route.VendorProductsRoute> {
+            VendorProductsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
                 }
             )
         }

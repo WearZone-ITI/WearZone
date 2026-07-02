@@ -40,6 +40,7 @@ fun HomeScreen(
     onNavigateToProductDetail: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
+    onNavigateToBrands: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToCart : ()->Unit,
     onShowSnackbar: (String) -> Unit
@@ -119,6 +120,7 @@ fun HomeScreen(
                             TopBrandsSection(
                                 brands = state.brands,
                                 onBrandClick = { viewModel.handleIntent(HomeUiIntent.OnBrandClicked(it)) },
+                                onSeeAllClick = onNavigateToBrands
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }

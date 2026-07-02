@@ -1,6 +1,9 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
+import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
+import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
@@ -14,6 +17,8 @@ import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
+import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
+import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
@@ -27,7 +32,9 @@ import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddres
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
+import com.example.wearzone.domain.product.usecase.GetBrandsUseCase
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
+import com.example.wearzone.domain.product.usecase.GetProductsByVendorUseCase
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
@@ -65,6 +72,16 @@ object UseCaseModule {
     fun provideGetProductsUseCase(
         repository: IProductRepository,
     ): GetProductsUseCase = GetProductsUseCase(repository)
+
+    @Provides
+    fun provideGetBrandsUseCase(
+        repository: IProductRepository,
+    ): GetBrandsUseCase = GetBrandsUseCase(repository)
+
+    @Provides
+    fun provideGetProductsByVendorUseCase(
+        repository: IProductRepository,
+    ): GetProductsByVendorUseCase = GetProductsByVendorUseCase(repository)
 
     @Provides
     fun provideSearchProductsUseCase(
@@ -184,6 +201,20 @@ object UseCaseModule {
     }
 
     @Provides
+    fun providePlaceOrderUseCase(
+        checkoutRepository: ICheckoutRepository,
+        cartRepository: ICartRepository,
+        customerIdProvider: ICustomerIdProvider,
+        customerAddressRepository: ICustomerAddressRepository,
+    ): PlaceOrderUseCase =
+        PlaceOrderUseCase(
+            checkoutRepository = checkoutRepository,
+            cartRepository = cartRepository,
+            customerIdProvider = customerIdProvider,
+            customerAddressRepository = customerAddressRepository,
+        )
+
+    @Provides
     fun getCategoriesUseCase(
         repository: ICategoryRepository
     ): GetCategoriesUseCase {
@@ -258,4 +289,18 @@ object UseCaseModule {
     fun provideSyncWishlistUseCase(
         repository: IWishlistRepository
     ): SyncWishlistUseCase = SyncWishlistUseCase(repository)
+
+    @Provides
+    fun provideGetOrderHistoryUseCase(
+        repository: IOrderHistoryRepository,
+    ): GetOrderHistoryUseCase = GetOrderHistoryUseCase(repository)
+
+    @Provides
+    fun provideOrderHistoryUseCases(
+        getCurrentCustomerId: GetCurrentCustomerIdUseCase,
+        getOrderHistory: GetOrderHistoryUseCase,
+    ): OrderHistoryUseCases = OrderHistoryUseCases(
+        getCurrentCustomerId = getCurrentCustomerId,
+        getOrderHistory = getOrderHistory,
+    )
 }

@@ -13,6 +13,9 @@ sealed interface Route {
     data object ProfileRoute : Route
 
     @Serializable
+    data object OrderHistoryRoute : Route
+
+    @Serializable
     data object SettingsRoute : Route
 
     @Serializable
@@ -31,11 +34,27 @@ sealed interface Route {
     data object RegisterRoute : Route
     @Serializable
     data object CartRoute  : Route
+
+    @Serializable
+    data object CheckoutRoute : Route
     // Hend
 
     // Ahmed
     @Serializable
     data object LoginRoute : Route
+    @Serializable
+    data class ProductDetailRoute(val productId: String) : Route
+
+
+    @Serializable
+    data object WishlistRoute : Route
+
+    @Serializable
+    data object BrandsRoute : Route
+
+    @Serializable
+    data class VendorProductsRoute(val vendorName: String) : Route
+
     // Ahmed
 
     // Omar
@@ -45,8 +64,6 @@ sealed interface Route {
     @Serializable
     data object HomeRoute : Route
 
-    @Serializable
-    data class ProductDetailRoute(val productId: String) : Route
 
 
     @Serializable
@@ -59,8 +76,6 @@ sealed interface Route {
         val collectionId: Long,
         val categoryName: String
     )
-    @Serializable
-    data object WishlistRoute : Route
-    // Omar
-}
 
+        // Omar
+}

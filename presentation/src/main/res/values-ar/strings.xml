@@ -75,6 +75,11 @@
     <string name="address_error_cannot_delete_default">لا يمكن حذف العنوان الافتراضي. عيّن عنوانًا آخر كافتراضي أولًا.</string>
     <string name="address_error_customer_id_unavailable">معرف عميل Shopify غير متاح بعد. يرجى ربط الحساب قبل إدارة العناوين.</string>
     <string name="address_error_generic">تعذر تحديث العناوين الآن. يرجى المحاولة مرة أخرى.</string>
+    <string name="address_error_permission">صلاحية العنوان غير متاحة. يرجى التحقق من وصول Shopify Admin API.</string>
+    <string name="address_error_customer_not_found">لم يتم العثور على عميل Shopify لهذا الحساب.</string>
+    <string name="address_error_invalid_shopify_address">رفض Shopify هذا العنوان. يرجى التحقق من الدولة، المدينة، الرمز البريدي، ورقم الهاتف.</string>
+    <string name="address_error_response_parse">تم حفظ العنوان ولكن تعذر قراءة صيغة الرد.</string>
+    <string name="address_error_network">خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.</string>
     <!-- Customer Addresses -->
 
     <!-- Profile and Settings -->
@@ -105,6 +110,47 @@
     <string name="profile_logout_dialog_confirm">تسجيل الخروج</string>
     <string name="profile_logout_dialog_cancel">إلغاء</string>
     <string name="profile_logout_failed">تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى.</string>
+    <string name="order_history_title">سجل الطلبات</string>
+    <string name="order_history_subtitle">تابع الطلبات السابقة أو أعد شراء منتجاتك المفضلة.</string>
+    <string name="order_history_refresh">تحديث الطلبات</string>
+    <string name="order_history_retry">إعادة المحاولة</string>
+    <string name="order_history_empty_title">لا توجد طلبات بعد</string>
+    <string name="order_history_empty_subtitle">ستظهر طلباتك المكتملة هنا بعد إتمام أول طلب.</string>
+    <string name="order_history_order_number">الطلب %1$s</string>
+    <string name="order_history_unknown_order">طلب غير معروف</string>
+    <string name="order_history_placed_on">تم الطلب في %1$s</string>
+    <string name="order_history_placed_date_unavailable">تاريخ الطلب غير متاح</string>
+    <string name="order_history_product_image_content_description">صورة منتج من %1$s</string>
+    <string name="order_history_image_placeholder">لا توجد صورة</string>
+    <string name="order_history_view_details">عرض التفاصيل</string>
+    <string name="order_history_track_package">تتبع الشحنة</string>
+    <string name="order_history_details_unavailable">تفاصيل الطلب غير متاحة بعد.</string>
+    <string name="order_history_tracking_available">معلومات التتبع متاحة لهذا الطلب.</string>
+    <string name="order_history_status_open">مفتوح</string>
+    <string name="order_history_status_closed">مغلق</string>
+    <string name="order_history_status_cancelled">ملغي</string>
+    <string name="order_history_error_customer_id_unavailable">معرف عميل Shopify غير متاح بعد. يرجى ربط الحساب قبل عرض الطلبات.</string>
+    <string name="order_history_error_permission">صلاحية سجل الطلبات غير متاحة. يرجى التحقق من وصول Shopify Admin API.</string>
+    <string name="order_history_error_customer_not_found">لم يتم العثور على عميل Shopify لهذا الحساب.</string>
+    <string name="order_history_error_response_parse">تم تحميل الطلبات، لكن تعذر قراءة تنسيق الاستجابة.</string>
+    <string name="order_history_error_network">خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.</string>
+    <string name="order_history_error_generic">تعذر تحميل الطلبات الآن. يرجى المحاولة مرة أخرى.</string>
+    <string name="checkout_title">الدفع</string>
+    <string name="checkout_review_order">مراجعة الطلب</string>
+    <string name="checkout_place_order">إتمام الطلب</string>
+    <string name="checkout_quantity_format">الكمية: %1$d</string>
+    <string name="checkout_empty_title">عربة التسوق فارغة</string>
+    <string name="checkout_empty_subtitle">أضف منتجات إلى عربة التسوق قبل الدفع.</string>
+    <string name="checkout_confirm_title">إتمام الطلب؟</string>
+    <string name="checkout_confirm_message">سيتم إنشاء طلبك في Shopify باستخدام ملف العميل المحفوظ.</string>
+    <string name="checkout_confirm_place_order">إتمام الطلب</string>
+    <string name="checkout_order_success">تم إنشاء الطلب بنجاح.</string>
+    <string name="checkout_error_empty_cart">عربة التسوق فارغة.</string>
+    <string name="checkout_error_invalid_cart">لا يمكن طلب عنصر واحد أو أكثر من عربة التسوق. يرجى تحديث العربة.</string>
+    <string name="checkout_error_customer_id_unavailable">معرف عميل Shopify غير متاح لهذا الحساب.</string>
+    <string name="checkout_error_order_creation">تعذر إنشاء طلب Shopify. يرجى المحاولة مرة أخرى.</string>
+    <string name="checkout_error_clear_cart">تم إنشاء الطلب، لكن تعذر إفراغ عربة التسوق.</string>
+    <string name="checkout_error_generic">تعذر إكمال الدفع الآن. يرجى المحاولة مرة أخرى.</string>
     <string name="settings_title">الإعدادات</string>
     <string name="settings_subtitle">إدارة تفضيلات التطبيق</string>
     <string name="settings_back_content_description">رجوع</string>
@@ -254,7 +300,9 @@
     <string name="wishlist_remove_dialog_confirm">إزالة</string>
     <string name="wishlist_remove_dialog_cancel">الاحتفاظ في المفضلة</string>
     <string name="wishlist_item_added">تمت الإضافة إلى المفضلة</string>
-
+    <!-- Brands Screen -->
+    <string name="brands_title">الماركات</string>
+    <string name="vendor_products_empty">لا توجد منتجات لهذه الماركة.</string>
     <!--Ahmed-->
 
     <!-- Omar -->
