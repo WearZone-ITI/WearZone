@@ -15,7 +15,6 @@ import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.product.model.Brand
-import com.example.wearzone.domain.product.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList

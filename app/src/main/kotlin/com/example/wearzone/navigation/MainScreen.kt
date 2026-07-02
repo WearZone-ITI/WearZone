@@ -70,24 +70,10 @@ fun MainScreen(
 
     val navItems = listOf(
         BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
-        BottomNavItem(
-            Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories
-        ),
-        BottomNavItem(
-            Route.SearchRoute,
-            Icons.Outlined.Search,
-            R.string.nav_search,
-            R.string.content_desc_search
-        ),
-        BottomNavItem(
-            Route.WishlistRoute,
-            Icons.Outlined.FavoriteBorder,
-            R.string.nav_wishlist,
-            R.string.nav_wishlist
-        ),
-        BottomNavItem(
-            Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile
-        )
+        BottomNavItem(Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
+        BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
+        BottomNavItem(Route.WishlistRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
+        BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
     )
 
     Scaffold(
@@ -160,27 +146,6 @@ fun MainScreen(
                                         }
                                     }
                                 }
-                                else if (item.route == Route.HomeRoute && currentDestination?.hasRoute(
-                                        Route.SearchRoute::class
-                                    ) == true
-                                ) {
-                                    bottomNavController.popBackStack(
-                                        Route.HomeRoute, inclusive = false
-                                    )
-                                } else if (item.route != Route.HomeRoute && currentDestination?.hasRoute(
-                                        Route.SearchRoute::class
-                                    ) == true
-                                ) {
-                                    bottomNavController.popBackStack(
-                                        Route.HomeRoute, inclusive = false
-                                    )
-
-                                    bottomNavController.navigate(item.route) {
-                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
 
                                 currentDestination?.hasRoute(Route.SearchRoute::class) == true -> {
                                     if (item.route == Route.HomeRoute) {
@@ -195,29 +160,31 @@ fun MainScreen(
                                             restoreState = true
                                         }
                                     }
-                                } !isSelected -> {
-                                    bottomNavController.navigate(item.route) {
-                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                }
+
+                                !isSelected -> {
+                                bottomNavController.navigate(item.route) {
+                                    popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                        saveState = true
                                     }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
-                        },
-                        colors = itemColors,
-                    )
+                            }
+                            },
+                            colors = itemColors,
+                            )
+                        }
                 }
-            }
-        }) { paddingValues ->
-        NavHost(
-            navController = bottomNavController,
-            startDestination = Route.HomeRoute,
-            modifier = Modifier.padding(paddingValues),
-        ) {
-            composable<Route.HomeRoute> {
-                HomeScreen(
+            }) { paddingValues ->
+            NavHost(
+                navController = bottomNavController,
+                startDestination = Route.HomeRoute,
+                modifier = Modifier.padding(paddingValues),
+            ) {
+                composable<Route.HomeRoute> {
+                    HomeScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onNavigateToCategory = { bottomNavController.navigate(Route.CategoriesRoute) },
                     onNavigateToBrand = { },
@@ -228,91 +195,91 @@ fun MainScreen(
                         }
                     },
                     onNavigateToCart = { onNavigateToCart() },
-                )
-            }
-            composable<Route.CategoriesRoute> {
-                CategoriesScreen()
-            }
-
-            composable<Route.SearchRoute> {
-                SearchScreen(
-                    onNavigateBack = { bottomNavController.popBackStack() },
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
-                    onNavigateToCart = {onNavigateToCart()}
-                )
-            }
-
-            composable<Route.ProfileRoute> {
-                ProfileScreen(
-                    onNavigateToLogin = onNavigateToLogin,
-                    onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToWishlist = {
-                        bottomNavController.navigate(Route.WishlistRoute)
-                    },
-                    onNavigateToOrders = { },
-                    onNavigateToCart = { onNavigateToCart() },
-                    onNavigateToSavedAddresses = {
-                        bottomNavController.navigate(Route.AddressListRoute) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
-            composable<Route.AddressListRoute> { backStackEntry ->
-                val refreshAfterChange by backStackEntry.savedStateHandle
-                    .getStateFlow(ADDRESS_CHANGED_KEY, false)
-                    .collectAsStateWithLifecycle()
-
-                AddressListScreen(
-                    onNavigateBack = { bottomNavController.popBackStack() },
-                    onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
-                    onNavigateToEditAddress = { addressId ->
-                        bottomNavController.navigate(Route.AddressEditRoute(addressId))
-                    },
-                    refreshAfterChange = refreshAfterChange,
-                    onRefreshAfterChangeConsumed = {
-                        backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
-                    },
-                )
-            }
-
-            composable<Route.AddressAddRoute> {
-                AddressFormScreen(
-                    addressId = null,
-                    onNavigateBack = { bottomNavController.popBackStack() },
-                    onAddressSaved = {
-                        bottomNavController.previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(ADDRESS_CHANGED_KEY, true)
-                    },
-                )
-            }
-
-            composable<Route.AddressEditRoute> { backStackEntry ->
-                val route = backStackEntry.toRoute<Route.AddressEditRoute>()
-                AddressFormScreen(
-                    addressId = route.addressId,
-                    onNavigateBack = { bottomNavController.popBackStack() },
-                    onAddressSaved = {
-                        bottomNavController.previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(ADDRESS_CHANGED_KEY, true)
-                                     },
                     )
-            }
+                }
+                composable<Route.CategoriesRoute> {
+                    CategoriesScreen()
+                }
 
-            composable<Route.WishlistRoute> {
-               WishlistScreen(
-                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
-                    onShowSnackbar = { message ->
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(message)
+                composable<Route.SearchRoute> {
+                    SearchScreen(
+                        onNavigateBack = { bottomNavController.popBackStack() },
+                        onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
+                        onNavigateToCart = {onNavigateToCart()}
+                    )
+                }
+
+                composable<Route.ProfileRoute> {
+                    ProfileScreen(
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToSettings = onNavigateToSettings,
+                        onNavigateToWishlist = {
+                            bottomNavController.navigate(Route.WishlistRoute)
+                        },
+                        onNavigateToOrders = { },
+                        onNavigateToCart = { onNavigateToCart() },
+                        onNavigateToSavedAddresses = {
+                            bottomNavController.navigate(Route.AddressListRoute) {
+                                launchSingleTop = true
+                            }
                         }
-                    },
-                   onNavigateToCart = onNavigateToCart
-                )
+                    )
+                }
+
+                composable<Route.AddressListRoute> { backStackEntry ->
+                    val refreshAfterChange by backStackEntry.savedStateHandle
+                        .getStateFlow(ADDRESS_CHANGED_KEY, false)
+                        .collectAsStateWithLifecycle()
+
+                    AddressListScreen(
+                        onNavigateBack = { bottomNavController.popBackStack() },
+                        onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
+                        onNavigateToEditAddress = { addressId ->
+                            bottomNavController.navigate(Route.AddressEditRoute(addressId))
+                        },
+                        refreshAfterChange = refreshAfterChange,
+                        onRefreshAfterChangeConsumed = {
+                            backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
+                        },
+                    )
+                }
+
+                composable<Route.AddressAddRoute> {
+                    AddressFormScreen(
+                        addressId = null,
+                        onNavigateBack = { bottomNavController.popBackStack() },
+                        onAddressSaved = {
+                            bottomNavController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(ADDRESS_CHANGED_KEY, true)
+                        },
+                    )
+                }
+
+                composable<Route.AddressEditRoute> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.AddressEditRoute>()
+                    AddressFormScreen(
+                        addressId = route.addressId,
+                        onNavigateBack = { bottomNavController.popBackStack() },
+                        onAddressSaved = {
+                            bottomNavController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(ADDRESS_CHANGED_KEY, true)
+                        },
+                    )
+                }
+
+                composable<Route.WishlistRoute> {
+                    WishlistScreen(
+                        onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
+                        onShowSnackbar = { message ->
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        },
+                        onNavigateToCart = onNavigateToCart
+                    )
+                }
             }
         }
-    }
-}
+        }
