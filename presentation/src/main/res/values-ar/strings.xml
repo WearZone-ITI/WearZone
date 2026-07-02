@@ -75,6 +75,11 @@
     <string name="address_error_cannot_delete_default">لا يمكن حذف العنوان الافتراضي. عيّن عنوانًا آخر كافتراضي أولًا.</string>
     <string name="address_error_customer_id_unavailable">معرف عميل Shopify غير متاح بعد. يرجى ربط الحساب قبل إدارة العناوين.</string>
     <string name="address_error_generic">تعذر تحديث العناوين الآن. يرجى المحاولة مرة أخرى.</string>
+    <string name="address_error_permission">صلاحية العنوان غير متاحة. يرجى التحقق من وصول Shopify Admin API.</string>
+    <string name="address_error_customer_not_found">لم يتم العثور على عميل Shopify لهذا الحساب.</string>
+    <string name="address_error_invalid_shopify_address">رفض Shopify هذا العنوان. يرجى التحقق من الدولة، المدينة، الرمز البريدي، ورقم الهاتف.</string>
+    <string name="address_error_response_parse">تم حفظ العنوان ولكن تعذر قراءة صيغة الرد.</string>
+    <string name="address_error_network">خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.</string>
     <!-- Customer Addresses -->
 
     <!-- Profile and Settings -->
@@ -254,7 +259,9 @@
     <string name="wishlist_remove_dialog_confirm">إزالة</string>
     <string name="wishlist_remove_dialog_cancel">الاحتفاظ في المفضلة</string>
     <string name="wishlist_item_added">تمت الإضافة إلى المفضلة</string>
-
+    <!-- Brands Screen -->
+    <string name="brands_title">الماركات</string>
+    <string name="vendor_products_empty">لا توجد منتجات لهذه الماركة.</string>
     <!--Ahmed-->
 
     <!-- Omar -->

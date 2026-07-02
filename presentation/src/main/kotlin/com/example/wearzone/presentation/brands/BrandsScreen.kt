@@ -30,12 +30,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Brand
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -60,7 +62,7 @@ fun BrandsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Brands", fontWeight = FontWeight.Bold, color = AppTheme.colors.textPrimary) },
+                title = { Text(stringResource(id = R.string.brands_title), fontWeight = FontWeight.Bold, color = AppTheme.colors.textPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

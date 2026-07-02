@@ -28,10 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.components.ProductCard
 
@@ -104,7 +106,7 @@ fun VendorProductsScreen(
                 is VendorProductsUiState.Success -> {
                     if (state.products.isEmpty()) {
                         Text(
-                            text = "No products found for this brand.",
+                            text = stringResource(id = R.string.vendor_products_empty),
                             style = MaterialTheme.typography.bodyLarge,
                             color = AppTheme.colors.textSecondary
                         )
