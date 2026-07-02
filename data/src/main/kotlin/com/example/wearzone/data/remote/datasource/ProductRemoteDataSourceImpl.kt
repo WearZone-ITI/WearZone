@@ -22,7 +22,7 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getProducts(vendor: String?): List<ProductDto> {
-        val response = apiService.getProducts(vendor)
+        val response = apiService.getProducts(vendor=vendor)
         return response.products.map { it.toProductDto() }
     }
 
@@ -38,7 +38,7 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     ): List<ProductDto> {
 
         return apiService
-            .getProducts()
+            .getProducts(collectionId=collectionId)
             .products
             .map { it.toProductDto() }
     }
