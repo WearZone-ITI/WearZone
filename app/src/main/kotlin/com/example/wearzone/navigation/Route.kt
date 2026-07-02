@@ -13,6 +13,9 @@ sealed interface Route {
     data object ProfileRoute : Route
 
     @Serializable
+    data object OrderHistoryRoute : Route
+
+    @Serializable
     data object SettingsRoute : Route
 
     @Serializable
@@ -31,6 +34,9 @@ sealed interface Route {
     data object RegisterRoute : Route
     @Serializable
     data object CartRoute  : Route
+
+    @Serializable
+    data object CheckoutRoute : Route
     // Hend
 
     // Ahmed

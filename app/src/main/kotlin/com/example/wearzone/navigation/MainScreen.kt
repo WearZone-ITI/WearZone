@@ -43,6 +43,7 @@ import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
+import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.wishlist.WishlistScreen
@@ -105,6 +106,8 @@ fun MainScreen(
                         R.string.nav_categories -> currentDestination?.hasRoute(Route.CategoriesRoute::class) == true
                         R.string.nav_wishlist -> currentDestination?.hasRoute(Route.WishlistRoute::class) == true
                         R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
+                        R.string.nav_profile -> currentDestination?.hasRoute(Route.ProfileRoute::class) == true ||
+                            currentDestination?.hasRoute(Route.OrderHistoryRoute::class) == true
                         else -> isRouteMatch
                     }
 
@@ -218,13 +221,23 @@ fun MainScreen(
                         onNavigateToWishlist = {
                             bottomNavController.navigate(Route.WishlistRoute)
                         },
-                        onNavigateToOrders = { },
+                        onNavigateToOrders = {
+                            bottomNavController.navigate(Route.OrderHistoryRoute) {
+                                launchSingleTop = true
+                            }
+                        },
                         onNavigateToCart = { onNavigateToCart() },
                         onNavigateToSavedAddresses = {
                             bottomNavController.navigate(Route.AddressListRoute) {
                                 launchSingleTop = true
                             }
                         }
+                    )
+                }
+
+                composable<Route.OrderHistoryRoute> {
+                    OrderHistoryScreen(
+                        onNavigateBack = { bottomNavController.popBackStack() },
                     )
                 }
 

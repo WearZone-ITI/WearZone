@@ -9,5 +9,6 @@ interface IProductRemoteDataSource {
     suspend fun getCategories(): List<CategoryDto>
     suspend fun getBrands(): List<BrandDto>
     suspend fun getProducts(): List<ProductDto>
+    suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto>
     suspend fun getProductDetail(productId: Long): ShopifyProductDetail
 }

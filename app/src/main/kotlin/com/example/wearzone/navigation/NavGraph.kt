@@ -9,8 +9,10 @@ import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
+import com.example.wearzone.presentation.checkout.CheckoutScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
@@ -80,7 +82,34 @@ fun NavGraph(
                         }
                     }
                 }, 
-                onNavigateToCheckout = {/* TODO */}
+                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) }
+            )
+        }
+
+        composable<Route.CheckoutRoute> {
+            CheckoutScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToOrderHistory = {
+                    navController.navigate(Route.OrderHistoryRoute) {
+                        popUpTo<Route.CartRoute> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable<Route.OrderHistoryRoute> {
+            OrderHistoryScreen(
+                onNavigateBack = {
+                    val returnedToPrevious = navController.popBackStack()
+                    if (!returnedToPrevious) {
+                        navController.navigate(Route.MainRoute) {
+                            launchSingleTop = true
+                        }
+                    }
+                },
             )
         }
 

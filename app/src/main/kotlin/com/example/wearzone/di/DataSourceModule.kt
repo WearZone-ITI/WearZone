@@ -18,7 +18,9 @@ import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICustomerAddressRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICategoryRemoteDataSource
+import com.example.wearzone.data.remote.datasource.IOrderRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
+import com.example.wearzone.data.remote.datasource.OrderRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.ProductRemoteDataSourceImpl
 import dagger.Binds
 import dagger.Module
@@ -77,6 +79,11 @@ abstract class DataSourceModule {
     abstract fun bindCustomerAddressRemoteDataSource(
         impl: CustomerAddressRemoteDataSourceImpl,
     ): ICustomerAddressRemoteDataSource
+
+    @Binds
+    abstract fun bindOrderRemoteDataSource(
+        impl: OrderRemoteDataSourceImpl,
+    ): IOrderRemoteDataSource
 
     companion object {
 

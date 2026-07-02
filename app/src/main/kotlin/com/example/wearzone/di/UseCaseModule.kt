@@ -1,6 +1,9 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
+import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
+import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
@@ -14,6 +17,8 @@ import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
+import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
+import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
@@ -184,6 +189,20 @@ object UseCaseModule {
     }
 
     @Provides
+    fun providePlaceOrderUseCase(
+        checkoutRepository: ICheckoutRepository,
+        cartRepository: ICartRepository,
+        customerIdProvider: ICustomerIdProvider,
+        customerAddressRepository: ICustomerAddressRepository,
+    ): PlaceOrderUseCase =
+        PlaceOrderUseCase(
+            checkoutRepository = checkoutRepository,
+            cartRepository = cartRepository,
+            customerIdProvider = customerIdProvider,
+            customerAddressRepository = customerAddressRepository,
+        )
+
+    @Provides
     fun getCategoriesUseCase(
         repository: ICategoryRepository
     ): GetCategoriesUseCase {
@@ -258,4 +277,18 @@ object UseCaseModule {
     fun provideSyncWishlistUseCase(
         repository: IWishlistRepository
     ): SyncWishlistUseCase = SyncWishlistUseCase(repository)
+
+    @Provides
+    fun provideGetOrderHistoryUseCase(
+        repository: IOrderHistoryRepository,
+    ): GetOrderHistoryUseCase = GetOrderHistoryUseCase(repository)
+
+    @Provides
+    fun provideOrderHistoryUseCases(
+        getCurrentCustomerId: GetCurrentCustomerIdUseCase,
+        getOrderHistory: GetOrderHistoryUseCase,
+    ): OrderHistoryUseCases = OrderHistoryUseCases(
+        getCurrentCustomerId = getCurrentCustomerId,
+        getOrderHistory = getOrderHistory,
+    )
 }
