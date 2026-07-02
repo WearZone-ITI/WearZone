@@ -19,14 +19,16 @@ data class ShopifyProductDetail(
 ) {
     fun toDomain(rating: Double, reviewsCount: Int, isFavorite: Boolean): ProductDetail {
         val firstVariant = variants.firstOrNull()
-        val priceString = firstVariant?.price ?: "0.00"
+        val priceDouble = firstVariant?.price?.toDoubleOrNull() ?: 0.0
         
         return ProductDetail(
-            id = id,
+            id = id.toString(),
+            variantId = firstVariant?.id?.toString() ?: id.toString(),
             title = title,
             vendor = vendor,
             descriptionHtml = body_html,
-            price = "$priceString", // Will add currency prefix in UI if needed, but string format comes from Shopify
+            price = priceDouble,
+            currencyCode = "EGP", // Will add currency prefix in UI if needed, but string format comes from Shopify
             images = images.mapNotNull { it.src },
             availableSizes = variants.mapNotNull { it.option1 }.distinct(),
             rating = rating,
@@ -43,6 +45,7 @@ data class ImageDto(
 
 @Serializable
 data class VariantDto(
+    val id: Long? = null,
     val price: String? = null,
     val option1: String? = null
 )

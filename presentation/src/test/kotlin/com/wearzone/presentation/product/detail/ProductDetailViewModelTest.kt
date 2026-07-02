@@ -50,11 +50,13 @@ class ProductDetailViewModelTest {
     }
 
     private val dummyProduct = ProductDetail(
-        id = 1L,
+        id = "1",
+        variantId = "1",
         title = "Title",
         vendor = "Vendor",
         descriptionHtml = "HTML",
-        price = "10",
+        price = 10.0,
+        currencyCode = "EGP",
         images = listOf("img1"),
         availableSizes = listOf("S", "M"),
         rating = 4.8,

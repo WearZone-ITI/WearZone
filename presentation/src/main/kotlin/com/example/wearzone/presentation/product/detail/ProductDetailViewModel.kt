@@ -97,7 +97,7 @@ class ProductDetailViewModel @Inject constructor(
                         id = productDetail.id,
                         title = productDetail.title,
                         vendor = productDetail.vendor,
-                        price = productDetail.price,
+                        price = "${productDetail.price} ${productDetail.currencyCode}",
                         descriptionHtml = productDetail.descriptionHtml,
                         images = productDetail.images.toImmutableList(),
                         availableSizes = productDetail.availableSizes.toImmutableList(),
@@ -109,7 +109,7 @@ class ProductDetailViewModel @Inject constructor(
                     if (user != null && user.uid.isNotEmpty()) {
                         launch {
                             observeWishlistUseCase(user.uid).collect { wishlistItems ->
-                                val isFav = wishlistItems.any { it.id == productDetail.id.toString() }
+                                val isFav = wishlistItems.any { it.id == productDetail.id }
                                 _uiState.update { state ->
                                     if (state is ProductDetailUiState.Success) {
                                         state.copy(isFavorite = isFav)
@@ -158,18 +158,18 @@ class ProductDetailViewModel @Inject constructor(
             val product = currentProduct ?: return@launch
             // we need to merge between product model and productDetails to can save in cart in database
 
-//            val item = CartItem(
-//                variantId = product.variantId,
-//                productId = product.id,
-//                title = product.title,
-//                vendor = product.vendor,
-//                price = product.price,
-//                currencyCode = product.,
-//                quantity = 1,
-//                maxQuantity = 10,
-//                imageUrl = product.images[0],
-//                size = state.selectedSize
-//            )
+            val item = CartItem(
+                variantId = product.variantId,
+                productId = product.id,
+                title = product.title,
+                vendor = product.vendor,
+                price = product.price,
+                currencyCode = product.currencyCode,
+                quantity = 1,
+                maxQuantity = 10,
+                imageUrl = product.images.firstOrNull(),
+                size = state.selectedSize
+            )
 
             when (addToCartUseCase(item)) {
                 is DataResult.Success ->
@@ -191,7 +191,7 @@ class ProductDetailViewModel @Inject constructor(
             val user = authRepository.getCurrentUser() ?: return@launch
             
             val item = WishlistItem(
-                id = state.id.toString(),
+                id = state.id,
                 title = state.title,
                 vendor = state.vendor,
                 price = state.price,
