@@ -2,11 +2,10 @@ package com.example.wearzone.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.presentation.R
+import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.Brand
-import com.example.wearzone.domain.product.model.Category
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.product.usecase.SearchProductsUseCase

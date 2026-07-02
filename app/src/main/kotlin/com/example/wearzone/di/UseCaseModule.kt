@@ -6,6 +6,8 @@ import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.domain.category.repository.ICategoryRepository
+import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
@@ -138,6 +140,13 @@ object UseCaseModule {
         repository: ISettingsRepository,
     ): SetLanguageUseCase {
         return SetLanguageUseCase(repository)
+    }
+
+    @Provides
+    fun getCategoriesUseCase(
+        repository: ICategoryRepository
+    ): GetCategoriesUseCase {
+        return GetCategoriesUseCase(repository)
     }
 
     @Provides

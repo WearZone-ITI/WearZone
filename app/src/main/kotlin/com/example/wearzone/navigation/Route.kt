@@ -46,6 +46,10 @@ sealed interface Route {
     @Serializable
     data class ProductDetailRoute(val productId: Long) : Route
 
+
+    @Serializable
+    data object CategoriesRoute : Route
+
     @Serializable
     data object SearchRoute : Route
     

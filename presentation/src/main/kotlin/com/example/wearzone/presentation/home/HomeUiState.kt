@@ -1,7 +1,7 @@
 package com.example.wearzone.presentation.home
 
+import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.product.model.Brand
-import com.example.wearzone.domain.product.model.Category
 import com.example.wearzone.domain.product.model.Product
 import kotlinx.collections.immutable.ImmutableList
 

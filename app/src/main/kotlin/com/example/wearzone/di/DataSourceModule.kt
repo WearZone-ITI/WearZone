@@ -9,9 +9,11 @@ import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
 import com.example.wearzone.data.local.datasource.SettingsPreferencesDataSourceImpl
 import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
+import com.example.wearzone.data.remote.datasource.CategoryRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CustomerAddressRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICustomerAddressRemoteDataSource
+import com.example.wearzone.data.remote.datasource.ICategoryRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ProductRemoteDataSourceImpl
 import dagger.Binds
@@ -53,6 +55,11 @@ abstract class DataSourceModule {
     ): IAuthRemoteDataSource
 
     @Binds
+    abstract fun bindCategoryRemoteDataSource(
+        categoryRemoteDataSourceImpl: CategoryRemoteDataSourceImpl,
+    ): ICategoryRemoteDataSource
+
+    @Binds
     abstract fun bindCustomerAddressRemoteDataSource(
         impl: CustomerAddressRemoteDataSourceImpl,
     ): ICustomerAddressRemoteDataSource
@@ -86,5 +93,7 @@ abstract class DataSourceModule {
         ): ISettingsPreferencesDataSource {
             return SettingsPreferencesDataSourceImpl(dataStore)
         }
+
+
     }
 }
