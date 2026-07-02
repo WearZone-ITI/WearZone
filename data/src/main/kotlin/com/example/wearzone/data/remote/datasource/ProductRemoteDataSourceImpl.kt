@@ -26,6 +26,12 @@ class ProductRemoteDataSourceImpl @Inject constructor(
         return response.products.map { it.toProductDto() }
     }
 
+    override suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto> {
+        if (productIds.isEmpty()) return emptyList()
+        val response = apiService.getProductsByIds(productIds.distinct().joinToString(","))
+        return response.products.map { it.toProductDto() }
+    }
+
     override suspend fun getProductDetail(productId: Long): ShopifyProductDetail {
         val response = apiService.getProductDetail(productId)
         return response.product
