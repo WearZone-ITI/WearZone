@@ -9,8 +9,7 @@ class CategoryRemoteDataSourceImpl @Inject constructor(
 ) : ICategoryRemoteDataSource {
 
     override suspend fun fetchCategories(): List<CategoryDto> {
-        return api.getCustomCollections()
-            .custom_collections
-            .map { it.toCategoryDto() }
+        return api.getCustomCollections().custom_collections
+          .map {it.toCategoryDto() }
     }
 }

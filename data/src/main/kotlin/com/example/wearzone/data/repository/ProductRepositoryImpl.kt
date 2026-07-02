@@ -38,12 +38,22 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getProducts(): DataResult<List<Product>> = withContext(ioDispatcher) {
+    override suspend fun getProducts(
+        collectionId: Long?
+    ): DataResult<List<Product>> = withContext(ioDispatcher) {
+
         try {
-            val dtoList = remoteDataSource.getProducts()
-            DataResult.Success(dtoList.map { it.toDomain() })
+
+            val dtoList = remoteDataSource.getProducts(collectionId)
+
+            DataResult.Success(
+                dtoList.map { it.toDomain() }
+            )
+
         } catch (e: Exception) {
+
             DataResult.Error(DomainError.Unknown(e))
+
         }
     }
 

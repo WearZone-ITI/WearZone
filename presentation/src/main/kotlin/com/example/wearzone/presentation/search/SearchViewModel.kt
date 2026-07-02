@@ -220,7 +220,7 @@ class SearchViewModel @Inject constructor(
 
     private fun DataResult<List<Brand>>.toBrandOptions() = when (this) {
         is DataResult.Error -> emptyList<SearchFilterOptionUiModel>().toImmutableList()
-        is DataResult.Success -> data.map { SearchFilterOptionUiModel(it.id, it.title) }.toImmutableList()
+        is DataResult.Success -> data.map { SearchFilterOptionUiModel(it.id.toLong(), it.title) }.toImmutableList()
     }
 
     private fun DataResult<List<Category>>.toCategoryOptions() = when (this) {

@@ -63,8 +63,8 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
-    onNavigateToProductList: (String?, String?) -> Unit,
-) {
+    onNavigateToProductList: (Long, String) -> Unit)
+{
     val bottomNavController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -201,12 +201,11 @@ fun MainScreen(
                 composable<Route.CategoriesRoute> {
                     CategoriesScreen(
                         navigateToCart = onNavigateToCart,
-                        onNavigateToProductList = { brandId, categoryName ->
-                            onNavigateToProductList(brandId, categoryName)
+                        onNavigateToProductList = { collectionId, categoryName ->
+                            onNavigateToProductList(collectionId, categoryName)
                         }
                     )
                 }
-
                 composable<Route.SearchRoute> {
                     SearchScreen(
                         onNavigateBack = { bottomNavController.popBackStack() },

@@ -47,7 +47,7 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 fun CategoriesScreen(
     modifier: Modifier = Modifier,
     navigateToCart : ()-> Unit,
-    onNavigateToProductList: (String?, String?) -> Unit,
+    onNavigateToProductList: (Long, String) -> Unit,
     viewModel: CategoriesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -58,8 +58,12 @@ fun CategoriesScreen(
             when(effect){
                  is CategoriesUiEffect.NavigateToCart ->navigateToCart()
                 is CategoriesUiEffect.NavigateToProductList -> {
-                    onNavigateToProductList(null, effect.categoryName)
+                    onNavigateToProductList(
+                        effect.categoryId,
+                        effect.categoryName
+                    )
                 }
+
                 else -> {}
             }
         }

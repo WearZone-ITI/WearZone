@@ -21,9 +21,14 @@ class ProductRemoteDataSourceImpl @Inject constructor(
         return response.smart_collections.map { it.toBrandDto() }
     }
 
-    override suspend fun getProducts(): List<ProductDto> {
-        val response = apiService.getProducts()
-        return response.products.map { it.toProductDto() }
+    override suspend fun getProducts(
+        collectionId: Long?
+    ): List<ProductDto> {
+
+        return apiService
+            .getProducts(collectionId)
+            .products
+            .map { it.toProductDto() }
     }
 
     override suspend fun getProductDetail(productId: Long): ShopifyProductDetail {

@@ -141,19 +141,31 @@ fun NavGraph(
                 onNavigateToCart = {
                     navController.navigate(Route.CartRoute)
                 } ,
-                onNavigateToProductList = { brandId, categoryName ->
-                    navController.navigate(Route.ProductListRoute(brandId = brandId, categoryName = categoryName))
+                onNavigateToProductList = { collectionId, categoryName ->
+                    navController.navigate(
+                        Route.ProductListRoute(
+                            collectionId = collectionId,
+                            categoryName = categoryName
+                        )
+                    )
                 }
             )
         }
         composable<Route.ProductListRoute> { backStackEntry ->
+
             val route = backStackEntry.toRoute<Route.ProductListRoute>()
+
             ProductListScreen(
-                brandId = route.brandId,
+                collectionId = route.collectionId,
                 categoryName = route.categoryName,
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+
                 onNavigateToProductDetail = { productId ->
-                    navController.navigate(Route.ProductDetailRoute(productId))
+                    navController.navigate(
+                        Route.ProductDetailRoute(productId)
+                    )
                 }
             )
         }

@@ -6,6 +6,7 @@ import com.example.wearzone.data.remote.dto.SmartCollectionsResponse
 import com.example.wearzone.data.remote.dto.ProductDetailDto
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ProductApiService {
     @GET("admin/api/2024-04/custom_collections.json")
@@ -15,7 +16,10 @@ interface ProductApiService {
     suspend fun getSmartCollections(): SmartCollectionsResponse
 
     @GET("admin/api/2024-04/products.json")
-    suspend fun getProducts(): ProductsResponse
+    suspend fun getProducts(
+        @Query("collection_id") collectionId: Long? = null
+    ): ProductsResponse
+
 
     @GET("admin/api/2024-04/products/{product_id}.json")
     suspend fun getProductDetail(@Path("product_id") productId: Long): ProductDetailDto
