@@ -29,6 +29,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,13 +46,25 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 @Composable
 fun CategoriesScreen(
     modifier: Modifier = Modifier,
+    navigateToCart : ()-> Unit,
     viewModel: CategoriesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val themeColors = AppTheme.colors
 
+    LaunchedEffect(Unit) {
+        viewModel.uiEffect.collect { effect ->
+            when(effect){
+                 CategoriesUiEffect.NavigateToCart ->navigateToCart()
+                 else -> {}
+            }
+        }
+    }
+
     Scaffold(
-        topBar = { TopBar() },
+        topBar = { TopBar(cartItemCount = if(uiState is CategoriesUiState.Success) (uiState as CategoriesUiState.Success).cartItemCount else 0,
+            onAddToCartClick = { viewModel.handleIntent(CategoriesUiIntent.OnNavigateToCartClick) })
+         },
         containerColor = themeColors.background
     ) { paddingValues ->
         Column(

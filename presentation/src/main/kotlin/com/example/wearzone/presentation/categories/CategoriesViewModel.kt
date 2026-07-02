@@ -18,15 +18,41 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.presentation.R // Import الـ Resources
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val observeCartUseCase: ObserveCartUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<CategoriesUiState>(CategoriesUiState.Loading)
-    val uiState: StateFlow<CategoriesUiState> = _uiState.asStateFlow()
 
+    private val cartItemCount: StateFlow<Int> =
+        observeCartUseCase()
+            .map { items -> items.sumOf { it.quantity } }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                0
+            )
+    private val _uiState = MutableStateFlow<CategoriesUiState>(CategoriesUiState.Loading)
+    val uiState: StateFlow<CategoriesUiState> =
+        combine(_uiState, cartItemCount) { state, count ->
+            when (state) {
+                is CategoriesUiState.Success ->
+                    state.copy(cartItemCount = count)
+
+                else -> state
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            CategoriesUiState.Loading
+        )
     private val _uiEffect = Channel<CategoriesUiEffect>(Channel.BUFFERED)
     val uiEffect: Flow<CategoriesUiEffect> = _uiEffect.receiveAsFlow()
 
@@ -39,6 +65,7 @@ class CategoriesViewModel @Inject constructor(
             is CategoriesUiIntent.OnSearchQueryChanged -> filterCategories(intent.query)
             is CategoriesUiIntent.OnCategoryClicked -> navigateToProductList(intent.categoryId, intent.categoryName)
             is CategoriesUiIntent.OnRetry -> loadCategories()
+            is CategoriesUiIntent.OnNavigateToCartClick -> navigateToCartScreen()
         }
     }
 
@@ -83,6 +110,12 @@ class CategoriesViewModel @Inject constructor(
     private fun navigateToProductList(categoryId: String, categoryName: String) {
         viewModelScope.launch {
             _uiEffect.send(CategoriesUiEffect.NavigateToProductList(categoryId, categoryName))
+        }
+    }
+
+    private fun navigateToCartScreen(){
+        viewModelScope.launch {
+            _uiEffect.send(CategoriesUiEffect.NavigateToCart)
         }
     }
 

@@ -198,7 +198,9 @@ fun MainScreen(
                     )
                 }
                 composable<Route.CategoriesRoute> {
-                    CategoriesScreen()
+                    CategoriesScreen(
+                        navigateToCart = onNavigateToCart
+                    )
                 }
 
                 composable<Route.SearchRoute> {
