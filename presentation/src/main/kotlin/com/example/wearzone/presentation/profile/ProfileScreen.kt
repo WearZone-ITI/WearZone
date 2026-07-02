@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.ExitToApp
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.LocationOn
@@ -60,7 +59,7 @@ fun ProfileScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToSavedAddresses: () -> Unit,
-    onNavigateToCard: () -> Unit,
+    onNavigateToCart: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,7 +75,7 @@ fun ProfileScreen(
                 ProfileUiEffect.NavigateToSettings -> onNavigateToSettings()
                 ProfileUiEffect.NavigateToWishlist -> onNavigateToWishlist()
                 ProfileUiEffect.NavigateToOrders -> onNavigateToOrders()
-                ProfileUiEffect.NavigateToCard -> onNavigateToCard()
+                ProfileUiEffect.NavigateToCart -> onNavigateToCart()
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {

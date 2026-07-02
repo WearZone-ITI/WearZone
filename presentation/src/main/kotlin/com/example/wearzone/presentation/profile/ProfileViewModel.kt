@@ -46,7 +46,7 @@ class ProfileViewModel @Inject constructor(
             ProfileUiIntent.OnLogoutConfirmed -> confirmLogout()
             ProfileUiIntent.OnLogoutCancelled -> Unit
             ProfileUiIntent.OnRetry -> loadProfile()
-            ProfileUiIntent.OnCardClicked -> sendEffect(ProfileUiEffect.NavigateToCard)
+            ProfileUiIntent.OnCardClicked -> sendEffect(ProfileUiEffect.NavigateToCart)
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.wearzone.di
 
 import com.example.wearzone.data.remote.api.AddressApiService
 import com.example.wearzone.data.remote.api.AuthApiService
+import com.example.wearzone.data.remote.api.CartApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -54,8 +55,8 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideCartApiService(retrofit: Retrofit): com.example.wearzone.data.remote.api.CartApiService {
-        return retrofit.create(com.example.wearzone.data.remote.api.CartApiService::class.java)
+    fun provideCartApiService(retrofit: Retrofit): CartApiService {
+        return retrofit.create(CartApiService::class.java)
     }
 
     @Provides

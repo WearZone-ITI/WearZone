@@ -44,6 +44,7 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
+import com.example.wearzone.presentation.wishlist.WishlistScreen
 import kotlinx.coroutines.launch
 
 data class BottomNavItem<T : Any>(
@@ -59,7 +60,7 @@ private const val ADDRESS_CHANGED_KEY = "address_changed"
 fun MainScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToCard: () -> Unit,
+    onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
 ) {
     val bottomNavController = rememberNavController()
@@ -213,7 +214,7 @@ fun MainScreen(
                             snackbarHostState.showSnackbar(message)
                         }
                     },
-                    onNavigateToCard = { onNavigateToCard() },
+                    onNavigateToCart = { onNavigateToCart() },
                 )
             }
 
@@ -221,7 +222,7 @@ fun MainScreen(
                 SearchScreen(
                     onNavigateBack = { bottomNavController.popBackStack() },
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
-                    onNavigateToCart = {onNavigateToCard()}
+                    onNavigateToCart = {onNavigateToCart()}
                 )
             }
 
@@ -233,7 +234,7 @@ fun MainScreen(
                         bottomNavController.navigate(Route.WishlistRoute)
                     },
                     onNavigateToOrders = { },
-                    onNavigateToCard = { onNavigateToCard() },
+                    onNavigateToCart = { onNavigateToCart() },
                     onNavigateToSavedAddresses = {
                         bottomNavController.navigate(Route.AddressListRoute) {
                             launchSingleTop = true
@@ -286,14 +287,14 @@ fun MainScreen(
             }
 
             composable<Route.WishlistRoute> {
-                com.example.wearzone.presentation.wishlist.WishlistScreen(
+               WishlistScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onShowSnackbar = { message ->
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
                     },
-                    onNavigateToCard
+                   onNavigateToCart = onNavigateToCart
                 )
             }
         }

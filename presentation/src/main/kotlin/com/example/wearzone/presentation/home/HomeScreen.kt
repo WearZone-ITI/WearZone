@@ -41,7 +41,7 @@ fun HomeScreen(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBrand: (String) -> Unit,
     onNavigateToSearch: () -> Unit,
-    onNavigateToCard : ()->Unit,
+    onNavigateToCart : ()->Unit,
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -53,7 +53,7 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToBrand -> onNavigateToBrand(effect.brandId)
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
-                is HomeUiEffect.NavigateToCart -> onNavigateToCard()
+                is HomeUiEffect.NavigateToCart -> onNavigateToCart()
                 is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.resources.getString(effect.messageResId))
             }
         }
