@@ -177,6 +177,38 @@
     <string name="settings_error_load_failed">تعذر تحميل الإعدادات. يرجى المحاولة مرة أخرى.</string>
     <string name="settings_error_save_failed">تعذر حفظ الإعدادات. يرجى المحاولة مرة أخرى.</string>
     <!-- Profile and Settings -->
+
+    <string name="order_details_title">تفاصيل الطلب</string>
+    <string name="order_details_order_number">الطلب %1$s</string>
+    <string name="order_details_tracking_title">التتبع</string>
+    <string name="order_details_timeline_placed">تم إنشاء الطلب</string>
+    <string name="order_details_timeline_processing">قيد المعالجة</string>
+    <string name="order_details_timeline_shipped">تم الشحن</string>
+    <string name="order_details_timeline_cancelled">تم الإلغاء</string>
+    <string name="order_details_timeline_unavailable">غير متاح بعد</string>
+    <string name="order_details_items_title">العناصر</string>
+    <string name="order_details_empty_items">لا توجد عناصر متاحة لهذا الطلب.</string>
+    <string name="order_details_image_placeholder">لا توجد صورة</string>
+    <string name="order_details_product_image_content_description">صورة المنتج %1$s</string>
+    <string name="order_details_quantity">الكمية: %1$d</string>
+    <string name="order_details_shipping_address">عنوان الشحن</string>
+    <string name="order_details_payment_method">طريقة الدفع</string>
+    <string name="order_details_summary_title">الملخص</string>
+    <string name="order_details_subtotal">المجموع الفرعي</string>
+    <string name="order_details_shipping">الشحن</string>
+    <string name="order_details_tax">الضريبة</string>
+    <string name="order_details_cancel_order">إلغاء الطلب</string>
+    <string name="order_details_continue_shopping">متابعة التسوق</string>
+    <string name="order_details_cancel_dialog_title">إلغاء الطلب؟</string>
+    <string name="order_details_cancel_dialog_message">سيتم إلغاء طلب Shopify، لكنه سيبقى ظاهرًا في سجل الطلبات.</string>
+    <string name="order_details_cancel_dialog_confirm">إلغاء الطلب</string>
+    <string name="order_details_cancel_success">تم إلغاء الطلب بنجاح.</string>
+    <string name="order_details_cancel_not_allowed">لا يمكن إلغاء هذا الطلب.</string>
+    <string name="order_details_cancel_error">تعذر إلغاء هذا الطلب الآن. يرجى المحاولة مرة أخرى.</string>
+    <string name="order_details_error_not_found">لم يتم العثور على الطلب.</string>
+    <string name="order_details_error_permission">هذا الطلب غير متاح للحساب الحالي.</string>
+    <string name="order_details_error_generic">تعذر تحميل تفاصيل الطلب الآن. يرجى المحاولة مرة أخرى.</string>
+
     <!-- Aalaa -->
 
     <!-- Hend -->
