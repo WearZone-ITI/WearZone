@@ -64,6 +64,7 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToProductList: (Long, String) -> Unit,
     onNavigateToBrands: () -> Unit,
     onNavigateToVendorProducts: (String) -> Unit,
 ) {
@@ -205,10 +206,12 @@ fun MainScreen(
                 }
                 composable<Route.CategoriesRoute> {
                     CategoriesScreen(
-                        navigateToCart = onNavigateToCart
+                        navigateToCart = onNavigateToCart,
+                        onNavigateToProductList = { collectionId, categoryName ->
+                            onNavigateToProductList(collectionId, categoryName)
+                        }
                     )
                 }
-
                 composable<Route.SearchRoute> {
                     SearchScreen(
                         onNavigateBack = { bottomNavController.popBackStack() },

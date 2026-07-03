@@ -495,6 +495,11 @@
     <string name="error_network">Network error, please check your connection</string>
     <string name="error_server">Server error (%1$s)</string>
     <string name="error_unknown">Something went wrong</string>
+
+
+    <string name="promo_limited_time_sale">LIMITED TIME SALE</string>
+    <string name="promo_discount_off">OFF</string>
+    <string name="promo_shop_now">Shop now</string>
     <!--Omar-->
 
 

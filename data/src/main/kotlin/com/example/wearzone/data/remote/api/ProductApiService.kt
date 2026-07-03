@@ -16,13 +16,16 @@ interface ProductApiService {
     suspend fun getSmartCollections(): SmartCollectionsResponse
 
     @GET("admin/api/2024-04/products.json")
-    suspend fun getProducts(@Query("vendor") vendor: String? = null): ProductsResponse
-
+    suspend fun getProducts(
+        @Query("vendor") vendor: String? = null,
+        @Query("collection_id") collectionId: Long? = null
+    ): ProductsResponse
     @GET("admin/api/2024-04/products.json")
     suspend fun getProductsByIds(
         @Query("ids") ids: String,
         @Query("fields") fields: String = "id,title,vendor,variants,image",
     ): ProductsResponse
+
 
     @GET("admin/api/2024-04/products/{product_id}.json")
     suspend fun getProductDetail(@Path("product_id") productId: Long): ProductDetailDto

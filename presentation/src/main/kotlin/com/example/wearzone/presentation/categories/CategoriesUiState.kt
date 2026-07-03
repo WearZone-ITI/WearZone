@@ -20,7 +20,7 @@ sealed interface CategoriesUiState {
 }
 
 data class CategoryUiModel(
-    val id: String,
+    val id: Long,
     val name: String,
     val imageUrl: String,
 )

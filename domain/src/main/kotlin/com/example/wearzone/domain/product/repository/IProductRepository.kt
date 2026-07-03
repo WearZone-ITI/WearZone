@@ -9,7 +9,10 @@ import com.example.wearzone.domain.product.model.ProductDetail
 interface IProductRepository {
     suspend fun getCategories(): DataResult<List<Category>>
     suspend fun getBrands(): DataResult<List<Brand>>
-    suspend fun getProducts(): DataResult<List<Product>>
+    suspend fun getProducts(
+        collectionId: Long? = null
+    ): DataResult<List<Product>>
+
     suspend fun getProductDetail(productId: Long): DataResult<ProductDetail>
     suspend fun getProductsByVendor(vendor: String): DataResult<List<Product>>
 }

@@ -22,14 +22,25 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getProducts(vendor: String?): List<ProductDto> {
-        val response = apiService.getProducts(vendor)
+        val response = apiService.getProducts(vendor=vendor)
         return response.products.map { it.toProductDto() }
     }
 
     override suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto> {
         if (productIds.isEmpty()) return emptyList()
         val response = apiService.getProductsByIds(productIds.distinct().joinToString(","))
+
         return response.products.map { it.toProductDto() }
+    }
+
+    override suspend fun getProducts(
+        collectionId: Long?
+    ): List<ProductDto> {
+
+        return apiService
+            .getProducts(collectionId=collectionId)
+            .products
+            .map { it.toProductDto() }
     }
 
     override suspend fun getProductDetail(productId: Long): ShopifyProductDetail {

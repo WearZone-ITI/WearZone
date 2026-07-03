@@ -4,6 +4,7 @@ import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.product.model.Brand
 import com.example.wearzone.domain.product.model.Product
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
@@ -15,7 +16,8 @@ sealed interface HomeUiState {
         val newArrivalProducts: ImmutableList<Product>,
         val heroProduct: Product? = null,
         val cartItemCount: Int = 0,
-        val productToRemove: Product? = null
+        val productToRemove: Product? = null,
+        val promoAds: ImmutableList<Product> = persistentListOf()
     ) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }
