@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -49,6 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.checkout.components.CheckoutOrderSummaryCard
+import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
+import com.example.wearzone.presentation.checkout.components.PaymentMethodCard
+import com.example.wearzone.presentation.checkout.components.PromoCodeCard
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -56,6 +59,10 @@ import kotlinx.coroutines.launch
 fun CheckoutScreen(
     onNavigateBack: () -> Unit,
     onNavigateToOrderHistory: () -> Unit,
+    onNavigateToAddressList: () -> Unit,
+    onNavigateToAddAddress: () -> Unit,
+    refreshAfterAddressChange: Boolean = false,
+    onRefreshAfterAddressChangeConsumed: () -> Unit = {},
     viewModel: CheckoutViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,11 +71,20 @@ fun CheckoutScreen(
     val context = LocalContext.current
     var showConfirmDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(refreshAfterAddressChange) {
+        if (refreshAfterAddressChange) {
+            viewModel.handleIntent(CheckoutUiIntent.OnRefreshAddresses)
+            onRefreshAfterAddressChangeConsumed()
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 CheckoutUiEffect.NavigateBack -> onNavigateBack()
                 CheckoutUiEffect.NavigateToOrderHistory -> onNavigateToOrderHistory()
+                CheckoutUiEffect.NavigateToAddressList -> onNavigateToAddressList()
+                CheckoutUiEffect.NavigateToAddAddress -> onNavigateToAddAddress()
                 CheckoutUiEffect.ShowConfirmOrderDialog -> showConfirmDialog = true
                 is CheckoutUiEffect.ShowMessage -> coroutineScope.launch {
                     snackbarHostState.showSnackbar(context.getString(effect.messageRes))
@@ -157,7 +173,10 @@ private fun CheckoutContent(
                     messageRes = uiState.messageRes,
                     onRetry = { onIntent(CheckoutUiIntent.OnRetry) },
                 )
-                is CheckoutUiState.Content -> CheckoutLoadedContent(uiState)
+                is CheckoutUiState.Content -> CheckoutLoadedContent(
+                    state = uiState,
+                    onIntent = onIntent,
+                )
             }
         }
     }
@@ -166,6 +185,7 @@ private fun CheckoutContent(
 @Composable
 private fun CheckoutLoadedContent(
     state: CheckoutUiState.Content,
+    onIntent: (CheckoutUiIntent) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -173,61 +193,39 @@ private fun CheckoutLoadedContent(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item {
-            Column {
-                Text(
-                    text = stringResource(R.string.checkout_review_order),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = AppTheme.colors.textPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.cart_item_count_format, state.itemCount),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.colors.textSecondary,
-                )
-            }
+            DeliveryAddressCard(
+                address = state.deliveryAddress,
+                isLoading = state.isLoadingAddress,
+                onChangeClicked = { onIntent(CheckoutUiIntent.OnChangeAddressClicked) },
+                onAddClicked = { onIntent(CheckoutUiIntent.OnAddAddressClicked) },
+            )
         }
-        items(state.items, key = { it.variantId }) { item ->
-            CheckoutItemRow(item)
+        item {
+            PaymentMethodCard(
+                paymentMethodLabelRes = state.paymentMethod.labelRes(),
+                paymentMethodDescriptionRes = state.paymentMethod.descriptionRes(),
+            )
+        }
+        item {
+            PromoCodeCard(
+                promoCodeText = state.promoCodeText,
+                appliedDiscountCode = state.appliedDiscountCode,
+                discountErrorRes = state.discountErrorRes,
+                isApplyingDiscount = state.isApplyingDiscount,
+                onPromoCodeChanged = { onIntent(CheckoutUiIntent.OnPromoCodeChanged(it)) },
+                onApplyClicked = { onIntent(CheckoutUiIntent.OnApplyDiscountClicked) },
+                onRemoveClicked = { onIntent(CheckoutUiIntent.OnRemoveDiscountClicked) },
+            )
+        }
+        item {
+            CheckoutOrderSummaryCard(
+                items = state.items,
+                subtotal = state.subtotal,
+                formattedDiscount = state.formattedDiscount,
+                total = state.total,
+            )
         }
         item { Spacer(modifier = Modifier.height(120.dp)) }
-    }
-}
-
-@Composable
-private fun CheckoutItemRow(item: CheckoutCartItemUiModel) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(AppTheme.colors.surface, RoundedCornerShape(16.dp))
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = AppTheme.colors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = stringResource(R.string.checkout_quantity_format, item.quantity),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colors.textSecondary,
-            )
-        }
-        Text(
-            text = item.formattedPrice,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colors.textPrimary,
-            fontWeight = FontWeight.SemiBold,
-        )
     }
 }
 
@@ -244,10 +242,19 @@ private fun CheckoutBottomBar(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SummaryRow(labelRes = R.string.cart_subtotal, value = state.subtotal)
+        if (state.formattedDiscount != null) {
+            SummaryRow(
+                labelRes = R.string.checkout_discount,
+                value = "-${state.formattedDiscount}",
+            )
+        }
         SummaryRow(labelRes = R.string.cart_total, value = state.total)
         Button(
             onClick = onSubmit,
-            enabled = !state.isPlacingOrder,
+            enabled = !state.isPlacingOrder &&
+                !state.isApplyingDiscount &&
+                !state.isLoadingAddress &&
+                state.deliveryAddress != null,
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppTheme.colors.selected,
@@ -264,7 +271,7 @@ private fun CheckoutBottomBar(
                 )
             } else {
                 Text(
-                    text = stringResource(R.string.checkout_place_order),
+                    text = stringResource(R.string.checkout_place_order_with_total, state.total),
                     fontWeight = FontWeight.SemiBold,
                 )
             }

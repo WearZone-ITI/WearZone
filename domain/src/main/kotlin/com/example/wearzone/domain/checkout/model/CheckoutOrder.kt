@@ -4,6 +4,8 @@ data class CheckoutOrderRequest(
     val customerId: Long,
     val lineItems: List<CheckoutLineItem>,
     val shippingAddress: CheckoutShippingAddress?,
+    val discount: CheckoutDiscount? = null,
+    val paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.CashOnDelivery,
 )
 
 data class CheckoutLineItem(

@@ -56,7 +56,7 @@ data class BottomNavItem<T : Any>(
     val contentDescriptionRes: Int
 )
 
-private const val ADDRESS_CHANGED_KEY = "address_changed"
+private const val ADDRESS_CHANGED_KEY = NavigationKeys.ADDRESS_CHANGED
 
 @Composable
 fun MainScreen(

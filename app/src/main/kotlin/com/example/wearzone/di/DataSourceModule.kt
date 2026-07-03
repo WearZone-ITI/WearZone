@@ -14,10 +14,12 @@ import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CartRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CategoryRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CustomerAddressRemoteDataSourceImpl
+import com.example.wearzone.data.remote.datasource.DiscountRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICustomerAddressRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICategoryRemoteDataSource
+import com.example.wearzone.data.remote.datasource.IDiscountRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IOrderRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
 import com.example.wearzone.data.remote.datasource.OrderRemoteDataSourceImpl
@@ -84,6 +86,11 @@ abstract class DataSourceModule {
     abstract fun bindOrderRemoteDataSource(
         impl: OrderRemoteDataSourceImpl,
     ): IOrderRemoteDataSource
+
+    @Binds
+    abstract fun bindDiscountRemoteDataSource(
+        impl: DiscountRemoteDataSourceImpl,
+    ): IDiscountRemoteDataSource
 
     companion object {
 

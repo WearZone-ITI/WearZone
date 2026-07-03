@@ -1,12 +1,17 @@
 package com.example.wearzone.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
+import com.example.wearzone.presentation.address.form.AddressFormScreen
+import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
@@ -90,7 +95,11 @@ fun NavGraph(
             )
         }
 
-        composable<Route.CheckoutRoute> {
+        composable<Route.CheckoutRoute> { backStackEntry ->
+            val refreshAfterAddressChange by backStackEntry.savedStateHandle
+                .getStateFlow(NavigationKeys.ADDRESS_CHANGED, false)
+                .collectAsStateWithLifecycle()
+
             CheckoutScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToOrderHistory = {
@@ -100,6 +109,61 @@ fun NavGraph(
                         }
                         launchSingleTop = true
                     }
+                },
+                onNavigateToAddressList = {
+                    navController.navigate(Route.AddressListRoute)
+                },
+                onNavigateToAddAddress = {
+                    navController.navigate(Route.AddressAddRoute)
+                },
+                refreshAfterAddressChange = refreshAfterAddressChange,
+                onRefreshAfterAddressChangeConsumed = {
+                    backStackEntry.savedStateHandle[NavigationKeys.ADDRESS_CHANGED] = false
+                },
+            )
+        }
+
+        composable<Route.AddressListRoute> { backStackEntry ->
+            val refreshAfterChange by backStackEntry.savedStateHandle
+                .getStateFlow(NavigationKeys.ADDRESS_CHANGED, false)
+                .collectAsStateWithLifecycle()
+
+            AddressListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddAddress = { navController.navigate(Route.AddressAddRoute) },
+                onNavigateToEditAddress = { addressId ->
+                    navController.navigate(Route.AddressEditRoute(addressId))
+                },
+                refreshAfterChange = refreshAfterChange,
+                onRefreshAfterChangeConsumed = {
+                    backStackEntry.savedStateHandle[NavigationKeys.ADDRESS_CHANGED] = false
+                },
+            )
+        }
+
+        composable<Route.AddressAddRoute> {
+            AddressFormScreen(
+                addressId = null,
+                onNavigateBack = { navController.popBackStack() },
+                onAddressSaved = {
+                    navController.markAddressChangedForCheckout()
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(NavigationKeys.ADDRESS_CHANGED, true)
+                },
+            )
+        }
+
+        composable<Route.AddressEditRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.AddressEditRoute>()
+            AddressFormScreen(
+                addressId = route.addressId,
+                onNavigateBack = { navController.popBackStack() },
+                onAddressSaved = {
+                    navController.markAddressChangedForCheckout()
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(NavigationKeys.ADDRESS_CHANGED, true)
                 },
             )
         }
@@ -237,5 +301,12 @@ fun NavGraph(
             )
         }
         // Omar
+    }
+}
+
+private fun NavHostController.markAddressChangedForCheckout() {
+    runCatching {
+        getBackStackEntry<Route.CheckoutRoute>()
+            .savedStateHandle[NavigationKeys.ADDRESS_CHANGED] = true
     }
 }
