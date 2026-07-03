@@ -23,9 +23,6 @@ class ProductListViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
     ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(ProductListUiState())
-    val uiState = _uiState.asStateFlow()
     private var currentCollectionId: Long? = null
     private val cartItemCount: StateFlow<Int> =
         observeCartUseCase()
