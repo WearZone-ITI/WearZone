@@ -13,18 +13,16 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,18 +42,22 @@ fun WishlistScreen(
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collectLatest { effect ->
             when (effect) {
                 is WishlistUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
-                is WishlistUiEffect.ShowSnackbar -> onShowSnackbar(effect.message)
+                is WishlistUiEffect.ShowSnackbar -> onShowSnackbar(context.resources.getString(effect.message))
+                is WishlistUiEffect.NavigateToCart -> onNavigateToCart()
             }
         }
     }
 
     Scaffold(
-        topBar = { TopBar(cartItemCount =0 ,onNavigateToCart) },
+        topBar = { TopBar(cartItemCount = if(uiState is WishlistUiState.Success)(uiState as WishlistUiState.Success).cartItemCount else 0,
+            onAddToCartClick = { viewModel.handleIntent(WishlistUiIntent.OnCartClicked) })
+        },
         containerColor = AppTheme.colors.background
     ) { paddingValues ->
         Column(
@@ -140,9 +142,6 @@ fun WishlistScreen(
                                     item = item,
                                     onProductClick = { viewModel.handleIntent(WishlistUiIntent.OnProductClicked(it)) },
                                     onRemoveClick = { viewModel.handleIntent(WishlistUiIntent.OnRemoveClicked(it)) },
-                                    onAddToCartClick = {
-                                        // Normally handled by a Cart UseCase, for now just show a snackbar
-                                    }
                                 )
                             }
                         }
