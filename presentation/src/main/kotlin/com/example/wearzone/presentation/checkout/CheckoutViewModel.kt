@@ -25,6 +25,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +46,7 @@ class CheckoutViewModel @Inject constructor(
 
     private val isPlacingOrder = MutableStateFlow(false)
     private val promoState = MutableStateFlow(PromoState())
+    private var applyDiscountJob: Job? = null
     private val checkoutDetails = MutableStateFlow(CheckoutDetailsState())
 
     private val cartItems = observeCartUseCase()
@@ -155,7 +157,9 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private fun applyDiscount() {
-        viewModelScope.launch {
+        applyDiscountJob?.cancel()
+
+        applyDiscountJob = viewModelScope.launch {
             val items = cartItems.value
             if (items.isEmpty()) {
                 _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_error_empty_cart))
@@ -184,6 +188,7 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private fun removeDiscount() {
+        applyDiscountJob?.cancel()
         promoState.value = PromoState()
     }
 
