@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -47,7 +45,6 @@ fun WishlistProductCard(
     item: WishlistItem,
     onProductClick: (String) -> Unit,
     onRemoveClick: (WishlistItem) -> Unit,
-    onAddToCartClick: (WishlistItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -157,29 +154,6 @@ fun WishlistProductCard(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { onAddToCartClick(item) },
-                    enabled = !item.isOutOfStock,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AppTheme.colors.textPrimary, // primary text color is black in this theme
-                        contentColor = AppTheme.colors.surface, // on-primary
-                        disabledContainerColor = AppTheme.colors.surfaceVariant,
-                        disabledContentColor = AppTheme.colors.textSecondary
-                    )
-                ) {
-                    Text(
-                        text = if (item.isOutOfStock) stringResource(id = R.string.wishlist_out_of_stock)
-                        else stringResource(id = R.string.product_detail_add_to_cart),
-                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }

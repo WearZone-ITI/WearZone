@@ -7,4 +7,5 @@ sealed interface WishlistUiIntent {
     data class OnRemoveClicked(val item: WishlistItem) : WishlistUiIntent
     data object OnConfirmRemove : WishlistUiIntent
     data object OnCancelRemove : WishlistUiIntent
+    data object OnCartClicked : WishlistUiIntent
 }

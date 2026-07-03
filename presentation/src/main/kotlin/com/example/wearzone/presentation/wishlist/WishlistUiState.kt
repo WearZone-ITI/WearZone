@@ -8,7 +8,8 @@ sealed interface WishlistUiState {
     data object GuestState : WishlistUiState
     data class Success(
         val items: ImmutableList<WishlistItem>,
-        val itemToRemove: WishlistItem? = null
-    ) : WishlistUiState
+        val itemToRemove: WishlistItem? = null,
+        val cartItemCount: Int = 0,
+        ) : WishlistUiState
     data class Error(val message: String) : WishlistUiState
 }
