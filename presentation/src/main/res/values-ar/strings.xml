@@ -364,5 +364,10 @@
     <string name="error_network">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="error_server">خطأ في الخادم (%1$s)</string>
     <string name="error_unknown">حدث خطأ ما، يرجى المحاولة لاحقاً</string>
+
+
+    <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
+    <string name="promo_discount_off">خصم</string>
+    <string name="promo_shop_now">تسوق الآن</string>
     <!-- Omar -->
 </resources>

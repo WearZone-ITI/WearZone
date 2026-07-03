@@ -21,12 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.wearzone.presentation.common.BannerAdView
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.GreetingSection
+import com.example.wearzone.presentation.common.PromoAdsCarousel
 import com.example.wearzone.presentation.home.components.HeroBannerSection
 import com.example.wearzone.presentation.home.components.NewArrivalsSection
 import com.example.wearzone.presentation.home.components.SearchBarSection
 import com.example.wearzone.presentation.common.TopBar
+import com.example.wearzone.presentation.common.ads.NativeAdCard
 import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
@@ -97,9 +100,20 @@ fun HomeScreen(
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
                     ) {
                         item { GreetingSection(state.userName) }
-                        item { Spacer(modifier = Modifier.height(32.dp)) }
+                        item { Spacer(modifier = Modifier.height(6.dp)) }
+
+
+                        item(key = "promo_ads") {
+                            PromoAdsCarousel(
+                                products = state.promoAds,
+                                onProductClick = { product ->
+                                    viewModel.handleIntent(HomeUiIntent.OnProductClicked(product.id))
+                                }
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(12.dp)) }
                         item { SearchBarSection(onClick = onNavigateToSearch) }
-                        item { Spacer(modifier = Modifier.height(32.dp)) }
+                        item { Spacer(modifier = Modifier.height(16.dp)) }
                         item {
                             HeroBannerSection(
                                 product = state.heroProduct,
@@ -116,6 +130,9 @@ fun HomeScreen(
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
+
+
+
                         item {
                             TopBrandsSection(
                                 brands = state.brands,

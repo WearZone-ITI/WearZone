@@ -46,6 +46,7 @@ kotlinxCoroutinesTest = "1.9.0"
 javaxInject = "1"
 uiGraphics = "1.11.3"
 foundation = "1.11.3"
+playServicesAdsApi = "25.4.0"
 #Hend
 
 [libraries]
@@ -117,6 +118,7 @@ firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 #Hend
 
 [plugins]

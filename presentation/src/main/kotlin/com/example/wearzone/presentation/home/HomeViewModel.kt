@@ -218,6 +218,8 @@ class HomeViewModel @Inject constructor(
         val hero = updatedProducts.firstOrNull()
         val trending = updatedProducts.take(5)
         val newArrivals = updatedProducts.takeLast(4)
+        val promoAds = updatedProducts.shuffled().take(3)
+
         homeDataState.update { currentState ->
             val productToRemove = if (currentState is HomeUiState.Success) currentState.productToRemove else null
             HomeUiState.Success(
@@ -227,6 +229,7 @@ class HomeViewModel @Inject constructor(
                 trendingProducts = trending.toImmutableList(),
                 newArrivalProducts = newArrivals.toImmutableList(),
                 heroProduct = hero,
+                promoAds = promoAds.toImmutableList(),
                 productToRemove = productToRemove
             )
         }
