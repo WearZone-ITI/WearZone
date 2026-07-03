@@ -48,6 +48,7 @@ android {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(project(":domain"))
+    implementation(libs.androidx.benchmark.traceprocessor)
     implementation(libs.androidx.compose.foundation)
     //Omar
     implementation(libs.androidx.lifecycle.runtime.ktx)

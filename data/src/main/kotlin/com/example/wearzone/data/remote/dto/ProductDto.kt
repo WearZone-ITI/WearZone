@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CategoryDto(
-    val id: String,
+    val id: Long,
     val title: String,
     val imageUrl: String? = null,
     val productsCount: Int? = null
@@ -49,7 +49,7 @@ data class ShopifyCollection(
     val title: String,
     val image: ShopifyImage? = null,
 ) {
-    fun toCategoryDto() = CategoryDto(id.toString(), title, image?.src)
+    fun toCategoryDto() = CategoryDto(id, title, image?.src)
     fun toBrandDto() = BrandDto(id.toString(), title, image?.src)
 }
 

@@ -47,6 +47,7 @@ javaxInject = "1"
 uiGraphics = "1.11.3"
 foundation = "1.11.3"
 playServicesAdsApi = "25.4.0"
+benchmarkTraceprocessor = "1.4.1"
 #Hend
 
 [libraries]
@@ -119,6 +120,7 @@ androidx-compose-material-icons-extended = { group = "androidx.compose.material"
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
+androidx-benchmark-traceprocessor = { group = "androidx.benchmark", name = "benchmark-traceprocessor", version.ref = "benchmarkTraceprocessor" }
 #Hend
 
 [plugins]
