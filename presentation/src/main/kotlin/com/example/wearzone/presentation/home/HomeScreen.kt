@@ -33,7 +33,6 @@ import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
-@SuppressLint("LocalContextResourcesRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
