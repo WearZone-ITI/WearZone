@@ -19,6 +19,7 @@ class ProductListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ProductListUiState())
     val uiState = _uiState.asStateFlow()
+    private var currentCollectionId: Long? = null
 
     private val _uiEffect = MutableSharedFlow<ProductListUiEffect>()
     val uiEffect = _uiEffect.asSharedFlow()
@@ -28,6 +29,7 @@ class ProductListViewModel @Inject constructor(
         when (intent) {
 
             is ProductListUiIntent.LoadProducts -> {
+                currentCollectionId = intent.collectionId
                 loadProducts(intent.collectionId)
             }
 
@@ -43,8 +45,7 @@ class ProductListViewModel @Inject constructor(
             }
 
             ProductListUiIntent.Retry -> {
-                // لو حبيت احتفظ بآخر collectionId وتعيد التحميل
-            }
+                loadProducts(currentCollectionId)            }
         }
     }
 

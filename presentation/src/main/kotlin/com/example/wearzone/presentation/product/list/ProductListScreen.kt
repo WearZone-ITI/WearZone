@@ -55,7 +55,7 @@ fun ProductListScreen(
     Scaffold(
         topBar = {
             ProductTopBar(
-                title = categoryName ?: "Products",
+                title = categoryName,
                 cartItemCount = 2,
                 onBackClick = onNavigateBack,
                 onCartClick = { }
@@ -78,14 +78,15 @@ fun ProductListScreen(
             }
 
             uiState.error != null -> {
-
-                Box(
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(uiState.error!!)
+                uiState.error?.let { errorMessage ->
+                    Box(
+                        modifier = Modifier
+                            .padding(padding)
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = errorMessage)
+                    }
                 }
             }
 
