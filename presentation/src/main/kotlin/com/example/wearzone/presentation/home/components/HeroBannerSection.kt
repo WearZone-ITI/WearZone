@@ -43,7 +43,7 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(320.dp)
+            .height(220.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable { product?.id?.let(onProductClick) }
     ) {
