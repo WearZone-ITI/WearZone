@@ -205,7 +205,7 @@ fun NavGraph(
                         Route.ProductDetailRoute(productId)
                     )
                 },
-
+                onNavigateToCart = { navController.navigate(Route.CartRoute) }
             )
         }
 

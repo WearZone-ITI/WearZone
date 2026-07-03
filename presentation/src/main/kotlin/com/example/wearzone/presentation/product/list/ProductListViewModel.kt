@@ -2,23 +2,52 @@ package com.example.wearzone.presentation.product.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val getProductsUseCase: GetProductsUseCase
-) : ViewModel() {
+    private val getProductsUseCase: GetProductsUseCase,
+    private val observeCartUseCase: ObserveCartUseCase,
+    ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProductListUiState())
-    val uiState = _uiState.asStateFlow()
+    private val cartItemCount: StateFlow<Int> =
+        observeCartUseCase()
+            .map { items -> items.sumOf { it.quantity } }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                0
+            )
+    private val productListState = MutableStateFlow(ProductListUiState())
+    val uiState: StateFlow<ProductListUiState> =
+        combine(
+            productListState,
+            cartItemCount
+        ) { state, count ->
+
+            state.copy(
+                cartItemCount = count
+            )
+
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            ProductListUiState()
+        )
 
     private val _uiEffect = MutableSharedFlow<ProductListUiEffect>()
     val uiEffect = _uiEffect.asSharedFlow()
@@ -41,6 +70,9 @@ class ProductListViewModel @Inject constructor(
                     )
                 }
             }
+            is ProductListUiIntent.OnCartClicked ->  viewModelScope.launch {
+                _uiEffect.emit(ProductListUiEffect.NavigateToCart)
+            }
 
             ProductListUiIntent.Retry -> {
                 // لو حبيت احتفظ بآخر collectionId وتعيد التحميل
@@ -52,7 +84,7 @@ class ProductListViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            _uiState.value = _uiState.value.copy(
+            productListState.value = productListState.value.copy(
                 isLoading = true,
                 error = null
             )
@@ -61,7 +93,7 @@ class ProductListViewModel @Inject constructor(
 
                 is DataResult.Success -> {
 
-                    _uiState.value = _uiState.value.copy(
+                    productListState.value = productListState.value.copy(
                         isLoading = false,
                         products = result.data
                     )
@@ -69,7 +101,7 @@ class ProductListViewModel @Inject constructor(
 
                 is DataResult.Error -> {
 
-                    _uiState.value = _uiState.value.copy(
+                    productListState.value = productListState.value.copy(
                         isLoading = false,
                         error = result.error.toString()
                     )

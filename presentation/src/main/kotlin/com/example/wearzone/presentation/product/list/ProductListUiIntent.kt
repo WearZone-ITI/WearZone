@@ -11,4 +11,5 @@ sealed interface ProductListUiIntent {
     ) : ProductListUiIntent
 
     data object Retry : ProductListUiIntent
+    data object OnCartClicked : ProductListUiIntent
 }

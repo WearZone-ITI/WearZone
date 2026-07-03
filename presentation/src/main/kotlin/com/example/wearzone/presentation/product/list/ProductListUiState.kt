@@ -5,5 +5,6 @@ import com.example.wearzone.domain.product.model.Product
 data class ProductListUiState(
     val isLoading: Boolean = false,
     val products: List<Product> = emptyList(),
+    val cartItemCount: Int = 0,
     val error: String? = null
 )

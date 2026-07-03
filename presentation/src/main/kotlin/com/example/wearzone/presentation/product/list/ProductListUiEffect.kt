@@ -9,4 +9,5 @@ sealed interface ProductListUiEffect {
     data class ShowError(
         val message: String
     ) : ProductListUiEffect
+    data object NavigateToCart : ProductListUiEffect
 }

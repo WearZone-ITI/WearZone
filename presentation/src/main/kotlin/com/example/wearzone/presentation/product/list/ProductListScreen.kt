@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.categories.CategoriesUiIntent
 import com.example.wearzone.presentation.common.ProductTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,7 @@ fun ProductListScreen(
     categoryName: String,
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToCart : ()-> Unit,
     viewModel: ProductListViewModel = hiltViewModel()
 ) {
 
@@ -52,13 +54,22 @@ fun ProductListScreen(
         )
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.uiEffect.collect {
+            when(it){
+                is ProductListUiEffect.NavigateToCart -> onNavigateToCart()
+                else -> {}
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             ProductTopBar(
                 title = categoryName ?: "Products",
-                cartItemCount = 2,
+                cartItemCount = uiState.cartItemCount,
                 onBackClick = onNavigateBack,
-                onCartClick = { }
+                onCartClick = { viewModel.onIntent(ProductListUiIntent.OnCartClicked)}
             )
         }
     ) { padding ->
