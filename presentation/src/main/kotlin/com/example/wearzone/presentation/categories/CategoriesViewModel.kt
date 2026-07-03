@@ -107,7 +107,7 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToProductList(categoryId: String, categoryName: String) {
+    private fun navigateToProductList(categoryId: Long, categoryName: String) {
         viewModelScope.launch {
             _uiEffect.send(CategoriesUiEffect.NavigateToProductList(categoryId, categoryName))
         }

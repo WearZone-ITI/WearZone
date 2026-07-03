@@ -17,7 +17,9 @@ class GetProductsUseCase(
         return repository.getBrands()
     }
 
-    suspend fun getProducts(): DataResult<List<Product>> {
-        return repository.getProducts()
+    suspend fun getProducts(
+        collectionId: Long? = null
+    ): DataResult<List<Product>> {
+        return repository.getProducts(collectionId)
     }
 }

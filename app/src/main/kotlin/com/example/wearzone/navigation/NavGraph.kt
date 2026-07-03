@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
@@ -14,6 +15,7 @@ import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
 import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
+import com.example.wearzone.presentation.product.list.ProductListScreen
 import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 import com.example.wearzone.presentation.brands.BrandsScreen
@@ -165,11 +167,19 @@ fun NavGraph(
                 onNavigateToSettings = {
                     navController.navigate(Route.SettingsRoute)
                 },
-               onNavigateToProductDetail = { productId ->
+                onNavigateToProductDetail = { productId ->
                     navController.navigate(Route.ProductDetailRoute(productId))
                 },
                 onNavigateToCart = {
                     navController.navigate(Route.CartRoute)
+                },
+                onNavigateToProductList = { collectionId, categoryName ->
+                    navController.navigate(
+                        Route.ProductListRoute(
+                            collectionId = collectionId,
+                            categoryName = categoryName
+                        )
+                    )
                 },
                 onNavigateToBrands = {
                     navController.navigate(Route.BrandsRoute)
@@ -177,6 +187,25 @@ fun NavGraph(
                 onNavigateToVendorProducts = { vendorName ->
                     navController.navigate(Route.VendorProductsRoute(vendorName))
                 }
+            )
+        }
+        composable<Route.ProductListRoute> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<Route.ProductListRoute>()
+
+            ProductListScreen(
+                collectionId = route.collectionId,
+                categoryName = route.categoryName,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(
+                        Route.ProductDetailRoute(productId)
+                    )
+                },
+                onNavigateToCart = { navController.navigate(Route.CartRoute) }
             )
         }
 
