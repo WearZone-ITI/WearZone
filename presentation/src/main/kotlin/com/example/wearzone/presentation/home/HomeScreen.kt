@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.wearzone.presentation.common.BannerAdView
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.GreetingSection
 import com.example.wearzone.presentation.common.PromoAdsCarousel
@@ -29,7 +28,6 @@ import com.example.wearzone.presentation.home.components.HeroBannerSection
 import com.example.wearzone.presentation.home.components.NewArrivalsSection
 import com.example.wearzone.presentation.home.components.SearchBarSection
 import com.example.wearzone.presentation.common.TopBar
-import com.example.wearzone.presentation.common.ads.NativeAdCard
 import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
