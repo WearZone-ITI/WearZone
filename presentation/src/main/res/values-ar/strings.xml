@@ -236,6 +236,19 @@
     <string name="checkout_payment_method_title">طريقة الدفع</string>
     <string name="checkout_payment_cash_on_delivery">الدفع عند الاستلام</string>
     <string name="checkout_payment_cash_on_delivery_description">ادفع نقدًا عند وصول طلبك.</string>
+    <string name="checkout_payment_credit_card">بطاقة ائتمان</string>
+    <string name="checkout_payment_credit_card_description">ادفع بأمان باستخدام بطاقتك الائتمانية عبر PayMock.</string>
+
+    <string name="checkout_card_details_title">تفاصيل البطاقة</string>
+    <string name="checkout_card_number">رقم البطاقة</string>
+    <string name="checkout_card_first_name">الاسم الأول</string>
+    <string name="checkout_card_last_name">اسم العائلة</string>
+    <string name="checkout_card_expiry_month">الشهر</string>
+    <string name="checkout_card_expiry_year">السنة</string>
+    <string name="checkout_card_cvv">رمز الأمان (CVV)</string>
+
+    <string name="checkout_error_invalid_card_details">يرجى إدخال تفاصيل بطاقة صحيحة.</string>
+    <string name="checkout_error_payment_failed">فشلت عملية الدفع. يرجى التحقق من بيانات البطاقة.</string>
 
     <string name="cart_title">عربة التسوق</string>
     <string name="cart_empty_title">عربة التسوق فارغة</string>
