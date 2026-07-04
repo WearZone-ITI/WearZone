@@ -257,8 +257,8 @@ class CheckoutViewModel @Inject constructor(
             val subtotal = items.sumOf { it.price * it.quantity }
 
             applyDiscountCodeUseCase(
-                promoCode = promoState.value.promoCodeText,
-                subtotalAmount = subtotal,
+                code = promoState.value.promoCodeText,
+                subtotal = subtotal,
             )
                 .onSuccess { discount ->
                     promoState.value = promoState.value.copy(
