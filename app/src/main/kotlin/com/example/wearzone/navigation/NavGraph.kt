@@ -3,8 +3,8 @@ package com.example.wearzone.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -36,7 +36,7 @@ fun NavGraph(
 ) {
 
     val navController = rememberNavController()
-    var pendingProtectedRoute by remember { mutableStateOf<Route?>(null) }
+    var pendingProtectedRoute by rememberSaveable { mutableStateOf<Route?>(null) }
 
     fun navigateToPendingOrMain(sourceRoute: Route) {
         val destination = pendingProtectedRoute ?: Route.MainRoute
