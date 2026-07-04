@@ -475,5 +475,6 @@
     <string name="email_label">البريد الإلكتروني</string>
     <string name="send_reset_link">إرسال رابط إعادة التعيين</string>
     <string name="back_to_login">العودة لتسجيل الدخول</string>
+    <string name="apple_signin_coming_soon">تسجيل الدخول باستخدام Apple قريباً!</string>
     <!-- Omar -->
 </resources>

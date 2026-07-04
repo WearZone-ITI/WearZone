@@ -584,6 +584,7 @@
     <string name="email_label">Email Address</string>
     <string name="send_reset_link">Send Reset Link</string>
     <string name="back_to_login">Back to Login</string>
+    <string name="apple_signin_coming_soon">Apple Sign-In coming soon!</string>
     <!--Omar-->
 
 
