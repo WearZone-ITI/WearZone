@@ -12,6 +12,7 @@ import com.example.wearzone.domain.checkout.model.EmptyDiscountCodeException
 import com.example.wearzone.domain.checkout.model.InvalidDiscountCodeException
 import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
+import com.example.wearzone.domain.checkout.usecase.ProcessPayMockPaymentUseCase
 import com.example.wearzone.domain.customer.address.model.AddressInput
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
@@ -32,9 +33,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -42,8 +45,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -53,6 +58,7 @@ class CheckoutViewModelTest {
     private val observeCartUseCase: ObserveCartUseCase = mockk()
     private val placeOrderUseCase: PlaceOrderUseCase = mockk()
     private val applyDiscountCodeUseCase: ApplyDiscountCodeUseCase = mockk()
+    private val processPayMockPaymentUseCase: ProcessPayMockPaymentUseCase = mockk()
 
     private val cartFlow = MutableSharedFlow<List<CartItem>>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -79,6 +85,7 @@ class CheckoutViewModelTest {
             placeOrderUseCase = placeOrderUseCase,
             applyDiscountCodeUseCase = applyDiscountCodeUseCase,
             customerAddressUseCases = createAddressUseCases(addressRepository),
+            processPayMockPaymentUseCase = processPayMockPaymentUseCase,
         )
     }
 
@@ -264,6 +271,7 @@ class CheckoutViewModelTest {
                 discount = any(),
                 selectedAddressId = any(),
                 paymentMethod = any(),
+                paymentId = any(),
             )
         } returns Result.success(
             CheckoutOrder(id = 1L, name = "#1001"),
@@ -281,6 +289,7 @@ class CheckoutViewModelTest {
                 discount = null,
                 selectedAddressId = DEFAULT_ADDRESS_ID,
                 paymentMethod = CheckoutPaymentMethod.CashOnDelivery,
+                paymentId = null,
             )
         }
     }
@@ -294,6 +303,7 @@ class CheckoutViewModelTest {
                 discount = applied,
                 selectedAddressId = any(),
                 paymentMethod = any(),
+                paymentId = any(),
             )
         } returns Result.success(
             CheckoutOrder(id = 1L, name = "#1001"),
@@ -310,6 +320,58 @@ class CheckoutViewModelTest {
                 discount = applied,
                 selectedAddressId = DEFAULT_ADDRESS_ID,
                 paymentMethod = CheckoutPaymentMethod.CashOnDelivery,
+                paymentId = null,
+            )
+        }
+    }
+
+    @Test
+    fun `selecting Credit Card updates state and shows card form`() = runTest {
+        createViewModel()
+        val content = awaitContent()
+        
+        viewModel.handleIntent(CheckoutUiIntent.OnPaymentMethodSelected(com.example.wearzone.presentation.checkout.CheckoutPaymentMethodUi.CreditCard))
+        
+        val updated = (viewModel.uiState.first() as CheckoutUiState.Content)
+        assertEquals(com.example.wearzone.presentation.checkout.CheckoutPaymentMethodUi.CreditCard, updated.paymentMethod)
+    }
+
+    @Test
+    fun `place order with Credit Card triggers PayMock vaulting and passes payment ID`() = runTest {
+        val payMockResponse = com.example.wearzone.domain.checkout.model.PayMockPaymentResponse(
+            id = "pay_123",
+            status = "approved",
+            amount = 100.0,
+            currency = "USD"
+        )
+        coEvery { processPayMockPaymentUseCase(any(), any()) } returns Result.success(payMockResponse)
+        coEvery {
+            placeOrderUseCase(
+                discount = any(),
+                selectedAddressId = any(),
+                paymentMethod = CheckoutPaymentMethod.CreditCard,
+                paymentId = "pay_123",
+            )
+        } returns Result.success(CheckoutOrder(id = 1L, name = "#1001"))
+
+        createViewModel()
+        awaitContent()
+
+        viewModel.handleIntent(CheckoutUiIntent.OnPaymentMethodSelected(com.example.wearzone.presentation.checkout.CheckoutPaymentMethodUi.CreditCard))
+        viewModel.handleIntent(CheckoutUiIntent.OnCardNumberChanged("1234567890123456"))
+        viewModel.handleIntent(CheckoutUiIntent.OnCardHolderNameChanged("John", "Doe"))
+        viewModel.handleIntent(CheckoutUiIntent.OnCardExpiryChanged("12", "2025"))
+        viewModel.handleIntent(CheckoutUiIntent.OnCardCvvChanged("123"))
+
+        viewModel.handleIntent(CheckoutUiIntent.OnSubmitOrderConfirmed)
+
+        coVerify {
+            processPayMockPaymentUseCase(100.0, "USD")
+            placeOrderUseCase(
+                discount = null,
+                selectedAddressId = DEFAULT_ADDRESS_ID,
+                paymentMethod = CheckoutPaymentMethod.CreditCard,
+                paymentId = "pay_123",
             )
         }
     }
@@ -321,13 +383,16 @@ class CheckoutViewModelTest {
                 discount = any(),
                 selectedAddressId = any(),
                 paymentMethod = any(),
+                paymentId = any(),
             )
         } returns Result.failure(RuntimeException("network"))
         createViewModel()
         awaitContent()
 
-        viewModel.uiEffect.test {
-            viewModel.handleIntent(CheckoutUiIntent.OnSubmitOrderConfirmed)
+        viewModel.handleIntent(CheckoutUiIntent.OnSubmitOrderConfirmed)
+        
+        // Final attempt to fix the flakiness: allow a very long time for the coroutine to complete
+        viewModel.uiEffect.test(timeout = 30000.milliseconds) {
             val effect = awaitItem() as CheckoutUiEffect.ShowMessage
             assertEquals(R.string.checkout_error_generic, effect.messageRes)
             cancelAndIgnoreRemainingEvents()

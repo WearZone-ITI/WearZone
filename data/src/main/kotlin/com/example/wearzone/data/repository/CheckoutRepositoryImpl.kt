@@ -52,7 +52,8 @@ class CheckoutRepositoryImpl @Inject constructor(
                 discountCodes = discount?.let { appliedDiscount ->
                     listOf(appliedDiscount.toOrderDiscountDto())
                 },
-                note = paymentMethod.toOrderNote(),
+                note = paymentId?.let { "Payment ID: $it\n" }.orEmpty() + paymentMethod.toOrderNote(),
+                financialStatus = if (paymentMethod == CheckoutPaymentMethod.CreditCard) "paid" else "pending",
             )
         )
 
@@ -73,6 +74,7 @@ class CheckoutRepositoryImpl @Inject constructor(
     private fun CheckoutPaymentMethod.toOrderNote(): String =
         when (this) {
             CheckoutPaymentMethod.CashOnDelivery -> ORDER_NOTE_CASH_ON_DELIVERY
+            CheckoutPaymentMethod.CreditCard -> ORDER_NOTE_CREDIT_CARD
         }
 
     private fun Double.toDiscountAmountString(): String =
@@ -82,6 +84,7 @@ class CheckoutRepositoryImpl @Inject constructor(
         const val DISCOUNT_TYPE_PERCENTAGE = "percentage"
         const val DISCOUNT_TYPE_FIXED_AMOUNT = "fixed_amount"
         const val ORDER_NOTE_CASH_ON_DELIVERY = "Payment method: Cash on Delivery"
+        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (PayMock)"
     }
 
     private fun CheckoutShippingAddress.toDto(): ShopifyOrderShippingAddressDto =
