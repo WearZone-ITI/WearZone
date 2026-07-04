@@ -43,6 +43,7 @@ import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
+import com.example.wearzone.presentation.order.details.OrderDetailsScreen
 import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
@@ -244,6 +245,26 @@ fun MainScreen(
                 composable<Route.OrderHistoryRoute> {
                     OrderHistoryScreen(
                         onNavigateBack = { bottomNavController.popBackStack() },
+                        onNavigateToDetails = { orderId ->
+                            bottomNavController.navigate(Route.OrderDetailsRoute(orderId))
+                        },
+                    )
+                }
+
+                composable<Route.OrderDetailsRoute> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.OrderDetailsRoute>()
+                    OrderDetailsScreen(
+                        orderId = route.orderId,
+                        onNavigateBack = { bottomNavController.popBackStack() },
+                        onContinueShopping = {
+                            bottomNavController.navigate(Route.HomeRoute) {
+                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                     )
                 }
 

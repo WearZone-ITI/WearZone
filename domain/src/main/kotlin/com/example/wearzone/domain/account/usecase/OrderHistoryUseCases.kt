@@ -5,4 +5,6 @@ import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerId
 data class OrderHistoryUseCases(
     val getCurrentCustomerId: GetCurrentCustomerIdUseCase,
     val getOrderHistory: GetOrderHistoryUseCase,
+    val getOrderDetails: GetOrderDetailsUseCase,
+    val cancelOrder: CancelOrderUseCase,
 )

@@ -16,6 +16,9 @@ sealed interface Route {
     data object OrderHistoryRoute : Route
 
     @Serializable
+    data class OrderDetailsRoute(val orderId: Long) : Route
+
+    @Serializable
     data object SettingsRoute : Route
 
     @Serializable

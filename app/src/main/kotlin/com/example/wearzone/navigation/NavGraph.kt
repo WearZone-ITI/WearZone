@@ -18,6 +18,7 @@ import com.example.wearzone.presentation.cart.CartScreen
 import com.example.wearzone.presentation.checkout.CheckoutScreen
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.onboarding.OnboardingScreen
+import com.example.wearzone.presentation.order.details.OrderDetailsScreen
 import com.example.wearzone.presentation.order.history.OrderHistoryScreen
 import com.example.wearzone.presentation.product.detail.ProductDetailScreen
 import com.example.wearzone.presentation.product.list.ProductListScreen
@@ -176,6 +177,22 @@ fun NavGraph(
                         navController.navigate(Route.MainRoute) {
                             launchSingleTop = true
                         }
+                    }
+                },
+                onNavigateToDetails = { orderId ->
+                    navController.navigate(Route.OrderDetailsRoute(orderId))
+                },
+            )
+        }
+
+        composable<Route.OrderDetailsRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.OrderDetailsRoute>()
+            OrderDetailsScreen(
+                orderId = route.orderId,
+                onNavigateBack = { navController.popBackStack() },
+                onContinueShopping = {
+                    navController.navigate(Route.MainRoute) {
+                        launchSingleTop = true
                     }
                 },
             )

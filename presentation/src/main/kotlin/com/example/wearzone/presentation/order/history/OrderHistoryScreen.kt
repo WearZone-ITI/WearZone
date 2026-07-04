@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun OrderHistoryScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToDetails: (Long) -> Unit,
     viewModel: OrderHistoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -65,6 +66,7 @@ fun OrderHistoryScreen(
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 OrderHistoryUiEffect.NavigateBack -> onNavigateBack()
+                is OrderHistoryUiEffect.NavigateToDetails -> onNavigateToDetails(effect.orderId)
                 is OrderHistoryUiEffect.ShowMessage -> coroutineScope.launch {
                     snackbarHostState.showSnackbar(context.getString(effect.messageRes))
                 }

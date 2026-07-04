@@ -4,14 +4,17 @@ import app.cash.turbine.test
 import com.example.presentation.MainDispatcherRule
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.presentation.product.list.ProductListUiEffect
 import com.example.wearzone.presentation.product.list.ProductListUiIntent
 import com.example.wearzone.presentation.product.list.ProductListViewModel
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -26,12 +29,14 @@ class ProductListViewModelTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val getProductsUseCase: GetProductsUseCase = mockk()
+    private val observeCartUseCase: ObserveCartUseCase = mockk()
 
     private lateinit var viewModel: ProductListViewModel
 
     @Before
     fun setup() {
-        viewModel = ProductListViewModel(getProductsUseCase)
+        every { observeCartUseCase() } returns flowOf(emptyList())
+        viewModel = ProductListViewModel(getProductsUseCase, observeCartUseCase)
     }
 
     @Test

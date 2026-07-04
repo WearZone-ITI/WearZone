@@ -194,6 +194,37 @@
     <string name="address_error_generic">Unable to update addresses right now. Please try again.</string>
     <!--Customer Addresses-->
 
+    <string name="order_details_title">Order Details</string>
+    <string name="order_details_order_number">Order %1$s</string>
+    <string name="order_details_tracking_title">Tracking</string>
+    <string name="order_details_timeline_placed">Order Placed</string>
+    <string name="order_details_timeline_processing">Processing</string>
+    <string name="order_details_timeline_shipped">Shipped</string>
+    <string name="order_details_timeline_cancelled">Cancelled</string>
+    <string name="order_details_timeline_unavailable">Not available yet</string>
+    <string name="order_details_items_title">Items</string>
+    <string name="order_details_empty_items">No items are available for this order.</string>
+    <string name="order_details_image_placeholder">No image</string>
+    <string name="order_details_product_image_content_description">Product image for %1$s</string>
+    <string name="order_details_quantity">Qty: %1$d</string>
+    <string name="order_details_shipping_address">Shipping Address</string>
+    <string name="order_details_payment_method">Payment Method</string>
+    <string name="order_details_summary_title">Summary</string>
+    <string name="order_details_subtotal">Subtotal</string>
+    <string name="order_details_shipping">Shipping</string>
+    <string name="order_details_tax">Tax</string>
+    <string name="order_details_cancel_order">Cancel Order</string>
+    <string name="order_details_continue_shopping">Continue Shopping</string>
+    <string name="order_details_cancel_dialog_title">Cancel order?</string>
+    <string name="order_details_cancel_dialog_message">This will cancel the Shopify order, but it will remain visible in your order history.</string>
+    <string name="order_details_cancel_dialog_confirm">Cancel Order</string>
+    <string name="order_details_cancel_success">Order canceled successfully.</string>
+    <string name="order_details_cancel_not_allowed">This order cannot be canceled.</string>
+    <string name="order_details_cancel_error">Unable to cancel this order right now. Please try again.</string>
+    <string name="order_details_error_not_found">Order was not found.</string>
+    <string name="order_details_error_permission">This order is not available for the current account.</string>
+    <string name="order_details_error_generic">Unable to load order details right now. Please try again.</string>
+
     <!--Aalaa-->
 
     <!--Hend-->
