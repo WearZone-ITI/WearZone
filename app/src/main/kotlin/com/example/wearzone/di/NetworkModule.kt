@@ -32,6 +32,7 @@ object NetworkModule {
         return Json {
             ignoreUnknownKeys = true
             coerceInputValues = true
+            explicitNulls = false
         }
     }
 
@@ -89,5 +90,21 @@ object NetworkModule {
         retrofit: Retrofit,
     ): DiscountApiService {
         return retrofit.create(DiscountApiService::class.java)
+    }
+
+    @Provides
+    fun provideGeminiApiService(json: Json): com.example.wearzone.data.remote.ai.chat.api.GeminiApiService {
+        val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
+            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        }
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://generativelanguage.googleapis.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+        return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GeminiApiService::class.java)
     }
 }

@@ -326,4 +326,22 @@ object UseCaseModule {
         getOrderDetails = getOrderDetails,
         cancelOrder = cancelOrder,
     )
+
+    @Provides
+    fun provideSendChatMessageUseCase(
+        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+    ): com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase =
+        com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase(repository)
+
+    @Provides
+    fun provideClearChatHistoryUseCase(
+        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+    ): com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase =
+        com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase(repository)
+
+    @Provides
+    fun provideGetChatHistoryUseCase(
+        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+    ): com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase =
+        com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase(repository)
 }

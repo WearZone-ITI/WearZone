@@ -72,4 +72,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindOrderHistoryRepository(impl: OrderHistoryRepositoryImpl): IOrderHistoryRepository
+
+    @Binds
+    abstract fun bindAiChatRepository(impl: com.example.wearzone.data.repository.AiChatRepositoryImpl): com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 }

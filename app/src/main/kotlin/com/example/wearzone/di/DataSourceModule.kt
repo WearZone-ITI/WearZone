@@ -92,6 +92,11 @@ abstract class DataSourceModule {
         impl: DiscountRemoteDataSourceImpl,
     ): IDiscountRemoteDataSource
 
+    @Binds
+    abstract fun bindAiChatRemoteDataSource(
+        impl: com.example.wearzone.data.remote.ai.chat.AiChatRemoteDataSourceImpl,
+    ): com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
+
     companion object {
 
         @Provides
@@ -121,5 +126,9 @@ abstract class DataSourceModule {
         ): ISettingsPreferencesDataSource {
             return SettingsPreferencesDataSourceImpl(dataStore)
         }
+
+        @Provides
+        @com.example.wearzone.data.remote.ai.chat.GeminiApiKey
+        fun provideGeminiApiKey(): String = com.example.wearzone.BuildConfig.GEMINI_API_KEY
     }
 }

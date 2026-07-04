@@ -60,6 +60,10 @@ sealed interface Route {
 
     // Ahmed
 
+    @Serializable
+    data object ChatRoute : Route
+
+
     // Omar
 
     @Serializable
