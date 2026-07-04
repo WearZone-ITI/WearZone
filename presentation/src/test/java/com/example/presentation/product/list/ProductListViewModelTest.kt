@@ -2,6 +2,7 @@ package com.example.presentation.product.list
 
 import app.cash.turbine.test
 import com.example.presentation.MainDispatcherRule
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.Product
@@ -26,12 +27,14 @@ class ProductListViewModelTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val getProductsUseCase: GetProductsUseCase = mockk()
+    private val observeCartUseCase: ObserveCartUseCase = mockk()
 
     private lateinit var viewModel: ProductListViewModel
 
     @Before
     fun setup() {
-        viewModel = ProductListViewModel(getProductsUseCase)
+        io.mockk.every { observeCartUseCase() } returns kotlinx.coroutines.flow.flowOf(emptyList())
+        viewModel = ProductListViewModel(getProductsUseCase, observeCartUseCase)
     }
 
     @Test
