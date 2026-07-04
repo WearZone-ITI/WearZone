@@ -6,6 +6,7 @@ data class CheckoutOrderRequest(
     val shippingAddress: CheckoutShippingAddress?,
     val discount: CheckoutDiscount? = null,
     val paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.CashOnDelivery,
+    val paymentId: String? = null,
 )
 
 data class CheckoutLineItem(
