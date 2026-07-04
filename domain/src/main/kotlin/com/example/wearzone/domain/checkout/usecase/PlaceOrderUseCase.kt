@@ -29,6 +29,7 @@ class PlaceOrderUseCase(
         discount: CheckoutDiscount? = null,
         selectedAddressId: Long? = null,
         paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.CashOnDelivery,
+        paymentId: String? = null,
     ): Result<CheckoutOrder> {
         val items = cartRepository.observeCart().first()
         if (items.isEmpty()) return Result.failure(EmptyCartCheckoutException())
@@ -50,6 +51,7 @@ class PlaceOrderUseCase(
                 shippingAddress = address,
                 discount = discount,
                 paymentMethod = paymentMethod,
+                paymentId = paymentId,
             )
         ).onSuccess {
             when (cartRepository.clearCart()) {

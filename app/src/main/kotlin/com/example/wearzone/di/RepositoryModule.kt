@@ -5,6 +5,7 @@ import com.example.wearzone.data.repository.CategoryRepositoryImpl
 import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
 import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
 import com.example.wearzone.data.repository.OrderHistoryRepositoryImpl
+import com.example.wearzone.data.repository.PayMockRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
@@ -14,6 +15,7 @@ import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.checkout.repository.IDiscountRepository
+import com.example.wearzone.domain.checkout.repository.IPayMockRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -53,6 +55,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindDiscountRepository(impl: DiscountRepositoryImpl): IDiscountRepository
+
+    @Binds
+    abstract fun bindPayMockRepository(impl: PayMockRepositoryImpl): IPayMockRepository
 
     @Binds
     abstract fun bindCategoryRepository(impl: CategoryRepositoryImpl): ICategoryRepository

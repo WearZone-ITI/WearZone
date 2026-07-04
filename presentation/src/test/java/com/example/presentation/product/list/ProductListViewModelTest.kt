@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.example.presentation.MainDispatcherRule
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
@@ -45,6 +46,9 @@ class ProductListViewModelTest {
             getAuthAccessStateUseCase,
             observeCartUseCase,
         )
+        io.mockk.every { observeCartUseCase() } returns kotlinx.coroutines.flow.flowOf(emptyList())
+        viewModel = ProductListViewModel(getProductsUseCase, observeCartUseCase)
+        every { observeCartUseCase() } returns flowOf(emptyList())
     }
 
     @Test

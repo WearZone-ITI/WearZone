@@ -49,6 +49,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.checkout.components.CheckoutOrderSummaryCard
+import com.example.wearzone.presentation.checkout.components.CreditCardForm
 import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
 import com.example.wearzone.presentation.checkout.components.PaymentMethodCard
 import com.example.wearzone.presentation.checkout.components.PromoCodeCard
@@ -228,7 +229,26 @@ private fun CheckoutLoadedContent(
             PaymentMethodCard(
                 paymentMethodLabelRes = state.paymentMethod.labelRes(),
                 paymentMethodDescriptionRes = state.paymentMethod.descriptionRes(),
+                onClick = {
+                    val next = if (state.paymentMethod == CheckoutPaymentMethodUi.CashOnDelivery) {
+                        CheckoutPaymentMethodUi.CreditCard
+                    } else {
+                        CheckoutPaymentMethodUi.CashOnDelivery
+                    }
+                    onIntent(CheckoutUiIntent.OnPaymentMethodSelected(next))
+                }
             )
+        }
+        if (state.paymentMethod == CheckoutPaymentMethodUi.CreditCard) {
+            item {
+                CreditCardForm(
+                    cardInfo = state.cardInfo,
+                    onNumberChange = { onIntent(CheckoutUiIntent.OnCardNumberChanged(it)) },
+                    onNameChange = { first, last -> onIntent(CheckoutUiIntent.OnCardHolderNameChanged(first, last)) },
+                    onExpiryChange = { month, year -> onIntent(CheckoutUiIntent.OnCardExpiryChanged(month, year)) },
+                    onCvvChange = { onIntent(CheckoutUiIntent.OnCardCvvChanged(it)) },
+                )
+            }
         }
         item {
             PromoCodeCard(
@@ -278,7 +298,8 @@ private fun CheckoutBottomBar(
             enabled = !state.isPlacingOrder &&
                 !state.isApplyingDiscount &&
                 !state.isLoadingAddress &&
-                state.deliveryAddress != null,
+                !state.isProcessingPayment &&
+                state.deliveryAddress != null ,
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppTheme.colors.selected,
@@ -288,7 +309,7 @@ private fun CheckoutBottomBar(
                 .fillMaxWidth()
                 .height(56.dp),
         ) {
-            if (state.isPlacingOrder) {
+            if (state.isPlacingOrder || state.isProcessingPayment) {
                 CircularProgressIndicator(
                     color = AppTheme.colors.onAccent,
                     strokeWidth = 2.dp,
