@@ -466,5 +466,14 @@
     <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
     <string name="promo_discount_off">خصم</string>
     <string name="promo_shop_now">تسوق الآن</string>
+
+
+    <string name="reset_email_sent_title">تم إرسال البريد الإلكتروني</string>
+    <string name="reset_email_sent_message">تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</string>
+    <string name="forgot_password_title">نسيت كلمة المرور</string>
+    <string name="forgot_password_subtitle">أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور الخاصة بك.</string>
+    <string name="email_label">البريد الإلكتروني</string>
+    <string name="send_reset_link">إرسال رابط إعادة التعيين</string>
+    <string name="back_to_login">العودة لتسجيل الدخول</string>
     <!-- Omar -->
 </resources>
