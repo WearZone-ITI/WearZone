@@ -51,7 +51,7 @@ class OrderHistoryViewModel @Inject constructor(
             OrderHistoryUiIntent.OnRetry -> loadOrders()
             OrderHistoryUiIntent.OnRefresh -> loadOrders(isRefresh = true)
             is OrderHistoryUiIntent.OnViewDetailsClicked -> sendEffect(
-                OrderHistoryUiEffect.ShowMessage(R.string.order_history_details_unavailable),
+                OrderHistoryUiEffect.NavigateToDetails(intent.orderId),
             )
             is OrderHistoryUiIntent.OnTrackPackageClicked -> sendEffect(
                 OrderHistoryUiEffect.ShowMessage(R.string.order_history_tracking_available),

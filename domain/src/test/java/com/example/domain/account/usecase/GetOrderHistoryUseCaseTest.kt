@@ -2,6 +2,8 @@ package com.example.domain.account.usecase
 
 import com.example.wearzone.domain.account.model.OrderHistory
 import com.example.wearzone.domain.account.model.OrderStatus
+import com.example.wearzone.domain.account.model.OrderCancelReason
+import com.example.wearzone.domain.account.model.OrderDetails
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import kotlinx.coroutines.test.runTest
@@ -35,6 +37,12 @@ class GetOrderHistoryUseCaseTest {
             lastCustomerId = customerId
             return result
         }
+
+        override suspend fun getOrderDetails(orderId: Long, currentCustomerId: Long): Result<OrderDetails> =
+            throw UnsupportedOperationException()
+
+        override suspend fun cancelOrder(orderId: Long, reason: OrderCancelReason): Result<OrderDetails> =
+            throw UnsupportedOperationException()
     }
 
     private companion object {

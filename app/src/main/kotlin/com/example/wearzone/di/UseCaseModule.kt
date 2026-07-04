@@ -2,6 +2,8 @@ package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
+import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
+import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
@@ -310,11 +312,25 @@ object UseCaseModule {
     ): GetOrderHistoryUseCase = GetOrderHistoryUseCase(repository)
 
     @Provides
+    fun provideGetOrderDetailsUseCase(
+        repository: IOrderHistoryRepository,
+    ): GetOrderDetailsUseCase = GetOrderDetailsUseCase(repository)
+
+    @Provides
+    fun provideCancelOrderUseCase(
+        repository: IOrderHistoryRepository,
+    ): CancelOrderUseCase = CancelOrderUseCase(repository)
+
+    @Provides
     fun provideOrderHistoryUseCases(
         getCurrentCustomerId: GetCurrentCustomerIdUseCase,
         getOrderHistory: GetOrderHistoryUseCase,
+        getOrderDetails: GetOrderDetailsUseCase,
+        cancelOrder: CancelOrderUseCase,
     ): OrderHistoryUseCases = OrderHistoryUseCases(
         getCurrentCustomerId = getCurrentCustomerId,
         getOrderHistory = getOrderHistory,
+        getOrderDetails = getOrderDetails,
+        cancelOrder = cancelOrder,
     )
 }
