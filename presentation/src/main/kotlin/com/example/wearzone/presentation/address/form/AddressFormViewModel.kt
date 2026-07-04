@@ -3,6 +3,8 @@ package com.example.wearzone.presentation.address.form
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.AddressInput
 import com.example.wearzone.domain.customer.address.model.AddressNetworkException
 import com.example.wearzone.domain.customer.address.model.AddressPermissionException
@@ -26,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddressFormViewModel @Inject constructor(
     private val addressUseCases: CustomerAddressUseCases,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddressFormUiState(isLoading = true))
@@ -64,16 +67,16 @@ class AddressFormViewModel @Inject constructor(
         hasInitialized = true
         initializedAddressId = addressId
 
-        if (addressId == null) {
-            _uiState.value = AddressFormUiState(isLoading = false).withValidation(showRequiredErrors = false)
-            return
-        }
-
         viewModelScope.launch {
             _uiState.value = AddressFormUiState(addressId = addressId, isLoading = true)
             val resolvedCustomerId = resolveCustomerId()
             if (resolvedCustomerId == null) {
                 _uiState.update { it.copy(isSubmitting = false) }
+                return@launch
+            }
+            if (addressId == null) {
+                _uiState.value = AddressFormUiState(isLoading = false)
+                    .withValidation(showRequiredErrors = false)
                 return@launch
             }
             addressUseCases.getAddress(resolvedCustomerId, addressId)
@@ -132,19 +135,25 @@ class AddressFormViewModel @Inject constructor(
     }
 
     private suspend fun resolveCustomerId(): Long? {
-        customerId?.let { return it }
-        return addressUseCases.getCurrentCustomerId()
-            .onSuccess { customerId = it }
-            .onFailure { error ->
+        return when (val accessState = getAuthAccessStateUseCase()) {
+            is AuthAccessState.AuthenticatedCustomer -> {
+                customerId = accessState.customerId
+                accessState.customerId
+            }
+            AuthAccessState.AuthenticatedMissingCustomerId,
+            AuthAccessState.Guest -> {
+                customerId = null
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isSubmitting = false,
-                        screenError = error.toMessageRes(),
+                        isSignInRequired = true,
+                        screenError = null,
                     )
                 }
+                null
             }
-            .getOrNull()
+        }
     }
 
     private fun updateField(reducer: AddressFormUiState.() -> AddressFormUiState) {

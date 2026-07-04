@@ -1,7 +1,8 @@
 package com.example.wearzone.presentation.product.detail
 
+import androidx.annotation.StringRes
+
 sealed interface ProductDetailUiEffect {
-    data class ShowToast(@androidx.annotation.StringRes val messageRes: Int) : ProductDetailUiEffect
-    // JETS Lab Requirement 1 & 4 — Guest restriction
-    data object ShowAuthRequiredError : ProductDetailUiEffect
+    data class ShowToast(@StringRes val messageRes: Int) : ProductDetailUiEffect
+    data class ShowSignInRequired(@StringRes val messageRes: Int) : ProductDetailUiEffect
 }

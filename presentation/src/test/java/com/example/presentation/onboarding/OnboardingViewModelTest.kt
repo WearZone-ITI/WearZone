@@ -6,6 +6,7 @@ import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.presentation.onboarding.OnboardingUiEffect
 import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
 import com.example.wearzone.presentation.onboarding.OnboardingUiState
@@ -60,13 +61,14 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `Continue as Guest emits NavigateToGuest and does not save`() = runTest {
+    fun `Continue as Guest clears session saves completion and emits NavigateToGuest`() = runTest {
         val repository = FakeAuthRepository()
         val viewModel = createViewModel(repository)
 
         viewModel.handleIntent(OnboardingUiIntent.OnContinueAsGuestClicked)
 
-        assertFalse(repository.saveAttempted)
+        assertTrue(repository.logoutAttempted)
+        assertTrue(repository.savedCompletion)
         assertEquals(OnboardingUiEffect.NavigateToGuest, viewModel.uiEffect.first())
         assertEquals(OnboardingUiState.Idle(), viewModel.uiState.value)
     }
@@ -91,6 +93,7 @@ class OnboardingViewModelTest {
         OnboardingViewModel(
             observeOnboardingCompletedUseCase = ObserveOnboardingCompletedUseCase(repository),
             setOnboardingCompletedUseCase = SetOnboardingCompletedUseCase(repository),
+            logoutUseCase = LogoutUseCase(repository),
         )
 
     private class FakeAuthRepository(
@@ -100,6 +103,8 @@ class OnboardingViewModelTest {
         var saveAttempted = false
             private set
         var savedCompletion = false
+            private set
+        var logoutAttempted = false
             private set
 
         override suspend fun loginWithEmail(
@@ -121,7 +126,10 @@ class OnboardingViewModelTest {
             TODO("Not yet implemented")
         }
 
-        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+        override suspend fun logout(): Result<Unit> {
+            logoutAttempted = true
+            return Result.success(Unit)
+        }
 
         override suspend fun register(
             name: String,

@@ -2,7 +2,8 @@ package com.example.wearzone.presentation.cart
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
@@ -30,10 +31,8 @@ class CartViewModel @Inject constructor(
     private val updateCartQuantityUseCase: UpdateCartQuantityUseCase,
     private val removeFromCartUseCase: RemoveFromCartUseCase,
     private val clearCartUseCase: ClearCartUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
-
-    private val authState = MutableStateFlow<Boolean?>(null)
 
     private val cartItems =
         observeCartUseCase()
@@ -43,9 +42,11 @@ class CartViewModel @Inject constructor(
                 emptyList()
             )
 
-    val uiState =
-        combine(authState, cartItems) { isAuthenticated, items ->
-            when (isAuthenticated) {
+    private val hasCartAccess = MutableStateFlow<Boolean?>(null)
+
+    val uiState: StateFlow<CartUiState> =
+        combine(cartItems, hasCartAccess) { items, hasAccess ->
+            when (hasAccess) {
                 null -> CartUiState.Loading
                 false -> CartUiState.LoginRequired
                 true -> buildCartState(items)
@@ -68,12 +69,12 @@ class CartViewModel @Inject constructor(
     val uiEffect: Flow<CartUiEffect> = _uiEffect.receiveAsFlow()
 
     init {
-        verifyAuthenticatedUser()
+        verifyCartAccess()
     }
 
     fun handleIntent(intent: CartUiIntent) {
         when (intent) {
-            CartUiIntent.OnRetry -> verifyAuthenticatedUser()
+            CartUiIntent.OnRetry -> verifyCartAccess()
             CartUiIntent.OnCheckoutClicked -> checkout()
             CartUiIntent.OnClearCartClicked -> requestClearCart()
             CartUiIntent.OnClearCartConfirmed -> clearCart()
@@ -81,16 +82,6 @@ class CartViewModel @Inject constructor(
             is CartUiIntent.OnDecreaseQuantity -> changeQuantity(intent.variantId, -QUANTITY_STEP)
             is CartUiIntent.OnRemoveItemClicked -> requestRemoveItem(intent.variantId)
             is CartUiIntent.OnRemoveItemConfirmed -> removeItem(intent.variantId)
-        }
-    }
-
-    private fun verifyAuthenticatedUser() {
-        viewModelScope.launch {
-            val authenticated = getCurrentUserUseCase() != null
-            authState.value = authenticated
-            if (!authenticated) {
-                _uiEffect.send(CartUiEffect.NavigateToLogin)
-            }
         }
     }
 
@@ -113,6 +104,11 @@ class CartViewModel @Inject constructor(
         if (newQuantity == item.quantity) return
 
         viewModelScope.launch {
+            if (!hasAuthenticatedCartAccess()) {
+                _uiEffect.send(CartUiEffect.ShowSignInRequired)
+                return@launch
+            }
+
             when (updateCartQuantityUseCase(variantId, newQuantity)) {
                 is DataResult.Success -> Unit
                 is DataResult.Error -> _uiEffect.send(CartUiEffect.ShowSnackbar(GENERIC_ERROR_MESSAGE))
@@ -122,12 +118,22 @@ class CartViewModel @Inject constructor(
 
     private fun requestRemoveItem(variantId: String) {
         viewModelScope.launch {
+            if (!hasAuthenticatedCartAccess()) {
+                _uiEffect.send(CartUiEffect.ShowSignInRequired)
+                return@launch
+            }
+
             _uiEffect.send(CartUiEffect.ShowRemoveConfirmation(variantId))
         }
     }
 
     private fun removeItem(variantId: String) {
         viewModelScope.launch {
+            if (!hasAuthenticatedCartAccess()) {
+                _uiEffect.send(CartUiEffect.ShowSignInRequired)
+                return@launch
+            }
+
             when (removeFromCartUseCase(variantId)) {
                 is DataResult.Success -> Unit
                 is DataResult.Error -> _uiEffect.send(CartUiEffect.ShowSnackbar(GENERIC_ERROR_MESSAGE))
@@ -137,12 +143,22 @@ class CartViewModel @Inject constructor(
 
     private fun requestClearCart() {
         viewModelScope.launch {
+            if (!hasAuthenticatedCartAccess()) {
+                _uiEffect.send(CartUiEffect.ShowSignInRequired)
+                return@launch
+            }
+
             _uiEffect.send(CartUiEffect.ShowClearCartConfirmation)
         }
     }
 
     private fun clearCart() {
         viewModelScope.launch {
+            if (!hasAuthenticatedCartAccess()) {
+                _uiEffect.send(CartUiEffect.ShowSignInRequired)
+                return@launch
+            }
+
             when (clearCartUseCase()) {
                 is DataResult.Success -> Unit
                 is DataResult.Error -> _uiEffect.send(CartUiEffect.ShowSnackbar(GENERIC_ERROR_MESSAGE))
@@ -152,13 +168,23 @@ class CartViewModel @Inject constructor(
 
     private fun checkout() {
         viewModelScope.launch {
-            if (authState.value != true) {
-                _uiEffect.send(CartUiEffect.NavigateToLogin)
-            } else {
-                _uiEffect.send(CartUiEffect.NavigateToCheckout)
+            when (getAuthAccessStateUseCase()) {
+                is AuthAccessState.AuthenticatedCustomer -> _uiEffect.send(CartUiEffect.NavigateToCheckout)
+                AuthAccessState.AuthenticatedMissingCustomerId,
+                AuthAccessState.Guest,
+                -> _uiEffect.send(CartUiEffect.ShowSignInRequired)
             }
         }
     }
+
+    private fun verifyCartAccess() {
+        viewModelScope.launch {
+            hasCartAccess.value = hasAuthenticatedCartAccess()
+        }
+    }
+
+    private suspend fun hasAuthenticatedCartAccess(): Boolean =
+        getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer
 
     private fun currentItems(): List<CartItemUiModel> {
         return (uiState.value as? CartUiState.Content)?.items.orEmpty()

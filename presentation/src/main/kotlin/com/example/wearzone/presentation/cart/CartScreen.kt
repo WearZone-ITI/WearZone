@@ -49,6 +49,7 @@ import com.example.presentation.R
 import com.example.wearzone.presentation.cart.components.CartItemRow
 import com.example.wearzone.presentation.cart.components.EmptyCartContent
 import com.example.wearzone.presentation.cart.components.PriceSummaryBar
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -56,18 +57,21 @@ fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToCheckout: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var pendingRemoveVariantId by remember { mutableStateOf<String?>(null) }
     var showClearCartDialog by remember { mutableStateOf(false) }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 CartUiEffect.NavigateToLogin -> onNavigateToLogin()
                 CartUiEffect.NavigateToCheckout -> onNavigateToCheckout()
+                CartUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
                 CartUiEffect.ShowClearCartConfirmation -> showClearCartDialog = true
                 is CartUiEffect.ShowRemoveConfirmation -> pendingRemoveVariantId = effect.variantId
                 is CartUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
@@ -79,6 +83,8 @@ fun CartScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
         onIntent = viewModel::handleIntent,
     )
 
@@ -107,6 +113,17 @@ fun CartScreen(
             onDismiss = { showClearCartDialog = false },
         )
     }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            messageRes = R.string.sign_in_required_cart_message,
+            onSignInRegister = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,6 +132,8 @@ private fun CartContent(
     uiState: CartUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onIntent: (CartUiIntent) -> Unit,
 ) {
     val content = uiState as? CartUiState.Content
@@ -180,10 +199,10 @@ private fun CartContent(
                     color = AppTheme.colors.selected,
                     modifier = Modifier.align(Alignment.Center),
                 )
-                CartUiState.LoginRequired -> Text(
-                    text = stringResource(id = R.string.cart_login_required),
-                    color = AppTheme.colors.textSecondary,
-                    modifier = Modifier.align(Alignment.Center),
+                CartUiState.LoginRequired -> SignInRequiredDialog(
+                    messageRes = R.string.sign_in_required_cart_message,
+                    onSignInRegister = onNavigateToLogin,
+                    onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(
                     modifier = Modifier.padding(horizontal = 32.dp),

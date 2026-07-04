@@ -3,6 +3,8 @@ package com.example.wearzone.presentation.address.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.AddressNetworkException
 import com.example.wearzone.domain.customer.address.model.AddressPermissionException
 import com.example.wearzone.domain.customer.address.model.AddressResponseParseException
@@ -26,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddressListViewModel @Inject constructor(
     private val addressUseCases: CustomerAddressUseCases,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AddressListUiState>(AddressListUiState.Loading)
@@ -86,13 +89,18 @@ class AddressListViewModel @Inject constructor(
     }
 
     private suspend fun resolveCustomerId(): Long? {
-        customerId?.let { return it }
-        return addressUseCases.getCurrentCustomerId()
-            .onSuccess { customerId = it }
-            .onFailure {
-                _uiState.value = AddressListUiState.Error(it.toMessageRes())
+        return when (val accessState = getAuthAccessStateUseCase()) {
+            is AuthAccessState.AuthenticatedCustomer -> {
+                customerId = accessState.customerId
+                accessState.customerId
             }
-            .getOrNull()
+            AuthAccessState.AuthenticatedMissingCustomerId,
+            AuthAccessState.Guest -> {
+                customerId = null
+                _uiState.value = AddressListUiState.SignInRequired
+                null
+            }
+        }
     }
 
     private fun requestDelete(address: CustomerAddressUiModel) {

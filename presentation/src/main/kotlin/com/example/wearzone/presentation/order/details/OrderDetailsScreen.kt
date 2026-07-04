@@ -68,6 +68,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.OrderStatusTone
 import kotlinx.coroutines.launch
@@ -77,6 +78,8 @@ fun OrderDetailsScreen(
     orderId: Long,
     onNavigateBack: () -> Unit,
     onContinueShopping: () -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: OrderDetailsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,6 +109,9 @@ fun OrderDetailsScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
+        onContinueBrowsing = onContinueShopping,
     )
 
     if (showCancelDialog) {
@@ -125,6 +131,9 @@ private fun OrderDetailsScaffold(
     uiState: OrderDetailsUiState,
     snackbarHostState: SnackbarHostState,
     onIntent: (OrderDetailsUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -167,6 +176,10 @@ private fun OrderDetailsScaffold(
                 OrderDetailsUiState.Loading -> CircularProgressIndicator(
                     color = AppTheme.colors.selected,
                     modifier = Modifier.align(Alignment.Center),
+                )
+                OrderDetailsUiState.SignInRequired -> SignInRequiredDialog(
+                    onSignInRegister = onNavigateToLogin,
+                    onContinueBrowsing = onContinueBrowsing,
                 )
                 is OrderDetailsUiState.Error -> OrderDetailsErrorContent(
                     messageRes = uiState.messageRes,

@@ -2,6 +2,9 @@ package com.example.presentation.checkout
 
 import app.cash.turbine.test
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.checkout.model.CheckoutDiscount
@@ -36,7 +39,9 @@ import io.mockk.mockk
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -80,10 +85,16 @@ class CheckoutViewModelTest {
     private fun createViewModel(
         addressRepository: FakeCustomerAddressRepository = this.addressRepository,
     ) {
+        val customerIdProvider = FakeCustomerIdProvider()
         viewModel = CheckoutViewModel(
             observeCartUseCase = observeCartUseCase,
             placeOrderUseCase = placeOrderUseCase,
             applyDiscountCodeUseCase = applyDiscountCodeUseCase,
+            customerAddressUseCases = createAddressUseCases(addressRepository, customerIdProvider),
+            getAuthAccessStateUseCase = GetAuthAccessStateUseCase(
+                FakeAuthRepository(),
+                customerIdProvider,
+            ),
             customerAddressUseCases = createAddressUseCases(addressRepository),
             processPayMockPaymentUseCase = processPayMockPaymentUseCase,
         )
@@ -424,9 +435,10 @@ class CheckoutViewModelTest {
 
     private fun createAddressUseCases(
         repository: FakeCustomerAddressRepository,
+        customerIdProvider: FakeCustomerIdProvider,
     ): CustomerAddressUseCases =
         CustomerAddressUseCases(
-            getCurrentCustomerId = GetCurrentCustomerIdUseCase(FakeCustomerIdProvider()),
+            getCurrentCustomerId = GetCurrentCustomerIdUseCase(customerIdProvider),
             getAddresses = GetCustomerAddressesUseCase(repository),
             getAddress = GetCustomerAddressUseCase(repository),
             createAddress = CreateCustomerAddressUseCase(repository),
@@ -461,6 +473,29 @@ class CheckoutViewModelTest {
         private val customerId: Long = CUSTOMER_ID,
     ) : ICustomerIdProvider {
         override suspend fun getCurrentCustomerId(): Result<Long> = Result.success(customerId)
+    }
+
+    private class FakeAuthRepository : IAuthRepository {
+        override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+            Result.failure(NotImplementedError())
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+            Result.failure(NotImplementedError())
+
+        override suspend fun isLoggedIn(): Boolean = true
+
+        override suspend fun getCurrentUser(): User =
+            User(uid = "uid", email = "customer@example.com", displayName = "Customer", photoUrl = null)
+
+        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+
+        override suspend fun register(name: String, email: String, password: String): Result<User> =
+            Result.failure(NotImplementedError())
+
+        override fun observeOnboardingCompleted(): Flow<Boolean> = flowOf(true)
+
+        override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+            Result.success(Unit)
     }
 
     private class FakeCustomerAddressRepository(

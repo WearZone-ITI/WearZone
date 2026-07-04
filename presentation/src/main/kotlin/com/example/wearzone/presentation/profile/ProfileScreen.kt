@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.profile.components.LogoutConfirmationDialog
@@ -55,11 +56,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToSavedAddresses: () -> Unit,
     onNavigateToCart: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,17 +70,20 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 ProfileUiEffect.NavigateToLogin -> onNavigateToLogin()
+                ProfileUiEffect.NavigateToRegister -> onNavigateToRegister()
                 ProfileUiEffect.NavigateToSettings -> onNavigateToSettings()
                 ProfileUiEffect.NavigateToWishlist -> onNavigateToWishlist()
                 ProfileUiEffect.NavigateToOrders -> onNavigateToOrders()
                 ProfileUiEffect.NavigateToCart -> onNavigateToCart()
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
+                ProfileUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {
                     showCustomSnackbar(
                         context = context,
@@ -88,9 +94,19 @@ fun ProfileScreen(
         }
     }
 
+    LaunchedEffect(uiState) {
+        if (uiState is ProfileUiState.Guest) {
+            showSignInRequiredDialog = true
+        }
+    }
+
     Scaffold(
         topBar = {
-            val cartCount = (uiState as? ProfileUiState.Content)?.cartItemCount ?: 0
+            val cartCount = when (val state = uiState) {
+                is ProfileUiState.Content -> state.cartItemCount
+                is ProfileUiState.Guest -> state.cartItemCount
+                else -> 0
+            }
             TopBar(cartItemCount = cartCount, onAddToCartClick = { viewModel.handleIntent(ProfileUiIntent.OnCardClicked) })
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -112,6 +128,19 @@ fun ProfileScreen(
             onDismiss = {
                 showLogoutDialog = false
                 viewModel.handleIntent(ProfileUiIntent.OnLogoutCancelled)
+            },
+        )
+    }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            onSignInRegister = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onContinueBrowsing = {
+                showSignInRequiredDialog = false
+                onContinueBrowsing()
             },
         )
     }
@@ -144,6 +173,8 @@ private fun ProfileContent(
                 uiState = uiState,
                 onIntent = onIntent,
             )
+
+            is ProfileUiState.Guest -> Unit
         }
     }
 }

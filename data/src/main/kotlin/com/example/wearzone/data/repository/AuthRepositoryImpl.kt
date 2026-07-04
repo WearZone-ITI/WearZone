@@ -51,6 +51,7 @@ class AuthRepositoryImpl @Inject constructor(
         runCatchingCancellable {
             remoteDataSource.signOut()
             settingsDataSource.setCustomerId(null)
+            settingsDataSource.setDraftOrderId(null)
         }
     }
 
@@ -62,6 +63,7 @@ class AuthRepositoryImpl @Inject constructor(
         runCatchingCancellable {
             val result = remoteDataSource.register(name, email, password)
             settingsDataSource.setCustomerId(result.customerId)
+            settingsDataSource.setDraftOrderId(null)
             result.firebaseUser.toDomain()
         }
     }
@@ -71,6 +73,7 @@ class AuthRepositoryImpl @Inject constructor(
             .getSavedShopifyCustomerId(firebaseUser.uid)
             ?.takeIf { it > 0L }
         settingsDataSource.setCustomerId(shopifyCustomerId)
+        settingsDataSource.setDraftOrderId(null)
     }
 
     private fun FirebaseUser.toDomain(): User {

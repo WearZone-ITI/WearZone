@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.components.OrderHistoryCard
 import kotlinx.coroutines.launch
@@ -55,6 +56,8 @@ import kotlinx.coroutines.launch
 fun OrderHistoryScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetails: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: OrderHistoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,6 +87,9 @@ fun OrderHistoryScreen(
         OrderHistoryContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToRegister = onNavigateToRegister,
+            onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -93,6 +99,9 @@ fun OrderHistoryScreen(
 private fun OrderHistoryContent(
     uiState: OrderHistoryUiState,
     onIntent: (OrderHistoryUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -107,6 +116,11 @@ private fun OrderHistoryContent(
             )
 
             OrderHistoryUiState.Empty -> OrderHistoryEmptyContent()
+
+            OrderHistoryUiState.SignInRequired -> SignInRequiredDialog(
+                onSignInRegister = onNavigateToLogin,
+                onContinueBrowsing = onContinueBrowsing,
+            )
 
             is OrderHistoryUiState.Error -> OrderHistoryErrorContent(
                 messageRes = uiState.messageRes,

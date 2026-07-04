@@ -422,6 +422,15 @@
     <string name="forgot_password">Forgot Password?</string>
 
     <string name="sign_in">Sign In</string>
+    <string name="sign_in_register">SIGN IN / REGISTER</string>
+    <string name="continue_browsing">Continue Browsing</string>
+    <string name="sign_in_required_title">Sign In Required</string>
+    <string name="sign_in_required_message">Please sign in to add items to your wishlist and manage your bag.</string>
+    <string name="sign_in_required_cart_message">Please sign in to add items to your bag.</string>
+    <string name="sign_in_required_wishlist_message">Please sign in to add items to your wishlist.</string>
+    <string name="sign_in_required_lock_content_description">Sign in required lock icon</string>
+    <string name="profile_guest_title">Welcome to WearZone</string>
+    <string name="profile_guest_required_subtitle">Sign in to manage your profile, orders, wishlist, and addresses.</string>
 
     <string name="or_continue_with">OR CONTINUE WITH</string>
 
@@ -462,6 +471,7 @@
     <string name="wishlist_item_added">Added to favorites</string>
     <string name="brands_title">Brands</string>
     <string name="vendor_products_empty">No products found for this brand.</string>
+    <string name="vendor_products_title">Products</string>
 
     <!--Ahmed-->
 

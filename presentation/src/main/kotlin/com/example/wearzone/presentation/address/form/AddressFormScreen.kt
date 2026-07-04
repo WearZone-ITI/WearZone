@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -70,6 +71,8 @@ fun AddressFormScreen(
     addressId: Long?,
     onNavigateBack: () -> Unit,
     onAddressSaved: () -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: AddressFormViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,6 +109,9 @@ fun AddressFormScreen(
         AddressFormContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToRegister = onNavigateToRegister,
+            onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -115,6 +121,9 @@ fun AddressFormScreen(
 private fun AddressFormContent(
     uiState: AddressFormUiState,
     onIntent: (AddressFormUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -126,6 +135,11 @@ private fun AddressFormContent(
             CircularProgressIndicator(
                 color = AppTheme.colors.selected,
                 modifier = Modifier.align(Alignment.Center),
+            )
+        } else if (uiState.isSignInRequired) {
+            SignInRequiredDialog(
+                onSignInRegister = onNavigateToLogin,
+                onContinueBrowsing = onContinueBrowsing,
             )
         } else {
             AddressFormLoadedContent(

@@ -6,6 +6,7 @@ data class AddressFormUiState(
     val addressId: Long? = null,
     val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
+    val isSignInRequired: Boolean = false,
     val recipientName: String = "",
     val countryCode: String = "+20",
     val phone: String = "",
@@ -30,6 +31,8 @@ data class AddressFormUiState(
     val canSubmit: Boolean =
         !isLoading &&
             !isSubmitting &&
+            !isSignInRequired &&
+            screenError == null &&
             recipientNameError == null &&
             phoneError == null &&
             address1Error == null &&

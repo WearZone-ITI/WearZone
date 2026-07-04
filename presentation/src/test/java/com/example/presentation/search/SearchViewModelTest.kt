@@ -1,6 +1,8 @@
 package com.example.presentation.search
 
 import com.example.presentation.MainDispatcherRule
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
@@ -35,6 +37,7 @@ class SearchViewModelTest {
     private val getRecentSearchesUseCase: GetRecentSearchesUseCase = mockk()
     private val saveRecentSearchUseCase: SaveRecentSearchUseCase = mockk()
     private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase = mockk()
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase = mockk()
     private val observeCartUseCase: ObserveCartUseCase = mockk()
 
     private lateinit var viewModel: SearchViewModel
@@ -43,6 +46,7 @@ class SearchViewModelTest {
     fun setUp() {
         every { getRecentSearchesUseCase() } returns flowOf(emptyList())
         every { observeCartUseCase() } returns flowOf(emptyList())
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.AuthenticatedCustomer(1L)
         coEvery { getProductsUseCase.getBrands() } returns DataResult.Success(emptyList())
         coEvery { getProductsUseCase.getCategories() } returns DataResult.Success(emptyList())
         coEvery { searchProductsUseCase(any()) } returns DataResult.Success(emptyList())
@@ -55,6 +59,7 @@ class SearchViewModelTest {
             getRecentSearchesUseCase,
             saveRecentSearchUseCase,
             clearRecentSearchesUseCase,
+            getAuthAccessStateUseCase,
             observeCartUseCase
         )
     }

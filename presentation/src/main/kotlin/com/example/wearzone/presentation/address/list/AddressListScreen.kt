@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.address.list.components.AddressCard
 import com.example.wearzone.presentation.address.list.components.AddressDeleteConfirmationDialog
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -63,6 +64,8 @@ fun AddressListScreen(
     onNavigateBack: () -> Unit,
     onNavigateToAddAddress: () -> Unit,
     onNavigateToEditAddress: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     refreshAfterChange: Boolean = false,
     onRefreshAfterChangeConsumed: () -> Unit = {},
     viewModel: AddressListViewModel = hiltViewModel(),
@@ -124,6 +127,9 @@ fun AddressListScreen(
         AddressListContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToRegister = onNavigateToRegister,
+            onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -143,6 +149,9 @@ fun AddressListScreen(
 private fun AddressListContent(
     uiState: AddressListUiState,
     onIntent: (AddressListUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -157,6 +166,12 @@ private fun AddressListContent(
             )
             AddressListUiState.Empty -> {
                 EmptyAddressesContent(onAddClicked = { onIntent(AddressListUiIntent.OnAddClicked) })
+            }
+            AddressListUiState.SignInRequired -> {
+                SignInRequiredDialog(
+                    onSignInRegister = onNavigateToLogin,
+                    onContinueBrowsing = onContinueBrowsing,
+                )
             }
             is AddressListUiState.Error -> {
                 ErrorAddressesContent(

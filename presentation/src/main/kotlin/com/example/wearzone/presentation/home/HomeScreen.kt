@@ -16,14 +16,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.GreetingSection
 import com.example.wearzone.presentation.common.PromoAdsCarousel
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.home.components.HeroBannerSection
 import com.example.wearzone.presentation.home.components.NewArrivalsSection
 import com.example.wearzone.presentation.home.components.SearchBarSection
@@ -43,10 +48,14 @@ fun HomeScreen(
     onNavigateToBrands: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToCart : ()->Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
+    var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -55,6 +64,10 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
                 is HomeUiEffect.NavigateToCart -> onNavigateToCart()
+                is HomeUiEffect.ShowSignInRequired -> {
+                    signInRequiredMessageRes = effect.messageResId
+                    showSignInRequiredDialog = true
+                }
                 is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.resources.getString(effect.messageResId))
             }
         }
@@ -151,5 +164,16 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            messageRes = signInRequiredMessageRes,
+            onSignInRegister = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
     }
 }

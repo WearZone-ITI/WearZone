@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 sealed interface OrderHistoryUiState {
     data object Loading : OrderHistoryUiState
     data object Empty : OrderHistoryUiState
+    data object SignInRequired : OrderHistoryUiState
 
     data class Content(
         val orders: ImmutableList<OrderHistoryUiModel>,

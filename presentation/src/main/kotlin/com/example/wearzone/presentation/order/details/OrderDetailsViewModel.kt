@@ -15,6 +15,8 @@ import com.example.wearzone.domain.account.model.OrderHistoryPermissionException
 import com.example.wearzone.domain.account.model.OrderHistoryResponseParseException
 import com.example.wearzone.domain.account.model.OrderStatus
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.ShopifyCustomerIdUnavailableException
 import com.example.wearzone.presentation.order.history.OrderStatusTone
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +39,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class OrderDetailsViewModel @Inject constructor(
     private val orderHistoryUseCases: OrderHistoryUseCases,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<OrderDetailsUiState>(OrderDetailsUiState.Loading)
@@ -86,13 +89,18 @@ class OrderDetailsViewModel @Inject constructor(
     }
 
     private suspend fun resolveCustomerId(): Long? {
-        customerId?.let { return it }
-        return orderHistoryUseCases.getCurrentCustomerId()
-            .onSuccess { customerId = it }
-            .onFailure {
-                _uiState.value = OrderDetailsUiState.Error(it.toMessageRes())
+        return when (val accessState = getAuthAccessStateUseCase()) {
+            is AuthAccessState.AuthenticatedCustomer -> {
+                customerId = accessState.customerId
+                accessState.customerId
             }
-            .getOrNull()
+            AuthAccessState.AuthenticatedMissingCustomerId,
+            AuthAccessState.Guest -> {
+                customerId = null
+                _uiState.value = OrderDetailsUiState.SignInRequired
+                null
+            }
+        }
     }
 
     private fun requestCancel() {

@@ -1,7 +1,8 @@
 package com.example.presentation.cart
 
 import app.cash.turbine.test
-import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
@@ -37,7 +38,7 @@ class CartViewModelTest {
     private val updateCartQuantityUseCase: UpdateCartQuantityUseCase = mockk()
     private val removeFromCartUseCase: RemoveFromCartUseCase = mockk()
     private val clearCartUseCase: ClearCartUseCase = mockk()
-    private val getCurrentUserUseCase: GetCurrentUserUseCase = mockk()
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase = mockk()
 
     private val cartFlow = MutableSharedFlow<List<CartItem>>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -47,6 +48,7 @@ class CartViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.AuthenticatedCustomer(1L)
     }
 
     @After
@@ -60,31 +62,37 @@ class CartViewModelTest {
             updateCartQuantityUseCase,
             removeFromCartUseCase,
             clearCartUseCase,
-            getCurrentUserUseCase
+            getAuthAccessStateUseCase
         )
     }
 
     // --- Authentication & Initialization Tests ---
 
     @Test
-    fun `init given user is unauthenticated emits LoginRequired state and NavigateToLogin effect`() = runTest {
+    fun `init given guest and cart has items maps to LoginRequired state`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns null
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.Guest
+        val sampleItem = CartItem(
+            variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
+            price = 25.0, quantity = 1, maxQuantity = 5, imageUrl = "url", size = "M", currencyCode = "USD"
+        )
 
         createViewModel()
 
         viewModel.uiState.test {
-            assertEquals(CartUiState.LoginRequired, awaitItem())
-        }
-        viewModel.uiEffect.test {
-            assertEquals(CartUiEffect.NavigateToLogin, awaitItem())
+            var state = awaitItem()
+            while (state is CartUiState.Loading) {
+                cartFlow.emit(listOf(sampleItem))
+                state = awaitItem()
+            }
+            assertEquals(CartUiState.LoginRequired, state)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `init given user is authenticated and cart is empty emits Empty state`() = runTest {
+    fun `init given cart is empty emits Empty state`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
 
         createViewModel()
 
@@ -101,7 +109,6 @@ class CartViewModelTest {
     @Test
     fun `init given user is authenticated and cart has items maps to Content state properly`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         val sampleItem = CartItem(
             variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
             price = 25.0, quantity = 2, maxQuantity = 5, imageUrl = "url", size = "M", currencyCode = "USD"
@@ -130,7 +137,6 @@ class CartViewModelTest {
     @Test
     fun `OnIncreaseQuantity invokes usecase and respects maxQuantity limit`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         val sampleItem = CartItem(
             variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
             price = 20.0, quantity = 4, maxQuantity = 5, imageUrl = "", size = "M", currencyCode = "USD"
@@ -159,7 +165,6 @@ class CartViewModelTest {
     @Test
     fun `OnDecreaseQuantity invokes usecase and respects MIN_QUANTITY limit`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         val sampleItem = CartItem(
             variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
             price = 20.0, quantity = 1, maxQuantity = 5, imageUrl = "", size = "M", currencyCode = "USD"
@@ -183,7 +188,6 @@ class CartViewModelTest {
     @Test
     fun `changeQuantity failure emits ShowSnackbar UI effect`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         val sampleItem = CartItem(
             variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
             price = 20.0, quantity = 2, maxQuantity = 5, imageUrl = "", size = "M", currencyCode = "USD"
@@ -213,7 +217,6 @@ class CartViewModelTest {
     @Test
     fun `OnRemoveItemClicked emits ShowRemoveConfirmation effect`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         createViewModel()
 
         viewModel.uiEffect.test {
@@ -225,7 +228,6 @@ class CartViewModelTest {
     @Test
     fun `OnRemoveItemConfirmed calls usecase successfully`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         coEvery { removeFromCartUseCase("v1") } returns DataResult.Success(Unit)
         createViewModel()
 
@@ -237,7 +239,6 @@ class CartViewModelTest {
     @Test
     fun `OnClearCartClicked emits ShowClearCartConfirmation effect`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         createViewModel()
 
         viewModel.uiEffect.test {
@@ -249,7 +250,6 @@ class CartViewModelTest {
     @Test
     fun `OnClearCartConfirmed calls usecase successfully`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
         coEvery { clearCartUseCase() } returns DataResult.Success(Unit)
         createViewModel()
 
@@ -263,12 +263,24 @@ class CartViewModelTest {
     @Test
     fun `OnCheckoutClicked navigates to Checkout if authenticated`() = runTest {
         every { observeCartUseCase() } returns cartFlow
-        coEvery { getCurrentUserUseCase() } returns mockk()
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.AuthenticatedCustomer(1L)
         createViewModel()
 
         viewModel.uiEffect.test {
             viewModel.handleIntent(CartUiIntent.OnCheckoutClicked)
             assertEquals(CartUiEffect.NavigateToCheckout, awaitItem())
+        }
+    }
+
+    @Test
+    fun `OnCheckoutClicked shows sign in required if guest`() = runTest {
+        every { observeCartUseCase() } returns cartFlow
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.Guest
+        createViewModel()
+
+        viewModel.uiEffect.test {
+            viewModel.handleIntent(CartUiIntent.OnCheckoutClicked)
+            assertEquals(CartUiEffect.ShowSignInRequired, awaitItem())
         }
     }
 }
