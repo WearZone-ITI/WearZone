@@ -300,6 +300,28 @@
     <string name="checkout_error_invalid_card_details">Please enter valid card details.</string>
     <string name="checkout_error_payment_failed">Payment processing failed. Please check your card info.</string>
 
+    <string name="card_number_required">Card number is required</string>
+    <string name="card_number_invalid">Please enter a valid card number</string>
+
+    <string name="card_first_name_required">First name is required</string>
+    <string name="card_last_name_required">Last name is required</string>
+
+    <string name="card_month_required">Expiry month is required</string>
+    <string name="card_month_invalid">Enter a valid month (1–12)</string>
+
+    <string name="card_year_required">Expiry year is required</string>
+    <string name="card_year_invalid">Enter a valid expiry year</string>
+
+    <string name="card_cvv_required">CVV is required</string>
+    <string name="card_cvv_invalid">CVV must be 3 or 4 digits</string>
+    <string name="first_name_required">First name is required</string>
+    <string name="last_name_required">Last name is required</string>
+
+    <string name="invalid_month">Please enter a valid expiry month</string>
+    <string name="invalid_year">Please enter a valid expiry year</string>
+
+    <string name="invalid_cvv">CVV must contain 3 or 4 digits</string>
+
 
     <string name="empty">&quot;&quot;</string>
     <string name="cart_title">Shopping Cart</string>

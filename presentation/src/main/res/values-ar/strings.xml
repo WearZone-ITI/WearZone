@@ -246,6 +246,27 @@
     <string name="checkout_card_expiry_month">الشهر</string>
     <string name="checkout_card_expiry_year">السنة</string>
     <string name="checkout_card_cvv">رمز الأمان (CVV)</string>
+    <string name="card_number_required">رقم البطاقة مطلوب</string>
+    <string name="card_number_invalid">يرجى إدخال رقم بطاقة صحيح</string>
+
+    <string name="card_first_name_required">الاسم الأول مطلوب</string>
+    <string name="card_last_name_required">اسم العائلة مطلوب</string>
+
+    <string name="card_month_required">شهر انتهاء البطاقة مطلوب</string>
+    <string name="card_month_invalid">يرجى إدخال شهر صحيح (من 1 إلى 12)</string>
+
+    <string name="card_year_required">سنة انتهاء البطاقة مطلوبة</string>
+    <string name="card_year_invalid">يرجى إدخال سنة انتهاء صحيحة</string>
+
+    <string name="card_cvv_required">رمز CVV مطلوب</string>
+    <string name="card_cvv_invalid">يجب أن يتكون CVV من 3 أو 4 أرقام</string>
+    <string name="first_name_required">الاسم الأول مطلوب</string>
+    <string name="last_name_required">اسم العائلة مطلوب</string>
+
+    <string name="invalid_month">يرجى إدخال شهر انتهاء صحيح</string>
+    <string name="invalid_year">يرجى إدخال سنة انتهاء صحيحة</string>
+
+    <string name="invalid_cvv">يجب أن يتكون رمز CVV من 3 أو 4 أرقام</string>
 
     <string name="checkout_error_invalid_card_details">يرجى إدخال تفاصيل بطاقة صحيحة.</string>
     <string name="checkout_error_payment_failed">فشلت عملية الدفع. يرجى التحقق من بيانات البطاقة.</string>
