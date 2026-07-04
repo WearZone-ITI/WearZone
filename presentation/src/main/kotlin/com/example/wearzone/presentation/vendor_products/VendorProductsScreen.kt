@@ -153,13 +153,9 @@ fun VendorProductsScreen(
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
             messageRes = signInRequiredMessageRes,
-            onSignIn = {
+            onSignInRegister = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()
-            },
-            onCreateAccount = {
-                showSignInRequiredDialog = false
-                onNavigateToRegister()
             },
             onContinueBrowsing = { showSignInRequiredDialog = false },
         )

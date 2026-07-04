@@ -3,7 +3,6 @@ package com.example.wearzone.presentation.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,7 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,6 +94,12 @@ fun ProfileScreen(
         }
     }
 
+    LaunchedEffect(uiState) {
+        if (uiState is ProfileUiState.Guest) {
+            showSignInRequiredDialog = true
+        }
+    }
+
     Scaffold(
         topBar = {
             val cartCount = when (val state = uiState) {
@@ -112,7 +115,6 @@ fun ProfileScreen(
         ProfileContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
-            onContinueBrowsing = onContinueBrowsing,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -132,15 +134,14 @@ fun ProfileScreen(
 
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
-            onSignIn = {
+            onSignInRegister = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()
             },
-            onCreateAccount = {
+            onContinueBrowsing = {
                 showSignInRequiredDialog = false
-                onNavigateToRegister()
+                onContinueBrowsing()
             },
-            onContinueBrowsing = { showSignInRequiredDialog = false },
         )
     }
 }
@@ -149,7 +150,6 @@ fun ProfileScreen(
 private fun ProfileContent(
     uiState: ProfileUiState,
     onIntent: (ProfileUiIntent) -> Unit,
-    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -174,55 +174,7 @@ private fun ProfileContent(
                 onIntent = onIntent,
             )
 
-            is ProfileUiState.Guest -> ProfileGuestContent(
-                onIntent = onIntent,
-                onContinueBrowsing = onContinueBrowsing,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProfileGuestContent(
-    onIntent: (ProfileUiIntent) -> Unit,
-    onContinueBrowsing: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.profile_guest_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = AppTheme.colors.textPrimary,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = stringResource(R.string.profile_guest_required_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = AppTheme.colors.textSecondary,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
-        Button(
-            onClick = { onIntent(ProfileUiIntent.OnSignInClicked) },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = stringResource(R.string.sign_in))
-        }
-        TextButton(
-            onClick = { onIntent(ProfileUiIntent.OnCreateAccountClicked) },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = stringResource(R.string.create_account))
-        }
-        TextButton(
-            onClick = onContinueBrowsing,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(text = stringResource(R.string.continue_browsing))
+            is ProfileUiState.Guest -> Unit
         }
     }
 }

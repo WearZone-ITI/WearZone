@@ -117,13 +117,9 @@ fun CartScreen(
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
             messageRes = R.string.sign_in_required_cart_message,
-            onSignIn = {
+            onSignInRegister = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()
-            },
-            onCreateAccount = {
-                showSignInRequiredDialog = false
-                onNavigateToRegister()
             },
             onContinueBrowsing = { showSignInRequiredDialog = false },
         )
@@ -205,8 +201,7 @@ private fun CartContent(
                 )
                 CartUiState.LoginRequired -> SignInRequiredDialog(
                     messageRes = R.string.sign_in_required_cart_message,
-                    onSignIn = onNavigateToLogin,
-                    onCreateAccount = onNavigateToRegister,
+                    onSignInRegister = onNavigateToLogin,
                     onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(

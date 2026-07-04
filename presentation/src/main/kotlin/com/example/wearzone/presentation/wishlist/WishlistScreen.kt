@@ -108,8 +108,7 @@ fun WishlistScreen(
                 is WishlistUiState.GuestState -> {
                     SignInRequiredDialog(
                         messageRes = R.string.sign_in_required_wishlist_message,
-                        onSignIn = onNavigateToLogin,
-                        onCreateAccount = onNavigateToRegister,
+                        onSignInRegister = onNavigateToLogin,
                         onContinueBrowsing = onContinueBrowsing,
                     )
                 }

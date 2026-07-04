@@ -320,11 +320,13 @@
     <string name="login_subtitle">سجل الدخول للوصول إلى مجموعتك المختارة.</string>
     <string name="forgot_password">هل نسيت كلمة المرور؟</string>
     <string name="sign_in">تسجيل الدخول</string>
+    <string name="sign_in_register">تسجيل الدخول / إنشاء حساب</string>
     <string name="continue_browsing">متابعة التصفح</string>
     <string name="sign_in_required_title">تسجيل الدخول مطلوب</string>
-    <string name="sign_in_required_message">يرجى تسجيل الدخول للمتابعة والوصول إلى هذه الميزة.</string>
-    <string name="sign_in_required_cart_message">يرجى تسجيل الدخول لإضافة عناصر إلى عربة التسوق.</string>
-    <string name="sign_in_required_wishlist_message">يرجى تسجيل الدخول لحفظ العناصر في قائمة أمنياتك.</string>
+    <string name="sign_in_required_message">يرجى تسجيل الدخول لإضافة عناصر إلى قائمة أمنياتك وإدارة حقيبتك.</string>
+    <string name="sign_in_required_cart_message">يرجى تسجيل الدخول لإضافة عناصر إلى حقيبتك.</string>
+    <string name="sign_in_required_wishlist_message">يرجى تسجيل الدخول لإضافة عناصر إلى قائمة أمنياتك.</string>
+    <string name="sign_in_required_lock_content_description">أيقونة قفل تسجيل الدخول</string>
     <string name="profile_guest_title">مرحبًا بك في WearZone</string>
     <string name="profile_guest_required_subtitle">سجل الدخول لإدارة ملفك الشخصي وطلباتك ومفضلتك وعناوينك.</string>
     <string name="or_continue_with">أو المتابعة باستخدام</string>

@@ -201,8 +201,7 @@ private fun CheckoutSignInRequiredContent(
     onContinueBrowsing: () -> Unit,
 ) {
     SignInRequiredDialog(
-        onSignIn = onNavigateToLogin,
-        onCreateAccount = onNavigateToRegister,
+        onSignInRegister = onNavigateToLogin,
         onContinueBrowsing = onContinueBrowsing,
     )
 }

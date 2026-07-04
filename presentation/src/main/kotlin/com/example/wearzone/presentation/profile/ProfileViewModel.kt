@@ -60,6 +60,7 @@ class ProfileViewModel @Inject constructor(
             _uiState.value = ProfileUiState.Loading
             if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
                 _uiState.value = ProfileUiState.Guest()
+                _uiEffect.send(ProfileUiEffect.ShowSignInRequired)
                 return@launch
             }
             val user = getCurrentUserUseCase()

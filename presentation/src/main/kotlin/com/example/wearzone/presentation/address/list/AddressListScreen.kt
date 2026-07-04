@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.address.list.components.AddressCard
 import com.example.wearzone.presentation.address.list.components.AddressDeleteConfirmationDialog
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -168,9 +168,8 @@ private fun AddressListContent(
                 EmptyAddressesContent(onAddClicked = { onIntent(AddressListUiIntent.OnAddClicked) })
             }
             AddressListUiState.SignInRequired -> {
-                AddressSignInRequiredContent(
-                    onNavigateToLogin = onNavigateToLogin,
-                    onNavigateToRegister = onNavigateToRegister,
+                SignInRequiredDialog(
+                    onSignInRegister = onNavigateToLogin,
                     onContinueBrowsing = onContinueBrowsing,
                 )
             }
@@ -186,81 +185,6 @@ private fun AddressListContent(
                     onIntent = onIntent,
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun AddressSignInRequiredContent(
-    onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onContinueBrowsing: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.sign_in_required_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = AppTheme.colors.textPrimary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(R.string.sign_in_required_message),
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colors.textSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        Spacer(modifier = Modifier.height(28.dp))
-        Button(
-            onClick = onNavigateToLogin,
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AppTheme.colors.selected,
-                contentColor = AppTheme.colors.onAccent,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.sign_in),
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedButton(
-            onClick = onNavigateToRegister,
-            shape = RoundedCornerShape(18.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.create_account),
-                color = AppTheme.colors.textPrimary,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedButton(
-            onClick = onContinueBrowsing,
-            shape = RoundedCornerShape(18.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.continue_browsing),
-                color = AppTheme.colors.textPrimary,
-                fontWeight = FontWeight.SemiBold,
-            )
         }
     }
 }
