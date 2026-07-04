@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.GreetingSection
 import com.example.wearzone.presentation.common.PromoAdsCarousel
@@ -54,6 +55,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     var showSignInRequiredDialog by remember { mutableStateOf(false) }
+    var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -62,7 +64,10 @@ fun HomeScreen(
                 is HomeUiEffect.NavigateToCategory -> onNavigateToCategory(effect.categoryId)
                 is HomeUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
                 is HomeUiEffect.NavigateToCart -> onNavigateToCart()
-                HomeUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
+                is HomeUiEffect.ShowSignInRequired -> {
+                    signInRequiredMessageRes = effect.messageResId
+                    showSignInRequiredDialog = true
+                }
                 is HomeUiEffect.ShowSnackbar -> onShowSnackbar(context.resources.getString(effect.messageResId))
             }
         }
@@ -163,6 +168,7 @@ fun HomeScreen(
 
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
+            messageRes = signInRequiredMessageRes,
             onSignIn = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()

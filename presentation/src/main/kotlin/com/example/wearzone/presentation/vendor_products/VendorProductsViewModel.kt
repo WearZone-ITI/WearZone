@@ -115,6 +115,11 @@ class VendorProductsViewModel @Inject constructor(
 
     private fun addToCart(product: Product) {
         viewModelScope.launch {
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                _uiEffect.send(VendorProductsUiEffect.ShowSignInRequired(R.string.sign_in_required_cart_message))
+                return@launch
+            }
+
             val item = CartItem(
                 variantId = product.variantId,
                 productId = product.id,
@@ -141,7 +146,7 @@ class VendorProductsViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = currentUserId
             if (userId == null || getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
-                _uiEffect.send(VendorProductsUiEffect.ShowSignInRequired)
+                _uiEffect.send(VendorProductsUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
                 return@launch
             }
 

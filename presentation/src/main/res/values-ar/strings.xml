@@ -323,6 +323,8 @@
     <string name="continue_browsing">متابعة التصفح</string>
     <string name="sign_in_required_title">تسجيل الدخول مطلوب</string>
     <string name="sign_in_required_message">يرجى تسجيل الدخول للمتابعة والوصول إلى هذه الميزة.</string>
+    <string name="sign_in_required_cart_message">يرجى تسجيل الدخول لإضافة عناصر إلى عربة التسوق.</string>
+    <string name="sign_in_required_wishlist_message">يرجى تسجيل الدخول لحفظ العناصر في قائمة أمنياتك.</string>
     <string name="profile_guest_title">مرحبًا بك في WearZone</string>
     <string name="profile_guest_required_subtitle">سجل الدخول لإدارة ملفك الشخصي وطلباتك ومفضلتك وعناوينك.</string>
     <string name="or_continue_with">أو المتابعة باستخدام</string>

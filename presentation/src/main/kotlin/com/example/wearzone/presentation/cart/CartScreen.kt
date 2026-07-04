@@ -83,6 +83,8 @@ fun CartScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
         onIntent = viewModel::handleIntent,
     )
 
@@ -114,6 +116,7 @@ fun CartScreen(
 
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
+            messageRes = R.string.sign_in_required_cart_message,
             onSignIn = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()
@@ -133,6 +136,8 @@ private fun CartContent(
     uiState: CartUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onIntent: (CartUiIntent) -> Unit,
 ) {
     val content = uiState as? CartUiState.Content
@@ -198,10 +203,11 @@ private fun CartContent(
                     color = AppTheme.colors.selected,
                     modifier = Modifier.align(Alignment.Center),
                 )
-                CartUiState.LoginRequired -> Text(
-                    text = stringResource(id = R.string.cart_login_required),
-                    color = AppTheme.colors.textSecondary,
-                    modifier = Modifier.align(Alignment.Center),
+                CartUiState.LoginRequired -> SignInRequiredDialog(
+                    messageRes = R.string.sign_in_required_cart_message,
+                    onSignIn = onNavigateToLogin,
+                    onCreateAccount = onNavigateToRegister,
+                    onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(
                     modifier = Modifier.padding(horizontal = 32.dp),

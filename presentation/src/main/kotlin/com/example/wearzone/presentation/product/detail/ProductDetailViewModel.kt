@@ -16,7 +16,6 @@ import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
-import com.example.wearzone.presentation.home.HomeUiEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -148,6 +147,11 @@ class ProductDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
 
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired(R.string.sign_in_required_cart_message))
+                return@launch
+            }
+
             if (state.selectedSize == null) {
                 _uiEffect.send(
                     ProductDetailUiEffect.ShowToast(
@@ -185,12 +189,16 @@ class ProductDetailViewModel @Inject constructor(
     private fun toggleFavorite(isAdding: Boolean = true) {
         viewModelScope.launch {
             if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
-                _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired)
+                _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
                 return@launch
             }
             
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
-            val user = getCurrentUserUseCase() ?: return@launch
+            val user = getCurrentUserUseCase()
+            if (user == null || user.uid.isEmpty()) {
+                _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
+                return@launch
+            }
             
             val item = WishlistItem(
                 id = state.id,

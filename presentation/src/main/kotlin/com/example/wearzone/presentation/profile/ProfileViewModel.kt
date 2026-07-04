@@ -107,11 +107,15 @@ class ProfileViewModel @Inject constructor(
     private fun observeCart() {
         viewModelScope.launch {
             observeCartUseCase().collect { cartItems ->
-                val count = cartItems.sumOf { it.quantity }
+                val count = if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
+                    cartItems.sumOf { it.quantity }
+                } else {
+                    0
+                }
                 _uiState.update { state ->
                     when (state) {
                         is ProfileUiState.Content -> state.copy(cartItemCount = count)
-                        is ProfileUiState.Guest -> state.copy(cartItemCount = count)
+                        is ProfileUiState.Guest -> state.copy(cartItemCount = 0)
                         else -> state
                     }
                 }

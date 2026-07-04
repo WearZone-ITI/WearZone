@@ -119,6 +119,11 @@ class HomeViewModel @Inject constructor(
 
     private fun addToCart(product: Product) {
         viewModelScope.launch {
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_cart_message))
+                return@launch
+            }
+
             val item = CartItem(
                 variantId = product.variantId,
                 productId = product.id,
@@ -145,13 +150,13 @@ class HomeViewModel @Inject constructor(
     private fun toggleFavorite(product: Product, isAdding: Boolean = true) {
         viewModelScope.launch {
             if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
-                sendEffect(HomeUiEffect.ShowSignInRequired)
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
                 return@launch
             }
 
             val user = getCurrentUserUseCase()
             if (user == null || user.uid.isEmpty()) {
-                sendEffect(HomeUiEffect.ShowSignInRequired)
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
                 return@launch
             }
             val item = WishlistItem(

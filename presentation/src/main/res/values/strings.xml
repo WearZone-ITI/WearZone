@@ -391,6 +391,8 @@
     <string name="continue_browsing">Continue Browsing</string>
     <string name="sign_in_required_title">Sign in required</string>
     <string name="sign_in_required_message">Please sign in to continue and access this feature.</string>
+    <string name="sign_in_required_cart_message">Please sign in to add items to your cart.</string>
+    <string name="sign_in_required_wishlist_message">Please sign in to save items to your wishlist.</string>
     <string name="profile_guest_title">Welcome to WearZone</string>
     <string name="profile_guest_required_subtitle">Sign in to manage your profile, orders, wishlist, and addresses.</string>
 

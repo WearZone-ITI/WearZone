@@ -48,6 +48,7 @@ class CartViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.AuthenticatedCustomer(1L)
     }
 
     @After
@@ -68,8 +69,9 @@ class CartViewModelTest {
     // --- Authentication & Initialization Tests ---
 
     @Test
-    fun `init given guest and cart has items maps to Content state`() = runTest {
+    fun `init given guest and cart has items maps to LoginRequired state`() = runTest {
         every { observeCartUseCase() } returns cartFlow
+        coEvery { getAuthAccessStateUseCase() } returns AuthAccessState.Guest
         val sampleItem = CartItem(
             variantId = "v1", productId = "p1", title = "T-Shirt", vendor = "Nike",
             price = 25.0, quantity = 1, maxQuantity = 5, imageUrl = "url", size = "M", currencyCode = "USD"
@@ -79,11 +81,11 @@ class CartViewModelTest {
 
         viewModel.uiState.test {
             var state = awaitItem()
-            while (state is CartUiState.Loading || state is CartUiState.Empty) {
+            while (state is CartUiState.Loading) {
                 cartFlow.emit(listOf(sampleItem))
                 state = awaitItem()
             }
-            assertTrue(state is CartUiState.Content)
+            assertEquals(CartUiState.LoginRequired, state)
             cancelAndIgnoreRemainingEvents()
         }
     }

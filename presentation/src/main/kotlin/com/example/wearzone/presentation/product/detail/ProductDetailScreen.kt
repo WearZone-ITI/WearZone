@@ -66,6 +66,7 @@ fun ProductDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showSignInRequiredDialog by remember { mutableStateOf(false) }
+    var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }
 
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -76,7 +77,10 @@ fun ProductDetailScreen(
                     )
                 )
 
-                ProductDetailUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
+                is ProductDetailUiEffect.ShowSignInRequired -> {
+                    signInRequiredMessageRes = effect.messageRes
+                    showSignInRequiredDialog = true
+                }
             }
         }
     }
@@ -157,6 +161,7 @@ fun ProductDetailScreen(
 
     if (showSignInRequiredDialog) {
         SignInRequiredDialog(
+            messageRes = signInRequiredMessageRes,
             onSignIn = {
                 showSignInRequiredDialog = false
                 onNavigateToLogin()
