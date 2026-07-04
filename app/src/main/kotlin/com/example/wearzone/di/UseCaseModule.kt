@@ -19,8 +19,10 @@ import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.checkout.repository.IDiscountRepository
+import com.example.wearzone.domain.checkout.repository.IPayMockRepository
 import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
+import com.example.wearzone.domain.checkout.usecase.ProcessPayMockPaymentUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
@@ -220,6 +222,11 @@ object UseCaseModule {
             customerIdProvider = customerIdProvider,
             customerAddressRepository = customerAddressRepository,
         )
+
+    @Provides
+    fun provideProcessPayMockPaymentUseCase(
+        repository: IPayMockRepository,
+    ): ProcessPayMockPaymentUseCase = ProcessPayMockPaymentUseCase(repository)
 
     @Provides
     fun getCategoriesUseCase(

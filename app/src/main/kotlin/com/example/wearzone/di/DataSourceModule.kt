@@ -7,8 +7,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.wearzone.data.local.datasource.CartLocalDataSourceImpl
 import com.example.wearzone.data.local.datasource.ICartLocalDataSource
 import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
+import com.example.wearzone.data.local.datasource.IPayMockLocalDataSource
 import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
+import com.example.wearzone.data.local.datasource.PayMockLocalDataSourceImpl
 import com.example.wearzone.data.local.datasource.SettingsPreferencesDataSourceImpl
 import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CartRemoteDataSourceImpl
@@ -40,12 +42,20 @@ annotation class OnboardingDataStore
 @Retention(AnnotationRetention.BINARY)
 annotation class SettingsDataStore
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PayMockDataStore
+
 private val Context.onboardingDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "onboarding_preferences",
 )
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings_preferences",
+)
+
+private val Context.payMockDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "paymock_preferences",
 )
 
 @Module
@@ -120,6 +130,20 @@ abstract class DataSourceModule {
             @SettingsDataStore dataStore: DataStore<Preferences>,
         ): ISettingsPreferencesDataSource {
             return SettingsPreferencesDataSourceImpl(dataStore)
+        }
+
+        @Provides
+        @PayMockDataStore
+        fun providePayMockDataStore(
+            @ApplicationContext context: Context,
+        ): DataStore<Preferences> =
+            context.payMockDataStore
+
+        @Provides
+        fun providePayMockLocalDataSource(
+            @PayMockDataStore dataStore: DataStore<Preferences>,
+        ): IPayMockLocalDataSource {
+            return PayMockLocalDataSourceImpl(dataStore)
         }
     }
 }
