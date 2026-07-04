@@ -9,6 +9,10 @@ import kotlinx.collections.immutable.persistentListOf
 sealed interface ProfileUiState {
     data object Loading : ProfileUiState
 
+    data class Guest(
+        val cartItemCount: Int = 0,
+    ) : ProfileUiState
+
     data class Content(
         val displayName: String?,
         val email: String?,

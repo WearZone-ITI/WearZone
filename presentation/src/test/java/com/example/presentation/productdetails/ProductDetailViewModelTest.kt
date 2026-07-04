@@ -4,9 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
+import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
@@ -56,7 +59,8 @@ class ProductDetailViewModelTest {
         return ProductDetailViewModel(
             savedStateHandle,
             getProductDetailUseCase,
-            authRepository,
+            GetAuthAccessStateUseCase(authRepository, FakeCustomerIdProvider()),
+            GetCurrentUserUseCase(authRepository),
             observeWishlistUseCase,
             toggleFavoriteUseCase,
             addToCartUseCase
@@ -160,24 +164,32 @@ class ProductDetailViewModelTest {
     }
 
     @Test
-    fun `AddToCart by guest emits ShowAuthRequiredError`() = runTest {
+    fun `AddToCart by guest with size emits ShowToast added to cart`() = runTest {
         coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
-        coEvery { authRepository.isLoggedIn() } returns false
+        coEvery { addToCartUseCase(any()) } returns DataResult.Success(Unit)
 
         val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.handleIntent(ProductDetailUiIntent.SelectSize("M"))
+            awaitItem()
+        }
 
         viewModel.uiEffect.test {
             viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick)
 
             val effect = awaitItem()
-            assertTrue(effect is ProductDetailUiEffect.ShowAuthRequiredError)
+            assertTrue(effect is ProductDetailUiEffect.ShowToast)
+            assertEquals(R.string.add_to_cart, (effect as ProductDetailUiEffect.ShowToast).messageRes)
         }
     }
 
     @Test
-    fun `OnToggleFavorite by guest emits ShowAuthRequiredError`() = runTest {
+    fun `OnToggleFavorite by guest emits ShowSignInRequired`() = runTest {
         coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
-        coEvery { authRepository.isLoggedIn() } returns false
 
         val viewModel = createViewModel()
 
@@ -190,14 +202,13 @@ class ProductDetailViewModelTest {
             viewModel.handleIntent(ProductDetailUiIntent.OnToggleFavorite)
 
             val effect = awaitItem()
-            assertTrue(effect is ProductDetailUiEffect.ShowAuthRequiredError)
+            assertEquals(ProductDetailUiEffect.ShowSignInRequired, effect)
         }
     }
 
     @Test
     fun `AddToCart with size by logged-in user emits ShowToast added to cart`() = runTest {
         coEvery { getProductDetailUseCase(1L) } returns DataResult.Success(dummyProduct)
-        coEvery { authRepository.isLoggedIn() } returns true
         coEvery { addToCartUseCase(any()) } returns DataResult.Success(Unit)
 
         val viewModel = createViewModel()
@@ -216,5 +227,9 @@ class ProductDetailViewModelTest {
             val effect = awaitItem()
             assertTrue(effect is ProductDetailUiEffect.ShowToast)
         }
+    }
+
+    private class FakeCustomerIdProvider : ICustomerIdProvider {
+        override suspend fun getCurrentCustomerId(): Result<Long> = Result.success(1L)
     }
 }

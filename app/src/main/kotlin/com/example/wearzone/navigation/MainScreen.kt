@@ -62,6 +62,7 @@ private const val ADDRESS_CHANGED_KEY = NavigationKeys.ADDRESS_CHANGED
 @Composable
 fun MainScreen(
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
@@ -203,6 +204,8 @@ fun MainScreen(
                         }
                     },
                     onNavigateToCart = { onNavigateToCart() },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
                     )
                 }
                 composable<Route.CategoriesRoute> {
@@ -224,6 +227,7 @@ fun MainScreen(
                 composable<Route.ProfileRoute> {
                     ProfileScreen(
                         onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                         onNavigateToSettings = onNavigateToSettings,
                         onNavigateToWishlist = {
                             bottomNavController.navigate(Route.WishlistRoute)
@@ -238,7 +242,16 @@ fun MainScreen(
                             bottomNavController.navigate(Route.AddressListRoute) {
                                 launchSingleTop = true
                             }
-                        }
+                        },
+                        onContinueBrowsing = {
+                            bottomNavController.navigate(Route.HomeRoute) {
+                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                     )
                 }
 
@@ -248,6 +261,8 @@ fun MainScreen(
                         onNavigateToDetails = { orderId ->
                             bottomNavController.navigate(Route.OrderDetailsRoute(orderId))
                         },
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                     )
                 }
 
@@ -265,6 +280,8 @@ fun MainScreen(
                                 restoreState = true
                             }
                         },
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                     )
                 }
 
@@ -279,6 +296,8 @@ fun MainScreen(
                         onNavigateToEditAddress = { addressId ->
                             bottomNavController.navigate(Route.AddressEditRoute(addressId))
                         },
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                         refreshAfterChange = refreshAfterChange,
                         onRefreshAfterChangeConsumed = {
                             backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
@@ -295,6 +314,8 @@ fun MainScreen(
                                 ?.savedStateHandle
                                 ?.set(ADDRESS_CHANGED_KEY, true)
                         },
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                     )
                 }
 
@@ -308,6 +329,8 @@ fun MainScreen(
                                 ?.savedStateHandle
                                 ?.set(ADDRESS_CHANGED_KEY, true)
                         },
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
                     )
                 }
 
@@ -319,7 +342,18 @@ fun MainScreen(
                                 snackbarHostState.showSnackbar(message)
                             }
                         },
-                        onNavigateToCart = onNavigateToCart
+                        onNavigateToCart = onNavigateToCart,
+                        onNavigateToLogin = onNavigateToLogin,
+                        onNavigateToRegister = onNavigateToRegister,
+                        onContinueBrowsing = {
+                            bottomNavController.navigate(Route.HomeRoute) {
+                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                     )
                 }
             }

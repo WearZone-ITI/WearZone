@@ -320,6 +320,11 @@
     <string name="login_subtitle">سجل الدخول للوصول إلى مجموعتك المختارة.</string>
     <string name="forgot_password">هل نسيت كلمة المرور؟</string>
     <string name="sign_in">تسجيل الدخول</string>
+    <string name="continue_browsing">متابعة التصفح</string>
+    <string name="sign_in_required_title">تسجيل الدخول مطلوب</string>
+    <string name="sign_in_required_message">يرجى تسجيل الدخول للمتابعة والوصول إلى هذه الميزة.</string>
+    <string name="profile_guest_title">مرحبًا بك في WearZone</string>
+    <string name="profile_guest_required_subtitle">سجل الدخول لإدارة ملفك الشخصي وطلباتك ومفضلتك وعناوينك.</string>
     <string name="or_continue_with">أو المتابعة باستخدام</string>
     <string name="dont_have_account">ليس لديك حساب؟</string>
     <string name="register">إنشاء حساب</string>
@@ -356,6 +361,7 @@
     <!-- Brands Screen -->
     <string name="brands_title">الماركات</string>
     <string name="vendor_products_empty">لا توجد منتجات لهذه الماركة.</string>
+    <string name="vendor_products_title">المنتجات</string>
     <!--Ahmed-->
 
     <!-- Omar -->

@@ -34,7 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
-import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
@@ -55,13 +57,15 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ProductDetailScreen(
-    onNavigateBack: () -> Unit, viewModel: ProductDetailViewModel = hiltViewModel()
+    onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
+    viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val authRequiredMessage = stringResource(id = R.string.product_detail_auth_required)
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel.uiEffect) {
         viewModel.uiEffect.collectLatest { effect ->
@@ -72,9 +76,7 @@ fun ProductDetailScreen(
                     )
                 )
 
-                is ProductDetailUiEffect.ShowAuthRequiredError -> snackbarHostState.showSnackbar(
-                    authRequiredMessage
-                )
+                ProductDetailUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
             }
         }
     }
@@ -151,6 +153,20 @@ fun ProductDetailScreen(
                 }
             }
         }
+    }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            onSignIn = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onCreateAccount = {
+                showSignInRequiredDialog = false
+                onNavigateToRegister()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
     }
 }
 

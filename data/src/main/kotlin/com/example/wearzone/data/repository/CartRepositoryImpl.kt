@@ -6,6 +6,7 @@ import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.entity.toDomain
 import com.example.wearzone.data.local.entity.toEntity
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
+import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.dto.DraftOrderLineItem
 import com.example.wearzone.data.remote.dto.DraftOrderPayload
 import com.example.wearzone.data.remote.dto.DraftOrderRequest
@@ -30,6 +31,7 @@ import javax.inject.Inject
 class CartRepositoryImpl @Inject constructor(
     private val localDataSource: ICartLocalDataSource,
     private val remoteDataSource: ICartRemoteDataSource,
+    private val authRemoteDataSource: IAuthRemoteDataSource,
     private val settingsDataSource: ISettingsPreferencesDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ICartRepository {
@@ -99,6 +101,14 @@ class CartRepositoryImpl @Inject constructor(
     private suspend fun syncCartWithRemote() {
 
         syncMutex.withLock {
+            if (authRemoteDataSource.getCurrentUser() == null) {
+                return
+            }
+
+            val customerId = settingsDataSource.getCustomerId()
+            if (customerId == null || customerId <= 0L) {
+                return
+            }
 
             val currentItems = localDataSource.observeCartItems().firstOrNull() ?: emptyList()
 

@@ -34,6 +34,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -70,6 +71,8 @@ fun AddressFormScreen(
     addressId: Long?,
     onNavigateBack: () -> Unit,
     onAddressSaved: () -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: AddressFormViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,6 +109,9 @@ fun AddressFormScreen(
         AddressFormContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToRegister = onNavigateToRegister,
+            onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -115,6 +121,9 @@ fun AddressFormScreen(
 private fun AddressFormContent(
     uiState: AddressFormUiState,
     onIntent: (AddressFormUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -127,10 +136,91 @@ private fun AddressFormContent(
                 color = AppTheme.colors.selected,
                 modifier = Modifier.align(Alignment.Center),
             )
+        } else if (uiState.isSignInRequired) {
+            AddressFormSignInRequiredContent(
+                onNavigateToLogin = onNavigateToLogin,
+                onNavigateToRegister = onNavigateToRegister,
+                onContinueBrowsing = onContinueBrowsing,
+            )
         } else {
             AddressFormLoadedContent(
                 uiState = uiState,
                 onIntent = onIntent,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddressFormSignInRequiredContent(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.sign_in_required_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = AppTheme.colors.textPrimary,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.sign_in_required_message),
+            style = MaterialTheme.typography.bodyLarge,
+            color = AppTheme.colors.textSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        Spacer(modifier = Modifier.height(28.dp))
+        Button(
+            onClick = onNavigateToLogin,
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AppTheme.colors.selected,
+                contentColor = AppTheme.colors.onAccent,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.sign_in),
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = onNavigateToRegister,
+            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.create_account),
+                color = AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = onContinueBrowsing,
+            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.continue_browsing),
+                color = AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }

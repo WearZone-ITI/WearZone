@@ -7,6 +7,7 @@ import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
@@ -133,6 +134,12 @@ object UseCaseModule {
     fun provideGetCurrentUserUseCase(
         repository: IAuthRepository
     ): GetCurrentUserUseCase = GetCurrentUserUseCase(repository)
+
+    @Provides
+    fun provideGetAuthAccessStateUseCase(
+        repository: IAuthRepository,
+        customerIdProvider: ICustomerIdProvider,
+    ): GetAuthAccessStateUseCase = GetAuthAccessStateUseCase(repository, customerIdProvider)
 
     @Provides
     fun provideLogoutUseCase(

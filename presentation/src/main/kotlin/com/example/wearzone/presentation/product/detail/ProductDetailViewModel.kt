@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
-import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
+import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.common.DataResult
@@ -31,7 +33,8 @@ import javax.inject.Inject
 class ProductDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getProductDetailUseCase: GetProductDetailUseCase,
-    private val authRepository: IAuthRepository,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val addToCartUseCase: AddToCartUseCase
@@ -91,7 +94,12 @@ class ProductDetailViewModel @Inject constructor(
                 is DataResult.Success -> {
                     val productDetail = result.data
                     currentProduct = productDetail
-                    val user = authRepository.getCurrentUser()
+                    val accessState = getAuthAccessStateUseCase()
+                    val user = if (accessState is AuthAccessState.AuthenticatedCustomer) {
+                        getCurrentUserUseCase()
+                    } else {
+                        null
+                    }
                     
                     _uiState.value = ProductDetailUiState.Success(
                         id = productDetail.id,
@@ -138,12 +146,6 @@ class ProductDetailViewModel @Inject constructor(
 
     private fun addToCart() {
         viewModelScope.launch {
-
-            if (!authRepository.isLoggedIn()) {
-                _uiEffect.send(ProductDetailUiEffect.ShowAuthRequiredError)
-                return@launch
-            }
-
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
 
             if (state.selectedSize == null) {
@@ -182,13 +184,13 @@ class ProductDetailViewModel @Inject constructor(
     }
     private fun toggleFavorite(isAdding: Boolean = true) {
         viewModelScope.launch {
-            if (!authRepository.isLoggedIn()) {
-                _uiEffect.send(ProductDetailUiEffect.ShowAuthRequiredError)
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired)
                 return@launch
             }
             
             val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
-            val user = authRepository.getCurrentUser() ?: return@launch
+            val user = getCurrentUserUseCase() ?: return@launch
             
             val item = WishlistItem(
                 id = state.id,

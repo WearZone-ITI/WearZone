@@ -2,6 +2,8 @@ package com.example.wearzone.presentation.wishlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
@@ -24,6 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WishlistViewModel @Inject constructor(
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val syncWishlistUseCase: SyncWishlistUseCase,
@@ -71,8 +74,15 @@ class WishlistViewModel @Inject constructor(
 
     private fun checkUserAndLoadWishlist() {
         viewModelScope.launch {
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                currentUserId = null
+                wishlistState.value = WishlistUiState.GuestState
+                return@launch
+            }
+
             val user = getCurrentUserUseCase()
             if (user == null) {
+                currentUserId = null
                 wishlistState.value = WishlistUiState.GuestState
             } else {
                 currentUserId = user.uid

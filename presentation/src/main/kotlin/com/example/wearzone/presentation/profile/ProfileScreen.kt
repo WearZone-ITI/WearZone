@@ -3,6 +3,7 @@ package com.example.wearzone.presentation.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.profile.components.LogoutConfirmationDialog
@@ -55,11 +59,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToSavedAddresses: () -> Unit,
     onNavigateToCart: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,17 +73,20 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 ProfileUiEffect.NavigateToLogin -> onNavigateToLogin()
+                ProfileUiEffect.NavigateToRegister -> onNavigateToRegister()
                 ProfileUiEffect.NavigateToSettings -> onNavigateToSettings()
                 ProfileUiEffect.NavigateToWishlist -> onNavigateToWishlist()
                 ProfileUiEffect.NavigateToOrders -> onNavigateToOrders()
                 ProfileUiEffect.NavigateToCart -> onNavigateToCart()
                 ProfileUiEffect.NavigateToSavedAddresses -> onNavigateToSavedAddresses()
                 ProfileUiEffect.ShowLogoutConfirmation -> showLogoutDialog = true
+                ProfileUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
                 is ProfileUiEffect.ShowError -> coroutineScope.launch {
                     showCustomSnackbar(
                         context = context,
@@ -90,7 +99,11 @@ fun ProfileScreen(
 
     Scaffold(
         topBar = {
-            val cartCount = (uiState as? ProfileUiState.Content)?.cartItemCount ?: 0
+            val cartCount = when (val state = uiState) {
+                is ProfileUiState.Content -> state.cartItemCount
+                is ProfileUiState.Guest -> state.cartItemCount
+                else -> 0
+            }
             TopBar(cartItemCount = cartCount, onAddToCartClick = { viewModel.handleIntent(ProfileUiIntent.OnCardClicked) })
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -99,6 +112,7 @@ fun ProfileScreen(
         ProfileContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onContinueBrowsing = onContinueBrowsing,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -115,12 +129,27 @@ fun ProfileScreen(
             },
         )
     }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            onSignIn = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onCreateAccount = {
+                showSignInRequiredDialog = false
+                onNavigateToRegister()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
+    }
 }
 
 @Composable
 private fun ProfileContent(
     uiState: ProfileUiState,
     onIntent: (ProfileUiIntent) -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -144,6 +173,56 @@ private fun ProfileContent(
                 uiState = uiState,
                 onIntent = onIntent,
             )
+
+            is ProfileUiState.Guest -> ProfileGuestContent(
+                onIntent = onIntent,
+                onContinueBrowsing = onContinueBrowsing,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileGuestContent(
+    onIntent: (ProfileUiIntent) -> Unit,
+    onContinueBrowsing: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.profile_guest_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = AppTheme.colors.textPrimary,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            text = stringResource(R.string.profile_guest_required_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colors.textSecondary,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        Button(
+            onClick = { onIntent(ProfileUiIntent.OnSignInClicked) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(text = stringResource(R.string.sign_in))
+        }
+        TextButton(
+            onClick = { onIntent(ProfileUiIntent.OnCreateAccountClicked) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(text = stringResource(R.string.create_account))
+        }
+        TextButton(
+            onClick = onContinueBrowsing,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(text = stringResource(R.string.continue_browsing))
         }
     }
 }

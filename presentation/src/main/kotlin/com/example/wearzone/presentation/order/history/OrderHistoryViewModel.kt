@@ -10,6 +10,8 @@ import com.example.wearzone.domain.account.model.OrderHistoryPermissionException
 import com.example.wearzone.domain.account.model.OrderHistoryResponseParseException
 import com.example.wearzone.domain.account.model.OrderStatus
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.ShopifyCustomerIdUnavailableException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.NumberFormat
@@ -31,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OrderHistoryViewModel @Inject constructor(
     private val orderHistoryUseCases: OrderHistoryUseCases,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<OrderHistoryUiState>(OrderHistoryUiState.Loading)
@@ -96,11 +99,18 @@ class OrderHistoryViewModel @Inject constructor(
         previousContent: OrderHistoryUiState.Content?,
         isRefresh: Boolean,
     ): Long? {
-        customerId?.let { return it }
-        return orderHistoryUseCases.getCurrentCustomerId()
-            .onSuccess { customerId = it }
-            .onFailure { handleLoadFailure(it, previousContent, isRefresh) }
-            .getOrNull()
+        return when (val accessState = getAuthAccessStateUseCase()) {
+            is AuthAccessState.AuthenticatedCustomer -> {
+                customerId = accessState.customerId
+                accessState.customerId
+            }
+            AuthAccessState.AuthenticatedMissingCustomerId,
+            AuthAccessState.Guest -> {
+                customerId = null
+                _uiState.value = OrderHistoryUiState.SignInRequired
+                null
+            }
+        }
     }
 
     private fun handleLoadFailure(

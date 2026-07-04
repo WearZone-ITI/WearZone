@@ -49,6 +49,7 @@ import com.example.presentation.R
 import com.example.wearzone.presentation.cart.components.CartItemRow
 import com.example.wearzone.presentation.cart.components.EmptyCartContent
 import com.example.wearzone.presentation.cart.components.PriceSummaryBar
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -56,18 +57,21 @@ fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToCheckout: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var pendingRemoveVariantId by remember { mutableStateOf<String?>(null) }
     var showClearCartDialog by remember { mutableStateOf(false) }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 CartUiEffect.NavigateToLogin -> onNavigateToLogin()
                 CartUiEffect.NavigateToCheckout -> onNavigateToCheckout()
+                CartUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
                 CartUiEffect.ShowClearCartConfirmation -> showClearCartDialog = true
                 is CartUiEffect.ShowRemoveConfirmation -> pendingRemoveVariantId = effect.variantId
                 is CartUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
@@ -105,6 +109,20 @@ fun CartScreen(
                 viewModel.handleIntent(CartUiIntent.OnClearCartConfirmed)
             },
             onDismiss = { showClearCartDialog = false },
+        )
+    }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            onSignIn = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onCreateAccount = {
+                showSignInRequiredDialog = false
+                onNavigateToRegister()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
         )
     }
 }

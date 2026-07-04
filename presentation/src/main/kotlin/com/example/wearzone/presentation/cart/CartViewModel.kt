@@ -2,7 +2,8 @@ package com.example.wearzone.presentation.cart
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
@@ -15,11 +16,10 @@ import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,10 +30,8 @@ class CartViewModel @Inject constructor(
     private val updateCartQuantityUseCase: UpdateCartQuantityUseCase,
     private val removeFromCartUseCase: RemoveFromCartUseCase,
     private val clearCartUseCase: ClearCartUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
-
-    private val authState = MutableStateFlow<Boolean?>(null)
 
     private val cartItems =
         observeCartUseCase()
@@ -44,13 +42,8 @@ class CartViewModel @Inject constructor(
             )
 
     val uiState =
-        combine(authState, cartItems) { isAuthenticated, items ->
-            when (isAuthenticated) {
-                null -> CartUiState.Loading
-                false -> CartUiState.LoginRequired
-                true -> buildCartState(items)
-            }
-        }
+        cartItems
+            .combineWithCartState()
             .catch {
                 emit(
                     CartUiState.Error(
@@ -67,13 +60,9 @@ class CartViewModel @Inject constructor(
     private val _uiEffect = Channel<CartUiEffect>(Channel.BUFFERED)
     val uiEffect: Flow<CartUiEffect> = _uiEffect.receiveAsFlow()
 
-    init {
-        verifyAuthenticatedUser()
-    }
-
     fun handleIntent(intent: CartUiIntent) {
         when (intent) {
-            CartUiIntent.OnRetry -> verifyAuthenticatedUser()
+            CartUiIntent.OnRetry -> Unit
             CartUiIntent.OnCheckoutClicked -> checkout()
             CartUiIntent.OnClearCartClicked -> requestClearCart()
             CartUiIntent.OnClearCartConfirmed -> clearCart()
@@ -81,16 +70,6 @@ class CartViewModel @Inject constructor(
             is CartUiIntent.OnDecreaseQuantity -> changeQuantity(intent.variantId, -QUANTITY_STEP)
             is CartUiIntent.OnRemoveItemClicked -> requestRemoveItem(intent.variantId)
             is CartUiIntent.OnRemoveItemConfirmed -> removeItem(intent.variantId)
-        }
-    }
-
-    private fun verifyAuthenticatedUser() {
-        viewModelScope.launch {
-            val authenticated = getCurrentUserUseCase() != null
-            authState.value = authenticated
-            if (!authenticated) {
-                _uiEffect.send(CartUiEffect.NavigateToLogin)
-            }
         }
     }
 
@@ -152,13 +131,17 @@ class CartViewModel @Inject constructor(
 
     private fun checkout() {
         viewModelScope.launch {
-            if (authState.value != true) {
-                _uiEffect.send(CartUiEffect.NavigateToLogin)
-            } else {
-                _uiEffect.send(CartUiEffect.NavigateToCheckout)
+            when (getAuthAccessStateUseCase()) {
+                is AuthAccessState.AuthenticatedCustomer -> _uiEffect.send(CartUiEffect.NavigateToCheckout)
+                AuthAccessState.AuthenticatedMissingCustomerId,
+                AuthAccessState.Guest,
+                -> _uiEffect.send(CartUiEffect.ShowSignInRequired)
             }
         }
     }
+
+    private fun Flow<List<CartItem>>.combineWithCartState(): Flow<CartUiState> =
+        map { items -> buildCartState(items) }
 
     private fun currentItems(): List<CartItemUiModel> {
         return (uiState.value as? CartUiState.Content)?.items.orEmpty()

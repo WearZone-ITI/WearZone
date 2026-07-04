@@ -52,6 +52,7 @@ import com.example.wearzone.presentation.checkout.components.CheckoutOrderSummar
 import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
 import com.example.wearzone.presentation.checkout.components.PaymentMethodCard
 import com.example.wearzone.presentation.checkout.components.PromoCodeCard
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -59,6 +60,8 @@ import kotlinx.coroutines.launch
 fun CheckoutScreen(
     onNavigateBack: () -> Unit,
     onNavigateToOrderHistory: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToAddressList: () -> Unit,
     onNavigateToAddAddress: () -> Unit,
     refreshAfterAddressChange: Boolean = false,
@@ -97,6 +100,8 @@ fun CheckoutScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
     )
 
     if (showConfirmDialog) {
@@ -116,6 +121,8 @@ private fun CheckoutContent(
     uiState: CheckoutUiState,
     snackbarHostState: SnackbarHostState,
     onIntent: (CheckoutUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
 ) {
     val content = uiState as? CheckoutUiState.Content
 
@@ -169,6 +176,11 @@ private fun CheckoutContent(
                     modifier = Modifier.align(Alignment.Center),
                 )
                 CheckoutUiState.Empty -> CheckoutEmptyContent()
+                CheckoutUiState.SignInRequired -> CheckoutSignInRequiredContent(
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onContinueBrowsing = { onIntent(CheckoutUiIntent.OnBackClicked) },
+                )
                 is CheckoutUiState.Error -> CheckoutErrorContent(
                     messageRes = uiState.messageRes,
                     onRetry = { onIntent(CheckoutUiIntent.OnRetry) },
@@ -180,6 +192,19 @@ private fun CheckoutContent(
             }
         }
     }
+}
+
+@Composable
+private fun CheckoutSignInRequiredContent(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
+) {
+    SignInRequiredDialog(
+        onSignIn = onNavigateToLogin,
+        onCreateAccount = onNavigateToRegister,
+        onContinueBrowsing = onContinueBrowsing,
+    )
 }
 
 @Composable

@@ -3,6 +3,9 @@ package com.example.presentation.address
 import app.cash.turbine.test
 import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.AddressInput
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
@@ -40,7 +43,7 @@ class AddressViewModelTest {
         val repository = FakeCustomerAddressRepository(
             addresses = listOf(address()),
         )
-        val viewModel = AddressListViewModel(createUseCases(repository))
+        val viewModel = createAddressListViewModel(repository)
         advanceUntilIdle()
 
         assertEquals(CUSTOMER_ID, repository.lastGetAddressesCustomerId)
@@ -52,7 +55,7 @@ class AddressViewModelTest {
         val repository = FakeCustomerAddressRepository(
             addresses = listOf(address(isDefault = true)),
         )
-        val viewModel = AddressListViewModel(createUseCases(repository))
+        val viewModel = createAddressListViewModel(repository)
         advanceUntilIdle()
         val content = viewModel.uiState.value as AddressListUiState.Content
 
@@ -69,7 +72,7 @@ class AddressViewModelTest {
     @Test
     fun `missing street address prevents form save`() = runTest {
         val repository = FakeCustomerAddressRepository()
-        val viewModel = AddressFormViewModel(createUseCases(repository))
+        val viewModel = createAddressFormViewModel(repository)
 
         viewModel.handleIntent(AddressFormUiIntent.OnInitialize(null))
         viewModel.handleIntent(AddressFormUiIntent.OnRecipientNameChanged("Mobile Customer"))
@@ -84,7 +87,7 @@ class AddressViewModelTest {
     @Test
     fun `invalid phone prevents form save`() = runTest {
         val repository = FakeCustomerAddressRepository()
-        val viewModel = AddressFormViewModel(createUseCases(repository))
+        val viewModel = createAddressFormViewModel(repository)
 
         fillValidAddress(viewModel)
         viewModel.handleIntent(AddressFormUiIntent.OnPhoneChanged("12345"))
@@ -97,7 +100,7 @@ class AddressViewModelTest {
     @Test
     fun `postal code with letters prevents form save`() = runTest {
         val repository = FakeCustomerAddressRepository()
-        val viewModel = AddressFormViewModel(createUseCases(repository))
+        val viewModel = createAddressFormViewModel(repository)
 
         fillValidAddress(viewModel)
         viewModel.handleIntent(AddressFormUiIntent.OnZipChanged("11A11"))
@@ -110,7 +113,7 @@ class AddressViewModelTest {
     @Test
     fun `set as default after create calls set default use case`() = runTest {
         val repository = FakeCustomerAddressRepository()
-        val viewModel = AddressFormViewModel(createUseCases(repository))
+        val viewModel = createAddressFormViewModel(repository)
 
         fillValidAddress(viewModel)
         viewModel.handleIntent(AddressFormUiIntent.OnDefaultChanged(true))
@@ -122,6 +125,16 @@ class AddressViewModelTest {
         assertEquals(CUSTOMER_ID, repository.lastCreateCustomerId)
         assertEquals(CUSTOMER_ID, repository.lastSetDefaultCustomerId)
         assertEquals("+2001012345678", repository.lastCreateInput?.phone)
+    }
+
+    @Test
+    fun `guest address list shows sign in required and does not load addresses`() = runTest {
+        val repository = FakeCustomerAddressRepository(addresses = listOf(address()))
+        val viewModel = createAddressListViewModel(repository, user = null)
+        advanceUntilIdle()
+
+        assertEquals(AddressListUiState.SignInRequired, viewModel.uiState.value)
+        assertEquals(null, repository.lastGetAddressesCustomerId)
     }
 
     private fun fillValidAddress(viewModel: AddressFormViewModel) {
@@ -148,10 +161,64 @@ class AddressViewModelTest {
             deleteAddress = DeleteCustomerAddressUseCase(repository),
         )
 
+    private fun createAddressListViewModel(
+        repository: FakeCustomerAddressRepository = FakeCustomerAddressRepository(),
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(),
+        user: User? = USER,
+    ): AddressListViewModel =
+        AddressListViewModel(
+            addressUseCases = createUseCases(repository, provider),
+            getAuthAccessStateUseCase = createAuthAccessUseCase(provider, user),
+        )
+
+    private fun createAddressFormViewModel(
+        repository: FakeCustomerAddressRepository = FakeCustomerAddressRepository(),
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(),
+        user: User? = USER,
+    ): AddressFormViewModel =
+        AddressFormViewModel(
+            addressUseCases = createUseCases(repository, provider),
+            getAuthAccessStateUseCase = createAuthAccessUseCase(provider, user),
+        )
+
+    private fun createAuthAccessUseCase(
+        provider: ICustomerIdProvider,
+        user: User?,
+    ): GetAuthAccessStateUseCase =
+        GetAuthAccessStateUseCase(
+            authRepository = FakeAuthRepository(user),
+            customerIdProvider = provider,
+        )
+
     private class FakeCustomerIdProvider(
         private val customerId: Long = CUSTOMER_ID,
     ) : ICustomerIdProvider {
         override suspend fun getCurrentCustomerId(): Result<Long> = Result.success(customerId)
+    }
+
+    private class FakeAuthRepository(
+        private val currentUser: User?,
+    ) : IAuthRepository {
+        override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun isLoggedIn(): Boolean = currentUser != null
+
+        override suspend fun getCurrentUser(): User? = currentUser
+
+        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+
+        override suspend fun register(name: String, email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override fun observeOnboardingCompleted(): kotlinx.coroutines.flow.Flow<Boolean> =
+            kotlinx.coroutines.flow.flowOf(false)
+
+        override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+            Result.success(Unit)
     }
 
     private class FakeCustomerAddressRepository(
@@ -214,6 +281,12 @@ class AddressViewModelTest {
     private companion object {
         const val CUSTOMER_ID = 9307871641828L
         const val CREATED_ADDRESS_ID = 10757933433060L
+        val USER = User(
+            uid = "firebase-user",
+            email = "user@example.com",
+            displayName = "Mobile Customer",
+            photoUrl = null,
+        )
 
         fun address(
             id: Long = 10736564994276L,

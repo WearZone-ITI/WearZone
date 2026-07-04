@@ -3,6 +3,8 @@ package com.example.wearzone.presentation.checkout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.checkout.model.CheckoutCartClearException
@@ -42,8 +44,10 @@ class CheckoutViewModel @Inject constructor(
     private val placeOrderUseCase: PlaceOrderUseCase,
     private val applyDiscountCodeUseCase: ApplyDiscountCodeUseCase,
     private val customerAddressUseCases: CustomerAddressUseCases,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
 ) : ViewModel() {
 
+    private val hasCheckoutAccess = MutableStateFlow<Boolean?>(null)
     private val isPlacingOrder = MutableStateFlow(false)
     private val promoState = MutableStateFlow(PromoState())
     private var applyDiscountJob: Job? = null
@@ -56,13 +60,18 @@ class CheckoutViewModel @Inject constructor(
             emptyList(),
         )
 
-    val uiState = combine(cartItems, isPlacingOrder, promoState, checkoutDetails) { items, placingOrder, promo, details ->
-        buildState(
-            items = items,
-            placingOrder = placingOrder,
-            promoState = promo,
-            checkoutDetails = details,
-        )
+    val uiState = combine(cartItems, isPlacingOrder, promoState, checkoutDetails, hasCheckoutAccess) {
+            items, placingOrder, promo, details, hasAccess ->
+        when (hasAccess) {
+            null -> CheckoutUiState.Loading
+            false -> CheckoutUiState.SignInRequired
+            true -> buildState(
+                items = items,
+                placingOrder = placingOrder,
+                promoState = promo,
+                checkoutDetails = details,
+            )
+        }
     }
         .catch { emit(CheckoutUiState.Error(R.string.checkout_error_generic)) }
         .stateIn(
@@ -75,7 +84,7 @@ class CheckoutViewModel @Inject constructor(
     val uiEffect: Flow<CheckoutUiEffect> = _uiEffect.receiveAsFlow()
 
     init {
-        loadDeliveryAddress()
+        verifyCheckoutAccess()
     }
 
     fun handleIntent(intent: CheckoutUiIntent) {
@@ -90,6 +99,20 @@ class CheckoutViewModel @Inject constructor(
             CheckoutUiIntent.OnChangeAddressClicked -> sendEffect(CheckoutUiEffect.NavigateToAddressList)
             CheckoutUiIntent.OnAddAddressClicked -> sendEffect(CheckoutUiEffect.NavigateToAddAddress)
             CheckoutUiIntent.OnRefreshAddresses -> loadDeliveryAddress()
+        }
+    }
+
+    private fun verifyCheckoutAccess() {
+        viewModelScope.launch {
+            when (getAuthAccessStateUseCase()) {
+                is AuthAccessState.AuthenticatedCustomer -> {
+                    hasCheckoutAccess.value = true
+                    loadDeliveryAddress()
+                }
+                AuthAccessState.AuthenticatedMissingCustomerId,
+                AuthAccessState.Guest,
+                -> hasCheckoutAccess.value = false
+            }
         }
     }
 
@@ -127,6 +150,7 @@ class CheckoutViewModel @Inject constructor(
 
     private fun loadDeliveryAddress() {
         viewModelScope.launch {
+            if (hasCheckoutAccess.value != true) return@launch
             checkoutDetails.value = checkoutDetails.value.copy(isLoadingAddress = true)
             val customerId = customerAddressUseCases.getCurrentCustomerId().getOrElse {
                 checkoutDetails.value = checkoutDetails.value.copy(isLoadingAddress = false)
@@ -231,7 +255,7 @@ class CheckoutViewModel @Inject constructor(
     private fun retryLoad() {
         viewModelScope.launch {
             promoState.value = promoState.value.copy(discountErrorRes = null)
-            loadDeliveryAddress()
+            verifyCheckoutAccess()
         }
     }
 

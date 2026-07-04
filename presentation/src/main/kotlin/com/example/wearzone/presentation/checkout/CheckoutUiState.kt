@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 sealed interface CheckoutUiState {
     data object Loading : CheckoutUiState
     data object Empty : CheckoutUiState
+    data object SignInRequired : CheckoutUiState
 
     data class Content(
         val items: ImmutableList<CheckoutCartItemUiModel>,

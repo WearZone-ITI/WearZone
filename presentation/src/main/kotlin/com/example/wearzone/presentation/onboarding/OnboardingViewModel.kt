@@ -2,6 +2,7 @@ package com.example.wearzone.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.presentation.R
@@ -25,6 +26,7 @@ private const val LAST_ONBOARDING_PAGE = 2
 class OnboardingViewModel @Inject constructor(
     observeOnboardingCompletedUseCase: ObserveOnboardingCompletedUseCase,
     private val setOnboardingCompletedUseCase: SetOnboardingCompletedUseCase,
+    private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
 
     val hasCompletedOnboarding: StateFlow<Boolean?> =
@@ -74,7 +76,29 @@ class OnboardingViewModel @Inject constructor(
 
     private fun navigateToGuest() {
         viewModelScope.launch {
-            _uiEffect.send(OnboardingUiEffect.NavigateToGuest)
+            val page = _uiState.value.currentPage
+            _uiState.value = OnboardingUiState.Saving(page)
+
+            logoutUseCase()
+                .onSuccess {
+                    setOnboardingCompletedUseCase(true)
+                        .onSuccess {
+                            _uiState.value = OnboardingUiState.Idle(page)
+                            _uiEffect.send(OnboardingUiEffect.NavigateToGuest)
+                        }
+                        .onFailure {
+                            _uiState.value = OnboardingUiState.Error(
+                                messageRes = R.string.onboarding_error_unable_to_continue,
+                                currentPage = page,
+                            )
+                        }
+                }
+                .onFailure {
+                    _uiState.value = OnboardingUiState.Error(
+                        messageRes = R.string.onboarding_error_unable_to_continue,
+                        currentPage = page,
+                    )
+                }
         }
     }
 

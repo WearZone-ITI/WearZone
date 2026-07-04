@@ -14,6 +14,9 @@ import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.ShopifyCustomerIdUnavailableException
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
@@ -40,7 +43,7 @@ class OrderHistoryViewModelTest {
         val repository = FakeOrderHistoryRepository(
             result = Result.success(listOf(order())),
         )
-        val viewModel = OrderHistoryViewModel(createUseCases(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         assertEquals(CUSTOMER_ID, repository.lastCustomerId)
@@ -54,6 +57,7 @@ class OrderHistoryViewModelTest {
     fun `empty order response becomes empty state`() = runTest {
         val viewModel = OrderHistoryViewModel(
             createUseCases(FakeOrderHistoryRepository(Result.success(emptyList()))),
+            createAuthAccessUseCase(),
         )
         advanceUntilIdle()
 
@@ -64,6 +68,7 @@ class OrderHistoryViewModelTest {
     fun `network failure becomes error state`() = runTest {
         val viewModel = OrderHistoryViewModel(
             createUseCases(FakeOrderHistoryRepository(Result.failure(OrderHistoryNetworkException()))),
+            createAuthAccessUseCase(),
         )
         advanceUntilIdle()
 
@@ -74,7 +79,7 @@ class OrderHistoryViewModelTest {
     @Test
     fun `refresh failure preserves existing content and emits message`() = runTest {
         val repository = FakeOrderHistoryRepository(Result.success(listOf(order())))
-        val viewModel = OrderHistoryViewModel(createUseCases(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
         repository.result = Result.failure(OrderHistoryNetworkException())
 
@@ -92,17 +97,14 @@ class OrderHistoryViewModelTest {
     }
 
     @Test
-    fun `missing Shopify customer id shows customer id error`() = runTest {
-        val viewModel = OrderHistoryViewModel(
-            createUseCases(
-                repository = FakeOrderHistoryRepository(Result.success(listOf(order()))),
-                provider = FakeCustomerIdProvider(Result.failure(ShopifyCustomerIdUnavailableException())),
-            )
-        )
+    fun `missing Shopify customer id shows sign in required and skips orders`() = runTest {
+        val repository = FakeOrderHistoryRepository(Result.success(listOf(order())))
+        val provider = FakeCustomerIdProvider(Result.failure(ShopifyCustomerIdUnavailableException()))
+        val viewModel = createViewModel(repository = repository, provider = provider)
         advanceUntilIdle()
 
-        val state = viewModel.uiState.value as OrderHistoryUiState.Error
-        assertEquals(R.string.order_history_error_customer_id_unavailable, state.messageRes)
+        assertEquals(OrderHistoryUiState.SignInRequired, viewModel.uiState.value)
+        assertEquals(null, repository.lastCustomerId)
     }
 
     private fun createUseCases(
@@ -116,10 +118,54 @@ class OrderHistoryViewModelTest {
             cancelOrder = CancelOrderUseCase(repository),
         )
 
+    private fun createViewModel(
+        repository: FakeOrderHistoryRepository,
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(Result.success(CUSTOMER_ID)),
+        user: User? = USER,
+    ): OrderHistoryViewModel =
+        OrderHistoryViewModel(
+            orderHistoryUseCases = createUseCases(repository, provider),
+            getAuthAccessStateUseCase = createAuthAccessUseCase(provider, user),
+        )
+
+    private fun createAuthAccessUseCase(
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(Result.success(CUSTOMER_ID)),
+        user: User? = USER,
+    ): GetAuthAccessStateUseCase =
+        GetAuthAccessStateUseCase(
+            authRepository = FakeAuthRepository(user),
+            customerIdProvider = provider,
+        )
+
     private class FakeCustomerIdProvider(
         private val result: Result<Long>,
     ) : ICustomerIdProvider {
         override suspend fun getCurrentCustomerId(): Result<Long> = result
+    }
+
+    private class FakeAuthRepository(
+        private val currentUser: User?,
+    ) : IAuthRepository {
+        override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun isLoggedIn(): Boolean = currentUser != null
+
+        override suspend fun getCurrentUser(): User? = currentUser
+
+        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+
+        override suspend fun register(name: String, email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override fun observeOnboardingCompleted(): kotlinx.coroutines.flow.Flow<Boolean> =
+            kotlinx.coroutines.flow.flowOf(false)
+
+        override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+            Result.success(Unit)
     }
 
     private class FakeOrderHistoryRepository(
@@ -142,6 +188,12 @@ class OrderHistoryViewModelTest {
 
     private companion object {
         const val CUSTOMER_ID = 9307871641828L
+        val USER = User(
+            uid = "firebase-user",
+            email = "user@example.com",
+            displayName = "Mobile Customer",
+            photoUrl = null,
+        )
 
         fun order(): OrderHistory =
             OrderHistory(
