@@ -10,6 +10,9 @@ interface IAuthRepository {
     suspend fun getCurrentUser(): User?
     suspend fun logout(): Result<Unit>
     suspend fun register(name: String, email: String, password: String): Result<User>
+    suspend fun checkEmailVerified(): Result<Boolean>
+    suspend fun sendEmailVerification(): Result<Unit>
+
     fun observeOnboardingCompleted(): Flow<Boolean>
     suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit>
 

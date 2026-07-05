@@ -466,5 +466,13 @@
     <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
     <string name="promo_discount_off">خصم</string>
     <string name="promo_shop_now">تسوق الآن</string>
+
+
+    <string name="verify_email_title">تأكيد البريد الإلكتروني</string>
+    <string name="verify_email_subtitle">لقد أرسلنا رابط التأكيد إلى %1$s. يرجى التحقق من صندوق الوارد وتأكيد حسابك للمتابعة.</string>
+    <string name="ive_verified_continue">لقد قمت بالتأكيد، متابعة</string>
+    <string name="resend_email">إعادة إرسال البريد الإلكتروني</string>
+    <string name="resend_email_countdown">إعادة الإرسال خلال %1$d ثانية</string>
+    <string name="logout">تسجيل الخروج</string>
     <!-- Omar -->
 </resources>

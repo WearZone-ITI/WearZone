@@ -15,6 +15,7 @@ import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
+import com.example.wearzone.presentation.auth.emailverification.EmailVerificationScreen
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
@@ -104,8 +105,15 @@ fun NavGraph(
                         inclusive = true
                     }
                 }
+            }, onNavigateToEmailVerification = {
+                navController.navigate(Route.EmailVerificationRoute) {
+                    popUpTo<Route.RegisterRoute> {
+                        inclusive = true
+                    }
+                }
             })
         }
+
 
         composable<Route.CartRoute> {
             CartScreen(
@@ -268,6 +276,13 @@ fun NavGraph(
                     navigateToPendingOrMain(Route.LoginRoute)
                 },
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
+                onNavigateToEmailVerification = {
+                    navController.navigate(Route.EmailVerificationRoute) {
+                        popUpTo<Route.LoginRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
             )
         }
 
@@ -355,6 +370,20 @@ fun NavGraph(
                     )
                 },
                 onNavigateToCart = { navController.navigate(Route.CartRoute) }
+            )
+        }
+        composable<Route.EmailVerificationRoute> {
+            EmailVerificationScreen(
+                onNavigateToHome = {
+                    navigateToPendingOrMain(Route.EmailVerificationRoute)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.EmailVerificationRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 

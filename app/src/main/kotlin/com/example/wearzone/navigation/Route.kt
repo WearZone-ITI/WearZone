@@ -67,6 +67,9 @@ sealed interface Route {
     @Serializable
     data object HomeRoute : Route
 
+    @Serializable
+    data object EmailVerificationRoute : Route
+
 
 
     @Serializable

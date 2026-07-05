@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     //Omar
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.tv.material)
     implementation(libs.androidx.ui.graphics)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

@@ -51,6 +51,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToEmailVerification: (String) -> Unit,
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,6 +70,7 @@ fun LoginScreen(
             when (effect) {
                 is LoginUiEffect.NavigateToHome -> onNavigateToHome()
                 is LoginUiEffect.NavigateToRegister -> { onNavigateToRegister() }
+                is LoginUiEffect.NavigateToEmailVerification -> onNavigateToEmailVerification(effect.email)
                 is LoginUiEffect.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }

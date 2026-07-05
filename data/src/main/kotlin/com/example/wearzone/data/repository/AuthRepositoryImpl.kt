@@ -98,4 +98,19 @@ class AuthRepositoryImpl @Inject constructor(
                 }
             }
         }
+
+    override suspend fun sendEmailVerification(): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.sendEmailVerification()
+            }
+        }
+
+    override suspend fun checkEmailVerified(): Result<Boolean> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.isEmailVerified()
+            }
+        }
+
 }
