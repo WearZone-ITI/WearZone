@@ -585,6 +585,10 @@
     <string name="send_reset_link">Send Reset Link</string>
     <string name="back_to_login">Back to Login</string>
     <string name="apple_signin_coming_soon">Apple Sign-In coming soon!</string>
+
+    <string name="forgot_password_empty_email">Please enter your email</string>
+    <string name="forgot_password_invalid_email">Please enter a valid email</string>
+    <string name="forgot_password_failed_send">Failed to send reset email</string>
     <!--Omar-->
 
 

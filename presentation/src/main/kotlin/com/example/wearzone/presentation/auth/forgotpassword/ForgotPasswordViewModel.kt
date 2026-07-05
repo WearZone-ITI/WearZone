@@ -2,6 +2,7 @@ package com.example.wearzone.presentation.auth.forgotpassword
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.presentation.R
 import com.example.wearzone.domain.auth.usecase.SendPasswordResetEmailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -48,11 +49,11 @@ class ForgotPasswordViewModel @Inject constructor(
         val email = _formState.value.email.trim()
 
         if (email.isBlank()) {
-            _uiState.value = ForgotPasswordUiState.Error("Please enter your email")
+            _uiState.value = ForgotPasswordUiState.Error(R.string.forgot_password_empty_email)
             return
         }
         if (!isValidEmail(email)) {
-            _uiState.value = ForgotPasswordUiState.Error("Please enter a valid email")
+            _uiState.value = ForgotPasswordUiState.Error(R.string.forgot_password_invalid_email)
             return
         }
 
@@ -64,7 +65,7 @@ class ForgotPasswordViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     _uiState.value = ForgotPasswordUiState.Error(
-                        error.localizedMessage ?: "Failed to send reset email"
+                        R.string.forgot_password_failed_send
                     )
                 }
         }

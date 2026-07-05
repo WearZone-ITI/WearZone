@@ -476,5 +476,9 @@
     <string name="send_reset_link">إرسال رابط إعادة التعيين</string>
     <string name="back_to_login">العودة لتسجيل الدخول</string>
     <string name="apple_signin_coming_soon">تسجيل الدخول باستخدام Apple قريباً!</string>
+
+    <string name="forgot_password_empty_email">الرجاء إدخال البريد الإلكتروني</string>
+    <string name="forgot_password_invalid_email">الرجاء إدخال بريد إلكتروني صحيح</string>
+    <string name="forgot_password_failed_send">فشل إرسال بريد إعادة التعيين</string>
     <!-- Omar -->
 </resources>

@@ -179,7 +179,7 @@ private fun ForgotPasswordContent(
                         label = stringResource(R.string.email_label),
                         placeholder = stringResource(R.string.email_placeholder),
                         isError = uiState is ForgotPasswordUiState.Error,
-                        errorMessage = (uiState as? ForgotPasswordUiState.Error)?.message,
+                        errorMessage = (uiState as? ForgotPasswordUiState.Error)?.messageRes?.let { stringResource(it) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     )
 
