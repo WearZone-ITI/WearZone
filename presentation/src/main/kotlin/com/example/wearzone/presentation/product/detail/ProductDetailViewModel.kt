@@ -15,6 +15,7 @@ import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
+import com.example.wearzone.domain.product.repository.IReviewRepository
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -26,6 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +39,8 @@ class ProductDetailViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val addToCartUseCase: AddToCartUseCase
+    private val addToCartUseCase: AddToCartUseCase,
+    private val reviewRepository: IReviewRepository
 ) : ViewModel() {
 
     private val productId: Long = savedStateHandle.get<String>("productId")?.toLongOrNull() ?: 9091143729380L
@@ -83,6 +87,16 @@ class ProductDetailViewModel @Inject constructor(
             }
 
             is ProductDetailUiIntent.OnAddToCartClick -> addToCart()
+            is ProductDetailUiIntent.SubmitReview -> submitReview(intent.rating, intent.comment)
+            is ProductDetailUiIntent.OnWriteReviewClick -> {
+                viewModelScope.launch {
+                    if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                        _uiEffect.send(ProductDetailUiEffect.ShowSignInRequired(R.string.sign_in_required_message))
+                    } else {
+                        _uiEffect.send(ProductDetailUiEffect.OpenWriteReviewSheet)
+                    }
+                }
+            }
         }
     }
 
@@ -112,6 +126,39 @@ class ProductDetailViewModel @Inject constructor(
                         reviewsCount = productDetail.reviewsCount,
                         isFavorite = productDetail.isFavorite
                     )
+
+                    // Observe real-time review updates
+                    launch {
+                        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
+                        reviewRepository.getReviewsForProduct(productDetail.id).collect { reviewsList ->
+                            val totalCount = reviewsList.size
+                            val avgRating = if (totalCount > 0) {
+                                reviewsList.map { it.rating }.sum() / totalCount
+                            } else {
+                                0.0
+                            }
+                            
+                            val reviewsUiList = reviewsList.map { review ->
+                                ClientReviewUiModel(
+                                    id = review.id,
+                                    shopperName = review.shopperName,
+                                    rating = review.rating,
+                                    comment = review.comment,
+                                    formattedDate = dateFormat.format(java.util.Date(review.timestamp))
+                                )
+                            }.toImmutableList()
+                            
+                            _uiState.update { state ->
+                                if (state is ProductDetailUiState.Success) {
+                                    state.copy(
+                                        rating = avgRating,
+                                        reviewsCount = totalCount,
+                                        reviews = reviewsUiList
+                                    )
+                                } else state
+                            }
+                        }
+                    }
                     
                     if (user != null && user.uid.isNotEmpty()) {
                         launch {
@@ -214,6 +261,29 @@ class ProductDetailViewModel @Inject constructor(
             
             if (isAdding) {
                 _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.wishlist_item_added))
+            }
+        }
+    }
+
+    private fun submitReview(rating: Double, comment: String) {
+        viewModelScope.launch {
+            val user = getCurrentUserUseCase()
+            val shopperName = user?.displayName?.takeIf { it.isNotEmpty() } ?: "WearZone Shopper"
+            
+            val state = _uiState.value as? ProductDetailUiState.Success ?: return@launch
+            
+            when (val result = reviewRepository.addReview(
+                productId = state.id,
+                shopperName = shopperName,
+                rating = rating,
+                comment = comment
+            )) {
+                is DataResult.Success -> {
+                    _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.review_submitted_successfully))
+                }
+                is DataResult.Error -> {
+                    _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.review_submit_failed))
+                }
             }
         }
     }

@@ -48,10 +48,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.SizeSelector
 import com.example.wearzone.presentation.product.detail.components.StarRatingRow
+import com.example.wearzone.presentation.product.detail.components.ReviewListCard
+import com.example.wearzone.presentation.product.detail.components.WriteReviewBottomSheet
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 
@@ -66,6 +70,7 @@ fun ProductDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showSignInRequiredDialog by remember { mutableStateOf(false) }
+    var showWriteReviewBottomSheet by remember { mutableStateOf(false) }
     var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }
 
     LaunchedEffect(viewModel.uiEffect) {
@@ -80,6 +85,10 @@ fun ProductDetailScreen(
                 is ProductDetailUiEffect.ShowSignInRequired -> {
                     signInRequiredMessageRes = effect.messageRes
                     showSignInRequiredDialog = true
+                }
+
+                is ProductDetailUiEffect.OpenWriteReviewSheet -> {
+                    showWriteReviewBottomSheet = true
                 }
             }
         }
@@ -167,6 +176,16 @@ fun ProductDetailScreen(
                 onNavigateToLogin()
             },
             onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
+    }
+
+    if (showWriteReviewBottomSheet) {
+        WriteReviewBottomSheet(
+            onDismissRequest = { showWriteReviewBottomSheet = false },
+            onSubmit = { rating, comment ->
+                showWriteReviewBottomSheet = false
+                viewModel.handleIntent(ProductDetailUiIntent.SubmitReview(rating, comment))
+            }
         )
     }
 }
@@ -298,8 +317,85 @@ private fun ProductDetailContent(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
+        }
+
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(id = R.string.product_detail_reviews_header),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (state.reviewsCount > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(id = R.string.product_detail_avg_rating, state.rating),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                Button(
+                    onClick = { onIntent(ProductDetailUiIntent.OnWriteReviewClick) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.product_detail_write_review),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (state.reviews.isEmpty()) {
+            item {
+                Text(
+                    text = stringResource(id = R.string.product_detail_no_reviews),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 24.dp)
+                )
+            }
+        } else {
+            items(
+                count = state.reviews.size,
+                key = { index -> state.reviews[index].id }
+            ) { index ->
+                val review = state.reviews[index]
+                ReviewListCard(
+                    review = review,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }

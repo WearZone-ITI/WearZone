@@ -382,6 +382,21 @@
     <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
     <string name="content_desc_product_image">صورة المنتج</string>
     <string name="content_desc_star_rating">تقييم النجوم</string>
+       <!-- Product Detail Reviews -->
+    <string name="review_submitted_successfully">تم إرسال التقييم بنجاح!</string>
+    <string name="review_submit_failed">فشل إرسال التقييم. يرجى المحاولة مرة أخرى.</string>
+    <string name="product_detail_write_review">كتابة تقييم</string>
+    <string name="product_detail_reviews_header">آراء العملاء</string>
+    <string name="product_detail_no_reviews">لا توجد تقييمات بعد. كن أول من يقيم!</string>
+    <string name="product_detail_rating">التقييم</string>
+    <string name="product_detail_comment">التعليق</string>
+    <string name="product_detail_submit">إرسال</string>
+    <string name="product_detail_cancel">إلغاء</string>
+    <string name="product_detail_review_stars_desc">%1$d من 5 نجوم</string>
+    <string name="product_detail_avg_rating">%1$.1f من 5</string>
+    <string name="product_detail_write_review_title">كتابة تقييم</string>
+    <string name="product_detail_rating_required">التقييم مطلوب</string>
+    <string name="product_detail_comment_required">التعليق مطلوب</string>
     <!-- Wish List Screen -->
     <string name="wishlist_title">قائمة أمنياتك</string>
     <string name="wishlist_items_saved">%1$d عناصر محفوظة</string>
@@ -461,10 +476,9 @@
     <string name="error_network">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="error_server">خطأ في الخادم (%1$s)</string>
     <string name="error_unknown">حدث خطأ ما، يرجى المحاولة لاحقاً</string>
-
-
     <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
     <string name="promo_discount_off">خصم</string>
     <string name="promo_shop_now">تسوق الآن</string>
     <!-- Omar -->
+
 </resources>
