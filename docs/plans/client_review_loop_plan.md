@@ -59,3 +59,29 @@ The Firestore dependency is already present in `data/build.gradle.kts`.
 - Render List/Column of reviews.
 - Add a "Write a Review" button.
 - Create a `ModalBottomSheet` containing a custom 1-5 star rating selector, a `TextField` for comments, and a Submit button.
+
+---
+
+## Phase 2: Premium UI/UX Overhaul
+
+This phase covers refactoring `ProductDetailScreen.kt` and its components to match premium, modern e-commerce application standards.
+
+### 1. Edge-to-Edge Image Header & Floating Buttons
+- Remove the Scaffold TopAppBar.
+- Stretch the product image/carousel edge-to-edge behind the transparent status bar.
+- Floating back and favorite buttons over the image using a `Box` with a frosted/translucent glass background (`MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)`).
+
+### 2. Premium Skeleton Loading (Shimmer Effect)
+- Replace generic `CircularProgressIndicator` with a shimmer skeleton screen (`ProductDetailShimmer.kt`).
+- Use an infinite transition color/alpha pulse based on `MaterialTheme.colorScheme` (e.g., pulsing between `surface` and `surfaceVariant`).
+- Introduce a 1-second delay in `ProductDetailViewModel.kt` during loading to showcase the skeleton screen.
+
+### 3. Modern Content Layout
+- Wrap details in a `Surface` with `RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)`.
+- Use a negative offset (`offset(y = (-32).dp)`) to overlap the surface over the bottom of the image header.
+- Clean typography hierarchy using Material 3 standard roles.
+
+### 4. Polished Customer Reviews & Bottom Bar
+- Refactor `ReviewListCard` with elevation, rounded corner shape, and circular letter-avatar placeholders.
+- Integrate the "Write a Review" button directly into the persistent `BottomAppBar` next to the "Add to Cart" button, creating a unified action area.
+

@@ -371,6 +371,7 @@
     <string name="product_detail_size_guide">دليل المقاسات</string>
     <string name="product_detail_description">الوصف</string>
     <string name="product_detail_add_to_cart">أضف إلى السلة</string>
+    <string name="product_detail_add_to_cart_with_qty">أضف إلى السلة (%1$d)</string>
     <string name="product_detail_buy_now">اشتري الآن</string>
     <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
     <string name="product_detail_retry">إعادة المحاولة</string>
@@ -386,6 +387,7 @@
     <string name="review_submitted_successfully">تم إرسال التقييم بنجاح!</string>
     <string name="review_submit_failed">فشل إرسال التقييم. يرجى المحاولة مرة أخرى.</string>
     <string name="product_detail_write_review">كتابة تقييم</string>
+    <string name="product_detail_write_review_hint">اكتب تقييمًا…</string>
     <string name="product_detail_reviews_header">آراء العملاء</string>
     <string name="product_detail_no_reviews">لا توجد تقييمات بعد. كن أول من يقيم!</string>
     <string name="product_detail_rating">التقييم</string>

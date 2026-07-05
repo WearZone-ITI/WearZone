@@ -9,6 +9,7 @@ import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.model.ProductDetail
@@ -20,6 +21,7 @@ import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +42,8 @@ class ProductDetailViewModel @Inject constructor(
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val addToCartUseCase: AddToCartUseCase,
-    private val reviewRepository: IReviewRepository
+    private val reviewRepository: IReviewRepository,
+    private val observeCartUseCase: ObserveCartUseCase
 ) : ViewModel() {
 
     private val productId: Long = savedStateHandle.get<String>("productId")?.toLongOrNull() ?: 9091143729380L
@@ -103,6 +106,7 @@ class ProductDetailViewModel @Inject constructor(
     private fun loadProduct() {
         viewModelScope.launch {
             _uiState.value = ProductDetailUiState.Loading
+            delay(1000)
             when (val result = getProductDetailUseCase(productId)) {
                 is DataResult.Success -> {
                     val productDetail = result.data
@@ -169,6 +173,20 @@ class ProductDetailViewModel @Inject constructor(
                                         state.copy(isFavorite = isFav)
                                     } else state
                                 }
+                            }
+                        }
+                    }
+
+                    // Observe cart updates
+                    launch {
+                        observeCartUseCase().collect { cartItems ->
+                            val totalQty = cartItems
+                                .filter { it.productId == productDetail.id }
+                                .sumOf { it.quantity }
+                            _uiState.update { state ->
+                                if (state is ProductDetailUiState.Success) {
+                                    state.copy(quantityInCart = totalQty)
+                                } else state
                             }
                         }
                     }

@@ -21,7 +21,8 @@ sealed interface ProductDetailUiState {
         val reviewsCount: Int,
         val isFavorite: Boolean,
         val showRemoveDialog: Boolean = false,
-        val reviews: ImmutableList<ClientReviewUiModel> = persistentListOf()
+        val reviews: ImmutableList<ClientReviewUiModel> = persistentListOf(),
+        val quantityInCart: Int = 0
     ) : ProductDetailUiState
 }
 

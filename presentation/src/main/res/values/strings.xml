@@ -443,6 +443,7 @@
     <string name="product_detail_size_guide">Size Guide</string>
     <string name="product_detail_description">Description</string>
     <string name="product_detail_add_to_cart">Add to Cart</string>
+    <string name="product_detail_add_to_cart_with_qty">Add to Cart (%1$d)</string>
     <string name="product_detail_buy_now">Buy Now</string>
     <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
     <string name="product_detail_retry">Retry</string>
@@ -458,6 +459,7 @@
     <string name="review_submitted_successfully">Review submitted successfully!</string>
     <string name="review_submit_failed">Failed to submit review. Please try again.</string>
     <string name="product_detail_write_review">Write a Review</string>
+    <string name="product_detail_write_review_hint">Write a review…</string>
     <string name="product_detail_reviews_header">Customer Reviews</string>
     <string name="product_detail_no_reviews">No reviews yet. Be the first to review!</string>
     <string name="product_detail_rating">Rating</string>
