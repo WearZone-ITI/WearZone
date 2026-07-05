@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ fun EmailVerificationScreen(
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
@@ -54,7 +56,8 @@ fun EmailVerificationScreen(
                 is EmailVerificationUiEffect.NavigateToHome -> onNavigateToHome()
                 is EmailVerificationUiEffect.NavigateToLogin -> onNavigateToLogin()
                 is EmailVerificationUiEffect.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(effect.message)
+                    val messageText = context.getString(effect.messageRes)
+                    snackbarHostState.showSnackbar(messageText)
                 }
             }
         }

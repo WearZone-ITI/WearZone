@@ -68,13 +68,13 @@ class EmailVerificationViewModel @Inject constructor(
             _screenState.update { it.copy(isResending = true) }
             sendEmailVerificationUseCase()
                 .onSuccess {
-                    sendEffect(EmailVerificationUiEffect.ShowSnackbar(R.string.email_verification_sent.toString()))
+                    sendEffect(EmailVerificationUiEffect.ShowSnackbar(R.string.email_verification_sent))
                     startCooldown()
                 }
                 .onFailure { error ->
                     sendEffect(
                         EmailVerificationUiEffect.ShowSnackbar(
-                            error.localizedMessage ?: R.string.email_verification_failed_send.toString()
+                             R.string.email_verification_failed_send
                         )
                     )
                 }
@@ -93,7 +93,7 @@ class EmailVerificationViewModel @Inject constructor(
                         onVerified()
                     } else if (showErrorOnFalse) {
                         sendEffect(
-                            EmailVerificationUiEffect.ShowSnackbar("Email is not verified yet")
+                            EmailVerificationUiEffect.ShowSnackbar(R.string.email_verification_not_verified)
                         )
                     }
                 }
