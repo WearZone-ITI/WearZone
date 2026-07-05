@@ -225,7 +225,10 @@ fun NavGraph(
         // Ahmed
         composable<Route.ChatRoute> {
             com.example.wearzone.presentation.ai.chat.ChatScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
+                }
             )
         }
 

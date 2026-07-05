@@ -48,8 +48,8 @@ android {
         val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
         buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
 
-        val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY", "")
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        val groqApiKey = localProperties.getProperty("GROQ_API_KEY", "").removeSurrounding("\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
     }
 
     buildTypes {

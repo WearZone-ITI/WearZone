@@ -45,10 +45,4 @@ object DatabaseModule {
     fun provideWishlistDao(database: WearZoneDatabase): WishlistDao {
         return database.wishlistDao()
     }
-
-    @Provides
-    @Singleton
-    fun provideChatDao(database: WearZoneDatabase): com.example.wearzone.data.local.ai.chat.ChatDao {
-        return database.chatDao()
-    }
 }

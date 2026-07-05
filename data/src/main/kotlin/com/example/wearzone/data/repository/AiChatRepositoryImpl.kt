@@ -1,88 +1,79 @@
 package com.example.wearzone.data.repository
 
-import com.example.wearzone.data.local.ai.chat.ChatDao
-import com.example.wearzone.data.local.ai.chat.ChatMessageEntity
 import com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
 import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatRole
 import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 import com.example.wearzone.domain.common.DataResult
+import com.example.wearzone.domain.common.DomainError
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AiChatRepositoryImpl @Inject constructor(
-    private val remoteDataSource: IAiChatRemoteDataSource,
-    private val chatDao: ChatDao
+    private val remoteDataSource: IAiChatRemoteDataSource
 ) : IAiChatRepository {
 
+    private val _history = MutableStateFlow<List<ChatMessage>>(emptyList())
+
     override fun getChatHistory(): Flow<List<ChatMessage>> {
-        return chatDao.getAllMessages().map { entities ->
-            entities.map { entity ->
-                ChatMessage(
-                    id = entity.id,
-                    role = ChatRole.valueOf(entity.role),
-                    content = entity.content,
-                    timestamp = entity.timestamp,
-                    isPending = entity.isPending
-                )
-            }
-        }
+        return _history.asStateFlow()
     }
 
     override suspend fun clearHistory() {
-        chatDao.clearHistory()
+        _history.value = emptyList()
     }
 
     override suspend fun sendMessage(message: String): DataResult<Unit> {
+        val userMsgId = UUID.randomUUID().toString()
+        val userMessage = ChatMessage(
+            id = userMsgId,
+            role = ChatRole.USER,
+            content = message,
+            timestamp = System.currentTimeMillis()
+        )
+
+        val pendingMsgId = UUID.randomUUID().toString()
+        val pendingMessage = ChatMessage(
+            id = pendingMsgId,
+            role = ChatRole.MODEL,
+            content = "...",
+            timestamp = System.currentTimeMillis(),
+            isPending = true
+        )
+
+        // 1. Add user and pending messages to local history flow
+        _history.value = _history.value + listOf(userMessage, pendingMessage)
+
+        // 2. Fetch history context to pass to the API (excluding pending message)
+        val historyToSend = _history.value.filter { it.id != pendingMsgId }
+
         return try {
-            val userMessage = ChatMessageEntity(
-                id = UUID.randomUUID().toString(),
-                role = ChatRole.USER.name,
-                content = message,
-                timestamp = System.currentTimeMillis()
-            )
-            chatDao.insertMessage(userMessage)
-            
-            // Generate response (could add a 'pending' message here for loading)
-            val pendingMessageId = UUID.randomUUID().toString()
-            chatDao.insertMessage(
-                ChatMessageEntity(
-                    id = pendingMessageId,
-                    role = ChatRole.MODEL.name,
-                    content = "...",
-                    timestamp = System.currentTimeMillis(),
-                    isPending = true
-                )
-            )
+            val response = remoteDataSource.sendMessage(message, historyToSend)
 
-            // Get history to pass context
-            val historyEntities = chatDao.getMessagesSync()
-            val history = historyEntities.map { entity ->
-                ChatMessage(
-                    id = entity.id,
-                    role = ChatRole.valueOf(entity.role),
-                    content = entity.content,
-                    timestamp = entity.timestamp,
-                    isPending = entity.isPending
-                )
-            }.filter { !it.isPending } // Ignore pending messages in history sent to remote
-            
-            val response = remoteDataSource.sendMessage(message, history)
-
-            chatDao.insertMessage(
-                ChatMessageEntity(
-                    id = pendingMessageId,
-                    role = ChatRole.MODEL.name,
-                    content = response,
-                    timestamp = System.currentTimeMillis(),
-                    isPending = false
-                )
-            )
+            // 3. Success: replace pending message with response
+            _history.value = _history.value.map { msg ->
+                if (msg.id == pendingMsgId) {
+                    ChatMessage(
+                        id = pendingMsgId,
+                        role = ChatRole.MODEL,
+                        content = response,
+                        timestamp = System.currentTimeMillis(),
+                        isPending = false
+                    )
+                } else {
+                    msg
+                }
+            }
             DataResult.Success(Unit)
         } catch (e: Exception) {
-            DataResult.Error(com.example.wearzone.domain.common.DomainError.Unknown(e))
+            // 4. Failure: remove the pending message, but don't add the error to history
+            _history.value = _history.value.filter { it.id != pendingMsgId }
+            DataResult.Error(DomainError.Unknown(e))
         }
     }
 }

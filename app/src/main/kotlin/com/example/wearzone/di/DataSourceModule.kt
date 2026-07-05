@@ -128,7 +128,7 @@ abstract class DataSourceModule {
         }
 
         @Provides
-        @com.example.wearzone.data.remote.ai.chat.GeminiApiKey
-        fun provideGeminiApiKey(): String = com.example.wearzone.BuildConfig.GEMINI_API_KEY
+        @com.example.wearzone.data.remote.ai.chat.GroqApiKey
+        fun provideGroqApiKey(): String = com.example.wearzone.BuildConfig.GROQ_API_KEY
     }
 }

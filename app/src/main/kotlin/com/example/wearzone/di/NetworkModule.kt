@@ -93,7 +93,7 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideGeminiApiService(json: Json): com.example.wearzone.data.remote.ai.chat.api.GeminiApiService {
+    fun provideGroqApiService(): com.example.wearzone.data.remote.ai.chat.api.GroqApiService {
         val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
             level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
         }
@@ -101,10 +101,10 @@ object NetworkModule {
             .addInterceptor(loggingInterceptor)
             .build()
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://generativelanguage.googleapis.com/")
+            .baseUrl("https://api.groq.com/openai/v1/")
             .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
             .build()
-        return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GeminiApiService::class.java)
+        return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GroqApiService::class.java)
     }
 }

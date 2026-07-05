@@ -1,261 +1,252 @@
 package com.example.wearzone.data.remote.ai.chat
 
 import android.util.Log
+import com.example.wearzone.data.remote.ai.chat.api.GroqApiService
+import com.example.wearzone.data.remote.ai.chat.dto.*
 import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatRole
-import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
-import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
-import com.example.wearzone.domain.search.model.SearchFilters
 import com.example.wearzone.domain.common.DataResult
-import com.example.wearzone.data.remote.ai.chat.api.GeminiApiService
-import com.example.wearzone.data.remote.ai.chat.dto.*
+import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
+import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
+import com.example.wearzone.domain.search.model.SearchFilters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.*
 import javax.inject.Inject
 import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class GeminiApiKey
+annotation class GroqApiKey
 
 class AiChatRemoteDataSourceImpl @Inject constructor(
-    @GeminiApiKey private val apiKey: String,
-    private val geminiApiService: GeminiApiService,
+    @GroqApiKey private val apiKey: String,
+    private val groqApiService: GroqApiService,
     private val searchProductsUseCase: SearchProductsUseCase,
     private val getProductDetailUseCase: GetProductDetailUseCase
 ) : IAiChatRemoteDataSource {
 
     init {
-        Log.d("GEMINI_INIT", "Target Key Length: ${apiKey.length}")
+        Log.d("GROQ_CHAT_DEBUG", "Target Key Length: ${apiKey.length}")
     }
 
     // ─── Tool definitions ───────────────────────────────────────────────────
 
     private val tools = listOf(
-        Tool(
-            functionDeclarations = listOf(
-                FunctionDeclaration(
-                    name = "searchProducts",
-                    description = "Search for products in the WearZone store by a keyword, e.g. 'shirts', 'sneakers', 'summer dresses'.",
-                    parameters = Schema(
-                        type = "OBJECT",
-                        properties = mapOf(
-                            "query" to Schema(
-                                type = "STRING",
-                                description = "The search keyword(s)."
-                            )
-                        ),
-                        required = listOf("query")
-                    )
-                ),
-                FunctionDeclaration(
-                    name = "getProductDetail",
-                    description = "Get full details (price, description, variants) of a specific product by its ID.",
-                    parameters = Schema(
-                        type = "OBJECT",
-                        properties = mapOf(
-                            "productId" to Schema(
-                                type = "STRING",
-                                description = "The numeric product ID as a string."
-                            )
-                        ),
-                        required = listOf("productId")
-                    )
+        GroqTool(
+            type = "function",
+            function = GroqFunctionDeclaration(
+                name = "searchProducts",
+                description = "Search for products in the WearZone store by a keyword, e.g. 'shirts', 'sneakers', 'summer dresses'.",
+                parameters = GroqSchema(
+                    type = "object",
+                    properties = mapOf(
+                        "query" to GroqSchema(
+                            type = "string",
+                            description = "The search keyword(s)."
+                        )
+                    ),
+                    required = listOf("query")
+                )
+            )
+        ),
+        GroqTool(
+            type = "function",
+            function = GroqFunctionDeclaration(
+                name = "getProductDetail",
+                description = "Get full details (price, description, variants) of a specific product by its ID.",
+                parameters = GroqSchema(
+                    type = "object",
+                    properties = mapOf(
+                        "productId" to GroqSchema(
+                            type = "string",
+                            description = "The numeric product ID as a string."
+                        )
+                    ),
+                    required = listOf("productId")
                 )
             )
         )
     )
 
-    // systemInstruction must NOT have a role field per Gemini REST spec
-    private val systemInstruction = Content(
-        parts = listOf(
-            Part(
-                text = """You are WearZone AI — a friendly, knowledgeable shopping assistant for the WearZone fashion app. 
-Help users discover products, compare options, and make purchase decisions.
-When a user asks about products, always call the searchProducts function to get real data from the store.
-Present results in a clear, scannable format with bullet points.
-Be concise but enthusiastic about fashion."""
-            )
-        )
-    )
+    private val systemPrompt = "You are the WearZone AI Stylist. Your SOLE purpose is to assist users with finding clothing, translating their fashion needs into specific products, and comparing items. You MUST strictly refuse to answer any questions outside of fashion, e-commerce, and WearZone products. Keep answers concise. When users ask for products or comparisons, ALWAYS use your tools to fetch real data and include the Product IDs in your final response."
 
     // ─── Core entry point ────────────────────────────────────────────────────
 
     override suspend fun sendMessage(message: String, history: List<ChatMessage>): String =
         withContext(Dispatchers.IO) {
             try {
-                // Build chat history, mapping domain → REST DTOs
-                // Exclude system instruction turns and filter to valid roles only
-                val chatHistory = history
-                    .filter { !it.isPending }
-                    .map { msg ->
-                        Content(
-                            role = if (msg.role == ChatRole.USER) "user" else "model",
-                            parts = listOf(Part(text = msg.content))
-                        )
-                    }
-                    .toMutableList()
+                // Build the messages list
+                val messagesList = mutableListOf<GroqMessage>()
 
-                // Append the new user message
-                chatHistory.add(Content(role = "user", parts = listOf(Part(text = message))))
+                // Add system prompt first
+                messagesList.add(GroqMessage(role = "system", content = systemPrompt))
 
-                val url = "v1beta/models/gemini-3.5-flash:generateContent"
-
-                val request = GeminiRequest(
-                    contents = chatHistory,
-                    tools = tools,
-                    systemInstruction = systemInstruction
-                )
-
-                val response = geminiApiService.generateContent(url, apiKey, request)
-                val candidate = response.candidates?.firstOrNull()
-
-                // ─── Function call dispatch ───────────────────────────────────
-                val functionCall = candidate?.content?.parts
-                    ?.firstOrNull { it.functionCall != null }
-                    ?.functionCall
-
-                if (functionCall != null) {
-                    return@withContext dispatchFunctionCall(
-                        functionCall = functionCall,
-                        modelContent = candidate.content,
-                        chatHistory = chatHistory,
-                        url = url
+                // Exclude pending messages and map history to GroqMessage
+                val historyMessages = history.filter { !it.isPending }.map { msg ->
+                    GroqMessage(
+                        role = if (msg.role == ChatRole.USER) "user" else "assistant",
+                        content = msg.content
                     )
                 }
 
-                // ─── Plain text response ──────────────────────────────────────
-                candidate?.content?.parts
-                    ?.firstOrNull { it.text != null }
-                    ?.text
-                    ?: "I'm here to help you shop! Try asking me about specific products, styles, or brands."
+                val newMsg = GroqMessage(role = "user", content = message)
+                val totalConversational = historyMessages + newMsg
+
+                // Trim to keep at most last 10 entries of the conversation
+                val trimmedConversational = if (totalConversational.size > 10) {
+                    Log.d("GROQ_CHAT_DEBUG", "Trimming history: conversation size ${totalConversational.size} exceeds 10. Discarding oldest ${totalConversational.size - 10} messages.")
+                    totalConversational.takeLast(10)
+                } else {
+                    totalConversational
+                }
+
+                messagesList.addAll(trimmedConversational)
+
+                var currentMessages = messagesList.toMutableList()
+                var loopCount = 0
+                val maxLoops = 3
+
+                while (loopCount < maxLoops) {
+                    loopCount++
+
+                    val request = GroqRequest(
+                        model = "llama-3.3-70b-versatile",
+                        messages = currentMessages,
+                        tools = tools
+                    )
+
+                    // Log the exact outgoing JSON payload string before network request
+                    val requestJson = com.google.gson.Gson().toJson(request)
+                    Log.d("GROQ_CHAT_DEBUG", "Outgoing JSON payload: $requestJson")
+
+                    val response = try {
+                        groqApiService.chatCompletions("Bearer $apiKey", request)
+                    } catch (e: Exception) {
+                        Log.e("GROQ_CHAT_DEBUG", "Network execution failed", e)
+                        throw mapErrorToException(e)
+                    }
+
+                    // Log raw incoming HTTP response code, headers, and body string
+                    val rawCode = response.code()
+                    val rawHeaders = response.headers().toString()
+                    val rawBodyString = if (response.isSuccessful) {
+                        com.google.gson.Gson().toJson(response.body())
+                    } else {
+                        response.errorBody()?.string() ?: ""
+                    }
+                    Log.d("GROQ_CHAT_DEBUG", "Raw Incoming Response:\nCode: $rawCode\nHeaders:\n$rawHeaders\nBody:\n$rawBodyString")
+
+                    if (!response.isSuccessful) {
+                        val errorException = mapHttpErrorToException(rawCode, rawBodyString)
+                        Log.e("GROQ_CHAT_DEBUG", "HTTP error exception: ${errorException.message}")
+                        throw errorException
+                    }
+
+                    val groqResponseObj = response.body()
+                    val choice = groqResponseObj?.choices?.firstOrNull()
+                    val responseMsg = choice?.message
+
+                    if (responseMsg == null) {
+                        throw Exception("Stylist response empty.")
+                    }
+
+                    currentMessages.add(responseMsg)
+
+                    val toolCalls = responseMsg.toolCalls
+                    if (!toolCalls.isNullOrEmpty()) {
+                        Log.d("GROQ_CHAT_DEBUG", "Tool call requested: ${toolCalls.map { it.function.name }}")
+                        for (toolCall in toolCalls) {
+                            val toolResult = executeTool(toolCall)
+                            Log.d("GROQ_CHAT_DEBUG", "Tool execution result: $toolResult")
+
+                            currentMessages.add(
+                                GroqMessage(
+                                    role = "tool",
+                                    toolCallId = toolCall.id,
+                                    name = toolCall.function.name,
+                                    content = toolResult
+                                )
+                            )
+                        }
+                        continue
+                    }
+
+                    return@withContext responseMsg.content ?: "I'm here to help you shop! Try asking me about specific products, styles, or brands."
+                }
+
+                throw Exception("Too many recursive tool calls.")
 
             } catch (e: Exception) {
-                Log.e("AiChat", "Error: ${e.message}", e)
-                "Sorry, I ran into an issue. Please try again in a moment."
+                Log.e("GROQ_CHAT_DEBUG", "Exception in sendMessage stack trace:", e)
+                throw e
             }
         }
 
-    // ─── Function call handler ───────────────────────────────────────────────
-
-    private suspend fun dispatchFunctionCall(
-        functionCall: FunctionCall,
-        modelContent: Content,
-        chatHistory: MutableList<Content>,
-        url: String
-    ): String {
-        // Step 1: add model's function-call turn to history
-        chatHistory.add(modelContent)
-
-        return when (functionCall.name) {
+    private suspend fun executeTool(toolCall: GroqToolCall): String {
+        return when (toolCall.function.name) {
             "searchProducts" -> {
-                val query = functionCall.args["query"]?.jsonPrimitive?.content ?: ""
-                handleSearchProducts(query, chatHistory, url)
+                val argsJson = try {
+                    com.google.gson.JsonParser.parseString(toolCall.function.arguments).asJsonObject
+                } catch (e: Exception) {
+                    null
+                }
+                val query = argsJson?.get("query")?.asString ?: ""
+                handleSearchProducts(query)
             }
-
             "getProductDetail" -> {
-                val productIdStr = functionCall.args["productId"]?.jsonPrimitive?.content ?: ""
+                val argsJson = try {
+                    com.google.gson.JsonParser.parseString(toolCall.function.arguments).asJsonObject
+                } catch (e: Exception) {
+                    null
+                }
+                val productIdStr = argsJson?.get("productId")?.asString ?: ""
                 val productId = productIdStr.toLongOrNull() ?: 0L
-                handleGetProductDetail(productId, chatHistory, url)
+                handleGetProductDetail(productId)
             }
-
-            else -> {
-                "I couldn't process that request. How else can I help you?"
-            }
+            else -> "Error: Unknown tool function name ${toolCall.function.name}"
         }
     }
 
-    // ─── Tool handlers ───────────────────────────────────────────────────────
-
-    private suspend fun handleSearchProducts(
-        query: String,
-        chatHistory: MutableList<Content>,
-        url: String
-    ): String {
+    private suspend fun handleSearchProducts(query: String): String {
         val searchResult = searchProductsUseCase(SearchFilters(query = query))
-        val functionResultJson = when (searchResult) {
+        return when (searchResult) {
             is DataResult.Success -> {
                 val products = searchResult.data
                 if (products.isEmpty()) {
-                    JsonObject(mapOf("result" to JsonPrimitive("No products found for '$query'.")))
+                    "{\"result\": \"No products found for '$query'.\"}"
                 } else {
                     val list = products.take(8).joinToString(", ") { "${it.title} (ID: ${it.id})" }
-                    JsonObject(mapOf("products" to JsonPrimitive(list)))
+                    "{\"products\": \"$list\"}"
                 }
             }
-            is DataResult.Error -> JsonObject(mapOf("error" to JsonPrimitive("Search failed.")))
+            is DataResult.Error -> "{\"error\": \"Search failed.\"}"
         }
-
-        // Step 2: add tool result as a "user" role turn (Gemini REST requirement)
-        chatHistory.add(
-            Content(
-                role = "user",
-                parts = listOf(
-                    Part(
-                        functionResponse = FunctionResponse(
-                            name = "searchProducts",
-                            response = functionResultJson
-                        )
-                    )
-                )
-            )
-        )
-
-        // Step 3: follow-up call for final natural-language answer
-        val followUp = geminiApiService.generateContent(
-            url = url,
-            apiKey = apiKey,
-            request = GeminiRequest(contents = chatHistory, tools = tools, systemInstruction = systemInstruction)
-        )
-        return followUp.candidates?.firstOrNull()?.content?.parts
-            ?.firstOrNull { it.text != null }?.text
-            ?: "I found some products that might interest you!"
     }
 
-    private suspend fun handleGetProductDetail(
-        productId: Long,
-        chatHistory: MutableList<Content>,
-        url: String
-    ): String {
+    private suspend fun handleGetProductDetail(productId: Long): String {
         val detailResult = getProductDetailUseCase(productId)
-        val functionResultJson = when (detailResult) {
+        return when (detailResult) {
             is DataResult.Success -> {
                 val d = detailResult.data
-                JsonObject(
-                    mapOf(
-                        "title" to JsonPrimitive(d.title),
-                        "price" to JsonPrimitive(d.price),
-                        "description" to JsonPrimitive(d.descriptionHtml)
-                    )
-                )
+                val escapedTitle = d.title.replace("\"", "\\\"")
+                val escapedPrice = d.price.toString()
+                val escapedDesc = d.descriptionHtml.take(500).replace("\"", "\\\"")
+                "{\"title\": \"$escapedTitle\", \"price\": \"$escapedPrice\", \"description\": \"$escapedDesc\"}"
             }
-            is DataResult.Error -> JsonObject(mapOf("error" to JsonPrimitive("Could not fetch product details.")))
+            is DataResult.Error -> "{\"error\": \"Could not fetch product details.\"}"
         }
+    }
 
-        // Step 2: add tool result as "user" role (Gemini REST requirement)
-        chatHistory.add(
-            Content(
-                role = "user",
-                parts = listOf(
-                    Part(
-                        functionResponse = FunctionResponse(
-                            name = "getProductDetail",
-                            response = functionResultJson
-                        )
-                    )
-                )
-            )
-        )
+    private fun mapErrorToException(e: Exception): Exception {
+        return Exception("Unable to reach the fashion assistant right now. Please check your internet connection.", e)
+    }
 
-        // Step 3: follow-up call
-        val followUp = geminiApiService.generateContent(
-            url = url,
-            apiKey = apiKey,
-            request = GeminiRequest(contents = chatHistory, tools = tools, systemInstruction = systemInstruction)
-        )
-        return followUp.candidates?.firstOrNull()?.content?.parts
-            ?.firstOrNull { it.text != null }?.text
-            ?: "Here are the details for that product!"
+    private fun mapHttpErrorToException(code: Int, bodyString: String): Exception {
+        val message = when (code) {
+            429 -> "Whoops, you're browsing style advice faster than our servers can process! Please wait a few seconds and try again."
+            401, 403 -> "Stylist connection error. There's a credential mismatch behind the scenes."
+            else -> "Unable to reach the fashion assistant right now. Please check your internet connection."
+        }
+        return Exception(message)
     }
 }
