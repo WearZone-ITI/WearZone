@@ -24,7 +24,7 @@ fun SplashScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         WearZoneAnimatedLoader()

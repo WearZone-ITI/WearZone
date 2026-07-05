@@ -23,7 +23,7 @@ import com.example.wearzone.presentation.common.theme.ChampagneGold
 @Composable
 fun WearZoneAnimatedLoader(
     modifier: Modifier = Modifier,
-    size: Dp = 150.dp
+    size: Dp = 350.dp
 ) {
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.wearzone_loader)
