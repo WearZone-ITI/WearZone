@@ -29,6 +29,7 @@ import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 import com.example.wearzone.presentation.brands.BrandsScreen
 import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
+import com.example.wearzone.presentation.splash.SplashScreen
 
 @Composable
 fun NavGraph(
@@ -61,9 +62,22 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.OnboardingRoute,
+        startDestination = Route.SplashRoute,
         modifier = modifier,
     ) {
+        // Splash
+        composable<Route.SplashRoute> {
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(Route.OnboardingRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
         // Aalaa
         composable<Route.OnboardingRoute> {
             OnboardingScreen(
