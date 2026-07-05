@@ -474,5 +474,10 @@
     <string name="resend_email">إعادة إرسال البريد الإلكتروني</string>
     <string name="resend_email_countdown">إعادة الإرسال خلال %1$d ثانية</string>
     <string name="logout">تسجيل الخروج</string>
+
+    <string name="email_verification_sent">تم إرسال بريد التحقق بنجاح</string>
+    <string name="email_verification_failed_send">فشل إرسال بريد التحقق</string>
+    <string name="email_verification_not_verified">لم يتم التحقق من البريد الإلكتروني بعد</string>
+    <string name="email_verification_failed_check">فشل التحقق من حالة الحساب</string>
     <!-- Omar -->
 </resources>

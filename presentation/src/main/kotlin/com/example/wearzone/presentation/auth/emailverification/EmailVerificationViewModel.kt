@@ -1,7 +1,9 @@
 package com.example.wearzone.presentation.auth.emailverification
 
+import androidx.compose.ui.geometry.RoundRect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.presentation.R
 import com.example.wearzone.domain.auth.usecase.CheckEmailVerifiedUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
@@ -66,13 +68,13 @@ class EmailVerificationViewModel @Inject constructor(
             _screenState.update { it.copy(isResending = true) }
             sendEmailVerificationUseCase()
                 .onSuccess {
-                    sendEffect(EmailVerificationUiEffect.ShowSnackbar("Verification email sent"))
+                    sendEffect(EmailVerificationUiEffect.ShowSnackbar(R.string.email_verification_sent.toString()))
                     startCooldown()
                 }
                 .onFailure { error ->
                     sendEffect(
                         EmailVerificationUiEffect.ShowSnackbar(
-                            error.localizedMessage ?: "Failed to send verification email"
+                            error.localizedMessage ?: R.string.email_verification_failed_send.toString()
                         )
                     )
                 }
