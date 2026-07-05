@@ -36,7 +36,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
             type = "function",
             function = GroqFunctionDeclaration(
                 name = "searchProducts",
-                description = "Search for products in the WearZone store by a keyword, e.g. 'shirts', 'sneakers', 'summer dresses'.",
+                description = "Search the WearZone database. If the user asks for specific items, use that keyword (e.g., 'shirts'). If the user asks broad questions like 'what do you sell' or 'show me clothes', use the query 'all' or 'clothing'.",
                 parameters = GroqSchema(
                     type = "object",
                     properties = mapOf(
@@ -68,7 +68,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         )
     )
 
-    private val systemPrompt = "You are the WearZone AI Stylist. Your SOLE purpose is to assist users with finding clothing, translating their fashion needs into specific products, and comparing items. You MUST strictly refuse to answer any questions outside of fashion, e-commerce, and WearZone products. Keep answers concise. When users ask for products or comparisons, ALWAYS use your tools to fetch real data and include the Product IDs in your final response."
+    private val systemPrompt = "You are the WearZone AI Stylist. Your SOLE purpose is to assist users with finding clothing, translating their fashion needs into specific products, and comparing items. You MUST strictly refuse to answer any questions outside of fashion, e-commerce, and WearZone products. Keep answers concise. When users ask for products or comparisons, ALWAYS use your tools to fetch real data and include the Product IDs in your final response. CRITICAL RULES: 1. If a tool returns an empty result, 'No products found', or an error, you MUST NOT call the tool again with new keywords. Accept the defeat immediately and politely tell the user you couldn't find matching items. 2. NEVER output raw XML or <function> tags. Only use the native JSON tool calling schema."
 
     // ─── Core entry point ────────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     loopCount++
 
                     val request = GroqRequest(
-                        model = "llama-3.3-70b-versatile",
+                        model = "llama-3.1-8b-instant",
                         messages = currentMessages,
                         tools = tools
                     )
@@ -137,6 +137,10 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     Log.d("GROQ_CHAT_DEBUG", "Raw Incoming Response:\nCode: $rawCode\nHeaders:\n$rawHeaders\nBody:\n$rawBodyString")
 
                     if (!response.isSuccessful) {
+                        if (rawCode == 400) {
+                            Log.e("GROQ_CHAT_DEBUG", "Intercepted HTTP 400, returning graceful fallback.")
+                            return@withContext "I'm having a little trouble parsing that request. Could you rephrase what you're looking for?"
+                        }
                         val errorException = mapHttpErrorToException(rawCode, rawBodyString)
                         Log.e("GROQ_CHAT_DEBUG", "HTTP error exception: ${errorException.message}")
                         throw errorException
@@ -174,7 +178,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     return@withContext responseMsg.content ?: "I'm here to help you shop! Try asking me about specific products, styles, or brands."
                 }
 
-                throw Exception("Too many recursive tool calls.")
+                return@withContext "I checked our catalog but couldn't find exactly what you're looking for right now. Could you try a different style or keyword?"
 
             } catch (e: Exception) {
                 Log.e("GROQ_CHAT_DEBUG", "Exception in sendMessage stack trace:", e)
@@ -213,13 +217,16 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
             is DataResult.Success -> {
                 val products = searchResult.data
                 if (products.isEmpty()) {
-                    "{\"result\": \"No products found for '$query'.\"}"
+                    "{\"status\": \"empty\", \"message\": \"Zero products found. Stop searching.\"}"
                 } else {
-                    val list = products.take(8).joinToString(", ") { "${it.title} (ID: ${it.id})" }
-                    "{\"products\": \"$list\"}"
+                    val list = products.take(8).joinToString(", ") { 
+                        val escapedTitle = it.title.replace("\"", "\\\"")
+                        "{\"id\": \"${it.id}\", \"title\": \"$escapedTitle\", \"price\": \"${it.price}\"}" 
+                    }
+                    "{\"products\": [$list]}"
                 }
             }
-            is DataResult.Error -> "{\"error\": \"Search failed.\"}"
+            is DataResult.Error -> "{\"status\": \"empty\", \"message\": \"Zero products found. Stop searching.\"}"
         }
     }
 
@@ -231,9 +238,9 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                 val escapedTitle = d.title.replace("\"", "\\\"")
                 val escapedPrice = d.price.toString()
                 val escapedDesc = d.descriptionHtml.take(500).replace("\"", "\\\"")
-                "{\"title\": \"$escapedTitle\", \"price\": \"$escapedPrice\", \"description\": \"$escapedDesc\"}"
+                "{\"id\": \"${d.id}\", \"title\": \"$escapedTitle\", \"price\": \"$escapedPrice\", \"description\": \"$escapedDesc\"}"
             }
-            is DataResult.Error -> "{\"error\": \"Could not fetch product details.\"}"
+            is DataResult.Error -> "{\"status\": \"empty\", \"message\": \"Zero products found. Stop searching.\"}"
         }
     }
 
