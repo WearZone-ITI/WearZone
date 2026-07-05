@@ -9,7 +9,7 @@ The WearZone AiChat feature currently calls **Google's Gemini REST API** (via a 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Groq API Key** — The key `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` will be written to `local.properties` and exposed via `BuildConfig.GROQ_API_KEY`. It is a dev key scoped to Groq and is safe to bundle.
+> **Groq API Key** — The key `YOUR_GROQ_API_KEY_HERE` will be written to `local.properties` and exposed via `BuildConfig.GROQ_API_KEY`. It is a dev key scoped to Groq and is safe to bundle.
 
 > [!WARNING]
 > **Room DB changes** — `ChatMessageEntity`, `ChatDao`, and the `chatDao()` accessor will be **deleted**. The `WearZoneDatabase` schema version will bump from **5 → 6** (with `fallbackToDestructiveMigration()` already in place). This wipes chat history on device update — which is intentional per the ephemeral-state requirement.
@@ -38,7 +38,7 @@ None — requirements are fully specified.
 
 #### [MODIFY] [local.properties](file:///d:/projects/WearZone/local.properties)
 
-- Add `GROQ_API_KEY=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`
+- Add `GROQ_API_KEY=YOUR_GROQ_API_KEY_HERE`
 
 ---
 
