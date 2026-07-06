@@ -483,6 +483,17 @@
     <string name="promo_shop_now">تسوق الآن</string>
 
 
+    <string name="verify_email_title">تأكيد البريد الإلكتروني</string>
+    <string name="verify_email_subtitle">لقد أرسلنا رابط التأكيد إلى %1$s. يرجى التحقق من صندوق الوارد وتأكيد حسابك للمتابعة.</string>
+    <string name="ive_verified_continue">لقد قمت بالتأكيد، متابعة</string>
+    <string name="resend_email">إعادة إرسال البريد الإلكتروني</string>
+    <string name="resend_email_countdown">إعادة الإرسال خلال %1$d ثانية</string>
+    <string name="logout">تسجيل الخروج</string>
+
+    <string name="email_verification_sent">تم إرسال بريد التحقق بنجاح</string>
+    <string name="email_verification_failed_send">فشل إرسال بريد التحقق</string>
+    <string name="email_verification_not_verified">لم يتم التحقق من البريد الإلكتروني بعد</string>
+    <string name="email_verification_failed_check">فشل التحقق من حالة الحساب</string>
     <string name="reset_email_sent_title">تم إرسال البريد الإلكتروني</string>
     <string name="reset_email_sent_message">تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</string>
     <string name="forgot_password_title">نسيت كلمة المرور</string>

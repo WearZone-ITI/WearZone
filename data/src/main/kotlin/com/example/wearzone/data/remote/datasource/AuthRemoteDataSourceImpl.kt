@@ -83,6 +83,18 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    override suspend fun sendEmailVerification() {
+        val user = firebaseAuth.currentUser ?: throw IllegalStateException("No signed-in user")
+        user.sendEmailVerification().await()
+    }
+
+    override suspend fun isEmailVerified(): Boolean {
+        val user = firebaseAuth.currentUser ?: return false
+        user.reload().await()
+        return user.isEmailVerified
+    }
+
+
     private suspend fun saveCustomerIdInFireStore(
         uid: String,
         customerId: Long,
