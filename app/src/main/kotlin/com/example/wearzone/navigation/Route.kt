@@ -72,6 +72,7 @@ sealed interface Route {
 
     @Serializable
     data object EmailVerificationRoute : Route
+    @Serializable
     data object ForgotPasswordRoute : Route
 
 
