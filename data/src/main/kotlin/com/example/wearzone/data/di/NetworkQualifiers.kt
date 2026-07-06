@@ -29,3 +29,11 @@ annotation class MapboxOkHttp
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class MapboxAccessToken
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class CurrencyRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class CurrencyOkHttp

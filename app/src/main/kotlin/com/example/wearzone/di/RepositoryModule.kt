@@ -13,7 +13,9 @@ import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.data.repository.CheckoutRepositoryImpl
+import com.example.wearzone.data.repository.CurrencyRepositoryImpl
 import com.example.wearzone.data.repository.DiscountRepositoryImpl
+import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
@@ -99,5 +101,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCurrencyRepository(impl: CurrencyRepositoryImpl): ICurrencyRepository
 }
 

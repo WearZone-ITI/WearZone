@@ -9,4 +9,5 @@ interface ISettingsRepository {
     suspend fun setThemeMode(themeMode: ThemeMode): Result<Unit>
     suspend fun setNotificationsEnabled(enabled: Boolean): Result<Unit>
     suspend fun setLanguage(languageCode: String): Result<Unit>
+    suspend fun setCurrency(currencyCode: String): Result<Unit>
 }

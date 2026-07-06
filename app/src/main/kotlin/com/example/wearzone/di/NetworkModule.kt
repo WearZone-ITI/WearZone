@@ -1,6 +1,8 @@
 package com.example.wearzone.di
 
 import android.util.Log
+import com.example.wearzone.data.di.CurrencyOkHttp
+import com.example.wearzone.data.di.CurrencyRetrofit
 import com.example.wearzone.data.di.PayMockOkHttp
 import com.example.wearzone.data.di.PayMockRetrofit
 import com.example.wearzone.data.di.MapboxAccessToken
@@ -11,6 +13,7 @@ import com.example.wearzone.data.di.ShopifyRetrofit
 import com.example.wearzone.data.remote.api.AddressApiService
 import com.example.wearzone.data.remote.api.AuthApiService
 import com.example.wearzone.data.remote.api.CartApiService
+import com.example.wearzone.data.remote.api.CurrencyApiService
 import com.example.wearzone.data.remote.api.DiscountApiService
 import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
@@ -39,6 +42,7 @@ object NetworkModule {
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
     private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
+    private const val CURRENCY_BASE_URL = "https://open.er-api.com/"
 
     @Provides
     fun provideJson(): Json {
@@ -132,6 +136,24 @@ object NetworkModule {
     }
 
     @Provides
+    @CurrencyOkHttp
+    fun provideCurrencyOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder().build()
+
+    @Provides
+    @CurrencyRetrofit
+    fun provideCurrencyRetrofit(
+        @CurrencyOkHttp okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(CURRENCY_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
     fun provideProductApiService(@ShopifyRetrofit retrofit: Retrofit): ProductApiService {
         return retrofit.create(ProductApiService::class.java)
     }
@@ -181,5 +203,12 @@ object NetworkModule {
         @PayMockRetrofit retrofit: Retrofit,
     ): PayMockApiService {
         return retrofit.create(PayMockApiService::class.java)
+    }
+
+    @Provides
+    fun provideCurrencyApiService(
+        @CurrencyRetrofit retrofit: Retrofit,
+    ): CurrencyApiService {
+        return retrofit.create(CurrencyApiService::class.java)
     }
 }
