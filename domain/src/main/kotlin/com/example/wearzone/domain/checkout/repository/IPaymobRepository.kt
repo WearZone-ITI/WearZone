@@ -1,13 +1,11 @@
 package com.example.wearzone.domain.checkout.repository
 
-interface IPaymobRepository {
-    suspend fun getPaymentToken(
-        amount: Double,
-        currency: String,
-        billingData: PaymobBillingData
-    ): Result<Pair<String, String>>
-}
+import com.example.wearzone.domain.checkout.model.CheckoutData
+import com.example.wearzone.domain.checkout.model.PaymentIntention
 
+interface IPaymentRepository {
+    suspend fun createIntention(checkoutData: CheckoutData): Result<PaymentIntention>
+}
 data class PaymobBillingData(
     val firstName: String,
     val lastName: String,
