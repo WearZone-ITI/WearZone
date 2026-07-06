@@ -5,17 +5,16 @@ import com.example.wearzone.data.repository.CategoryRepositoryImpl
 import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
 import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
 import com.example.wearzone.data.repository.OrderHistoryRepositoryImpl
-import com.example.wearzone.data.repository.PayMockRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
-import com.example.wearzone.data.repository.search.RecentSearchRepositoryImpl
+import com.example.wearzone.data.repository.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.data.repository.CheckoutRepositoryImpl
 import com.example.wearzone.data.repository.DiscountRepositoryImpl
+import com.example.wearzone.data.repository.PaymentRepositoryImpl
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.checkout.repository.IDiscountRepository
-import com.example.wearzone.domain.checkout.repository.IPayMockRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -24,13 +23,13 @@ import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.data.repository.WishlistRepositoryImpl
+import com.example.wearzone.domain.checkout.repository.IPaymentRepository
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
 import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -57,7 +56,7 @@ abstract class RepositoryModule {
     abstract fun bindDiscountRepository(impl: DiscountRepositoryImpl): IDiscountRepository
 
     @Binds
-    abstract fun bindPayMockRepository(impl: PayMockRepositoryImpl): IPayMockRepository
+    abstract fun bindPaymobRepository(impl: PaymentRepositoryImpl): IPaymentRepository
 
     @Binds
     abstract fun bindCategoryRepository(impl: CategoryRepositoryImpl): ICategoryRepository
