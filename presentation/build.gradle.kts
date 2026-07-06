@@ -21,7 +21,7 @@ android {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -29,6 +29,9 @@ android {
         }
         val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "\"\""
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", googleClientId)
+
+        val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
     }
 
     buildFeatures {
@@ -98,6 +101,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.material)
+    implementation(libs.mapbox.maps.android)
+    implementation(libs.mapbox.maps.compose)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

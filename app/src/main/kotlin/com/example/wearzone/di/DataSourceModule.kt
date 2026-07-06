@@ -5,18 +5,23 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.wearzone.data.local.datasource.CartLocalDataSourceImpl
+import com.example.wearzone.data.local.datasource.CurrentLocationDataSourceImpl
 import com.example.wearzone.data.local.datasource.ICartLocalDataSource
+import com.example.wearzone.data.local.datasource.ICountryLocalDataSource
+import com.example.wearzone.data.local.datasource.ICurrentLocationDataSource
 import com.example.wearzone.data.local.datasource.IOnboardingPreferencesDataSource
 import com.example.wearzone.data.local.datasource.IPayMockLocalDataSource
 import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
 import com.example.wearzone.data.local.datasource.PayMockLocalDataSourceImpl
 import com.example.wearzone.data.local.datasource.SettingsPreferencesDataSourceImpl
+import com.example.wearzone.data.local.datasource.StaticCountryLocalDataSourceImpl
 import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CartRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CategoryRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CustomerAddressRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.DiscountRemoteDataSourceImpl
+import com.example.wearzone.data.remote.datasource.IAddressLookupRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
 import com.example.wearzone.data.remote.datasource.ICustomerAddressRemoteDataSource
@@ -24,6 +29,7 @@ import com.example.wearzone.data.remote.datasource.ICategoryRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IDiscountRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IOrderRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
+import com.example.wearzone.data.remote.datasource.MapboxAddressLookupRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.OrderRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.ProductRemoteDataSourceImpl
 import dagger.Binds
@@ -101,6 +107,21 @@ abstract class DataSourceModule {
     abstract fun bindDiscountRemoteDataSource(
         impl: DiscountRemoteDataSourceImpl,
     ): IDiscountRemoteDataSource
+
+    @Binds
+    abstract fun bindAddressLookupRemoteDataSource(
+        impl: MapboxAddressLookupRemoteDataSourceImpl,
+    ): IAddressLookupRemoteDataSource
+
+    @Binds
+    abstract fun bindCountryLocalDataSource(
+        impl: StaticCountryLocalDataSourceImpl,
+    ): ICountryLocalDataSource
+
+    @Binds
+    abstract fun bindCurrentLocationDataSource(
+        impl: CurrentLocationDataSourceImpl,
+    ): ICurrentLocationDataSource
 
     companion object {
 

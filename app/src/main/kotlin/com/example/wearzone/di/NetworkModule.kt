@@ -3,12 +3,16 @@ package com.example.wearzone.di
 import android.util.Log
 import com.example.wearzone.data.di.PayMockOkHttp
 import com.example.wearzone.data.di.PayMockRetrofit
+import com.example.wearzone.data.di.MapboxAccessToken
+import com.example.wearzone.data.di.MapboxOkHttp
+import com.example.wearzone.data.di.MapboxRetrofit
 import com.example.wearzone.data.di.ShopifyOkHttp
 import com.example.wearzone.data.di.ShopifyRetrofit
 import com.example.wearzone.data.remote.api.AddressApiService
 import com.example.wearzone.data.remote.api.AuthApiService
 import com.example.wearzone.data.remote.api.CartApiService
 import com.example.wearzone.data.remote.api.DiscountApiService
+import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
 import com.example.wearzone.data.remote.api.PayMockApiService
 import com.example.wearzone.data.remote.interceptor.PayMockAuthInterceptor
@@ -34,6 +38,7 @@ object NetworkModule {
 
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
+    private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
 
     @Provides
     fun provideJson(): Json {
@@ -78,6 +83,16 @@ object NetworkModule {
     }
 
     @Provides
+    @MapboxOkHttp
+    fun provideMapboxOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder().build()
+
+    @Provides
+    @MapboxAccessToken
+    fun provideMapboxAccessToken(): String =
+        com.example.wearzone.BuildConfig.MAPBOX_ACCESS_TOKEN
+
+    @Provides
     @ShopifyRetrofit
     fun provideRetrofit(
         @ShopifyOkHttp okHttpClient: OkHttpClient,
@@ -98,6 +113,19 @@ object NetworkModule {
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(PAYMOCK_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @MapboxRetrofit
+    fun provideMapboxRetrofit(
+        @MapboxOkHttp okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(MAPBOX_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -127,6 +155,11 @@ object NetworkModule {
     @Provides
     fun provideAddressApiService(@ShopifyRetrofit retrofit: Retrofit): AddressApiService {
         return retrofit.create(AddressApiService::class.java)
+    }
+
+    @Provides
+    fun provideMapboxApiService(@MapboxRetrofit retrofit: Retrofit): MapboxApiService {
+        return retrofit.create(MapboxApiService::class.java)
     }
 
     @Provides
