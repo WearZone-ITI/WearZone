@@ -14,6 +14,7 @@ data class ChatUiMessage(
     val id: String,
     val isFromUser: Boolean,
     val text: String,
+    val rawText: String, // Store raw text for product parsing
     val timestamp: Long,
     val isPending: Boolean = false
 )

@@ -43,7 +43,8 @@ class ChatViewModel @Inject constructor(
                     ChatUiMessage(
                         id = msg.id,
                         isFromUser = msg.role == ChatRole.USER,
-                        text = msg.content,
+                        text = if (msg.role == ChatRole.USER) msg.content else formatAiResponse(msg.content),
+                        rawText = msg.content,
                         timestamp = msg.timestamp,
                         isPending = msg.isPending
                     )
@@ -51,6 +52,11 @@ class ChatViewModel @Inject constructor(
                 _uiState.update { it.copy(messages = uiMessages) }
             }
         }
+    }
+
+    private fun formatAiResponse(text: String): String {
+        // Strip [ID: 12345] data blocks from the UI text to prevent leakage
+        return text.replace(Regex("""\[ID:\s*\d+\]"""), "").trim()
     }
 
     fun handleIntent(intent: ChatUiIntent) {
@@ -65,9 +71,9 @@ class ChatViewModel @Inject constructor(
     private fun sendMessage() {
         val currentText = _uiState.value.inputText
         if (currentText.isBlank()) return
-        
+
         _uiState.update { it.copy(inputText = "", isSending = true) }
-        
+
         viewModelScope.launch {
             val result = sendChatMessageUseCase(currentText)
             _uiState.update { it.copy(isSending = false) }
