@@ -12,6 +12,7 @@ import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.domain.auth.usecase.SendPasswordResetEmailUseCase
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
 import com.example.wearzone.domain.cart.repository.ICartRepository
@@ -131,6 +132,12 @@ object UseCaseModule {
     fun provideRegisterUseCase(
         repository: IAuthRepository,
     ): RegisterUseCase = RegisterUseCase(repository)
+
+    @Provides
+    fun provideSendPasswordResetEmailUseCase(
+        repository: IAuthRepository,
+    ): SendPasswordResetEmailUseCase = SendPasswordResetEmailUseCase(repository)
+
 
     @Provides
     fun provideGetCurrentUserUseCase(

@@ -592,6 +592,20 @@
     <string name="promo_limited_time_sale">LIMITED TIME SALE</string>
     <string name="promo_discount_off">OFF</string>
     <string name="promo_shop_now">Shop now</string>
+
+
+    <string name="reset_email_sent_title">Email Sent</string>
+    <string name="reset_email_sent_message">A password reset link has been sent to your email address.</string>
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_subtitle">Enter your email address to reset your password.</string>
+    <string name="email_label">Email Address</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="apple_signin_coming_soon">Apple Sign-In coming soon!</string>
+
+    <string name="forgot_password_empty_email">Please enter your email</string>
+    <string name="forgot_password_invalid_email">Please enter a valid email</string>
+    <string name="forgot_password_failed_send">Failed to send reset email</string>
     <!--Omar-->
 
 </resources>
