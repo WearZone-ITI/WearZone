@@ -17,3 +17,15 @@ annotation class ShopifyOkHttp
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class PaymobOkHttp
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MapboxRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MapboxOkHttp
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MapboxAccessToken

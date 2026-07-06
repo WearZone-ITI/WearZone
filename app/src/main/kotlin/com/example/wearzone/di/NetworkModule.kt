@@ -2,11 +2,8 @@ package com.example.wearzone.di
 
 import android.util.Log
 import com.example.wearzone.BuildConfig
-import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.di.PaymobOkHttp
 import com.example.wearzone.data.di.PaymobRetrofit
-import com.example.wearzone.data.di.PayMockOkHttp
-import com.example.wearzone.data.di.PayMockRetrofit
 import com.example.wearzone.data.di.MapboxAccessToken
 import com.example.wearzone.data.di.MapboxOkHttp
 import com.example.wearzone.data.di.MapboxRetrofit
@@ -20,8 +17,6 @@ import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
 import com.example.wearzone.data.remote.api.PaymobApiService
 import com.example.wearzone.data.remote.api.ProductApiService
-import com.example.wearzone.data.repository.PaymentRepositoryImpl
-import com.example.wearzone.domain.checkout.repository.IPaymentRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -31,7 +26,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -106,7 +100,7 @@ object NetworkModule {
     @Provides
     @MapboxAccessToken
     fun provideMapboxAccessToken(): String =
-        com.example.wearzone.BuildConfig.MAPBOX_ACCESS_TOKEN
+        BuildConfig.MAPBOX_ACCESS_TOKEN
 
     @Provides
     @ShopifyRetrofit
