@@ -192,20 +192,13 @@ fun PromoAdsCarousel(
                     ) {
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
-                                text = String.format(Locale.US, "%.0f", realPrice),
+                                text = formatPrice(realPrice),
                                 color = glassTextColor,
                                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
                             )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = product.currencyCode,
-                                color = colors.accent,
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                modifier = Modifier.padding(bottom = 3.dp)
-                            )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = String.format(Locale.US, "%.0f %s", strikedPrice, product.currencyCode),
+                                text = formatPrice(strikedPrice),
                                 color = glassTextColor.copy(alpha = 0.5f),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textDecoration = TextDecoration.LineThrough,

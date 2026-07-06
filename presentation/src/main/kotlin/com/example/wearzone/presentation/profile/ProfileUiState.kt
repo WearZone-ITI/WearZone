@@ -18,7 +18,8 @@ sealed interface ProfileUiState {
         val email: String?,
         val photoUrl: String?,
         val recentOrders: ImmutableList<RecentOrderUiModel>,
-        @param:StringRes val currencyRes: Int = R.string.profile_currency_usd,
+        val selectedCurrency: String = "EGP",
+        val availableCurrencies: ImmutableList<String> = persistentListOf("EGP", "USD", "EUR", "GBP"),
         val isAuthenticated: Boolean,
         val cartItemCount: Int = 0,
     ) : ProfileUiState

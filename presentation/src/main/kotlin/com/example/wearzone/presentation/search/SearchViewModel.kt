@@ -217,7 +217,7 @@ class SearchViewModel @Inject constructor(
         id = id,
         title = title,
         vendor = vendor,
-        formattedPrice = price.toInt().toString() + " " + currencyCode,
+        basePriceEgp = price,
         imageUrl = imageUrl,
     )
 

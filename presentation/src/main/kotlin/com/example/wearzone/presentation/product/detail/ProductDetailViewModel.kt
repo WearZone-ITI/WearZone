@@ -122,7 +122,7 @@ class ProductDetailViewModel @Inject constructor(
                         id = productDetail.id,
                         title = productDetail.title,
                         vendor = productDetail.vendor,
-                        price = "${productDetail.price} ${productDetail.currencyCode}",
+                        basePriceEgp = productDetail.price,
                         descriptionHtml = productDetail.descriptionHtml,
                         images = productDetail.images.toImmutableList(),
                         availableSizes = productDetail.availableSizes.toImmutableList(),
@@ -269,7 +269,7 @@ class ProductDetailViewModel @Inject constructor(
                 id = state.id,
                 title = state.title,
                 vendor = state.vendor,
-                price = state.price,
+                price = state.basePriceEgp.toString(),
                 currencyCode = "EGP", // Provide a default currency if not in ProductDetail
                 imageUrl = state.images.firstOrNull() ?: "",
                 isOutOfStock = false

@@ -24,12 +24,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun PriceSummaryBar(
-    subtotal: String,
-    total: String,
+    subtotalAmount: Double,
+    totalAmount: Double,
     onCheckout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -40,7 +41,7 @@ fun PriceSummaryBar(
             .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        SummaryLine(label = stringResource(id = R.string.cart_subtotal), value = subtotal)
+        SummaryLine(label = stringResource(id = R.string.cart_subtotal), value = formatPrice(subtotalAmount))
         Spacer(modifier = Modifier.height(8.dp))
         SummaryLine(
             label = stringResource(id = R.string.cart_shipping),
@@ -60,7 +61,7 @@ fun PriceSummaryBar(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = total,
+                text = formatPrice(totalAmount),
                 color = AppTheme.colors.textPrimary,
                 style = MaterialTheme.typography.headlineMedium,
             )

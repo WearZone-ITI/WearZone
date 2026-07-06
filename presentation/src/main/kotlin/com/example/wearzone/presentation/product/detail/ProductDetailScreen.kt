@@ -59,6 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.product.detail.components.ImageCarousel
 import com.example.wearzone.presentation.product.detail.components.ProductDetailShimmer
@@ -293,7 +294,7 @@ private fun ProductDetailContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = state.price,
+                        text = formatPrice(state.basePriceEgp),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold

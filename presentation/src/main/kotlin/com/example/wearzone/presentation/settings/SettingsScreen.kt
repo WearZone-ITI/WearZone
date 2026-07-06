@@ -1,6 +1,7 @@
 package com.example.wearzone.presentation.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,17 +11,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,8 +68,10 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     appVersion: String,
     viewModel: SettingsViewModel = hiltViewModel(),
+    profileViewModel: com.example.wearzone.presentation.profile.ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -95,6 +103,8 @@ fun SettingsScreen(
     ) { innerPadding ->
         SettingsContent(
             uiState = uiState,
+            profileUiState = profileUiState,
+            profileViewModel = profileViewModel,
             appVersion = appVersion,
             onIntent = viewModel::handleIntent,
             modifier = Modifier.padding(innerPadding),
@@ -133,6 +143,8 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     uiState: SettingsUiState,
+    profileUiState: com.example.wearzone.presentation.profile.ProfileUiState,
+    profileViewModel: com.example.wearzone.presentation.profile.ProfileViewModel,
     appVersion: String,
     onIntent: (SettingsUiIntent) -> Unit,
     modifier: Modifier = Modifier,
@@ -156,6 +168,8 @@ private fun SettingsContent(
 
             is SettingsUiState.Content -> SettingsLoadedContent(
                 uiState = uiState,
+                profileUiState = profileUiState,
+                profileViewModel = profileViewModel,
                 appVersion = appVersion,
                 onIntent = onIntent,
             )
@@ -166,6 +180,8 @@ private fun SettingsContent(
 @Composable
 private fun SettingsLoadedContent(
     uiState: SettingsUiState.Content,
+    profileUiState: com.example.wearzone.presentation.profile.ProfileUiState,
+    profileViewModel: com.example.wearzone.presentation.profile.ProfileViewModel,
     appVersion: String,
     onIntent: (SettingsUiIntent) -> Unit,
 ) {
@@ -230,6 +246,15 @@ private fun SettingsLoadedContent(
                     valueRes = uiState.languageRes,
                     onClick = { onIntent(SettingsUiIntent.OnLanguageClicked) },
                 )
+                if (profileUiState is com.example.wearzone.presentation.profile.ProfileUiState.Content) {
+                    val content = profileUiState as com.example.wearzone.presentation.profile.ProfileUiState.Content
+                    SettingsDivider()
+                    CurrencySettingsRow(
+                        selectedCurrency = content.selectedCurrency,
+                        availableCurrencies = content.availableCurrencies,
+                        onCurrencySelected = { profileViewModel.handleIntent(com.example.wearzone.presentation.profile.ProfileUiIntent.OnCurrencySelected(it)) }
+                    )
+                }
             }
         }
         item { Spacer(modifier = Modifier.height(40.dp)) }
@@ -326,6 +351,71 @@ private fun LanguagePickerDialog(
         },
         containerColor = AppTheme.colors.surface,
     )
+}
+
+@Composable
+private fun CurrencySettingsRow(
+    selectedCurrency: String,
+    availableCurrencies: List<String>,
+    onCurrencySelected: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clickable { expanded = true }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.CreditCard,
+            contentDescription = null,
+            tint = AppTheme.colors.textPrimary,
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = stringResource(R.string.profile_currency),
+            style = MaterialTheme.typography.bodyLarge,
+            color = AppTheme.colors.textPrimary,
+            modifier = Modifier.weight(1f),
+        )
+        Box {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = selectedCurrency,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AppTheme.colors.textSecondary,
+                )
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = AppTheme.colors.textSecondary,
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(AppTheme.colors.surface)
+            ) {
+                availableCurrencies.forEach { currency ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = currency,
+                                color = if (currency == selectedCurrency) AppTheme.colors.selected else AppTheme.colors.textPrimary
+                            )
+                        },
+                        onClick = {
+                            onCurrencySelected(currency)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
