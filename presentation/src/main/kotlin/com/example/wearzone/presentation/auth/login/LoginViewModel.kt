@@ -56,7 +56,7 @@ class LoginViewModel @Inject constructor(
                 sendEffect(LoginUiEffect.NavigateToRegister)
             }
             is LoginUiIntent.OnForgotPasswordClicked -> {
-                sendEffect(LoginUiEffect.ShowSnackbar("Forgot Password coming soon!"))
+                sendEffect(LoginUiEffect.NavigateToForgotPassword)
             }
         }
     }

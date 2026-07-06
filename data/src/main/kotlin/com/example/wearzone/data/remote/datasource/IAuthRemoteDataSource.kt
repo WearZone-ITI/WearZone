@@ -11,6 +11,7 @@ interface IAuthRemoteDataSource {
     fun getCurrentUser(): FirebaseUser?
     suspend fun sendEmailVerification()
     suspend fun isEmailVerified(): Boolean
+    suspend fun sendPasswordResetEmail(email: String)
 
     fun signOut()
 }

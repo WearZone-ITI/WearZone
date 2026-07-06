@@ -52,6 +52,7 @@ fun LoginScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToEmailVerification: (String) -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -71,6 +72,7 @@ fun LoginScreen(
                 is LoginUiEffect.NavigateToHome -> onNavigateToHome()
                 is LoginUiEffect.NavigateToRegister -> { onNavigateToRegister() }
                 is LoginUiEffect.NavigateToEmailVerification -> onNavigateToEmailVerification(effect.email)
+                is LoginUiEffect.NavigateToForgotPassword -> onNavigateToForgotPassword()
                 is LoginUiEffect.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }

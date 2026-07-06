@@ -21,6 +21,8 @@ import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvid
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
 import com.example.wearzone.domain.cart.repository.ICartRepository
+import com.example.wearzone.data.repository.ReviewRepositoryImpl
+import com.example.wearzone.domain.product.repository.IReviewRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.data.repository.WishlistRepositoryImpl
@@ -77,4 +79,8 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindOrderHistoryRepository(impl: OrderHistoryRepositoryImpl): IOrderHistoryRepository
+
+    @Binds
+    abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository
 }
+

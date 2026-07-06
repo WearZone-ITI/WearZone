@@ -13,6 +13,7 @@ interface IAuthRepository {
     suspend fun checkEmailVerified(): Result<Boolean>
     suspend fun sendEmailVerification(): Result<Unit>
 
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit>
     fun observeOnboardingCompleted(): Flow<Boolean>
     suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit>
 

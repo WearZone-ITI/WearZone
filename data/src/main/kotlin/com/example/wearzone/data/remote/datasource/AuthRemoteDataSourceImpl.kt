@@ -102,4 +102,9 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         val data = mapOf("customerId" to customerId)
         firestore.collection("users").document(uid).set(data).await()
     }
+
+    override suspend fun sendPasswordResetEmail(email: String) {
+        firebaseAuth.sendPasswordResetEmail(email).await()
+    }
+
 }
