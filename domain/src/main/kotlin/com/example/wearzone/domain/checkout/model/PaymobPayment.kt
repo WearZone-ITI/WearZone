@@ -1,6 +1,6 @@
 package com.example.wearzone.domain.checkout.model
 
-data class PayMockPaymentResponse(
+data class PaymobPaymentResponse(
     val id: String,
     val status: String,
     val amount: Double,
