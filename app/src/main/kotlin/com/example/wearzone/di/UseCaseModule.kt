@@ -6,12 +6,15 @@ import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
+import com.example.wearzone.domain.auth.usecase.CheckEmailVerifiedUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
+import com.example.wearzone.domain.auth.usecase.SendEmailVerificationUseCase
+import com.example.wearzone.domain.auth.usecase.SendPasswordResetEmailUseCase
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
 import com.example.wearzone.domain.cart.repository.ICartRepository
@@ -28,12 +31,19 @@ import com.example.wearzone.domain.checkout.usecase.CreatePaymentIntentionUseCas
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.repository.IAddressLookupRepository
+import com.example.wearzone.domain.customer.address.repository.ICountryRepository
+import com.example.wearzone.domain.customer.address.repository.ICurrentLocationRepository
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
 import com.example.wearzone.domain.customer.address.usecase.DeleteCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCountriesUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentAddressCoordinatesUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
+import com.example.wearzone.domain.customer.address.usecase.ReverseGeocodeAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.SearchAddressSuggestionsUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
@@ -118,6 +128,18 @@ object UseCaseModule {
     }
 
     @Provides
+    fun provideSendEmailVerificationUseCase(
+        repository: IAuthRepository,
+    ): SendEmailVerificationUseCase = SendEmailVerificationUseCase(repository)
+
+    @Provides
+    fun provideCheckEmailVerifiedUseCase(
+        repository: IAuthRepository,
+    ): CheckEmailVerifiedUseCase = CheckEmailVerifiedUseCase(repository)
+
+
+
+    @Provides
     fun provideLoginWithEmailUseCase(
         repository: IAuthRepository,
     ): LoginWithEmailUseCase = LoginWithEmailUseCase(repository)
@@ -131,6 +153,12 @@ object UseCaseModule {
     fun provideRegisterUseCase(
         repository: IAuthRepository,
     ): RegisterUseCase = RegisterUseCase(repository)
+
+    @Provides
+    fun provideSendPasswordResetEmailUseCase(
+        repository: IAuthRepository,
+    ): SendPasswordResetEmailUseCase = SendPasswordResetEmailUseCase(repository)
+
 
     @Provides
     fun provideGetCurrentUserUseCase(
@@ -301,6 +329,26 @@ object UseCaseModule {
     )
 
     @Provides
+    fun provideGetCountriesUseCase(
+        repository: ICountryRepository,
+    ): GetCountriesUseCase = GetCountriesUseCase(repository)
+
+    @Provides
+    fun provideSearchAddressSuggestionsUseCase(
+        repository: IAddressLookupRepository,
+    ): SearchAddressSuggestionsUseCase = SearchAddressSuggestionsUseCase(repository)
+
+    @Provides
+    fun provideReverseGeocodeAddressUseCase(
+        repository: IAddressLookupRepository,
+    ): ReverseGeocodeAddressUseCase = ReverseGeocodeAddressUseCase(repository)
+
+    @Provides
+    fun provideGetCurrentAddressCoordinatesUseCase(
+        repository: ICurrentLocationRepository,
+    ): GetCurrentAddressCoordinatesUseCase = GetCurrentAddressCoordinatesUseCase(repository)
+
+    @Provides
     fun provideObserveWishlistUseCase(
         repository: IWishlistRepository
     ): ObserveWishlistUseCase = ObserveWishlistUseCase(repository)
@@ -342,4 +390,6 @@ object UseCaseModule {
         getOrderDetails = getOrderDetails,
         cancelOrder = cancelOrder,
     )
+
+
 }

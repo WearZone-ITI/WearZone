@@ -5,5 +5,6 @@ import androidx.annotation.StringRes
 sealed interface AddressFormUiEffect {
     data object NavigateBack : AddressFormUiEffect
     data object AddressSaved : AddressFormUiEffect
+    data object RequestLocationPermission : AddressFormUiEffect
     data class ShowMessage(@param:StringRes val messageRes: Int) : AddressFormUiEffect
 }

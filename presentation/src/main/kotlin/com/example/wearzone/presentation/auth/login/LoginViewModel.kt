@@ -2,6 +2,7 @@ package com.example.wearzone.presentation.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.usecase.CheckEmailVerifiedUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginWithEmailUseCase: LoginWithEmailUseCase,
-    private val loginWithGoogleUseCase: LoginWithGoogleUseCase
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
+    private val checkEmailVerifiedUseCase: CheckEmailVerifiedUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -49,14 +51,14 @@ class LoginViewModel @Inject constructor(
             is LoginUiIntent.OnGoogleSignInResult -> {
                 loginWithGoogle(intent.idToken)
             }
-            is LoginUiIntent.OnAppleSignInClicked -> {
-                sendEffect(LoginUiEffect.ShowSnackbar("Apple Sign-In coming soon!"))
+            is LoginUiIntent.OnGuestModeClicked -> {
+                sendEffect(LoginUiEffect.NavigateToHome)
             }
             is LoginUiIntent.OnRegisterClicked -> {
                 sendEffect(LoginUiEffect.NavigateToRegister)
             }
             is LoginUiIntent.OnForgotPasswordClicked -> {
-                sendEffect(LoginUiEffect.ShowSnackbar("Forgot Password coming soon!"))
+                sendEffect(LoginUiEffect.NavigateToForgotPassword)
             }
         }
     }
@@ -70,29 +72,51 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             loginWithEmailUseCase(currentForm.email, currentForm.password)
-                .onSuccess {
-                    _uiState.value = LoginUiState.Idle
-                    sendEffect(LoginUiEffect.NavigateToHome)
+                .onSuccess { user ->
+                    checkEmailVerifiedUseCase()
+                        .onSuccess { isVerified ->
+                            _uiState.value = LoginUiState.Idle
+                            if (isVerified) {
+                                sendEffect(LoginUiEffect.NavigateToHome)
+                            } else {
+                                sendEffect(LoginUiEffect.NavigateToEmailVerification(user.email))
+                            }
+                        }
+                        .onFailure { error ->
+                            _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Verification check failed")
+                        }
                 }
                 .onFailure { error ->
                     _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Login failed")
                 }
         }
+
     }
 
     private fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             loginWithGoogleUseCase(idToken)
-                .onSuccess {
-                    _uiState.value = LoginUiState.Idle
-                    sendEffect(LoginUiEffect.NavigateToHome)
+                .onSuccess { user ->
+                    checkEmailVerifiedUseCase()
+                        .onSuccess { isVerified ->
+                            _uiState.value = LoginUiState.Idle
+                            if (isVerified) {
+                                sendEffect(LoginUiEffect.NavigateToHome)
+                            } else {
+                                sendEffect(LoginUiEffect.NavigateToEmailVerification(user.email))
+                            }
+                        }
+                        .onFailure { error ->
+                            _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Verification check failed")
+                        }
                 }
                 .onFailure { error ->
                     _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Google Sign-In failed")
                 }
         }
     }
+
 
     private fun sendEffect(effect: LoginUiEffect) {
         viewModelScope.launch {

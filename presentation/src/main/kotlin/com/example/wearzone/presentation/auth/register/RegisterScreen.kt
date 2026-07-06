@@ -50,6 +50,7 @@ import com.example.wearzone.presentation.common.toMessage
 fun RegisterScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToEmailVerification: (String) -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,6 +64,7 @@ fun RegisterScreen(
             when (effect) {
                 is RegisterUiEffect.NavigateToHome -> onNavigateToHome()
                 is RegisterUiEffect.NavigateToLogin -> onNavigateToLogin()
+                is RegisterUiEffect.NavigateToEmailVerification -> onNavigateToEmailVerification(effect.email)
                 is RegisterUiEffect.ShowSnackbar -> {
                     val message = effect.error?.toMessage(context) ?: registerFailed
                     snackbarHostState.showSnackbar(message)

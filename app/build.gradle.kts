@@ -50,6 +50,10 @@ android {
 
         val paymobSecretKey = localProperties.getProperty("PAYMOB_SECRET_KEY", "")
         buildConfigField("String", "PAYMOB_SECRET_KEY", "\"$paymobSecretKey\"")
+
+        val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
     buildTypes {

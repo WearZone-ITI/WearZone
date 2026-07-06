@@ -28,6 +28,12 @@ import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.collections.immutable.ImmutableList
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.getValue
+
 @Composable
 fun ImageCarousel(
     images: ImmutableList<String>,
@@ -56,21 +62,31 @@ fun ImageCarousel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center
+                    .padding(bottom = 56.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 repeat(images.size) { iteration ->
-                    val color = if (pagerState.currentPage == iteration) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        AppTheme.colors.textSecondary.copy(alpha = 0.5f)
-                    }
+                    val isActive = pagerState.currentPage == iteration
+                    val width by animateDpAsState(
+                        targetValue = if (isActive) 18.dp else 8.dp,
+                        label = "width"
+                    )
+                    val color by animateColorAsState(
+                        targetValue = if (isActive) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                        },
+                        label = "color"
+                    )
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .clip(CircleShape)
                             .background(color)
-                            .size(8.dp)
+                            .width(width)
+                            .height(8.dp)
                     )
                 }
             }

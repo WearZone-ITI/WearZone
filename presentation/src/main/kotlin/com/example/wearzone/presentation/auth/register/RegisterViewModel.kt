@@ -91,7 +91,7 @@ class RegisterViewModel @Inject constructor(
                             displayName = user.displayName?:"",
                         ),
                     )
-                    _effects.send(RegisterUiEffect.NavigateToHome)
+                    _effects.send(RegisterUiEffect.NavigateToEmailVerification(user.email))
                 },
                 onFailure = { throwable ->
                     val message = (throwable as? ValidationException)?.error
@@ -99,6 +99,7 @@ class RegisterViewModel @Inject constructor(
                     _effects.send(RegisterUiEffect.ShowSnackbar(message))
                 },
             )
+
         }
     }
 }

@@ -27,6 +27,8 @@ kotlinxCoroutinesPlayServices = "1.11.0"
 kotlinxCoroutinesCore = "1.8.0"
 coil = "3.2.0"
 hiltNavigationCompose = "1.3.0"
+mapboxMaps = "11.19.0"
+playServicesLocation = "21.4.0"
 # Aalaa
 
 
@@ -43,6 +45,8 @@ mockk = "1.13.12"
 turbine = "1.1.0"
 kotlinxCoroutinesTest = "1.9.0"
 #Ahmed
+lottie = "6.4.0"
+#Ahmed
 
 #Hend
 javaxInject = "1"
@@ -50,6 +54,7 @@ uiGraphics = "1.11.3"
 foundation = "1.11.3"
 playServicesAdsApi = "25.4.0"
 benchmarkTraceprocessor = "1.4.1"
+tvMaterial = "1.1.0"
 #Hend
 
 [libraries]
@@ -102,6 +107,9 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+mapbox-maps-android = { module = "com.mapbox.maps:android-ndk27", version.ref = "mapboxMaps" }
+mapbox-maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapboxMaps" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 # Aalaa
 #Ahmed
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -116,6 +124,8 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 #Ahmed
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
+#Ahmed
 
 #Hend
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
@@ -125,6 +135,7 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", ve
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 androidx-benchmark-traceprocessor = { group = "androidx.benchmark", name = "benchmark-traceprocessor", version.ref = "benchmarkTraceprocessor" }
+androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
 #Hend
 
 [plugins]

@@ -41,4 +41,7 @@ class RecentSearchRepositoryImpl @Inject constructor(
     override suspend fun clearRecentSearches(): Result<Unit> = withContext(ioDispatcher) {
         runCatching { dao.clearRecentSearches() }
     }
+
+    private fun RecentSearchEntity.toDomain(): RecentSearch =
+        RecentSearch(query = query, searchedAt = searchedAt)
 }

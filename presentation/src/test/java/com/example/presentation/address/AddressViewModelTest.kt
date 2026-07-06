@@ -7,15 +7,25 @@ import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.model.AddressInput
+import com.example.wearzone.domain.customer.address.model.AddressCoordinates
+import com.example.wearzone.domain.customer.address.model.AddressSuggestion
+import com.example.wearzone.domain.customer.address.model.Country
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
+import com.example.wearzone.domain.customer.address.repository.IAddressLookupRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
+import com.example.wearzone.domain.customer.address.repository.ICountryRepository
+import com.example.wearzone.domain.customer.address.repository.ICurrentLocationRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
 import com.example.wearzone.domain.customer.address.usecase.DeleteCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCountriesUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentAddressCoordinatesUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
+import com.example.wearzone.domain.customer.address.usecase.ReverseGeocodeAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.SearchAddressSuggestionsUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
 import com.example.wearzone.presentation.address.form.AddressFormUiIntent
@@ -27,6 +37,7 @@ import com.example.wearzone.presentation.address.list.AddressListViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -124,7 +135,99 @@ class AddressViewModelTest {
         assertEquals(1, repository.setDefaultCalls)
         assertEquals(CUSTOMER_ID, repository.lastCreateCustomerId)
         assertEquals(CUSTOMER_ID, repository.lastSetDefaultCustomerId)
-        assertEquals("+2001012345678", repository.lastCreateInput?.phone)
+        assertEquals("+201012345678", repository.lastCreateInput?.phone)
+    }
+
+    @Test
+    fun `selecting another country changes phone normalization`() = runTest {
+        val repository = FakeCustomerAddressRepository()
+        val viewModel = createAddressFormViewModel(repository)
+
+        fillValidAddress(viewModel)
+        viewModel.handleIntent(AddressFormUiIntent.OnCountrySelected("SA"))
+        viewModel.handleIntent(AddressFormUiIntent.OnPhoneChanged("+966512345678"))
+        viewModel.handleIntent(AddressFormUiIntent.OnSaveClicked)
+        advanceUntilIdle()
+
+        assertEquals("+966512345678", repository.lastCreateInput?.phone)
+        assertEquals("Saudi Arabia", repository.lastCreateInput?.country)
+    }
+
+    @Test
+    fun `selecting address suggestion fills address fields and country`() = runTest {
+        val lookupRepository = FakeAddressLookupRepository(
+            suggestions = listOf(
+                AddressSuggestion(
+                    id = "mapbox.1",
+                    title = "King Fahd Road",
+                    subtitle = "King Fahd Road, Riyadh, Saudi Arabia",
+                    address1 = "King Fahd Road",
+                    city = "Riyadh",
+                    province = "Riyadh Province",
+                    countryName = "Saudi Arabia",
+                    countryCode = "SA",
+                    postalCode = "12271",
+                    coordinates = AddressCoordinates(latitude = 24.7136, longitude = 46.6753),
+                )
+            ),
+        )
+        val viewModel = createAddressFormViewModel(
+            repository = FakeCustomerAddressRepository(),
+            lookupRepository = lookupRepository,
+        )
+
+        viewModel.handleIntent(AddressFormUiIntent.OnInitialize(null))
+        advanceUntilIdle()
+        viewModel.handleIntent(AddressFormUiIntent.OnAddressSearchQueryChanged("King Fahd"))
+        advanceUntilIdle()
+        viewModel.handleIntent(AddressFormUiIntent.OnAddressSuggestionSelected("mapbox.1"))
+
+        val state = viewModel.uiState.value
+        assertEquals("King Fahd Road", state.address1)
+        assertEquals("Riyadh", state.city)
+        assertEquals("SA", state.countryIsoCode)
+        assertEquals("+966", state.countryDialCode)
+    }
+
+    @Test
+    fun `map picker suggestion fills form only after confirm`() = runTest {
+        val lookupRepository = FakeAddressLookupRepository(
+            suggestions = listOf(
+                AddressSuggestion(
+                    id = "mapbox.2",
+                    title = "Tahlia Street",
+                    subtitle = "Tahlia Street, Riyadh, Saudi Arabia",
+                    address1 = "Tahlia Street",
+                    city = "Riyadh",
+                    province = "Riyadh Province",
+                    countryName = "Saudi Arabia",
+                    countryCode = "SA",
+                    postalCode = "12241",
+                    coordinates = AddressCoordinates(latitude = 24.7000, longitude = 46.6800),
+                )
+            ),
+        )
+        val viewModel = createAddressFormViewModel(
+            repository = FakeCustomerAddressRepository(),
+            lookupRepository = lookupRepository,
+        )
+
+        viewModel.handleIntent(AddressFormUiIntent.OnInitialize(null))
+        advanceUntilIdle()
+        viewModel.handleIntent(AddressFormUiIntent.OnPickOnMapClicked)
+        viewModel.handleIntent(AddressFormUiIntent.OnAddressSearchQueryChanged("Tahlia"))
+        advanceUntilIdle()
+        viewModel.handleIntent(AddressFormUiIntent.OnAddressSuggestionSelected("mapbox.2"))
+
+        assertEquals("", viewModel.uiState.value.address1)
+        assertEquals("Tahlia Street", viewModel.uiState.value.mapPickerSelectedLocation?.title)
+
+        viewModel.handleIntent(AddressFormUiIntent.OnConfirmMapLocationClicked)
+
+        val state = viewModel.uiState.value
+        assertEquals("Tahlia Street", state.address1)
+        assertEquals("Riyadh", state.city)
+        assertEquals("SA", state.countryIsoCode)
     }
 
     @Test
@@ -137,8 +240,9 @@ class AddressViewModelTest {
         assertEquals(null, repository.lastGetAddressesCustomerId)
     }
 
-    private fun fillValidAddress(viewModel: AddressFormViewModel) {
+    private fun TestScope.fillValidAddress(viewModel: AddressFormViewModel) {
         viewModel.handleIntent(AddressFormUiIntent.OnInitialize(null))
+        advanceUntilIdle()
         viewModel.handleIntent(AddressFormUiIntent.OnRecipientNameChanged("Mobile Customer"))
         viewModel.handleIntent(AddressFormUiIntent.OnPhoneChanged("01012345678"))
         viewModel.handleIntent(AddressFormUiIntent.OnAddress1Changed("456 Mobile App Avenue"))
@@ -175,10 +279,17 @@ class AddressViewModelTest {
         repository: FakeCustomerAddressRepository = FakeCustomerAddressRepository(),
         provider: ICustomerIdProvider = FakeCustomerIdProvider(),
         user: User? = USER,
+        countryRepository: ICountryRepository = FakeCountryRepository(),
+        lookupRepository: IAddressLookupRepository = FakeAddressLookupRepository(),
+        locationRepository: ICurrentLocationRepository = FakeCurrentLocationRepository(),
     ): AddressFormViewModel =
         AddressFormViewModel(
             addressUseCases = createUseCases(repository, provider),
             getAuthAccessStateUseCase = createAuthAccessUseCase(provider, user),
+            getCountriesUseCase = GetCountriesUseCase(countryRepository),
+            searchAddressSuggestionsUseCase = SearchAddressSuggestionsUseCase(lookupRepository),
+            reverseGeocodeAddressUseCase = ReverseGeocodeAddressUseCase(lookupRepository),
+            getCurrentAddressCoordinatesUseCase = GetCurrentAddressCoordinatesUseCase(locationRepository),
         )
 
     private fun createAuthAccessUseCase(
@@ -276,6 +387,35 @@ class AddressViewModelTest {
             deleteCalls += 1
             return Result.success(Unit)
         }
+    }
+
+    private class FakeCountryRepository : ICountryRepository {
+        override suspend fun getCountries(): Result<List<Country>> =
+            Result.success(
+                listOf(
+                    Country("Egypt", "EG", "+20", 10, 10, "1012345678"),
+                    Country("Saudi Arabia", "SA", "+966", 9, 9, "512345678"),
+                )
+            )
+    }
+
+    private class FakeAddressLookupRepository(
+        private val suggestions: List<AddressSuggestion> = emptyList(),
+        private val reverseSuggestion: AddressSuggestion? = suggestions.firstOrNull(),
+    ) : IAddressLookupRepository {
+        override suspend fun searchAddressSuggestions(
+            query: String,
+            countryIsoCode: String?,
+        ): Result<List<AddressSuggestion>> = Result.success(suggestions)
+
+        override suspend fun reverseGeocode(
+            coordinates: AddressCoordinates,
+        ): Result<AddressSuggestion?> = Result.success(reverseSuggestion)
+    }
+
+    private class FakeCurrentLocationRepository : ICurrentLocationRepository {
+        override suspend fun getCurrentCoordinates(): Result<AddressCoordinates> =
+            Result.success(AddressCoordinates(latitude = 30.0444, longitude = 31.2357))
     }
 
     private companion object {
