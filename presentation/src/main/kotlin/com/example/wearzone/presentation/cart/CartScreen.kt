@@ -180,8 +180,8 @@ private fun CartContent(
         bottomBar = {
             if (content != null) {
                 PriceSummaryBar(
-                    subtotal = content.subtotal,
-                    total = content.total,
+                    subtotalAmount = content.subtotalAmount,
+                    totalAmount = content.totalAmount,
                     onCheckout = { onIntent(CartUiIntent.OnCheckoutClicked) },
                 )
             }

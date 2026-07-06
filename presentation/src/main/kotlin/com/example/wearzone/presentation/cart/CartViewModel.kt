@@ -89,12 +89,11 @@ class CartViewModel @Inject constructor(
         if (items.isEmpty()) return CartUiState.Empty
 
         val subtotal = items.sumOf { it.price * it.quantity }
-        val currencyCode = items.firstOrNull()?.currencyCode.orEmpty()
         return CartUiState.Content(
             items = items.map { it.toUiModel() }.toImmutableList(),
             itemCount = items.sumOf { it.quantity },
-            subtotal = formatMoney(subtotal, currencyCode),
-            total = formatMoney(subtotal, currencyCode),
+            subtotalAmount = subtotal,
+            totalAmount = subtotal,
         )
     }
 
@@ -195,7 +194,7 @@ class CartViewModel @Inject constructor(
         productId = productId,
         title = title,
         vendor = vendor,
-        price = formatMoney(price, currencyCode),
+        basePriceEgp = price,
         quantity = quantity,
         maxQuantity = maxQuantity,
         imageUrl = imageUrl,

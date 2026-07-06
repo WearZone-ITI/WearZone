@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -116,7 +117,7 @@ fun ProductCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${product.price} ${product.currencyCode}",
+                        text = formatPrice(product.price),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = AppTheme.colors.textPrimary,
                     )

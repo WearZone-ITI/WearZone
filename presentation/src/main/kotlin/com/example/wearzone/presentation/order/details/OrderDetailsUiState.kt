@@ -26,10 +26,10 @@ data class OrderDetailsUiModel(
     val items: ImmutableList<OrderDetailsItemUiModel>,
     val shippingAddress: OrderDetailsAddressUiModel?,
     val paymentMethods: ImmutableList<String>,
-    val subtotal: String,
-    val shipping: String,
-    val tax: String,
-    val total: String,
+    val subtotalAmount: Double,
+    val shippingAmount: Double,
+    val taxAmount: Double,
+    val totalAmount: Double,
     val canCancel: Boolean,
 )
 
@@ -51,7 +51,7 @@ data class OrderDetailsItemUiModel(
     val title: String,
     val variantInfo: String,
     val quantity: Int,
-    val formattedPrice: String,
+    val basePriceEgp: Double,
     val imageUrl: String?,
 )
 

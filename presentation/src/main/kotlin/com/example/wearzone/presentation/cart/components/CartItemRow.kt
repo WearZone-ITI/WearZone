@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.presentation.cart.CartItemUiModel
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -125,7 +126,7 @@ fun CartItemRow(
                             onDecrease = onDecrease,
                         )
                         Text(
-                            text = item.price,
+                            text = formatPrice(item.basePriceEgp),
                             color = AppTheme.colors.textPrimary,
                             style = MaterialTheme.typography.titleLarge,
                         )
