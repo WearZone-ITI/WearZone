@@ -7,6 +7,7 @@ import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
 import com.example.wearzone.domain.common.DataResult
+import com.example.wearzone.domain.common.DomainError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -79,9 +80,9 @@ class ChatViewModel @Inject constructor(
             _uiState.update { it.copy(isSending = false) }
             if (result is DataResult.Error) {
                 val errorMsg = when (val err = result.error) {
-                    is com.example.wearzone.domain.common.DomainError.Network -> err.exception.message
-                    is com.example.wearzone.domain.common.DomainError.Server -> err.message
-                    is com.example.wearzone.domain.common.DomainError.Unknown -> err.exception.message
+                    is DomainError.Network -> err.exception.message
+                    is DomainError.Server -> err.message
+                    is DomainError.Unknown -> err.exception.message
                 } ?: "Failed to send message"
                 _uiState.update { it.copy(error = errorMsg) }
                 _uiEffect.send(ChatUiEffect.ShowSnackbar(errorMsg))

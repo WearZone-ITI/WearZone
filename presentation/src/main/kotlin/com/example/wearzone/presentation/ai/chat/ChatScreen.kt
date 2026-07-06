@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -471,7 +472,7 @@ fun ProductCardInChat(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = AppTheme.colors.card),
-        border = androidx.compose.foundation.BorderStroke(1.dp, AppTheme.colors.divider)
+        border = BorderStroke(1.dp, AppTheme.colors.divider)
     ) {
         Row(
             modifier = Modifier.padding(10.dp),

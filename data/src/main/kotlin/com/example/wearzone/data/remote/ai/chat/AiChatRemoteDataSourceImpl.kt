@@ -9,6 +9,8 @@ import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
 import com.example.wearzone.domain.product.usecase.SearchProductsUseCase
 import com.example.wearzone.domain.search.model.SearchFilters
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -116,7 +118,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     )
 
                     // Log the exact outgoing JSON payload string before network request
-                    val requestJson = com.google.gson.Gson().toJson(request)
+                    val requestJson = Gson().toJson(request)
                     Log.d("GROQ_CHAT_DEBUG", "Outgoing JSON payload: $requestJson")
 
                     val response = try {
@@ -130,7 +132,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     val rawCode = response.code()
                     val rawHeaders = response.headers().toString()
                     val rawBodyString = if (response.isSuccessful) {
-                        com.google.gson.Gson().toJson(response.body())
+                        Gson().toJson(response.body())
                     } else {
                         response.errorBody()?.string() ?: ""
                     }
@@ -190,7 +192,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         return when (toolCall.function.name) {
             "searchProducts" -> {
                 val argsJson = try {
-                    com.google.gson.JsonParser.parseString(toolCall.function.arguments).asJsonObject
+                    JsonParser.parseString(toolCall.function.arguments).asJsonObject
                 } catch (e: Exception) {
                     null
                 }
@@ -199,7 +201,7 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
             }
             "getProductDetail" -> {
                 val argsJson = try {
-                    com.google.gson.JsonParser.parseString(toolCall.function.arguments).asJsonObject
+                    JsonParser.parseString(toolCall.function.arguments).asJsonObject
                 } catch (e: Exception) {
                     null
                 }
