@@ -98,4 +98,12 @@ class AuthRepositoryImpl @Inject constructor(
                 }
             }
         }
+
+    override suspend fun sendPasswordResetEmail(email: String): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                remoteDataSource.sendPasswordResetEmail(email)
+            }
+        }
+
 }

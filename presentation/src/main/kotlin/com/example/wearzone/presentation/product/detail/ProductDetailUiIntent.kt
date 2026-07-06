@@ -8,4 +8,6 @@ sealed interface ProductDetailUiIntent {
     data object OnConfirmRemove : ProductDetailUiIntent
     data object OnCancelRemove : ProductDetailUiIntent
     data object OnAddToCartClick : ProductDetailUiIntent
+    data class SubmitReview(val rating: Double, val comment: String) : ProductDetailUiIntent
+    data object OnWriteReviewClick : ProductDetailUiIntent
 }

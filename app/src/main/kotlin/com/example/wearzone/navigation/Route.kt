@@ -70,6 +70,9 @@ sealed interface Route {
     @Serializable
     data object HomeRoute : Route
 
+    @Serializable
+    data object ForgotPasswordRoute : Route
+
 
 
     @Serializable

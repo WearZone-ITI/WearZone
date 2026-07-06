@@ -15,6 +15,7 @@ import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
+import com.example.wearzone.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
@@ -282,6 +283,7 @@ fun NavGraph(
                     navigateToPendingOrMain(Route.LoginRoute)
                 },
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
+                onNavigateToForgotPassword = { navController.navigate(Route.ForgotPasswordRoute) },
             )
         }
 
@@ -406,6 +408,20 @@ fun NavGraph(
                 onNavigateToCart = { navController.navigate(Route.CartRoute) }
             )
         }
+
+        composable<Route.ForgotPasswordRoute> {
+            ForgotPasswordScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.ForgotPasswordRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
+
         // Omar
     }
 }

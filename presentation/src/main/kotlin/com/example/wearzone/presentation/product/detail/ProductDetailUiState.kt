@@ -1,6 +1,7 @@
 package com.example.wearzone.presentation.product.detail
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 sealed interface ProductDetailUiState {
     data object Loading : ProductDetailUiState
@@ -19,6 +20,17 @@ sealed interface ProductDetailUiState {
         val rating: Double,
         val reviewsCount: Int,
         val isFavorite: Boolean,
-        val showRemoveDialog: Boolean = false
+        val showRemoveDialog: Boolean = false,
+        val reviews: ImmutableList<ClientReviewUiModel> = persistentListOf(),
+        val quantityInCart: Int = 0
     ) : ProductDetailUiState
 }
+
+data class ClientReviewUiModel(
+    val id: String,
+    val shopperName: String,
+    val rating: Double,
+    val comment: String,
+    val formattedDate: String
+)
+
