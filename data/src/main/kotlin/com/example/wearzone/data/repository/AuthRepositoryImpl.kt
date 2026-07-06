@@ -110,6 +110,9 @@ class AuthRepositoryImpl @Inject constructor(
         withContext(ioDispatcher) {
             runCatchingCancellable {
                 remoteDataSource.isEmailVerified()
+
+                }
+            }
     override suspend fun sendPasswordResetEmail(email: String): Result<Unit> =
         withContext(ioDispatcher) {
             runCatchingCancellable {
