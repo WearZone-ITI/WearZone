@@ -49,9 +49,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.checkout.components.CheckoutOrderSummaryCard
+import com.example.wearzone.presentation.checkout.components.CreditCardForm
 import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
 import com.example.wearzone.presentation.checkout.components.PaymentMethodCard
 import com.example.wearzone.presentation.checkout.components.PromoCodeCard
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -59,6 +61,8 @@ import kotlinx.coroutines.launch
 fun CheckoutScreen(
     onNavigateBack: () -> Unit,
     onNavigateToOrderHistory: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToAddressList: () -> Unit,
     onNavigateToAddAddress: () -> Unit,
     refreshAfterAddressChange: Boolean = false,
@@ -97,6 +101,8 @@ fun CheckoutScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
     )
 
     if (showConfirmDialog) {
@@ -116,6 +122,8 @@ private fun CheckoutContent(
     uiState: CheckoutUiState,
     snackbarHostState: SnackbarHostState,
     onIntent: (CheckoutUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
 ) {
     val content = uiState as? CheckoutUiState.Content
 
@@ -169,6 +177,11 @@ private fun CheckoutContent(
                     modifier = Modifier.align(Alignment.Center),
                 )
                 CheckoutUiState.Empty -> CheckoutEmptyContent()
+                CheckoutUiState.SignInRequired -> CheckoutSignInRequiredContent(
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onContinueBrowsing = { onIntent(CheckoutUiIntent.OnBackClicked) },
+                )
                 is CheckoutUiState.Error -> CheckoutErrorContent(
                     messageRes = uiState.messageRes,
                     onRetry = { onIntent(CheckoutUiIntent.OnRetry) },
@@ -180,6 +193,18 @@ private fun CheckoutContent(
             }
         }
     }
+}
+
+@Composable
+private fun CheckoutSignInRequiredContent(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
+) {
+    SignInRequiredDialog(
+        onSignInRegister = onNavigateToLogin,
+        onContinueBrowsing = onContinueBrowsing,
+    )
 }
 
 @Composable
@@ -204,7 +229,26 @@ private fun CheckoutLoadedContent(
             PaymentMethodCard(
                 paymentMethodLabelRes = state.paymentMethod.labelRes(),
                 paymentMethodDescriptionRes = state.paymentMethod.descriptionRes(),
+                onClick = {
+                    val next = if (state.paymentMethod == CheckoutPaymentMethodUi.CashOnDelivery) {
+                        CheckoutPaymentMethodUi.CreditCard
+                    } else {
+                        CheckoutPaymentMethodUi.CashOnDelivery
+                    }
+                    onIntent(CheckoutUiIntent.OnPaymentMethodSelected(next))
+                }
             )
+        }
+        if (state.paymentMethod == CheckoutPaymentMethodUi.CreditCard) {
+            item {
+                CreditCardForm(
+                    cardInfo = state.cardInfo,
+                    onNumberChange = { onIntent(CheckoutUiIntent.OnCardNumberChanged(it)) },
+                    onNameChange = { first, last -> onIntent(CheckoutUiIntent.OnCardHolderNameChanged(first, last)) },
+                    onExpiryChange = { month, year -> onIntent(CheckoutUiIntent.OnCardExpiryChanged(month, year)) },
+                    onCvvChange = { onIntent(CheckoutUiIntent.OnCardCvvChanged(it)) },
+                )
+            }
         }
         item {
             PromoCodeCard(
@@ -254,7 +298,8 @@ private fun CheckoutBottomBar(
             enabled = !state.isPlacingOrder &&
                 !state.isApplyingDiscount &&
                 !state.isLoadingAddress &&
-                state.deliveryAddress != null,
+                !state.isProcessingPayment &&
+                state.deliveryAddress != null ,
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppTheme.colors.selected,
@@ -264,7 +309,7 @@ private fun CheckoutBottomBar(
                 .fillMaxWidth()
                 .height(56.dp),
         ) {
-            if (state.isPlacingOrder) {
+            if (state.isPlacingOrder || state.isProcessingPayment) {
                 CircularProgressIndicator(
                     color = AppTheme.colors.onAccent,
                     strokeWidth = 2.dp,

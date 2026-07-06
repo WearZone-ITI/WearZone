@@ -7,6 +7,9 @@ sealed interface Route {
 
     // Aalaa
     @Serializable
+    data object SplashRoute : Route
+
+    @Serializable
     data object OnboardingRoute : Route
 
     @Serializable
@@ -70,6 +73,11 @@ sealed interface Route {
     data object MainRoute : Route
     @Serializable
     data object HomeRoute : Route
+
+    @Serializable
+    data object EmailVerificationRoute : Route
+    @Serializable
+    data object ForgotPasswordRoute : Route
 
 
 

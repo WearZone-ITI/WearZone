@@ -20,3 +20,15 @@ class AddressResponseParseException :
 
 class AddressNetworkException :
     IllegalStateException("Address network error.")
+
+class AddressLookupUnavailableException :
+    IllegalStateException("Address lookup is unavailable.")
+
+class AddressLookupTokenMissingException :
+    IllegalStateException("Mapbox public access token is missing or invalid.")
+
+class CurrentLocationPermissionDeniedException :
+    IllegalStateException("Location permission was denied.")
+
+class CurrentLocationUnavailableException :
+    IllegalStateException("Current location is unavailable.")

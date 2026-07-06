@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.FullScreenLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,13 +42,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.cart.components.CartItemRow
 import com.example.wearzone.presentation.cart.components.EmptyCartContent
 import com.example.wearzone.presentation.cart.components.PriceSummaryBar
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -56,18 +56,22 @@ fun CartScreen(
     viewModel: CartViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onNavigateToCheckout: () -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var pendingRemoveVariantId by remember { mutableStateOf<String?>(null) }
     var showClearCartDialog by remember { mutableStateOf(false) }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 CartUiEffect.NavigateToLogin -> onNavigateToLogin()
                 CartUiEffect.NavigateToCheckout -> onNavigateToCheckout()
+                CartUiEffect.ShowSignInRequired -> showSignInRequiredDialog = true
                 CartUiEffect.ShowClearCartConfirmation -> showClearCartDialog = true
                 is CartUiEffect.ShowRemoveConfirmation -> pendingRemoveVariantId = effect.variantId
                 is CartUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
@@ -79,7 +83,10 @@ fun CartScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onNavigateBack = onNavigateBack,
+        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToRegister = onNavigateToRegister,
         onIntent = viewModel::handleIntent,
+        onContinueShopping = onContinueShopping,
     )
 
     pendingRemoveVariantId?.let { variantId ->
@@ -107,6 +114,17 @@ fun CartScreen(
             onDismiss = { showClearCartDialog = false },
         )
     }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            messageRes = R.string.sign_in_required_cart_message,
+            onSignInRegister = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +133,10 @@ private fun CartContent(
     uiState: CartUiState,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     onIntent: (CartUiIntent) -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val content = uiState as? CartUiState.Content
 
@@ -126,8 +147,7 @@ private fun CartContent(
                     Text(
                         text = stringResource(id = R.string.app_name),
                         color = AppTheme.colors.textPrimary,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -176,16 +196,14 @@ private fun CartContent(
                 .background(AppTheme.colors.background),
         ) {
             when (uiState) {
-                CartUiState.Loading -> CircularProgressIndicator(
-                    color = AppTheme.colors.selected,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-                CartUiState.LoginRequired -> Text(
-                    text = stringResource(id = R.string.cart_login_required),
-                    color = AppTheme.colors.textSecondary,
-                    modifier = Modifier.align(Alignment.Center),
+                CartUiState.Loading -> FullScreenLoader(modifier = Modifier.align(Alignment.Center))
+                CartUiState.LoginRequired -> SignInRequiredDialog(
+                    messageRes = R.string.sign_in_required_cart_message,
+                    onSignInRegister = onNavigateToLogin,
+                    onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(
+                    onContinueShopping = onContinueShopping,
                     modifier = Modifier.padding(horizontal = 32.dp),
                 )
                 is CartUiState.Error -> CartErrorContent(
@@ -224,7 +242,7 @@ private fun CartItemsContent(
                 Text(
                     text = stringResource(id = R.string.cart_item_count_format, state.itemCount),
                     color = AppTheme.colors.textSecondary,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
         }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
@@ -134,9 +134,7 @@ fun PromoAdsCarousel(
                         Text(
                             text = "-$discountPercent%",
                             color = colors.onAccent,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-0.5).sp
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black)
                         )
 
                         Spacer(modifier = Modifier.width(6.dp))
@@ -150,9 +148,7 @@ fun PromoAdsCarousel(
                             Text(
                                 text = stringResource(R.string.promo_discount_off).uppercase(),
                                 color = Color.White,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 0.5.sp
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black)
                             )
                         }
                     }
@@ -170,9 +166,7 @@ fun PromoAdsCarousel(
                     Text(
                         text = stringResource(R.string.promo_limited_time_sale).uppercase(),
                         color = glassTextColor,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
@@ -185,8 +179,7 @@ fun PromoAdsCarousel(
                     Text(
                         text = product.title,
                         color = glassTextColor,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         maxLines = 1
                     )
 
@@ -201,23 +194,20 @@ fun PromoAdsCarousel(
                             Text(
                                 text = String.format(Locale.US, "%.0f", realPrice),
                                 color = glassTextColor,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 24.sp
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = product.currencyCode,
                                 color = colors.accent,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 modifier = Modifier.padding(bottom = 3.dp)
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = String.format(Locale.US, "%.0f %s", strikedPrice, product.currencyCode),
                                 color = glassTextColor.copy(alpha = 0.5f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal,
+                                style = MaterialTheme.typography.bodyMedium,
                                 textDecoration = TextDecoration.LineThrough,
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
@@ -234,8 +224,7 @@ fun PromoAdsCarousel(
                             Text(
                                 text = stringResource(R.string.promo_shop_now),
                                 color = glassTextColor,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                             )
                         }
                     }

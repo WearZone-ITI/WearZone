@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -55,7 +56,7 @@ fun QuantitySelector(
         Text(
             text = quantity.toString(),
             color = AppTheme.colors.textPrimary,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
         )
         IconButton(
             onClick = onIncrease,

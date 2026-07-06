@@ -4,5 +4,8 @@ sealed interface LoginUiEffect {
     data object NavigateToHome : LoginUiEffect
     data object NavigateToRegister : LoginUiEffect
     data object LaunchGoogleSignIn : LoginUiEffect
+    data class NavigateToEmailVerification(val email: String) : LoginUiEffect
+    data object NavigateToForgotPassword : LoginUiEffect
+
     data class ShowSnackbar(val message: String) : LoginUiEffect
 }

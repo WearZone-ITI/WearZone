@@ -11,6 +11,9 @@ import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
+import com.example.wearzone.domain.auth.model.User
+import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.presentation.order.details.OrderDetailsUiEffect
@@ -34,7 +37,7 @@ class OrderDetailsViewModelTest {
     @Test
     fun `loading order resolves current customer id and becomes content`() = runTest {
         val repository = FakeOrderHistoryRepository(detailsResult = Result.success(orderDetails(canCancel = true)))
-        val viewModel = OrderDetailsViewModel(createUseCases(repository))
+        val viewModel = createViewModel(repository)
 
         viewModel.handleIntent(OrderDetailsUiIntent.LoadOrder(ORDER_ID))
         advanceUntilIdle()
@@ -48,7 +51,7 @@ class OrderDetailsViewModelTest {
     @Test
     fun `cancel click emits confirmation dialog effect`() = runTest {
         val repository = FakeOrderHistoryRepository(detailsResult = Result.success(orderDetails(canCancel = true)))
-        val viewModel = OrderDetailsViewModel(createUseCases(repository))
+        val viewModel = createViewModel(repository)
         viewModel.handleIntent(OrderDetailsUiIntent.LoadOrder(ORDER_ID))
         advanceUntilIdle()
 
@@ -66,7 +69,7 @@ class OrderDetailsViewModelTest {
             detailsResult = Result.success(orderDetails(canCancel = true)),
             cancelResult = Result.success(orderDetails(canCancel = false, status = OrderStatus.Cancelled)),
         )
-        val viewModel = OrderDetailsViewModel(createUseCases(repository))
+        val viewModel = createViewModel(repository)
         viewModel.handleIntent(OrderDetailsUiIntent.LoadOrder(ORDER_ID))
         advanceUntilIdle()
 
@@ -81,6 +84,18 @@ class OrderDetailsViewModelTest {
         }
     }
 
+    @Test
+    fun `guest order details shows sign in required and skips details load`() = runTest {
+        val repository = FakeOrderHistoryRepository(detailsResult = Result.success(orderDetails(canCancel = true)))
+        val viewModel = createViewModel(repository = repository, user = null)
+
+        viewModel.handleIntent(OrderDetailsUiIntent.LoadOrder(ORDER_ID))
+        advanceUntilIdle()
+
+        assertEquals(OrderDetailsUiState.SignInRequired, viewModel.uiState.value)
+        assertEquals(null, repository.lastDetailsCustomerId)
+    }
+
     private fun createUseCases(
         repository: FakeOrderHistoryRepository,
         provider: ICustomerIdProvider = FakeCustomerIdProvider(Result.success(CUSTOMER_ID)),
@@ -92,10 +107,54 @@ class OrderDetailsViewModelTest {
             cancelOrder = CancelOrderUseCase(repository),
         )
 
+    private fun createViewModel(
+        repository: FakeOrderHistoryRepository,
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(Result.success(CUSTOMER_ID)),
+        user: User? = USER,
+    ): OrderDetailsViewModel =
+        OrderDetailsViewModel(
+            orderHistoryUseCases = createUseCases(repository, provider),
+            getAuthAccessStateUseCase = createAuthAccessUseCase(provider, user),
+        )
+
+    private fun createAuthAccessUseCase(
+        provider: ICustomerIdProvider = FakeCustomerIdProvider(Result.success(CUSTOMER_ID)),
+        user: User? = USER,
+    ): GetAuthAccessStateUseCase =
+        GetAuthAccessStateUseCase(
+            authRepository = FakeAuthRepository(user),
+            customerIdProvider = provider,
+        )
+
     private class FakeCustomerIdProvider(
         private val result: Result<Long>,
     ) : ICustomerIdProvider {
         override suspend fun getCurrentCustomerId(): Result<Long> = result
+    }
+
+    private class FakeAuthRepository(
+        private val currentUser: User?,
+    ) : IAuthRepository {
+        override suspend fun loginWithEmail(email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun loginWithGoogleCredential(idToken: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override suspend fun isLoggedIn(): Boolean = currentUser != null
+
+        override suspend fun getCurrentUser(): User? = currentUser
+
+        override suspend fun logout(): Result<Unit> = Result.success(Unit)
+
+        override suspend fun register(name: String, email: String, password: String): Result<User> =
+            Result.failure(UnsupportedOperationException())
+
+        override fun observeOnboardingCompleted(): kotlinx.coroutines.flow.Flow<Boolean> =
+            kotlinx.coroutines.flow.flowOf(false)
+
+        override suspend fun setOnboardingCompleted(completed: Boolean): Result<Unit> =
+            Result.success(Unit)
     }
 
     private class FakeOrderHistoryRepository(
@@ -123,6 +182,12 @@ class OrderDetailsViewModelTest {
     private companion object {
         const val ORDER_ID = 99L
         const val CUSTOMER_ID = 9307871641828L
+        val USER = User(
+            uid = "firebase-user",
+            email = "user@example.com",
+            displayName = "Mobile Customer",
+            photoUrl = null,
+        )
 
         fun orderDetails(canCancel: Boolean, status: OrderStatus = OrderStatus.Open): OrderDetails =
             OrderDetails(
@@ -150,4 +215,3 @@ class OrderDetailsViewModelTest {
             )
     }
 }
-

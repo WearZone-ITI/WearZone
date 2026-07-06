@@ -2,6 +2,8 @@ package com.example.wearzone.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.common.DataResult
@@ -38,6 +40,7 @@ class SearchViewModel @Inject constructor(
     private val getRecentSearchesUseCase: GetRecentSearchesUseCase,
     private val saveRecentSearchUseCase: SaveRecentSearchUseCase,
     private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
 ) : ViewModel() {
 
@@ -241,7 +244,11 @@ class SearchViewModel @Inject constructor(
     private fun observeCart() {
         viewModelScope.launch {
             observeCartUseCase().collect { cartItems ->
-                val count = cartItems.sumOf { it.quantity }
+                val count = if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
+                    cartItems.sumOf { it.quantity }
+                } else {
+                    0
+                }
                 _uiState.update { state ->
                     state.copy(cartItemCount = count)
                 }

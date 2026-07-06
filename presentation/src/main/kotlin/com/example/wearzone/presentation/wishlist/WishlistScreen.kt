@@ -1,10 +1,10 @@
 package com.example.wearzone.presentation.wishlist
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.TopBar
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
@@ -39,6 +40,9 @@ fun WishlistScreen(
     onNavigateToProductDetail: (String) -> Unit,
     onShowSnackbar: suspend (String) -> Unit,
     onNavigateToCart : ()-> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,19 +101,14 @@ fun WishlistScreen(
             // Content
             when (val state = uiState) {
                 is WishlistUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = AppTheme.colors.selected)
-                    }
+                    ProductGridSkeleton(modifier = Modifier.fillMaxSize())
                 }
                 is WishlistUiState.GuestState -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stringResource(id = R.string.wishlist_sign_in_required),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = AppTheme.colors.textSecondary
-                        )
-                        // TODO: Implement the Guest Modal matching VogueVibe HTML design here later.
-                    }
+                    SignInRequiredDialog(
+                        messageRes = R.string.sign_in_required_wishlist_message,
+                        onSignInRegister = onNavigateToLogin,
+                        onContinueBrowsing = onContinueBrowsing,
+                    )
                 }
                 is WishlistUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -128,7 +127,7 @@ fun WishlistScreen(
                     }
                     
                     if (state.items.isEmpty()) {
-                        WishlistEmptyState()
+                        WishlistEmptyState(onContinueBrowsing = onContinueBrowsing)
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),

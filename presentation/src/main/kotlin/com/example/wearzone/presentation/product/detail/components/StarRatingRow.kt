@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
 
+import com.example.wearzone.presentation.common.theme.AppTheme
+
 @Composable
 fun StarRatingRow(
     rating: Double,
@@ -29,7 +31,7 @@ fun StarRatingRow(
         Icon(
             imageVector = Icons.Default.Star,
             contentDescription = stringResource(id = R.string.content_desc_star_rating),
-            tint = Color(0xFFD4AF37), // Champagne Gold
+            tint = AppTheme.colors.accent, // Dynamic primary gold
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(

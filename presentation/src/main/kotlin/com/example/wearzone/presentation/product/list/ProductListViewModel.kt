@@ -2,6 +2,8 @@ package com.example.wearzone.presentation.product.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
@@ -21,12 +23,19 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
     ) : ViewModel() {
     private var currentCollectionId: Long? = null
     private val cartItemCount: StateFlow<Int> =
         observeCartUseCase()
-            .map { items -> items.sumOf { it.quantity } }
+            .map { items ->
+                if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
+                    items.sumOf { it.quantity }
+                } else {
+                    0
+                }
+            }
             .stateIn(
                 viewModelScope,
                 SharingStarted.Eagerly,

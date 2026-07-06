@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Brand
@@ -47,13 +47,12 @@ fun TopBrandsSection(
         ) {
             Text(
                 text = stringResource(id = R.string.home_top_brands),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 color = AppTheme.colors.textPrimary,
             )
             Text(
                 text = stringResource(id = R.string.home_see_all),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = AppTheme.colors.textSecondary,
                 modifier = Modifier.clickable { onSeeAllClick() }
             )
@@ -96,8 +95,7 @@ fun TopBrandsSection(
 
                     Text(
                         text = brand.title,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                         color = AppTheme.colors.textPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

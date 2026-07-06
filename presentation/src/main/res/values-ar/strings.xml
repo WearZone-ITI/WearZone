@@ -1,5 +1,5 @@
 <resources>
-    <!-- Aalaa  -->
+    <!--  Aalaa   -->
     <string name="onboarding_back">رجوع</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_get_started">ابدأ الآن</string>
@@ -15,8 +15,7 @@
     <string name="onboarding_delivery_moment_title">افتح أناقتك</string>
     <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
     <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
-
-    <!-- Customer Addresses -->
+    <!--  Customer Addresses  -->
     <string name="address_list_title">العناوين المحفوظة</string>
     <string name="address_list_subtitle">أدر وجهات الشحن الخاصة بك.</string>
     <string name="address_refresh">تحديث العناوين</string>
@@ -36,14 +35,49 @@
     <string name="address_edit_title">تعديل العنوان</string>
     <string name="address_contact_information">معلومات التواصل</string>
     <string name="address_delivery_address">عنوان التوصيل</string>
+    <string name="address_details">تفاصيل العنوان</string>
+    <string name="address_optional">اختياري</string>
     <string name="address_recipient_name">اسم المستلم</string>
     <string name="address_recipient_name_hint">الاسم الكامل على الطلب</string>
     <string name="address_country_code">كود الدولة</string>
     <string name="address_country_code_egypt">مصر %1$s</string>
     <string name="address_mobile_number">رقم الهاتف المحمول</string>
-    <string name="address_mobile_number_hint">01XXXXXXXXX</string>
+    <string name="address_mobile_number_hint">رقم الهاتف المحلي</string>
     <string name="address_country">الدولة</string>
-    <string name="address_country_hint">مصر</string>
+    <string name="address_country_hint">اختر الدولة</string>
+    <string name="address_select_country">اختر الدولة</string>
+    <string name="address_country_search">ابحث عن دولة</string>
+    <string name="address_country_no_results">لا توجد دول مطابقة.</string>
+    <string name="address_search_label">البحث عن عنوان</string>
+    <string name="address_search_hint">ابحث عن موقع</string>
+    <string name="address_lookup_no_results">لم يتم العثور على اقتراحات عناوين.</string>
+    <string name="address_lookup_applied">تم تطبيق اقتراح العنوان.</string>
+    <string name="address_lookup_country_not_supported">تم ملء العنوان، لكن هذه الدولة غير موجودة في القائمة بعد.</string>
+    <string name="address_lookup_unavailable">البحث عن العنوان غير متاح. يمكنك إدخال العنوان يدويًا.</string>
+    <string name="address_mapbox_token_missing">لم يتم إعداد Mapbox. أضف MAPBOX_ACCESS_TOKEN إلى local.properties لتفعيل البحث عن العناوين.</string>
+    <string name="address_use_current_location">استخدام الموقع الحالي</string>
+    <string name="address_use_current_location_short">الموقع الحالي</string>
+    <string name="address_current_location_applied">تم تطبيق الموقع الحالي.</string>
+    <string name="address_location_permission_denied">تم رفض إذن الموقع. يمكنك إدخال العنوان يدويًا.</string>
+    <string name="address_location_unavailable">الموقع الحالي غير متاح. تحقق من إعدادات الموقع أو أدخل العنوان يدويًا.</string>
+    <string name="address_location_no_result">تعذر العثور على عنوان لهذا الموقع.</string>
+    <string name="address_choose_delivery_location">اختيار موقع التوصيل</string>
+    <string name="address_choose_delivery_location_hint">ابحث أو استخدم الموقع الحالي أو اختر من الخريطة</string>
+    <string name="address_pick_on_map">اختيار من الخريطة</string>
+    <string name="address_selected_location">الموقع المحدد</string>
+    <string name="address_clear_location">مسح الموقع المحدد</string>
+    <string name="address_change_on_map">تغيير على الخريطة</string>
+    <string name="address_map_preview">معاينة الخريطة</string>
+    <string name="address_map_preview_unavailable">معاينة الخريطة غير متاحة حتى يتم إعداد رمز Mapbox عام.</string>
+    <string name="address_interactive_map_unavailable">الخريطة التفاعلية غير متاحة حتى يتم إعداد رمز Mapbox عام. يمكنك إدخال العنوان يدويًا.</string>
+    <string name="address_map_center_pin">دبوس مركز الخريطة المحدد</string>
+    <string name="address_map_resolving_location">جارٍ تحديد الموقع المختار</string>
+    <string name="address_search_clear">مسح البحث عن العنوان</string>
+    <string name="address_map_coordinates">خط العرض %1$s، خط الطول %2$s</string>
+    <string name="address_use_this_location">استخدم هذا الموقع</string>
+    <string name="address_confirm_location">تأكيد الموقع</string>
+    <string name="address_map_cancel">إلغاء</string>
+    <string name="address_map_location_applied">تم تطبيق موقع الخريطة.</string>
     <string name="address_city">المدينة</string>
     <string name="address_city_hint">القاهرة</string>
     <string name="address_postal_code">الرمز البريدي</string>
@@ -63,7 +97,7 @@
     <string name="address_delete_success">تم حذف العنوان.</string>
     <string name="address_set_default_success">تم تحديث العنوان الافتراضي.</string>
     <string name="address_error_required_field">هذا الحقل مطلوب.</string>
-    <string name="address_error_invalid_phone">يجب أن يتكون رقم الهاتف من 11 رقمًا بالضبط.</string>
+    <string name="address_error_invalid_phone">أدخل رقم هاتف صحيحًا للدولة المختارة.</string>
     <string name="address_error_invalid_egypt_phone">أدخل رقم هاتف مصري صحيح مثل 01012345678.</string>
     <string name="address_error_invalid_recipient_name">أدخل اسم المستلم باستخدام حرفين على الأقل.</string>
     <string name="address_error_invalid_city">أدخل مدينة صحيحة.</string>
@@ -80,9 +114,8 @@
     <string name="address_error_invalid_shopify_address">رفض Shopify هذا العنوان. يرجى التحقق من الدولة، المدينة، الرمز البريدي، ورقم الهاتف.</string>
     <string name="address_error_response_parse">تم حفظ العنوان ولكن تعذر قراءة صيغة الرد.</string>
     <string name="address_error_network">خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.</string>
-    <!-- Customer Addresses -->
-
-    <!-- Profile and Settings -->
+    <!--  Customer Addresses  -->
+    <!--  Profile and Settings  -->
     <string name="profile_brand_title">WearZone</string>
     <string name="profile_guest_name">ضيف</string>
     <string name="profile_guest_email">سجل الدخول لعرض حسابك</string>
@@ -176,8 +209,7 @@
     <string name="settings_language_todo">اختيار اللغة قريباً.</string>
     <string name="settings_error_load_failed">تعذر تحميل الإعدادات. يرجى المحاولة مرة أخرى.</string>
     <string name="settings_error_save_failed">تعذر حفظ الإعدادات. يرجى المحاولة مرة أخرى.</string>
-    <!-- Profile and Settings -->
-
+    <!--  Profile and Settings  -->
     <string name="order_details_title">تفاصيل الطلب</string>
     <string name="order_details_order_number">الطلب %1$s</string>
     <string name="order_details_tracking_title">التتبع</string>
@@ -208,10 +240,8 @@
     <string name="order_details_error_not_found">لم يتم العثور على الطلب.</string>
     <string name="order_details_error_permission">هذا الطلب غير متاح للحساب الحالي.</string>
     <string name="order_details_error_generic">تعذر تحميل تفاصيل الطلب الآن. يرجى المحاولة مرة أخرى.</string>
-
-    <!-- Aalaa -->
-
-    <!-- Hend -->
+    <!--  Aalaa  -->
+    <!--  Hend  -->
     <string name="create_account">إنشاء حساب</string>
     <string name="register_subtitle">انضم إلى WearZone لتجربة تسوق فاخرة وسهلة الوصول.</string>
     <string name="full_name">الاسم الكامل</string>
@@ -247,7 +277,6 @@
     <string name="password_strength_good">جيدة</string>
     <string name="password_strength_strong">قوية</string>
     <string name="empty"/>
-
     <string name="checkout_promo_code_title">رمز الخصم</string>
     <string name="checkout_promo_code_placeholder">أدخل الرمز</string>
     <string name="checkout_apply_discount">تطبيق</string>
@@ -268,7 +297,32 @@
     <string name="checkout_payment_method_title">طريقة الدفع</string>
     <string name="checkout_payment_cash_on_delivery">الدفع عند الاستلام</string>
     <string name="checkout_payment_cash_on_delivery_description">ادفع نقدًا عند وصول طلبك.</string>
-
+    <string name="checkout_payment_credit_card">بطاقة ائتمان</string>
+    <string name="checkout_payment_credit_card_description">ادفع بأمان باستخدام بطاقتك الائتمانية عبر PayMock.</string>
+    <string name="checkout_card_details_title">تفاصيل البطاقة</string>
+    <string name="checkout_card_number">رقم البطاقة</string>
+    <string name="checkout_card_first_name">الاسم الأول</string>
+    <string name="checkout_card_last_name">اسم العائلة</string>
+    <string name="checkout_card_expiry_month">الشهر</string>
+    <string name="checkout_card_expiry_year">السنة</string>
+    <string name="checkout_card_cvv">رمز الأمان (CVV)</string>
+    <string name="card_number_required">رقم البطاقة مطلوب</string>
+    <string name="card_number_invalid">يرجى إدخال رقم بطاقة صحيح</string>
+    <string name="card_first_name_required">الاسم الأول مطلوب</string>
+    <string name="card_last_name_required">اسم العائلة مطلوب</string>
+    <string name="card_month_required">شهر انتهاء البطاقة مطلوب</string>
+    <string name="card_month_invalid">يرجى إدخال شهر صحيح (من 1 إلى 12)</string>
+    <string name="card_year_required">سنة انتهاء البطاقة مطلوبة</string>
+    <string name="card_year_invalid">يرجى إدخال سنة انتهاء صحيحة</string>
+    <string name="card_cvv_required">رمز CVV مطلوب</string>
+    <string name="card_cvv_invalid">يجب أن يتكون CVV من 3 أو 4 أرقام</string>
+    <string name="first_name_required">الاسم الأول مطلوب</string>
+    <string name="last_name_required">اسم العائلة مطلوب</string>
+    <string name="invalid_month">يرجى إدخال شهر انتهاء صحيح</string>
+    <string name="invalid_year">يرجى إدخال سنة انتهاء صحيحة</string>
+    <string name="invalid_cvv">يجب أن يتكون رمز CVV من 3 أو 4 أرقام</string>
+    <string name="checkout_error_invalid_card_details">يرجى إدخال تفاصيل بطاقة صحيحة.</string>
+    <string name="checkout_error_payment_failed">فشلت عملية الدفع. يرجى التحقق من بيانات البطاقة.</string>
     <string name="cart_title">عربة التسوق</string>
     <string name="cart_empty_title">عربة التسوق فارغة</string>
     <string name="cart_empty_subtitle">يبدو أنك لم تضف أي شيء إلى عربة التسوق بعد.</string>
@@ -307,10 +361,8 @@
     <string name="cart_increase_quantity">زيادة الكمية</string>
     <string name="add_to_cart">تمت الاضافه الى الكارت</string>
     <string name="failed_to_add_to_cart">فشل الاضافة الى الكارت</string>
-
-    <!-- Hend -->
-
-    <!-- Ahmed -->
+    <!--  Hend  -->
+    <!--  Ahmed  -->
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="unexpected_credential_type">نوع بيانات الاعتماد غير متوقع</string>
     <string name="google_sign_in_failed">فشل تسجيل الدخول باستخدام Google</string>
@@ -320,14 +372,24 @@
     <string name="login_subtitle">سجل الدخول للوصول إلى مجموعتك المختارة.</string>
     <string name="forgot_password">هل نسيت كلمة المرور؟</string>
     <string name="sign_in">تسجيل الدخول</string>
+    <string name="sign_in_register">تسجيل الدخول / إنشاء حساب</string>
+    <string name="continue_browsing">متابعة التصفح</string>
+    <string name="sign_in_required_title">تسجيل الدخول مطلوب</string>
+    <string name="sign_in_required_message">يرجى تسجيل الدخول لإضافة عناصر إلى قائمة أمنياتك وإدارة حقيبتك.</string>
+    <string name="sign_in_required_cart_message">يرجى تسجيل الدخول لإضافة عناصر إلى حقيبتك.</string>
+    <string name="sign_in_required_wishlist_message">يرجى تسجيل الدخول لإضافة عناصر إلى قائمة أمنياتك.</string>
+    <string name="sign_in_required_lock_content_description">أيقونة قفل تسجيل الدخول</string>
+    <string name="profile_guest_title">مرحبًا بك في WearZone</string>
+    <string name="profile_guest_required_subtitle">سجل الدخول لإدارة ملفك الشخصي وطلباتك ومفضلتك وعناوينك.</string>
     <string name="or_continue_with">أو المتابعة باستخدام</string>
     <string name="dont_have_account">ليس لديك حساب؟</string>
     <string name="register">إنشاء حساب</string>
-    <!-- Product Detail Screen -->
+    <!--  Product Detail Screen  -->
     <string name="product_detail_select_size">اختر المقاس</string>
     <string name="product_detail_size_guide">دليل المقاسات</string>
     <string name="product_detail_description">الوصف</string>
     <string name="product_detail_add_to_cart">أضف إلى السلة</string>
+    <string name="product_detail_add_to_cart_with_qty">أضف إلى السلة (%1$d)</string>
     <string name="product_detail_buy_now">اشتري الآن</string>
     <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
     <string name="product_detail_retry">إعادة المحاولة</string>
@@ -339,6 +401,22 @@
     <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
     <string name="content_desc_product_image">صورة المنتج</string>
     <string name="content_desc_star_rating">تقييم النجوم</string>
+       <!-- Product Detail Reviews -->
+    <string name="review_submitted_successfully">تم إرسال التقييم بنجاح!</string>
+    <string name="review_submit_failed">فشل إرسال التقييم. يرجى المحاولة مرة أخرى.</string>
+    <string name="product_detail_write_review">كتابة تقييم</string>
+    <string name="product_detail_write_review_hint">اكتب تقييمًا…</string>
+    <string name="product_detail_reviews_header">آراء العملاء</string>
+    <string name="product_detail_no_reviews">لا توجد تقييمات بعد. كن أول من يقيم!</string>
+    <string name="product_detail_rating">التقييم</string>
+    <string name="product_detail_comment">التعليق</string>
+    <string name="product_detail_submit">إرسال</string>
+    <string name="product_detail_cancel">إلغاء</string>
+    <string name="product_detail_review_stars_desc">%1$d من 5 نجوم</string>
+    <string name="product_detail_avg_rating">%1$.1f من 5</string>
+    <string name="product_detail_write_review_title">كتابة تقييم</string>
+    <string name="product_detail_rating_required">التقييم مطلوب</string>
+    <string name="product_detail_comment_required">التعليق مطلوب</string>
     <!-- Wish List Screen -->
     <string name="wishlist_title">قائمة أمنياتك</string>
     <string name="wishlist_items_saved">%1$d عناصر محفوظة</string>
@@ -353,12 +431,12 @@
     <string name="wishlist_remove_dialog_confirm">إزالة</string>
     <string name="wishlist_remove_dialog_cancel">الاحتفاظ في المفضلة</string>
     <string name="wishlist_item_added">تمت الإضافة إلى المفضلة</string>
-    <!-- Brands Screen -->
+    <!--  Brands Screen  -->
     <string name="brands_title">الماركات</string>
     <string name="vendor_products_empty">لا توجد منتجات لهذه الماركة.</string>
-    <!--Ahmed-->
-
-    <!-- Omar -->
+    <string name="vendor_products_title">المنتجات</string>
+    <!-- Ahmed -->
+    <!--  Omar  -->
     <string name="hero_banner_default_title">مجموعة Midnight Slate</string>
     <string name="hero_banner_shop_now">تسوق الآن</string>
     <string name="hero_banner_recommended">موصى به لك</string>
@@ -404,8 +482,6 @@
     <string name="search_error_title">البحث غير متاح حالياً</string>
     <string name="search_error_subtitle">لم نتمكن من تحميل المنتجات في الوقت الحالي.</string>
     <string name="search_retry">إعادة المحاولة</string>
-
-
     <string name="categories_title">الأقسام</string>
     <string name="categories_search_placeholder">البحث في الأقسام…</string>
     <string name="categories_search_content_description">البحث في الأقسام</string>
@@ -417,10 +493,34 @@
     <string name="error_network">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="error_server">خطأ في الخادم (%1$s)</string>
     <string name="error_unknown">حدث خطأ ما، يرجى المحاولة لاحقاً</string>
-
-
     <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
     <string name="promo_discount_off">خصم</string>
     <string name="promo_shop_now">تسوق الآن</string>
+
+
+    <string name="verify_email_title">تأكيد البريد الإلكتروني</string>
+    <string name="verify_email_subtitle">لقد أرسلنا رابط التأكيد إلى %1$s. يرجى التحقق من صندوق الوارد وتأكيد حسابك للمتابعة.</string>
+    <string name="ive_verified_continue">لقد قمت بالتأكيد، متابعة</string>
+    <string name="resend_email">إعادة إرسال البريد الإلكتروني</string>
+    <string name="resend_email_countdown">إعادة الإرسال خلال %1$d ثانية</string>
+    <string name="logout">تسجيل الخروج</string>
+
+    <string name="email_verification_sent">تم إرسال بريد التحقق بنجاح</string>
+    <string name="email_verification_failed_send">فشل إرسال بريد التحقق</string>
+    <string name="email_verification_not_verified">لم يتم التحقق من البريد الإلكتروني بعد</string>
+    <string name="email_verification_failed_check">فشل التحقق من حالة الحساب</string>
+    <string name="reset_email_sent_title">تم إرسال البريد الإلكتروني</string>
+    <string name="reset_email_sent_message">تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</string>
+    <string name="forgot_password_title">نسيت كلمة المرور</string>
+    <string name="forgot_password_subtitle">أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور الخاصة بك.</string>
+    <string name="email_label">البريد الإلكتروني</string>
+    <string name="send_reset_link">إرسال رابط إعادة التعيين</string>
+    <string name="back_to_login">العودة لتسجيل الدخول</string>
+    <string name="apple_signin_coming_soon">تسجيل الدخول باستخدام Apple قريباً!</string>
+
+    <string name="forgot_password_empty_email">الرجاء إدخال البريد الإلكتروني</string>
+    <string name="forgot_password_invalid_email">الرجاء إدخال بريد إلكتروني صحيح</string>
+    <string name="forgot_password_failed_send">فشل إرسال بريد إعادة التعيين</string>
     <!-- Omar -->
+
 </resources>

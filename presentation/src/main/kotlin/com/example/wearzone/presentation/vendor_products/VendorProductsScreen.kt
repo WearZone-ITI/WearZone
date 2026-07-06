@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +24,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.components.ProductCard
 
@@ -42,16 +45,24 @@ import com.example.wearzone.presentation.home.components.ProductCard
 fun VendorProductsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: VendorProductsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showSignInRequiredDialog by remember { mutableStateOf(false) }
+    var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 is VendorProductsUiEffect.NavigateToProductDetail -> onNavigateToProductDetail(effect.productId)
+                is VendorProductsUiEffect.ShowSignInRequired -> {
+                    signInRequiredMessageRes = effect.messageResId
+                    showSignInRequiredDialog = true
+                }
                 is VendorProductsUiEffect.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(context.getString(effect.messageResId))
                 }
@@ -61,7 +72,7 @@ fun VendorProductsScreen(
 
     val title = when (val state = uiState) {
         is VendorProductsUiState.Success -> state.vendorName
-        else -> "Products"
+        else -> stringResource(R.string.vendor_products_title)
     }
 
     Scaffold(
@@ -72,7 +83,7 @@ fun VendorProductsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.content_desc_back),
                             tint = AppTheme.colors.textPrimary
                         )
                     }
@@ -93,7 +104,7 @@ fun VendorProductsScreen(
         ) {
             when (val state = uiState) {
                 is VendorProductsUiState.Loading -> {
-                    CircularProgressIndicator(color = AppTheme.colors.selected)
+                    ProductGridSkeleton()
                 }
                 is VendorProductsUiState.Error -> {
                     Text(
@@ -137,5 +148,16 @@ fun VendorProductsScreen(
                 }
             }
         }
+    }
+
+    if (showSignInRequiredDialog) {
+        SignInRequiredDialog(
+            messageRes = signInRequiredMessageRes,
+            onSignInRegister = {
+                showSignInRequiredDialog = false
+                onNavigateToLogin()
+            },
+            onContinueBrowsing = { showSignInRequiredDialog = false },
+        )
     }
 }

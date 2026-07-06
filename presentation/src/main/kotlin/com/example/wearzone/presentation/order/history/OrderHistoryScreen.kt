@@ -20,7 +20,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.OrderListSkeleton
+import com.example.wearzone.presentation.common.PremiumEmptyState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.components.OrderHistoryCard
 import kotlinx.coroutines.launch
@@ -55,6 +57,8 @@ import kotlinx.coroutines.launch
 fun OrderHistoryScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetails: (Long) -> Unit,
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
     viewModel: OrderHistoryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,6 +88,9 @@ fun OrderHistoryScreen(
         OrderHistoryContent(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToRegister = onNavigateToRegister,
+            onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -93,6 +100,9 @@ fun OrderHistoryScreen(
 private fun OrderHistoryContent(
     uiState: OrderHistoryUiState,
     onIntent: (OrderHistoryUiIntent) -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -101,12 +111,19 @@ private fun OrderHistoryContent(
             .background(AppTheme.colors.background),
     ) {
         when (uiState) {
-            OrderHistoryUiState.Loading -> CircularProgressIndicator(
-                color = AppTheme.colors.selected,
-                modifier = Modifier.align(Alignment.Center),
+            OrderHistoryUiState.Loading -> OrderListSkeleton()
+
+            OrderHistoryUiState.Empty -> PremiumEmptyState(
+                lottieResId = com.example.presentation.R.raw.cart_is_empty,
+                title = stringResource(R.string.order_history_empty_title),
+                description = stringResource(R.string.order_history_empty_subtitle),
+                modifier = Modifier.fillMaxSize()
             )
 
-            OrderHistoryUiState.Empty -> OrderHistoryEmptyContent()
+            OrderHistoryUiState.SignInRequired -> SignInRequiredDialog(
+                onSignInRegister = onNavigateToLogin,
+                onContinueBrowsing = onContinueBrowsing,
+            )
 
             is OrderHistoryUiState.Error -> OrderHistoryErrorContent(
                 messageRes = uiState.messageRes,
@@ -200,11 +217,7 @@ private fun OrderHistoryHeader(
             color = AppTheme.colors.textSecondary,
         )
         if (isRefreshing) {
-            Spacer(modifier = Modifier.height(12.dp))
-            CircularProgressIndicator(
-                color = AppTheme.colors.selected,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }

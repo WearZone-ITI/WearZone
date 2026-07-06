@@ -27,9 +27,11 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 fun PaymentMethodCard(
     paymentMethodLabelRes: Int,
     paymentMethodDescriptionRes: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = AppTheme.colors.card),

@@ -2,6 +2,8 @@ package com.example.wearzone.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wearzone.domain.auth.model.AuthAccessState
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
+    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
     private val addToCartUseCase: AddToCartUseCase,
@@ -116,6 +119,11 @@ class HomeViewModel @Inject constructor(
 
     private fun addToCart(product: Product) {
         viewModelScope.launch {
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_cart_message))
+                return@launch
+            }
+
             val item = CartItem(
                 variantId = product.variantId,
                 productId = product.id,
@@ -141,9 +149,14 @@ class HomeViewModel @Inject constructor(
 
     private fun toggleFavorite(product: Product, isAdding: Boolean = true) {
         viewModelScope.launch {
+            if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
+                return@launch
+            }
+
             val user = getCurrentUserUseCase()
             if (user == null || user.uid.isEmpty()) {
-                sendEffect(HomeUiEffect.ShowSnackbar(R.string.wishlist_sign_in_required))
+                sendEffect(HomeUiEffect.ShowSignInRequired(R.string.sign_in_required_wishlist_message))
                 return@launch
             }
             val item = WishlistItem(
@@ -171,7 +184,12 @@ class HomeViewModel @Inject constructor(
             val categoriesResult = getProductsUseCase.getCategories()
             val brandsResult = getProductsUseCase.getBrands()
             val productsResult = getProductsUseCase.getProducts()
-            val user = getCurrentUserUseCase()
+            val accessState = getAuthAccessStateUseCase()
+            val user = if (accessState is AuthAccessState.AuthenticatedCustomer) {
+                getCurrentUserUseCase()
+            } else {
+                null
+            }
 
             if (categoriesResult is DataResult.Success &&
                 brandsResult is DataResult.Success &&

@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableList
 sealed interface AddressListUiState {
     data object Loading : AddressListUiState
     data object Empty : AddressListUiState
+    data object SignInRequired : AddressListUiState
 
     data class Content(
         val addresses: ImmutableList<CustomerAddressUiModel>,

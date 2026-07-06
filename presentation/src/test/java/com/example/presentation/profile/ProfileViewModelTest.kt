@@ -5,12 +5,14 @@ import com.example.presentation.MainDispatcherRule
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.model.User
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
+import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.presentation.profile.ProfileUiEffect
 import com.example.wearzone.presentation.profile.ProfileUiIntent
 import com.example.wearzone.presentation.profile.ProfileUiState
@@ -102,15 +104,34 @@ class ProfileViewModelTest {
         assertEquals(0, state.cartItemCount)
     }
 
+    @Test
+    fun `guest load shows guest state`() = runTest {
+        val repository = FakeAuthRepository(currentUser = null)
+        val viewModel = createViewModel(repository)
+
+        assertTrue(viewModel.uiState.value is ProfileUiState.Guest)
+    }
+
     private fun createViewModel(
         repository: FakeAuthRepository = FakeAuthRepository(),
+        customerIdResult: Result<Long> = Result.success(1L),
     ): ProfileViewModel {
         val cartRepository = FakeCartRepository()
         return ProfileViewModel(
+            getAuthAccessStateUseCase = GetAuthAccessStateUseCase(
+                repository,
+                FakeCustomerIdProvider(customerIdResult),
+            ),
             getCurrentUserUseCase = GetCurrentUserUseCase(repository),
             logoutUseCase = LogoutUseCase(repository),
             observeCartUseCase = ObserveCartUseCase(cartRepository),
         )
+    }
+
+    private class FakeCustomerIdProvider(
+        private val result: Result<Long>,
+    ) : ICustomerIdProvider {
+        override suspend fun getCurrentCustomerId(): Result<Long> = result
     }
 
     private class FakeAuthRepository(

@@ -2,6 +2,9 @@ package com.example.wearzone.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -12,6 +15,8 @@ import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
+import com.example.wearzone.presentation.auth.emailverification.EmailVerificationScreen
+import com.example.wearzone.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
 import com.example.wearzone.presentation.cart.CartScreen
@@ -26,6 +31,7 @@ import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 import com.example.wearzone.presentation.brands.BrandsScreen
 import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
+import com.example.wearzone.presentation.splash.SplashScreen
 
 @Composable
 fun NavGraph(
@@ -33,12 +39,61 @@ fun NavGraph(
 ) {
 
     val navController = rememberNavController()
+    var pendingProtectedRoute by rememberSaveable { mutableStateOf<Route?>(null) }
+
+    fun navigateToPendingOrMain(sourceRoute: Route) {
+        val destination = pendingProtectedRoute ?: Route.MainRoute
+        pendingProtectedRoute = null
+        navController.navigate(destination) {
+            popUpTo(sourceRoute) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToLoginForProtectedRoute(route: Route) {
+        pendingProtectedRoute = route
+        navController.navigate(Route.LoginRoute)
+    }
+
+    fun navigateToRegisterForProtectedRoute(route: Route) {
+        pendingProtectedRoute = route
+        navController.navigate(Route.RegisterRoute)
+    }
 
     NavHost(
         navController = navController,
-        startDestination = Route.OnboardingRoute,
+        startDestination = Route.SplashRoute,
         modifier = modifier,
     ) {
+        // Splash
+        composable<Route.SplashRoute> {
+            SplashScreen(
+                onNavigateToOnboarding = {
+                    navController.navigate(Route.OnboardingRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToMain = {
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
         // Aalaa
         composable<Route.OnboardingRoute> {
             OnboardingScreen(
@@ -50,7 +105,11 @@ fun NavGraph(
                     }
                 },
                 onNavigateToGuest = {
-                    // TODO: Navigate to GuestRoute when guest mode is implemented.
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.OnboardingRoute> {
+                            inclusive = true
+                        }
+                    }
                 },
             )
         }
@@ -68,13 +127,15 @@ fun NavGraph(
         // Hend
         composable<Route.RegisterRoute> {
             RegisterScreen(onNavigateToHome = {
-                navController.navigate(Route.HomeRoute) {
+                navigateToPendingOrMain(Route.RegisterRoute)
+            }, onNavigateToLogin = {
+                navController.navigate(Route.LoginRoute) {
                     popUpTo<Route.RegisterRoute> {
                         inclusive = true
                     }
                 }
-            }, onNavigateToLogin = {
-                navController.navigate(Route.LoginRoute) {
+            }, onNavigateToEmailVerification = {
+                navController.navigate(Route.EmailVerificationRoute) {
                     popUpTo<Route.RegisterRoute> {
                         inclusive = true
                     }
@@ -82,17 +143,24 @@ fun NavGraph(
             })
         }
 
+
         composable<Route.CartRoute> {
             CartScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToLogin = {
-                    navController.navigate(Route.LoginRoute) {
-                        popUpTo<Route.CartRoute> {
+                    navigateToLoginForProtectedRoute(Route.CheckoutRoute)
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.CheckoutRoute)
+                }, 
+                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) },
+                onContinueShopping = {
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.MainRoute> {
                             inclusive = true
                         }
                     }
-                }, 
-                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) }
+                }
             )
         }
 
@@ -110,6 +178,12 @@ fun NavGraph(
                         }
                         launchSingleTop = true
                     }
+                },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.CheckoutRoute)
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.CheckoutRoute)
                 },
                 onNavigateToAddressList = {
                     navController.navigate(Route.AddressListRoute)
@@ -135,6 +209,12 @@ fun NavGraph(
                 onNavigateToEditAddress = { addressId ->
                     navController.navigate(Route.AddressEditRoute(addressId))
                 },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.AddressListRoute)
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.AddressListRoute)
+                },
                 refreshAfterChange = refreshAfterChange,
                 onRefreshAfterChangeConsumed = {
                     backStackEntry.savedStateHandle[NavigationKeys.ADDRESS_CHANGED] = false
@@ -152,6 +232,12 @@ fun NavGraph(
                         ?.savedStateHandle
                         ?.set(NavigationKeys.ADDRESS_CHANGED, true)
                 },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.AddressAddRoute)
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.AddressAddRoute)
+                },
             )
         }
 
@@ -165,6 +251,12 @@ fun NavGraph(
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set(NavigationKeys.ADDRESS_CHANGED, true)
+                },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.AddressEditRoute(route.addressId))
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.AddressEditRoute(route.addressId))
                 },
             )
         }
@@ -182,6 +274,12 @@ fun NavGraph(
                 onNavigateToDetails = { orderId ->
                     navController.navigate(Route.OrderDetailsRoute(orderId))
                 },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.OrderHistoryRoute)
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.OrderHistoryRoute)
+                },
             )
         }
 
@@ -195,6 +293,12 @@ fun NavGraph(
                         launchSingleTop = true
                     }
                 },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.OrderDetailsRoute(route.orderId))
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.OrderDetailsRoute(route.orderId))
+                },
             )
         }
 
@@ -205,19 +309,30 @@ fun NavGraph(
         composable<Route.LoginRoute> {
             LoginScreen(
                 onNavigateToHome = {
-                    navController.navigate(Route.MainRoute) {
+                    navigateToPendingOrMain(Route.LoginRoute)
+                },
+                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
+                onNavigateToEmailVerification = {
+                    navController.navigate(Route.EmailVerificationRoute) {
                         popUpTo<Route.LoginRoute> {
                             inclusive = true
                         }
                     }
                 },
-                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
+                onNavigateToForgotPassword = { navController.navigate(Route.ForgotPasswordRoute) },
             )
         }
 
-        composable<Route.ProductDetailRoute> {
+        composable<Route.ProductDetailRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.ProductDetailRoute>()
             ProductDetailScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.ProductDetailRoute(route.productId))
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.ProductDetailRoute(route.productId))
+                },
             )
         }
 
@@ -240,6 +355,8 @@ fun NavGraph(
                 onNavigateToBrand = { brandId -> },
                 onNavigateToBrands = {},
                 onNavigateToCart = { navController.navigate(Route.CartRoute) },
+                onNavigateToLogin = { navController.navigate(Route.LoginRoute) },
+                onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
                 onShowSnackbar = { message -> },
                 onNavigateToSearch = {},
                 onNavigateToChat = { navController.navigate(Route.ChatRoute) }
@@ -253,6 +370,9 @@ fun NavGraph(
                             inclusive = true
                         }
                     }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Route.RegisterRoute)
                 },
                 onNavigateToSettings = {
                     navController.navigate(Route.SettingsRoute)
@@ -301,6 +421,20 @@ fun NavGraph(
                 onNavigateToCart = { navController.navigate(Route.CartRoute) }
             )
         }
+        composable<Route.EmailVerificationRoute> {
+            EmailVerificationScreen(
+                onNavigateToHome = {
+                    navigateToPendingOrMain(Route.EmailVerificationRoute)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.EmailVerificationRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
 
         composable<Route.BrandsRoute> {
             BrandsScreen(
@@ -311,12 +445,19 @@ fun NavGraph(
             )
         }
 
-        composable<Route.VendorProductsRoute> {
+        composable<Route.VendorProductsRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.VendorProductsRoute>()
             VendorProductsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToProductDetail = { productId ->
                     navController.navigate(Route.ProductDetailRoute(productId))
-                }
+                },
+                onNavigateToLogin = {
+                    navigateToLoginForProtectedRoute(Route.VendorProductsRoute(route.vendorName))
+                },
+                onNavigateToRegister = {
+                    navigateToRegisterForProtectedRoute(Route.VendorProductsRoute(route.vendorName))
+                },
             )
         }
 
@@ -329,6 +470,20 @@ fun NavGraph(
                 onNavigateToCart = { navController.navigate(Route.CartRoute) }
             )
         }
+
+        composable<Route.ForgotPasswordRoute> {
+            ForgotPasswordScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.ForgotPasswordRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
+
         // Omar
     }
 }

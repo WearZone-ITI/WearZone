@@ -24,6 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
@@ -94,19 +94,16 @@ fun ProductCard(
             ) {
                 Text(
                     text = product.vendor.uppercase(),
-                    fontSize = 10.sp,
-                    color = AppTheme.colors.textSecondary,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = AppTheme.colors.textSecondary
                 )
 
                 Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = product.title,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                     color = AppTheme.colors.textPrimary,
-                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -120,8 +117,7 @@ fun ProductCard(
                 ) {
                     Text(
                         text = "${product.price} ${product.currencyCode}",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = AppTheme.colors.textPrimary,
                     )
 

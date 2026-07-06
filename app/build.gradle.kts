@@ -50,6 +50,9 @@ android {
 
         val groqApiKey = localProperties.getProperty("GROQ_API_KEY", "").removeSurrounding("\"")
         buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
+        val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
     buildTypes {

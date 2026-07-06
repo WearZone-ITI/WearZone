@@ -1,42 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-
-    <!--Aalaa-->
+    <!-- Aalaa -->
     <string name="onboarding_back">Back</string>
-
     <string name="onboarding_next">Next</string>
-
     <string name="onboarding_get_started">Get Started</string>
-
     <string name="onboarding_continue_as_guest">Continue as Guest</string>
-
     <string name="onboarding_error_unable_to_continue">Unable to continue. Please try again.</string>
-
     <string name="onboarding_style_discovery_image_description">Woman wearing a cream outfit</string>
-
     <string name="onboarding_style_discovery_title">Discover Curated Fashion</string>
-
     <string name="onboarding_style_discovery_description">Explore refined looks selected for your everyday wardrobe.</string>
-
     <string name="onboarding_shopping_flow_image_description">Woman shopping from her phone</string>
-
     <string name="onboarding_shopping_flow_title">Shop With Ease</string>
-
     <string name="onboarding_shopping_flow_description">Browse collections, compare styles, and keep your favorites close.</string>
-
     <string name="onboarding_delivery_moment_image_description">Woman opening a fashion package</string>
-
     <string name="onboarding_delivery_moment_title">Unbox Your Style</string>
-
     <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
-
     <string name="login_placeholder_title">Login Screen</string>
-
     <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
-
-
-    <!--Profile and Settings-->
+    <!-- Profile and Settings -->
     <string name="profile_brand_title">WearZone</string>
     <string name="profile_guest_name">Guest</string>
     <string name="profile_guest_email">Sign in to view your account</string>
@@ -130,10 +110,8 @@
     <string name="settings_language_todo">Language selection is coming soon.</string>
     <string name="settings_error_load_failed">Unable to load settings. Please try again.</string>
     <string name="settings_error_save_failed">Unable to save settings. Please try again.</string>
-    <!--Profile and Settings-->
-
-
-    <!--Customer Addresses-->
+    <!-- Profile and Settings -->
+    <!-- Customer Addresses -->
     <string name="address_list_title">Saved Addresses</string>
     <string name="address_list_subtitle">Manage your shipping destinations.</string>
     <string name="address_refresh">Refresh addresses</string>
@@ -143,8 +121,8 @@
     <string name="address_delete">Delete address</string>
     <string name="address_set_default">Set as default</string>
     <string name="address_add_new">Add New Address</string>
-    <string name="address_empty_title">No saved addresses</string>
-    <string name="address_empty_subtitle">Add a shipping destination to make checkout faster.</string>
+    <string name="address_empty_title">No addresses saved</string>
+    <string name="address_empty_subtitle">Add a shipping address to speed up your checkout process.</string>
     <string name="address_delete_dialog_title">Delete Address?</string>
     <string name="address_delete_dialog_message">Are you sure you want to delete this address?</string>
     <string name="address_delete_dialog_confirm">Delete Address</string>
@@ -153,14 +131,49 @@
     <string name="address_edit_title">Edit Address</string>
     <string name="address_contact_information">CONTACT INFORMATION</string>
     <string name="address_delivery_address">DELIVERY ADDRESS</string>
+    <string name="address_details">ADDRESS DETAILS</string>
+    <string name="address_optional">OPTIONAL</string>
     <string name="address_recipient_name">Recipient Name</string>
     <string name="address_recipient_name_hint">Full name on the order</string>
     <string name="address_country_code">Country code</string>
     <string name="address_country_code_egypt">Egypt %1$s</string>
     <string name="address_mobile_number">Mobile Number</string>
-    <string name="address_mobile_number_hint">01XXXXXXXXX</string>
+    <string name="address_mobile_number_hint">National phone number</string>
     <string name="address_country">Country</string>
-    <string name="address_country_hint">Egypt</string>
+    <string name="address_country_hint">Select country</string>
+    <string name="address_select_country">Select country</string>
+    <string name="address_country_search">Search country</string>
+    <string name="address_country_no_results">No countries found.</string>
+    <string name="address_search_label">Find address</string>
+    <string name="address_search_hint">Search location</string>
+    <string name="address_lookup_no_results">No address suggestions found.</string>
+    <string name="address_lookup_applied">Address suggestion applied.</string>
+    <string name="address_lookup_country_not_supported">Address filled, but this country is not in the selector yet.</string>
+    <string name="address_lookup_unavailable">Address lookup is unavailable. You can still enter the address manually.</string>
+    <string name="address_mapbox_token_missing">Mapbox is not configured. Add MAPBOX_ACCESS_TOKEN to local.properties to enable address lookup.</string>
+    <string name="address_use_current_location">Use Current Location</string>
+    <string name="address_use_current_location_short">Current Location</string>
+    <string name="address_current_location_applied">Current location applied.</string>
+    <string name="address_location_permission_denied">Location permission was denied. You can still enter the address manually.</string>
+    <string name="address_location_unavailable">Current location is unavailable. Please check location settings or enter the address manually.</string>
+    <string name="address_location_no_result">Could not find an address for this location.</string>
+    <string name="address_choose_delivery_location">Choose Delivery Location</string>
+    <string name="address_choose_delivery_location_hint">Search, use current location, or pick on map</string>
+    <string name="address_pick_on_map">Pick on Map</string>
+    <string name="address_selected_location">Selected location</string>
+    <string name="address_clear_location">Clear selected location</string>
+    <string name="address_change_on_map">Change on Map</string>
+    <string name="address_map_preview">Map preview</string>
+    <string name="address_map_preview_unavailable">Map preview is unavailable until a public Mapbox token is configured.</string>
+    <string name="address_interactive_map_unavailable">Interactive map is unavailable until a public Mapbox token is configured. You can still enter the address manually.</string>
+    <string name="address_map_center_pin">Selected map center pin</string>
+    <string name="address_map_resolving_location">Resolving selected location</string>
+    <string name="address_search_clear">Clear address search</string>
+    <string name="address_map_coordinates">Lat %1$s, Lng %2$s</string>
+    <string name="address_use_this_location">Use this location</string>
+    <string name="address_confirm_location">Confirm Location</string>
+    <string name="address_map_cancel">Cancel</string>
+    <string name="address_map_location_applied">Map location applied.</string>
     <string name="address_city">City</string>
     <string name="address_city_hint">Cairo</string>
     <string name="address_postal_code">Postal Code</string>
@@ -180,7 +193,7 @@
     <string name="address_delete_success">Address deleted.</string>
     <string name="address_set_default_success">Default address updated.</string>
     <string name="address_error_required_field">This field is required.</string>
-    <string name="address_error_invalid_phone">Phone number must be exactly 11 digits.</string>
+    <string name="address_error_invalid_phone">Enter a valid phone number for the selected country.</string>
     <string name="address_error_invalid_egypt_phone">Enter a valid Egyptian mobile number, like 01012345678.</string>
     <string name="address_error_invalid_recipient_name">Enter the recipient name using at least 2 letters.</string>
     <string name="address_error_invalid_city">Enter a valid city.</string>
@@ -192,8 +205,7 @@
     <string name="address_error_cannot_delete_default">Default addresses cannot be deleted. Set another address as default first.</string>
     <string name="address_error_customer_id_unavailable">Shopify customer id is not available yet. Please connect account mapping before managing addresses.</string>
     <string name="address_error_generic">Unable to update addresses right now. Please try again.</string>
-    <!--Customer Addresses-->
-
+    <!-- Customer Addresses -->
     <string name="order_details_title">Order Details</string>
     <string name="order_details_order_number">Order %1$s</string>
     <string name="order_details_tracking_title">Tracking</string>
@@ -224,79 +236,42 @@
     <string name="order_details_error_not_found">Order was not found.</string>
     <string name="order_details_error_permission">This order is not available for the current account.</string>
     <string name="order_details_error_generic">Unable to load order details right now. Please try again.</string>
-
-    <!--Aalaa-->
-
-    <!--Hend-->
-
+    <!-- Aalaa -->
+    <!-- Hend -->
     <string name="create_account">Create Account</string>
-
     <string name="register_subtitle">Join WearZone for an accessible luxury experience.</string>
-
     <string name="full_name">Full Name</string>
-
     <string name="full_name_placeholder">Jane Doe</string>
-
     <string name="email_address">Email Address</string>
-
     <string name="email_placeholder">jane@example.com</string>
-
     <string name="password">Password</string>
-
     <string name="confirm_password">Confirm Password</string>
-
     <string name="password_placeholder">••••••••</string>
-
     <string name="hide_password">Hide</string>
-
     <string name="show_password">Show</string>
-
     <string name="already_have_account">Already have an account?</string>
-
     <string name="log_in">Log in</string>
-
     <string name="error_blank_name">Full name is required</string>
-
     <string name="error_invalid_email">Please enter a valid email address</string>
-
     <string name="error_short_password">Password must be at least 8 characters</string>
-
     <string name="error_password_mismatch">Passwords do not match</string>
-
     <string name="error_terms_not_accepted">You must accept the Terms of Service</string>
-
     <string name="error_register_failed">Registration failed. Please try again.</string>
-
     <string name="error_firebase_sign_up_failed">Unable to create your Firebase account. Please try again.</string>
-
     <string name="error_shopify_customer_creation_failed">Unable to create your Shopify customer profile. Please try again.</string>
-
     <string name="error_firestore_profile_save_failed">Unable to save your customer profile. Please try again.</string>
-
     <string name="error_firestore_profile_fetch_failed">Unable to load your customer profile. Please try again.</string>
-
     <string name="error_local_customer_id_save_failed">Unable to save your customer session. Please try again.</string>
-
     <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
-
-    <string name="terms_of_service">  Terms of Service</string>
-
+    <string name="terms_of_service"> Terms of Service</string>
     <string name="terms_and"> and </string>
-
     <string name="privacy_policy"> Privacy Policy</string>
-
     <string name="terms_period">.</string>
-
     <string name="password_strength">Password strength: %1$s</string>
-
     <string name="password_strength_weak">Weak</string>
-
     <string name="password_strength_fair">Fair</string>
-
     <string name="password_strength_good">Good</string>
-
     <string name="password_strength_strong">Strong</string>
-
     <string name="checkout_promo_code_title">Promo Code</string>
     <string name="checkout_promo_code_placeholder">Enter code</string>
     <string name="checkout_apply_discount">Apply</string>
@@ -317,10 +292,33 @@
     <string name="checkout_payment_method_title">Payment Method</string>
     <string name="checkout_payment_cash_on_delivery">Cash on Delivery</string>
     <string name="checkout_payment_cash_on_delivery_description">Pay with cash when your order arrives.</string>
-
-
-
-    <string name="empty">&quot;&quot;</string>
+    <string name="checkout_payment_credit_card">Credit Card</string>
+    <string name="checkout_payment_credit_card_description">Pay securely with your credit card via PayMock.</string>
+    <string name="checkout_card_details_title">CARD DETAILS</string>
+    <string name="checkout_card_number">Card Number</string>
+    <string name="checkout_card_first_name">First Name</string>
+    <string name="checkout_card_last_name">Last Name</string>
+    <string name="checkout_card_expiry_month">Month</string>
+    <string name="checkout_card_expiry_year">Year</string>
+    <string name="checkout_card_cvv">CVV</string>
+    <string name="checkout_error_invalid_card_details">Please enter valid card details.</string>
+    <string name="checkout_error_payment_failed">Payment processing failed. Please check your card info.</string>
+    <string name="card_number_required">Card number is required</string>
+    <string name="card_number_invalid">Please enter a valid card number</string>
+    <string name="card_first_name_required">First name is required</string>
+    <string name="card_last_name_required">Last name is required</string>
+    <string name="card_month_required">Expiry month is required</string>
+    <string name="card_month_invalid">Enter a valid month (1–12)</string>
+    <string name="card_year_required">Expiry year is required</string>
+    <string name="card_year_invalid">Enter a valid expiry year</string>
+    <string name="card_cvv_required">CVV is required</string>
+    <string name="card_cvv_invalid">CVV must be 3 or 4 digits</string>
+    <string name="first_name_required">First name is required</string>
+    <string name="last_name_required">Last name is required</string>
+    <string name="invalid_month">Please enter a valid expiry month</string>
+    <string name="invalid_year">Please enter a valid expiry year</string>
+    <string name="invalid_cvv">CVV must contain 3 or 4 digits</string>
+    <string name="empty">""</string>
     <string name="cart_title">Shopping Cart</string>
     <string name="cart_empty_title">Your cart is empty</string>
     <string name="cart_empty_subtitle">Looks like you haven\'t added anything to your cart yet.</string>
@@ -359,47 +357,37 @@
     <string name="cart_increase_quantity">Increase Quantity</string>
     <string name="add_to_cart">Added to cart</string>
     <string name="failed_to_add_to_cart">Failed to add to cart</string>
-
-    <!--Hend-->
-
-
-
-    <!--Alaa-->
-
-    <!--Alaa-->
-
-
-
-
-    <!--Ahmed-->
-
+    <!-- Hend -->
+    <!-- Alaa -->
+    <!-- Alaa -->
+    <!-- Ahmed -->
     <string name="login_successful">Login successful!</string>
-
     <string name="unexpected_credential_type">Unexpected credential type</string>
-
     <string name="google_sign_in_failed">Google Sign-In failed</string>
-
     <string name="content_desc_google_sign_in">Sign in with Google</string>
     <string name="content_desc_apple_sign_in">Sign in with Apple</string>
     <string name="welcome_back">Welcome Back</string>
-
     <string name="login_subtitle">Sign in to access your curated collection.</string>
-
     <string name="forgot_password">Forgot Password?</string>
-
     <string name="sign_in">Sign In</string>
-
+    <string name="sign_in_register">SIGN IN / REGISTER</string>
+    <string name="continue_browsing">Continue Browsing</string>
+    <string name="sign_in_required_title">Sign In Required</string>
+    <string name="sign_in_required_message">Please sign in to add items to your wishlist and manage your bag.</string>
+    <string name="sign_in_required_cart_message">Please sign in to add items to your bag.</string>
+    <string name="sign_in_required_wishlist_message">Please sign in to add items to your wishlist.</string>
+    <string name="sign_in_required_lock_content_description">Sign in required lock icon</string>
+    <string name="profile_guest_title">Welcome to WearZone</string>
+    <string name="profile_guest_required_subtitle">Sign in to manage your profile, orders, wishlist, and addresses.</string>
     <string name="or_continue_with">OR CONTINUE WITH</string>
-
     <string name="dont_have_account">Don\'t have an account?</string>
-
     <string name="register">Register</string>
-
-    <!-- Product Detail Screen -->
+    <!--  Product Detail Screen  -->
     <string name="product_detail_select_size">Select Size</string>
     <string name="product_detail_size_guide">Size Guide</string>
     <string name="product_detail_description">Description</string>
     <string name="product_detail_add_to_cart">Add to Cart</string>
+    <string name="product_detail_add_to_cart_with_qty">Add to Cart (%1$d)</string>
     <string name="product_detail_buy_now">Buy Now</string>
     <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
     <string name="product_detail_retry">Retry</string>
@@ -411,6 +399,22 @@
     <string name="content_desc_wishlist_remove">Remove from wishlist</string>
     <string name="content_desc_product_image">Product image</string>
     <string name="content_desc_star_rating">Star rating</string>
+       <!-- Product Detail Reviews -->
+    <string name="review_submitted_successfully">Review submitted successfully!</string>
+    <string name="review_submit_failed">Failed to submit review. Please try again.</string>
+    <string name="product_detail_write_review">Write a Review</string>
+    <string name="product_detail_write_review_hint">Write a review…</string>
+    <string name="product_detail_reviews_header">Customer Reviews</string>
+    <string name="product_detail_no_reviews">No reviews yet. Be the first to review!</string>
+    <string name="product_detail_rating">Rating</string>
+    <string name="product_detail_comment">Comment</string>
+    <string name="product_detail_submit">Submit</string>
+    <string name="product_detail_cancel">Cancel</string>
+    <string name="product_detail_review_stars_desc">%1$d out of 5 stars</string>
+    <string name="product_detail_avg_rating">%1$.1f out of 5</string>
+    <string name="product_detail_write_review_title">Write a Review</string>
+    <string name="product_detail_rating_required">Rating is required</string>
+    <string name="product_detail_comment_required">Comment is required</string>
     <!-- Wish List Screen -->
     <string name="wishlist_title">Your Wishlist</string>
     <string name="wishlist_items_saved">%1$d items saved</string>
@@ -418,72 +422,44 @@
     <string name="wishlist_out_of_stock">Out of Stock</string>
     <string name="wishlist_empty_title">Your wishlist is empty</string>
     <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
+    <string name="wishlist_discover_styles">Discover Styles</string>
     <string name="wishlist_item_removed">Item removed from wishlist</string>
     <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
     <string name="wishlist_remove_dialog_title">Remove Item?</string>
     <string name="wishlist_remove_dialog_subtitle">This item will be removed from your wishlist.</string>
     <string name="wishlist_remove_dialog_confirm">Remove</string>
     <string name="wishlist_remove_dialog_cancel">Keep in Wishlist</string>
-    <!-- Brands Screen -->
+    <!--  Brands Screen  -->
     <string name="wishlist_item_added">Added to favorites</string>
     <string name="brands_title">Brands</string>
     <string name="vendor_products_empty">No products found for this brand.</string>
-
-    <!--Ahmed-->
-
-
-
-
-
-    <!--Omar-->
-
+    <string name="vendor_products_title">Products</string>
+    <!-- Ahmed -->
+    <!-- Omar -->
     <string name="hero_banner_default_title">The Midnight Slate Collection</string>
-
     <string name="hero_banner_shop_now">Shop Now</string>
-
     <string name="hero_banner_recommended">RECOMMENDED FOR YOU</string>
-
     <string name="hero_banner_description">Hero Banner Image</string>
-
     <string name="home_new_arrivals">New Arrivals</string>
-
     <string name="content_desc_favorite">Favorite</string>
-
     <string name="content_desc_add_to_cart">Add to Cart</string>
-
     <string name="content_desc_search">Search</string>
-
     <string name="search_placeholder">Search here</string>
-
     <string name="app_name">WearZone</string>
-
     <string name="content_desc_menu">Menu</string>
-
     <string name="content_desc_cart">Cart</string>
-
     <string name="dummy_cart_count">3</string>
-
     <string name="home_greeting">Hello, %1$s</string>
-
     <string name="home_subtitle">Discover today\'s curated styles.</string>
-
     <string name="home_top_brands">Top Brands</string>
-
     <string name="home_see_all">See all</string>
-
     <string name="home_trending_now">Trending Now</string>
-
     <string name="nav_home">Home</string>
-
     <string name="nav_categories">Categories</string>
-
     <string name="nav_search">Search</string>
-
     <string name="nav_wishlist">Wishlist</string>
-
     <string name="nav_profile">Profile</string>
-
-    <!--Search-->
+    <!-- Search -->
     <string name="search_title">Search</string>
     <string name="content_desc_back">Back</string>
     <string name="content_desc_clear_search">Clear search</string>
@@ -501,19 +477,17 @@
     <string name="search_reset_filters">Reset</string>
     <string name="search_start_title">Find your next piece</string>
     <string name="search_start_subtitle">Search by product, designer, brand, or category.</string>
-    <string name="search_empty_title">No matching styles</string>
-    <string name="search_empty_subtitle">Try another keyword or loosen the filters.</string>
+    <string name="search_empty_title">No results found</string>
+    <string name="search_empty_subtitle">We couldn\'t find what you were looking for. Try a different term or keyword.</string>
     <string name="search_error_title">Search unavailable</string>
     <string name="search_error_subtitle">We could not load products right now.</string>
     <string name="search_retry">Retry</string>
-    <!--Search-->
-
+    <!-- Search -->
     <string name="address_error_permission">Address permission is not available. Please check Shopify Admin API access.</string>
     <string name="address_error_customer_not_found">Shopify customer was not found for this account.</string>
     <string name="address_error_invalid_shopify_address">Shopify rejected this address. Please check country, city, zip code, and phone.</string>
     <string name="address_error_response_parse">Address was saved but the response format could not be read.</string>
     <string name="address_error_network">Network error. Please check your connection and try again.</string>
-
     <string name="categories_title">Categories</string>
     <string name="categories_search_placeholder">Search categories…</string>
     <string name="categories_search_content_description">Search Categories</string>
@@ -522,16 +496,41 @@
     <string name="categories_no_results_found">No categories found for \"%1$s\"</string>
     <string name="categories_no_data_available">No categories available</string>
     <string name="categories_products_available">%1$d Products Available</string>
-
     <string name="error_network">Network error, please check your connection</string>
     <string name="error_server">Server error (%1$s)</string>
     <string name="error_unknown">Something went wrong</string>
-
-
     <string name="promo_limited_time_sale">LIMITED TIME SALE</string>
     <string name="promo_discount_off">OFF</string>
     <string name="promo_shop_now">Shop now</string>
+
+
+    <string name="verify_email_title">Verify Your Email</string>
+    <string name="verify_email_subtitle">We have sent a verification link to %1$s. Please check your inbox and verify your account to continue.</string>
+    <string name="ive_verified_continue">I\'ve Verified, Continue</string>
+    <string name="resend_email">Resend Email</string>
+    <string name="resend_email_countdown">Resend email in %1$ds</string>
+    <string name="logout">Log Out</string>
+
+    <!-- Email Verification Strings -->
+    <string name="email_verification_sent">Verification email sent</string>
+    <string name="email_verification_failed_send">Failed to send verification email</string>
+    <string name="email_verification_not_verified">Email is not verified yet</string>
+    <string name="email_verification_failed_check">Failed to check verification status</string>
     <!--Omar-->
 
+
+    <string name="reset_email_sent_title">Email Sent</string>
+    <string name="reset_email_sent_message">A password reset link has been sent to your email address.</string>
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_subtitle">Enter your email address to reset your password.</string>
+    <string name="email_label">Email Address</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="apple_signin_coming_soon">Apple Sign-In coming soon!</string>
+
+    <string name="forgot_password_empty_email">Please enter your email</string>
+    <string name="forgot_password_invalid_email">Please enter a valid email</string>
+    <string name="forgot_password_failed_send">Failed to send reset email</string>
+    <!--Omar-->
 
 </resources>
