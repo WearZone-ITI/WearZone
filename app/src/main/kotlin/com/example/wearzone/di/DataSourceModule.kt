@@ -112,6 +112,8 @@ abstract class DataSourceModule {
     abstract fun bindAiChatRemoteDataSource(
         impl: com.example.wearzone.data.remote.ai.chat.AiChatRemoteDataSourceImpl,
     ): com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
+
+    @Binds
     abstract fun bindAddressLookupRemoteDataSource(
         impl: MapboxAddressLookupRemoteDataSourceImpl,
     ): IAddressLookupRemoteDataSource
@@ -159,6 +161,8 @@ abstract class DataSourceModule {
         @Provides
         @com.example.wearzone.data.remote.ai.chat.GroqApiKey
         fun provideGroqApiKey(): String = com.example.wearzone.BuildConfig.GROQ_API_KEY
+
+        @Provides
         @PayMockDataStore
         fun providePayMockDataStore(
             @ApplicationContext context: Context,

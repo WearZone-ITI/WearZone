@@ -88,6 +88,8 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindAiChatRepository(impl: com.example.wearzone.data.repository.AiChatRepositoryImpl): com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+
+    @Binds
     abstract fun bindCountryRepository(impl: CountryRepositoryImpl): ICountryRepository
 
     @Binds

@@ -192,7 +192,8 @@ object NetworkModule {
             .build()
         return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GroqApiService::class.java)
     }
-}
+
+    @Provides
     fun providePayMockApiService(
         @PayMockRetrofit retrofit: Retrofit,
     ): PayMockApiService {
