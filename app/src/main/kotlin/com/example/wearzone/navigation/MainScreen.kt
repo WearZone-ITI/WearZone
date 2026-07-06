@@ -1,19 +1,27 @@
 package com.example.wearzone.navigation
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -22,8 +30,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,7 +63,7 @@ import kotlinx.coroutines.launch
 
 data class BottomNavItem<T : Any>(
     val route: T,
-    val icon: ImageVector,
+    val iconRes: Int,
     val labelRes: Int,
     val contentDescriptionRes: Int
 )
@@ -75,11 +86,11 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val navItems = listOf(
-        BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
-        BottomNavItem(Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
-        BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
-        BottomNavItem(Route.WishlistRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
-        BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
+        BottomNavItem(Route.HomeRoute, R.drawable.ic_home, R.string.nav_home, R.string.nav_home),
+        BottomNavItem(Route.CategoriesRoute, R.drawable.ic_categories, R.string.nav_categories, R.string.nav_categories),
+        BottomNavItem(Route.SearchRoute, R.drawable.ic_search, R.string.nav_search, R.string.content_desc_search),
+        BottomNavItem(Route.WishlistRoute, R.drawable.ic_wishlist, R.string.nav_wishlist, R.string.nav_wishlist),
+        BottomNavItem(Route.ProfileRoute, R.drawable.ic_profile, R.string.nav_profile, R.string.nav_profile)
     )
 
     Scaffold(
@@ -87,90 +98,51 @@ fun MainScreen(
         containerColor = AppTheme.colors.background,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
-            val itemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = AppTheme.colors.selected,
-                selectedTextColor = AppTheme.colors.selected,
-                indicatorColor = AppTheme.colors.surfaceVariant,
-                unselectedIconColor = AppTheme.colors.textSecondary,
-                unselectedTextColor = AppTheme.colors.textSecondary,
-            )
+            val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
 
-            NavigationBar(
-                containerColor = AppTheme.colors.surface, tonalElevation = 8.dp
-            ) {
-                val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-
-                navItems.forEach { item ->
-                    val isRouteMatch = currentDestination?.hierarchy?.any {
-                        it.hasRoute(item.route::class)
-                    } == true
-
-                    val isSelected = when (item.labelRes) {
+            val selectedIndex = remember(currentDestination) {
+                navItems.indexOfFirst { item ->
+                    when (item.labelRes) {
                         R.string.nav_home -> currentDestination?.hasRoute(Route.HomeRoute::class) == true
                         R.string.nav_categories -> currentDestination?.hasRoute(Route.CategoriesRoute::class) == true
                         R.string.nav_wishlist -> currentDestination?.hasRoute(Route.WishlistRoute::class) == true
                         R.string.nav_search -> currentDestination?.hasRoute(Route.SearchRoute::class) == true
                         R.string.nav_profile -> currentDestination?.hasRoute(Route.ProfileRoute::class) == true ||
-                            currentDestination?.hasRoute(Route.OrderHistoryRoute::class) == true
-                        else -> isRouteMatch
+                                currentDestination?.hasRoute(Route.OrderHistoryRoute::class) == true
+                        else -> currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
                     }
+                }.coerceAtLeast(0)
+            }
 
-                    NavigationBarItem(
-                        selected = isSelected,
-                        label = {
-                            Text(
-                                text = stringResource(id = item.labelRes),
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = stringResource(id = item.contentDescriptionRes),
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
-                        onClick = {
-                            when {
-                                item.route == Route.ProfileRoute -> {
-                                    if (currentDestination?.hasRoute(Route.ProfileRoute::class) != true) {
-                                        val returnedToProfile = bottomNavController.popBackStack(
-                                            Route.ProfileRoute,
-                                            inclusive = false,
-                                        )
-                                        if (!returnedToProfile) {
-                                            bottomNavController.navigate(Route.ProfileRoute) {
-                                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+            AnimatedCurvedNavigationBar(
+                items = navItems,
+                selectedIndex = selectedIndex,
+                onItemSelected = { item, isSelected ->
+                    when {
+                        item.route == Route.ProfileRoute -> {
+                            if (currentDestination?.hasRoute(Route.ProfileRoute::class) != true) {
+                                val returnedToProfile = bottomNavController.popBackStack(
+                                    Route.ProfileRoute,
+                                    inclusive = false,
+                                )
+                                if (!returnedToProfile) {
+                                    bottomNavController.navigate(Route.ProfileRoute) {
+                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
                                 }
+                            }
+                        }
 
-                                currentDestination?.hasRoute(Route.SearchRoute::class) == true -> {
-                                    if (item.route == Route.HomeRoute) {
-                                        bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
-                                    } else {
-                                        bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
-                                        bottomNavController.navigate(item.route) {
-                                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
-                                }
-
-                                !isSelected -> {
+                        currentDestination?.hasRoute(Route.SearchRoute::class) == true -> {
+                            if (item.route == Route.HomeRoute) {
+                                bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
+                            } else {
+                                bottomNavController.popBackStack(Route.HomeRoute, inclusive = false)
                                 bottomNavController.navigate(item.route) {
                                     popUpTo(bottomNavController.graph.findStartDestination().id) {
                                         saveState = true
@@ -179,20 +151,29 @@ fun MainScreen(
                                     restoreState = true
                                 }
                             }
-                            }
-                            },
-                            colors = itemColors,
-                            )
                         }
+
+                        !isSelected -> {
+                            bottomNavController.navigate(item.route) {
+                                popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }
                 }
-            }) { paddingValues ->
-            NavHost(
-                navController = bottomNavController,
-                startDestination = Route.HomeRoute,
-                modifier = Modifier.padding(paddingValues),
-            ) {
-                composable<Route.HomeRoute> {
-                    HomeScreen(
+            )
+        }
+    ) { paddingValues ->
+        NavHost(
+            navController = bottomNavController,
+            startDestination = Route.HomeRoute,
+            modifier = Modifier.padding(paddingValues),
+        ) {
+            composable<Route.HomeRoute> {
+                HomeScreen(
                     onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
                     onNavigateToCategory = { bottomNavController.navigate(Route.CategoriesRoute) },
                     onNavigateToBrand = { brandName -> onNavigateToVendorProducts(brandName) },
@@ -206,156 +187,259 @@ fun MainScreen(
                     onNavigateToCart = { onNavigateToCart() },
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister,
-                    )
-                }
-                composable<Route.CategoriesRoute> {
-                    CategoriesScreen(
-                        navigateToCart = onNavigateToCart,
-                        onNavigateToProductList = { collectionId, categoryName ->
-                            onNavigateToProductList(collectionId, categoryName)
+                )
+            }
+            composable<Route.CategoriesRoute> {
+                CategoriesScreen(
+                    navigateToCart = onNavigateToCart,
+                    onNavigateToProductList = { collectionId, categoryName ->
+                        onNavigateToProductList(collectionId, categoryName)
+                    }
+                )
+            }
+            composable<Route.SearchRoute> {
+                SearchScreen(
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
+                    onNavigateToCart = { onNavigateToCart() }
+                )
+            }
+
+            composable<Route.ProfileRoute> {
+                ProfileScreen(
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onNavigateToSettings = onNavigateToSettings,
+                    onNavigateToWishlist = {
+                        bottomNavController.navigate(Route.WishlistRoute)
+                    },
+                    onNavigateToOrders = {
+                        bottomNavController.navigate(Route.OrderHistoryRoute) {
+                            launchSingleTop = true
                         }
-                    )
-                }
-                composable<Route.SearchRoute> {
-                    SearchScreen(
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
-                        onNavigateToCart = {onNavigateToCart()}
-                    )
-                }
-
-                composable<Route.ProfileRoute> {
-                    ProfileScreen(
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                        onNavigateToSettings = onNavigateToSettings,
-                        onNavigateToWishlist = {
-                            bottomNavController.navigate(Route.WishlistRoute)
-                        },
-                        onNavigateToOrders = {
-                            bottomNavController.navigate(Route.OrderHistoryRoute) {
-                                launchSingleTop = true
+                    },
+                    onNavigateToCart = { onNavigateToCart() },
+                    onNavigateToSavedAddresses = {
+                        bottomNavController.navigate(Route.AddressListRoute) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onContinueBrowsing = {
+                        bottomNavController.navigate(Route.HomeRoute) {
+                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                        },
-                        onNavigateToCart = { onNavigateToCart() },
-                        onNavigateToSavedAddresses = {
-                            bottomNavController.navigate(Route.AddressListRoute) {
-                                launchSingleTop = true
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
+            }
+
+            composable<Route.OrderHistoryRoute> {
+                OrderHistoryScreen(
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onNavigateToDetails = { orderId ->
+                        bottomNavController.navigate(Route.OrderDetailsRoute(orderId))
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                )
+            }
+
+            composable<Route.OrderDetailsRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.OrderDetailsRoute>()
+                OrderDetailsScreen(
+                    orderId = route.orderId,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onContinueShopping = {
+                        bottomNavController.navigate(Route.HomeRoute) {
+                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                        },
-                        onContinueBrowsing = {
-                            bottomNavController.navigate(Route.HomeRoute) {
-                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                )
+            }
+
+            composable<Route.AddressListRoute> { backStackEntry ->
+                val refreshAfterChange by backStackEntry.savedStateHandle
+                    .getStateFlow(ADDRESS_CHANGED_KEY, false)
+                    .collectAsStateWithLifecycle()
+
+                AddressListScreen(
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
+                    onNavigateToEditAddress = { addressId ->
+                        bottomNavController.navigate(Route.AddressEditRoute(addressId))
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    refreshAfterChange = refreshAfterChange,
+                    onRefreshAfterChangeConsumed = {
+                        backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
+                    },
+                )
+            }
+
+            composable<Route.AddressAddRoute> {
+                AddressFormScreen(
+                    addressId = null,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                )
+            }
+
+            composable<Route.AddressEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.AddressEditRoute>()
+                AddressFormScreen(
+                    addressId = route.addressId,
+                    onNavigateBack = { bottomNavController.popBackStack() },
+                    onAddressSaved = {
+                        bottomNavController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(ADDRESS_CHANGED_KEY, true)
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                )
+            }
+
+            composable<Route.WishlistRoute> {
+                WishlistScreen(
+                    onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
+                    onShowSnackbar = { message ->
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    },
+                    onNavigateToCart = onNavigateToCart,
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onContinueBrowsing = {
+                        bottomNavController.navigate(Route.HomeRoute) {
+                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                        },
-                    )
-                }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
+            }
+        }
+    }
+}
 
-                composable<Route.OrderHistoryRoute> {
-                    OrderHistoryScreen(
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onNavigateToDetails = { orderId ->
-                            bottomNavController.navigate(Route.OrderDetailsRoute(orderId))
-                        },
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                    )
-                }
+@Composable
+fun AnimatedCurvedNavigationBar(
+    items: List<BottomNavItem<out Any>>,
+    selectedIndex: Int,
+    onItemSelected: (BottomNavItem<out Any>, Boolean) -> Unit
+) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(88.dp)
+    ) {
+        val tabWidth = maxWidth / items.size
 
-                composable<Route.OrderDetailsRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<Route.OrderDetailsRoute>()
-                    OrderDetailsScreen(
-                        orderId = route.orderId,
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onContinueShopping = {
-                            bottomNavController.navigate(Route.HomeRoute) {
-                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                    )
-                }
+        val fabSize = 56.dp
+        val notchBorderSize = 8.dp
+        val totalNotchSize = fabSize + (notchBorderSize * 2)
 
-                composable<Route.AddressListRoute> { backStackEntry ->
-                    val refreshAfterChange by backStackEntry.savedStateHandle
-                        .getStateFlow(ADDRESS_CHANGED_KEY, false)
-                        .collectAsStateWithLifecycle()
+        val targetX = (tabWidth * selectedIndex) + (tabWidth / 2) - (totalNotchSize / 2)
+        val animatedX by animateDpAsState(
+            targetValue = targetX,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            ),
+            label = "notch_anim"
+        )
 
-                    AddressListScreen(
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onNavigateToAddAddress = { bottomNavController.navigate(Route.AddressAddRoute) },
-                        onNavigateToEditAddress = { addressId ->
-                            bottomNavController.navigate(Route.AddressEditRoute(addressId))
-                        },
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                        refreshAfterChange = refreshAfterChange,
-                        onRefreshAfterChangeConsumed = {
-                            backStackEntry.savedStateHandle[ADDRESS_CHANGED_KEY] = false
-                        },
-                    )
-                }
-
-                composable<Route.AddressAddRoute> {
-                    AddressFormScreen(
-                        addressId = null,
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onAddressSaved = {
-                            bottomNavController.previousBackStackEntry
-                                ?.savedStateHandle
-                                ?.set(ADDRESS_CHANGED_KEY, true)
-                        },
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                    )
-                }
-
-                composable<Route.AddressEditRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<Route.AddressEditRoute>()
-                    AddressFormScreen(
-                        addressId = route.addressId,
-                        onNavigateBack = { bottomNavController.popBackStack() },
-                        onAddressSaved = {
-                            bottomNavController.previousBackStackEntry
-                                ?.savedStateHandle
-                                ?.set(ADDRESS_CHANGED_KEY, true)
-                        },
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                    )
-                }
-
-                composable<Route.WishlistRoute> {
-                    WishlistScreen(
-                        onNavigateToProductDetail = { productId -> onNavigateToProductDetail(productId) },
-                        onShowSnackbar = { message ->
-                            coroutineScope.launch {
-                                snackbarHostState.showSnackbar(message)
-                            }
-                        },
-                        onNavigateToCart = onNavigateToCart,
-                        onNavigateToLogin = onNavigateToLogin,
-                        onNavigateToRegister = onNavigateToRegister,
-                        onContinueBrowsing = {
-                            bottomNavController.navigate(Route.HomeRoute) {
-                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .align(Alignment.BottomCenter)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                )
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, item ->
+                val isSelected = index == selectedIndex
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { onItemSelected(item, isSelected) }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!isSelected) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(id = item.iconRes),
+                                contentDescription = stringResource(id = item.contentDescriptionRes),
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(id = item.labelRes),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = animatedX, y = (-20).dp)
+                .size(totalNotchSize)
+                .background(
+                    color = AppTheme.colors.background,
+                    shape = CircleShape
+                )
+                .padding(notchBorderSize)
+                .shadow(elevation = 6.dp, shape = CircleShape)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            val selectedItem = items[selectedIndex]
+            Icon(
+                painter = painterResource(id = selectedItem.iconRes),
+                contentDescription = stringResource(id = selectedItem.contentDescriptionRes),
+                modifier = Modifier.size(26.dp),
+                tint = Color.Unspecified
+            )
         }
+    }
+}
