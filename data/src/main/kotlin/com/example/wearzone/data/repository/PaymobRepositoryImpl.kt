@@ -1,64 +1,44 @@
 package com.example.wearzone.data.repository
 
-import android.util.Log
-import com.example.data.BuildConfig
 import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.remote.api.PaymobApiService
-import com.example.wearzone.data.remote.dto.*
-import com.example.wearzone.domain.checkout.repository.IPaymobRepository
-import com.example.wearzone.domain.checkout.repository.PaymobBillingData
-import com.example.wearzone.domain.common.runCatchingCancellable
+import com.example.wearzone.data.remote.mapper.toDomain
+import com.example.wearzone.data.remote.mapper.toIntentionRequestDto
+import com.example.wearzone.domain.checkout.model.CheckoutData
+import com.example.wearzone.domain.checkout.model.PaymentIntention
+import com.example.wearzone.domain.checkout.repository.IPaymentRepository
+import com.example.wearzone.domain.common.PaymentException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Named
 
-class PaymobRepositoryImpl @Inject constructor(
+class PaymentRepositoryImpl @Inject constructor(
     private val apiService: PaymobApiService,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-) : IPaymobRepository {
+    @Named("secretKey") private val secretKey: String,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
+) : IPaymentRepository {
 
-    private val secretKey = BuildConfig.PAYMOB_API_KEY
-    private val publicKey = BuildConfig.PAYMOB_PUBLIC_KEY
-    private val integrationId = BuildConfig.PAYMOB_INTEGRATION_ID.toIntOrNull() ?: 0
+    override suspend fun createIntention(checkoutData: CheckoutData): Result<PaymentIntention> {
 
-    override suspend fun getPaymentToken(
-        amount: Double,
-        currency: String,
-        billingData: PaymobBillingData
-    ): Result<Pair<String, String>> = withContext(ioDispatcher) {
-        runCatchingCancellable {
+        return withContext(dispatcher) {
             try {
-                val amountCents = (amount * 100).toLong()
+                val specialRef = "wearzone_${System.currentTimeMillis()}"
+                val requestDto = checkoutData.toIntentionRequestDto(specialRef)
                 val response = apiService.createIntention(
                     authHeader = "Token $secretKey",
-                    request = PaymobIntentionRequest(
-                        amount = amountCents,
-                        currency = currency,
-                        paymentMethods = listOf(integrationId),
-                        billingData = billingData.toDto(),
-                    )
+                    request = requestDto
                 )
-                response.clientSecret to publicKey
+                Result.success(response.toDomain())
             } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("PaymobError", "Code: ${e.code()} | Body: $errorBody")
-                throw e
+                Result.failure(PaymentException.ApiError(e.code(), e.message()))
+            } catch (e: IOException) {
+                Result.failure(PaymentException.NetworkError)
+            } catch (e: Exception) {
+                Result.failure(PaymentException.Unknown(e.message))
             }
         }
     }
-
-    private fun PaymobBillingData.toDto() = PaymobBillingDataDto(
-        apartment = apartment,
-        email = email,
-        floor = floor,
-        first_name = firstName,
-        street = street,
-        building = building,
-        phone_number = phoneNumber,
-        city = city,
-        country = country,
-        last_name = lastName,
-        state = state
-    )
 }

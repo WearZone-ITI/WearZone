@@ -1,16 +1,15 @@
-package com.example.wearzone.data.remote.dto
+package com.example.wearzone.data.remote.mapper
 
-import android.icu.number.Precision.currency
 import com.example.data.BuildConfig
 import com.example.wearzone.domain.checkout.model.CheckoutData
 import com.example.wearzone.domain.checkout.model.PaymentIntention
 
 private const val CURRENCY_MULTIPLIER = 100L
 
-fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto {
+fun CheckoutData.toIntentionRequestDto(specialRef: String): com.example.wearzone.data.remote.dto.IntentionRequestDto {
 
     val intentionItems = cartItems.map { item ->
-        IntentionItemDto(
+        _root_ide_package_.com.example.wearzone.data.remote.dto.IntentionItemDto(
             name = item.title,
             amount = (item.price * CURRENCY_MULTIPLIER).toLong(),
             description = item.size?.let { "Size: $it" } ?: item.vendor,
@@ -23,17 +22,17 @@ fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto 
         "Amount mismatch: totalAmount=$totalAmount but items sum=$itemsTotal"
     }
 
-    return IntentionRequestDto(
+    return _root_ide_package_.com.example.wearzone.data.remote.dto.IntentionRequestDto(
         amount = totalAmount,
         paymentMethods = listOf(BuildConfig.PAYMOB_INTEGRATION_ID.toLong()),
         items = intentionItems,
-        billingData = BillingDataDto(
+        billingData = _root_ide_package_.com.example.wearzone.data.remote.dto.BillingDataDto(
             firstName = customerInfo.firstName,
             lastName = customerInfo.lastName,
-            phoneNumber = "01279336697",
+            phoneNumber = customerInfo.phone,
             email = customerInfo.email
         ),
-        customer = CustomerPaymentDto(
+        customer = _root_ide_package_.com.example.wearzone.data.remote.dto.CustomerPaymentDto(
             firstName = customerInfo.firstName,
             lastName = customerInfo.lastName,
             email = customerInfo.email
@@ -43,13 +42,7 @@ fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto 
     )
 }
 
-private fun String.toPaymobPhoneFormat(): String {
-    if (this.startsWith("+")) return this
-    val digitsOnly = this.trim().removePrefix("0")
-    return "+20$digitsOnly"
-}
-
-fun IntentionResponseDto.toDomain(): PaymentIntention {
+fun com.example.wearzone.data.remote.dto.IntentionResponseDto.toDomain(): PaymentIntention {
     return PaymentIntention(
         intentionId = id,
         clientSecret = clientSecret,

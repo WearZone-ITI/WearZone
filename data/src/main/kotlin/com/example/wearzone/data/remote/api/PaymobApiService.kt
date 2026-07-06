@@ -9,6 +9,6 @@ interface PaymobApiService {
     @POST("v1/intention/")
     suspend fun createIntention(
         @Header("Authorization") authHeader: String,
-        @Body request: PaymobIntentionRequest
-    ): PaymobIntentionResponse
+        @Body request: IntentionRequestDto
+    ): IntentionResponseDto
 }
