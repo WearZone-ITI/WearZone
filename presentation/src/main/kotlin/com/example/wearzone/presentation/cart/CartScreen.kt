@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.FullScreenLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +58,7 @@ fun CartScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToCheckout: () -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,6 +86,7 @@ fun CartScreen(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToRegister = onNavigateToRegister,
         onIntent = viewModel::handleIntent,
+        onContinueShopping = onContinueShopping,
     )
 
     pendingRemoveVariantId?.let { variantId ->
@@ -134,6 +136,7 @@ private fun CartContent(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onIntent: (CartUiIntent) -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val content = uiState as? CartUiState.Content
 
@@ -193,16 +196,14 @@ private fun CartContent(
                 .background(AppTheme.colors.background),
         ) {
             when (uiState) {
-                CartUiState.Loading -> CircularProgressIndicator(
-                    color = AppTheme.colors.selected,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                CartUiState.Loading -> FullScreenLoader(modifier = Modifier.align(Alignment.Center))
                 CartUiState.LoginRequired -> SignInRequiredDialog(
                     messageRes = R.string.sign_in_required_cart_message,
                     onSignInRegister = onNavigateToLogin,
                     onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(
+                    onContinueShopping = onContinueShopping,
                     modifier = Modifier.padding(horizontal = 32.dp),
                 )
                 is CartUiState.Error -> CartErrorContent(

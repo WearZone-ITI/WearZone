@@ -2,9 +2,11 @@ package com.example.wearzone.presentation.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,6 +46,9 @@ fun TopBar(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
             )
+        },
+        navigationIcon = {
+            Spacer(modifier = Modifier.width(56.dp))
         },
         actions = {
             Box(modifier = Modifier.padding(end = 8.dp)) {

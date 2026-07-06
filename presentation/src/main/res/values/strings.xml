@@ -143,8 +143,8 @@
     <string name="address_delete">Delete address</string>
     <string name="address_set_default">Set as default</string>
     <string name="address_add_new">Add New Address</string>
-    <string name="address_empty_title">No saved addresses</string>
-    <string name="address_empty_subtitle">Add a shipping destination to make checkout faster.</string>
+    <string name="address_empty_title">No addresses saved</string>
+    <string name="address_empty_subtitle">Add a shipping address to speed up your checkout process.</string>
     <string name="address_delete_dialog_title">Delete Address?</string>
     <string name="address_delete_dialog_message">Are you sure you want to delete this address?</string>
     <string name="address_delete_dialog_confirm">Delete Address</string>
@@ -478,6 +478,7 @@
     <string name="wishlist_out_of_stock">Out of Stock</string>
     <string name="wishlist_empty_title">Your wishlist is empty</string>
     <string name="wishlist_empty_subtitle">Save items you love to view them later.</string>
+    <string name="wishlist_discover_styles">Discover Styles</string>
     <string name="wishlist_item_removed">Item removed from wishlist</string>
     <string name="wishlist_sign_in_required">Sign in to sync your wishlist</string>
     <string name="wishlist_remove_dialog_title">Remove Item?</string>
@@ -562,8 +563,8 @@
     <string name="search_reset_filters">Reset</string>
     <string name="search_start_title">Find your next piece</string>
     <string name="search_start_subtitle">Search by product, designer, brand, or category.</string>
-    <string name="search_empty_title">No matching styles</string>
-    <string name="search_empty_subtitle">Try another keyword or loosen the filters.</string>
+    <string name="search_empty_title">No results found</string>
+    <string name="search_empty_subtitle">We couldn\'t find what you were looking for. Try a different term or keyword.</string>
     <string name="search_error_title">Search unavailable</string>
     <string name="search_error_subtitle">We could not load products right now.</string>
     <string name="search_retry">Retry</string>

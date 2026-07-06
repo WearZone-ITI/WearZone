@@ -19,7 +19,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.ProfileSkeleton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -158,10 +158,7 @@ private fun ProfileContent(
             .background(AppTheme.colors.background),
     ) {
         when (uiState) {
-            ProfileUiState.Loading -> CircularProgressIndicator(
-                color = AppTheme.colors.selected,
-                modifier = Modifier.align(Alignment.Center),
-            )
+            ProfileUiState.Loading -> ProfileSkeleton()
 
             is ProfileUiState.Error -> Text(
                 text = stringResource(uiState.messageRes),

@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -104,7 +104,7 @@ fun VendorProductsScreen(
         ) {
             when (val state = uiState) {
                 is VendorProductsUiState.Loading -> {
-                    CircularProgressIndicator(color = AppTheme.colors.selected)
+                    ProductGridSkeleton()
                 }
                 is VendorProductsUiState.Error -> {
                     Text(
