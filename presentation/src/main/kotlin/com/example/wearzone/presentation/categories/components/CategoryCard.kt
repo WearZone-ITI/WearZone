@@ -50,7 +50,7 @@ fun CategoryCard(
                 translationY = -4f
             },
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+        border = BorderStroke(1.dp, themeColors.border.copy(alpha = 0.15f)),
         colors = CardDefaults.cardColors(
             containerColor = themeColors.surfaceVariant
         ),
@@ -101,7 +101,7 @@ fun CategoryCard(
                     modifier = Modifier
                         .width(28.dp)
                         .height(3.dp)
-                        .background(Color.White.copy(alpha = 0.6f), RoundedCornerShape(2.dp))
+                        .background(themeColors.accent, RoundedCornerShape(2.dp))
                 )
             }
         }

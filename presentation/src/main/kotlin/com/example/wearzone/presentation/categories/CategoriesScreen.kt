@@ -194,7 +194,7 @@ fun CategoriesScreen(
                             onClick = { viewModel.handleIntent(CategoriesUiIntent.OnRetry) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = themeColors.selected,
-                                contentColor = if (MaterialTheme.colorScheme.isLight()) Color.White else Color.Black
+                                contentColor = themeColors.onAccent
                             )
                         ) {
                             Text(text = stringResource(id = R.string.categories_retry_button))
@@ -219,6 +219,3 @@ fun CategoriesScreen(
         }
     }
 }
-
-@Composable
-private fun ColorScheme.isLight() = this.background.luminance() > 0.5f
