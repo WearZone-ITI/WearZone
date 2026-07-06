@@ -1,5 +1,6 @@
 package com.example.wearzone.di
 
+import com.example.wearzone.data.notifications.CouponNotificationSchedulerImpl
 import com.example.wearzone.data.repository.AuthRepositoryImpl
 import com.example.wearzone.data.repository.CategoryRepositoryImpl
 import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
@@ -77,4 +78,11 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindOrderHistoryRepository(impl: OrderHistoryRepositoryImpl): IOrderHistoryRepository
+
+
+    @Binds
+    abstract fun bindCouponNotificationScheduler(
+        impl: CouponNotificationSchedulerImpl,
+    ): ICouponNotificationScheduler
+
 }

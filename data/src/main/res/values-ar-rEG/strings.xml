@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="coupon_notification_channel_name">الكوبونات والعروض</string>
+    <string name="coupon_notification_channel_description">إشعارات بكوبونات الخصم والعروض الخاصة</string>
+    <string name="coupon_notification_title">هدية بانتظارك 🎁</string>
+    <string name="coupon_notification_body">استمتع بخصم %1$d%% باستخدام الكود %2$s. تسوق الآن!</string>
+
+</resources>

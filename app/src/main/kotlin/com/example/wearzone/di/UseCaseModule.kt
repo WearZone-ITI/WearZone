@@ -117,6 +117,14 @@ object UseCaseModule {
         return GetProductDetailUseCase(repository)
     }
 
+    // --- ADDED: provides the coupon-picking use case used by CouponReminderWorker ---
+    @Provides
+    fun provideGetRandomCouponOfferUseCase(): GetRandomCouponOfferUseCase {
+        return GetRandomCouponOfferUseCase()
+    }
+
+
+
     @Provides
     fun provideLoginWithEmailUseCase(
         repository: IAuthRepository,

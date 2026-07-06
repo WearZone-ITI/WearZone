@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="coupon_notification_channel_name">Coupons &amp; Offers</string>
+    <string name="coupon_notification_channel_description">Notifications about discount coupons and special offers</string>
+    <string name="coupon_notification_title">A gift is waiting for you 🎁</string>
+    <string name="coupon_notification_body">Enjoy %1$d%% off with code %2$s. Tap to shop now!</string>
+
+</resources>

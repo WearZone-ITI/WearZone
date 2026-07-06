@@ -72,10 +72,12 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":presentation"))
     implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.hilt.work)
     implementation(libs.firebase.auth.ktx)
 
     //Omar
     implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.androidx.work.runtime.ktx)
     //Omar
 
     //Ahmed

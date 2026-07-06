@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 class SettingsRepositoryImpl @Inject constructor(
     private val dataSource: ISettingsPreferencesDataSource,
+    private val couponNotificationScheduler: ICouponNotificationScheduler, // ADDED
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ISettingsRepository {
 
@@ -31,8 +32,16 @@ class SettingsRepositoryImpl @Inject constructor(
         withContext(ioDispatcher) {
             runCatchingCancellable {
                 dataSource.setNotificationsEnabled(enabled)
+                // ADDED: start/stop the periodic coupon-reminder work immediately
+                // instead of waiting for the worker to notice the flag changed.
+                if (enabled) {
+                    couponNotificationScheduler.start()
+                } else {
+                    couponNotificationScheduler.stop()
+                }
             }
         }
+
 
     override suspend fun setLanguage(languageCode: String): Result<Unit> =
         withContext(ioDispatcher) {
