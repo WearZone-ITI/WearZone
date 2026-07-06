@@ -18,6 +18,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.example.presentation.R
+import androidx.compose.ui.graphics.Color
 import com.example.wearzone.presentation.common.theme.ChampagneGold
 
 @Composable
@@ -57,10 +58,10 @@ fun WearZoneAnimatedLoader(
             value = SimpleColorFilter(goldColor.toArgb()),
             keyPath = arrayOf("Graphs-anim", "**")
         ),
-        // BG (the background circle/ring) -> adaptive faint background
+        // BG (the background circle/ring) -> transparent
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
-            value = SimpleColorFilter(backgroundTint.toArgb()),
+            value = SimpleColorFilter(Color.Transparent.toArgb()),
             keyPath = arrayOf("BG", "**")
         )
     )
