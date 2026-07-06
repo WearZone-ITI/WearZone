@@ -443,6 +443,7 @@
     <string name="product_detail_size_guide">Size Guide</string>
     <string name="product_detail_description">Description</string>
     <string name="product_detail_add_to_cart">Add to Cart</string>
+    <string name="product_detail_add_to_cart_with_qty">Add to Cart (%1$d)</string>
     <string name="product_detail_buy_now">Buy Now</string>
     <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
     <string name="product_detail_retry">Retry</string>
@@ -454,6 +455,22 @@
     <string name="content_desc_wishlist_remove">Remove from wishlist</string>
     <string name="content_desc_product_image">Product image</string>
     <string name="content_desc_star_rating">Star rating</string>
+       <!-- Product Detail Reviews -->
+    <string name="review_submitted_successfully">Review submitted successfully!</string>
+    <string name="review_submit_failed">Failed to submit review. Please try again.</string>
+    <string name="product_detail_write_review">Write a Review</string>
+    <string name="product_detail_write_review_hint">Write a review…</string>
+    <string name="product_detail_reviews_header">Customer Reviews</string>
+    <string name="product_detail_no_reviews">No reviews yet. Be the first to review!</string>
+    <string name="product_detail_rating">Rating</string>
+    <string name="product_detail_comment">Comment</string>
+    <string name="product_detail_submit">Submit</string>
+    <string name="product_detail_cancel">Cancel</string>
+    <string name="product_detail_review_stars_desc">%1$d out of 5 stars</string>
+    <string name="product_detail_avg_rating">%1$.1f out of 5</string>
+    <string name="product_detail_write_review_title">Write a Review</string>
+    <string name="product_detail_rating_required">Rating is required</string>
+    <string name="product_detail_comment_required">Comment is required</string>
     <!-- Wish List Screen -->
     <string name="wishlist_title">Your Wishlist</string>
     <string name="wishlist_items_saved">%1$d items saved</string>
@@ -576,6 +593,5 @@
     <string name="promo_discount_off">OFF</string>
     <string name="promo_shop_now">Shop now</string>
     <!--Omar-->
-
 
 </resources>
