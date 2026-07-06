@@ -49,8 +49,8 @@ class LoginViewModel @Inject constructor(
             is LoginUiIntent.OnGoogleSignInResult -> {
                 loginWithGoogle(intent.idToken)
             }
-            is LoginUiIntent.OnAppleSignInClicked -> {
-                sendEffect(LoginUiEffect.ShowSnackbar("Apple Sign-In coming soon!"))
+            is LoginUiIntent.OnGuestModeClicked -> {
+                sendEffect(LoginUiEffect.NavigateToHome)
             }
             is LoginUiIntent.OnRegisterClicked -> {
                 sendEffect(LoginUiEffect.NavigateToRegister)
@@ -70,29 +70,39 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             loginWithEmailUseCase(currentForm.email, currentForm.password)
-                .onSuccess {
+                .onSuccess { user ->
                     _uiState.value = LoginUiState.Idle
-                    sendEffect(LoginUiEffect.NavigateToHome)
+                    if (user.isEmailVerified) {
+                        sendEffect(LoginUiEffect.NavigateToHome)
+                    } else {
+                        sendEffect(LoginUiEffect.NavigateToEmailVerification(user.email))
+                    }
                 }
                 .onFailure { error ->
                     _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Login failed")
                 }
         }
+
     }
 
     private fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             loginWithGoogleUseCase(idToken)
-                .onSuccess {
+                .onSuccess { user ->
                     _uiState.value = LoginUiState.Idle
-                    sendEffect(LoginUiEffect.NavigateToHome)
+                    if (user.isEmailVerified) {
+                        sendEffect(LoginUiEffect.NavigateToHome)
+                    } else {
+                        sendEffect(LoginUiEffect.NavigateToEmailVerification(user.email))
+                    }
                 }
                 .onFailure { error ->
                     _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Google Sign-In failed")
                 }
         }
     }
+
 
     private fun sendEffect(effect: LoginUiEffect) {
         viewModelScope.launch {

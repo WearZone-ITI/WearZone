@@ -45,7 +45,7 @@ fun SocialLoginButtons(
         }
 
         OutlinedButton(
-            onClick = { onIntent(LoginUiIntent.OnAppleSignInClicked) },
+            onClick = { onIntent(LoginUiIntent.OnGuestModeClicked) },
             modifier = Modifier
                 .weight(1f)
                 .height(56.dp),
@@ -54,8 +54,8 @@ fun SocialLoginButtons(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = AppTheme.colors.textPrimary)
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_apple),
-                contentDescription = stringResource(R.string.content_desc_apple_sign_in),
+                painter = painterResource(id = R.drawable.ic_guest),
+                contentDescription = "Guest Mode",
                 tint = Color.Unspecified
             )
         }

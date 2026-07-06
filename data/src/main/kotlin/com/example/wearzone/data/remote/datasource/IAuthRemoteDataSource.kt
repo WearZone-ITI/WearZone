@@ -9,6 +9,8 @@ interface IAuthRemoteDataSource {
     suspend fun getSavedShopifyCustomerId(uid: String): Long?
     suspend fun register(name: String, email: String, password: String): RegisterResult
     fun getCurrentUser(): FirebaseUser?
+    suspend fun sendEmailVerification()
+    suspend fun isEmailVerified(): Boolean
     suspend fun sendPasswordResetEmail(email: String)
 
     fun signOut()

@@ -15,6 +15,7 @@ import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
+import com.example.wearzone.presentation.auth.emailverification.EmailVerificationScreen
 import com.example.wearzone.presentation.auth.forgotpassword.ForgotPasswordScreen
 import com.example.wearzone.presentation.auth.login.LoginScreen
 import com.example.wearzone.presentation.auth.register.RegisterScreen
@@ -30,6 +31,7 @@ import com.example.wearzone.presentation.search.SearchScreen
 import com.example.wearzone.presentation.settings.SettingsScreen
 import com.example.wearzone.presentation.brands.BrandsScreen
 import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
+import com.example.wearzone.presentation.splash.SplashScreen
 
 @Composable
 fun NavGraph(
@@ -62,9 +64,36 @@ fun NavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Route.OnboardingRoute,
+        startDestination = Route.SplashRoute,
         modifier = modifier,
     ) {
+        // Splash
+        composable<Route.SplashRoute> {
+            SplashScreen(
+                onNavigateToOnboarding = {
+                    navController.navigate(Route.OnboardingRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToMain = {
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.SplashRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
         // Aalaa
         composable<Route.OnboardingRoute> {
             OnboardingScreen(
@@ -105,8 +134,15 @@ fun NavGraph(
                         inclusive = true
                     }
                 }
+            }, onNavigateToEmailVerification = {
+                navController.navigate(Route.EmailVerificationRoute) {
+                    popUpTo<Route.RegisterRoute> {
+                        inclusive = true
+                    }
+                }
             })
         }
+
 
         composable<Route.CartRoute> {
             CartScreen(
@@ -269,6 +305,13 @@ fun NavGraph(
                     navigateToPendingOrMain(Route.LoginRoute)
                 },
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
+                onNavigateToEmailVerification = {
+                    navController.navigate(Route.EmailVerificationRoute) {
+                        popUpTo<Route.LoginRoute> {
+                            inclusive = true
+                        }
+                    }
+                },
                 onNavigateToForgotPassword = { navController.navigate(Route.ForgotPasswordRoute) },
             )
         }
@@ -357,6 +400,20 @@ fun NavGraph(
                     )
                 },
                 onNavigateToCart = { navController.navigate(Route.CartRoute) }
+            )
+        }
+        composable<Route.EmailVerificationRoute> {
+            EmailVerificationScreen(
+                onNavigateToHome = {
+                    navigateToPendingOrMain(Route.EmailVerificationRoute)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Route.LoginRoute) {
+                        popUpTo<Route.EmailVerificationRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 

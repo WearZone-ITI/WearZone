@@ -594,6 +594,21 @@
     <string name="promo_shop_now">Shop now</string>
 
 
+    <string name="verify_email_title">Verify Your Email</string>
+    <string name="verify_email_subtitle">We have sent a verification link to %1$s. Please check your inbox and verify your account to continue.</string>
+    <string name="ive_verified_continue">I\'ve Verified, Continue</string>
+    <string name="resend_email">Resend Email</string>
+    <string name="resend_email_countdown">Resend email in %1$ds</string>
+    <string name="logout">Log Out</string>
+
+    <!-- Email Verification Strings -->
+    <string name="email_verification_sent">Verification email sent</string>
+    <string name="email_verification_failed_send">Failed to send verification email</string>
+    <string name="email_verification_not_verified">Email is not verified yet</string>
+    <string name="email_verification_failed_check">Failed to check verification status</string>
+    <!--Omar-->
+
+
     <string name="reset_email_sent_title">Email Sent</string>
     <string name="reset_email_sent_message">A password reset link has been sent to your email address.</string>
     <string name="forgot_password_title">Forgot Password</string>

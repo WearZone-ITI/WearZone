@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     //Omar
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.tv.material)
     implementation(libs.androidx.ui.graphics)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -115,6 +116,9 @@ dependencies {
 
     // Material Icons Extended
     implementation(libs.androidx.material.icons.extended)
+
+    // Lottie Compose loader
+    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
