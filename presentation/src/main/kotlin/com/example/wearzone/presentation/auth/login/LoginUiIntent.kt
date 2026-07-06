@@ -7,7 +7,7 @@ sealed interface LoginUiIntent {
     data object OnSignInClicked : LoginUiIntent
     data class OnGoogleSignInResult(val idToken: String) : LoginUiIntent
     data object OnGoogleSignInClicked : LoginUiIntent
-    data object OnAppleSignInClicked : LoginUiIntent
+    data object OnGuestModeClicked : LoginUiIntent
     data object OnRegisterClicked : LoginUiIntent
     data object OnForgotPasswordClicked : LoginUiIntent
 }

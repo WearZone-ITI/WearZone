@@ -7,6 +7,9 @@ sealed interface Route {
 
     // Aalaa
     @Serializable
+    data object SplashRoute : Route
+
+    @Serializable
     data object OnboardingRoute : Route
 
     @Serializable

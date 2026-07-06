@@ -49,8 +49,8 @@ class LoginViewModel @Inject constructor(
             is LoginUiIntent.OnGoogleSignInResult -> {
                 loginWithGoogle(intent.idToken)
             }
-            is LoginUiIntent.OnAppleSignInClicked -> {
-                sendEffect(LoginUiEffect.ShowSnackbar("Apple Sign-In coming soon!"))
+            is LoginUiIntent.OnGuestModeClicked -> {
+                sendEffect(LoginUiEffect.NavigateToHome)
             }
             is LoginUiIntent.OnRegisterClicked -> {
                 sendEffect(LoginUiEffect.NavigateToRegister)
