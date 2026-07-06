@@ -1,9 +1,12 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.data.repository.AuthRepositoryImpl
+import com.example.wearzone.data.repository.AddressLookupRepositoryImpl
 import com.example.wearzone.data.repository.CategoryRepositoryImpl
 import com.example.wearzone.data.repository.CurrentCustomerIdProviderImpl
+import com.example.wearzone.data.repository.CurrentLocationRepositoryImpl
 import com.example.wearzone.data.repository.CustomerAddressRepositoryImpl
+import com.example.wearzone.data.repository.CountryRepositoryImpl
 import com.example.wearzone.data.repository.OrderHistoryRepositoryImpl
 import com.example.wearzone.data.repository.PayMockRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
@@ -18,6 +21,9 @@ import com.example.wearzone.domain.checkout.repository.IDiscountRepository
 import com.example.wearzone.domain.checkout.repository.IPayMockRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.repository.IAddressLookupRepository
+import com.example.wearzone.domain.customer.address.repository.ICountryRepository
+import com.example.wearzone.domain.customer.address.repository.ICurrentLocationRepository
 import com.example.wearzone.domain.product.repository.IProductRepository
 import com.example.wearzone.domain.search.repository.IRecentSearchRepository
 import com.example.wearzone.domain.cart.repository.ICartRepository
@@ -79,6 +85,17 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindOrderHistoryRepository(impl: OrderHistoryRepositoryImpl): IOrderHistoryRepository
+
+    @Binds
+    abstract fun bindCountryRepository(impl: CountryRepositoryImpl): ICountryRepository
+
+    @Binds
+    abstract fun bindAddressLookupRepository(impl: AddressLookupRepositoryImpl): IAddressLookupRepository
+
+    @Binds
+    abstract fun bindCurrentLocationRepository(
+        impl: CurrentLocationRepositoryImpl,
+    ): ICurrentLocationRepository
 
     @Binds
     abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository

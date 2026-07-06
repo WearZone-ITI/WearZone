@@ -31,12 +31,19 @@ import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.checkout.usecase.ProcessPayMockPaymentUseCase
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.repository.IAddressLookupRepository
+import com.example.wearzone.domain.customer.address.repository.ICountryRepository
+import com.example.wearzone.domain.customer.address.repository.ICurrentLocationRepository
 import com.example.wearzone.domain.customer.address.usecase.CreateCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
 import com.example.wearzone.domain.customer.address.usecase.DeleteCustomerAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCountriesUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentAddressCoordinatesUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
+import com.example.wearzone.domain.customer.address.usecase.ReverseGeocodeAddressUseCase
+import com.example.wearzone.domain.customer.address.usecase.SearchAddressSuggestionsUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
@@ -318,6 +325,26 @@ object UseCaseModule {
         setDefaultAddress = setDefaultAddress,
         deleteAddress = deleteAddress,
     )
+
+    @Provides
+    fun provideGetCountriesUseCase(
+        repository: ICountryRepository,
+    ): GetCountriesUseCase = GetCountriesUseCase(repository)
+
+    @Provides
+    fun provideSearchAddressSuggestionsUseCase(
+        repository: IAddressLookupRepository,
+    ): SearchAddressSuggestionsUseCase = SearchAddressSuggestionsUseCase(repository)
+
+    @Provides
+    fun provideReverseGeocodeAddressUseCase(
+        repository: IAddressLookupRepository,
+    ): ReverseGeocodeAddressUseCase = ReverseGeocodeAddressUseCase(repository)
+
+    @Provides
+    fun provideGetCurrentAddressCoordinatesUseCase(
+        repository: ICurrentLocationRepository,
+    ): GetCurrentAddressCoordinatesUseCase = GetCurrentAddressCoordinatesUseCase(repository)
 
     @Provides
     fun provideObserveWishlistUseCase(

@@ -47,6 +47,10 @@ android {
 
         val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
         buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
+
+        val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
     buildTypes {
