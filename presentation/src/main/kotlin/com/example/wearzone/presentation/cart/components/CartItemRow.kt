@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -80,9 +81,7 @@ fun CartItemRow(
                             Text(
                                 text = item.vendor.uppercase(),
                                 color = AppTheme.colors.textSecondary,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.8.sp,
+                                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.8.sp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -90,8 +89,7 @@ fun CartItemRow(
                             Text(
                                 text = item.title,
                                 color = AppTheme.colors.textPrimary,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.titleMedium,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -100,7 +98,7 @@ fun CartItemRow(
                                 Text(
                                     text = stringResource(id = R.string.cart_size_format, item.size),
                                     color = AppTheme.colors.textSecondary,
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                 )
                             }
                         }
@@ -129,8 +127,7 @@ fun CartItemRow(
                         Text(
                             text = item.price,
                             color = AppTheme.colors.textPrimary,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge,
                         )
                     }
                 }
@@ -158,8 +155,7 @@ private fun LowStockBanner(maxQuantity: Int) {
         Text(
             text = stringResource(id = R.string.cart_low_stock_format, maxQuantity),
             color = AppTheme.colors.error,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelSmall,
         )
     }
 }

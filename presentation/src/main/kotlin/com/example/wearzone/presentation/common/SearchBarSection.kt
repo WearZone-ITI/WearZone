@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 
@@ -45,7 +45,7 @@ fun SearchBarSection(
             Text(
                 text = stringResource(id = R.string.search_placeholder),
                 color = AppTheme.colors.textSecondary,
-                fontSize = 16.sp
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

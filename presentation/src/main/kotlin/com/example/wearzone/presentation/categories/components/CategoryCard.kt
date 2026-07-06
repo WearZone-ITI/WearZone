@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -92,7 +93,7 @@ fun CategoryCard(
                 Text(
                     text = category.name.uppercase(),
                     color = Color.White,
-                    fontSize = if (isFullWidth) 24.sp else 19.sp,
+                    style = if (isFullWidth) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.5.sp
                 )

@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
@@ -145,8 +144,7 @@ private fun CartContent(
                     Text(
                         text = stringResource(id = R.string.app_name),
                         color = AppTheme.colors.textPrimary,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -243,7 +241,7 @@ private fun CartItemsContent(
                 Text(
                     text = stringResource(id = R.string.cart_item_count_format, state.itemCount),
                     color = AppTheme.colors.textSecondary,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
         }

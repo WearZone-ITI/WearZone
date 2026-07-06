@@ -15,6 +15,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -26,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 
@@ -42,8 +42,7 @@ fun TopBar(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(id = R.string.app_name),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = AppTheme.colors.textPrimary,
                     maxLines = 1,
                     softWrap = false,
@@ -96,13 +95,12 @@ fun GreetingSection(
     Column {
         Text(
             text = stringResource(id = R.string.home_greeting, userName),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.headlineMedium,
             color = AppTheme.colors.textPrimary,
         )
         Text(
             text = stringResource(id = R.string.home_subtitle),
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.bodyLarge,
             color = AppTheme.colors.textSecondary,
             modifier = Modifier.padding(top = 4.dp)
         )    }
