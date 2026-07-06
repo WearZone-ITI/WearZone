@@ -123,13 +123,6 @@ fun HomeScreen(
                         }
                         item { Spacer(modifier = Modifier.height(12.dp)) }
                         item { SearchBarSection(onClick = onNavigateToSearch) }
-                        item { Spacer(modifier = Modifier.height(16.dp)) }
-                        item {
-                            HeroBannerSection(
-                                product = state.heroProduct,
-                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
-                            )
-                        }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
                         item {
                             TrendingSection(
@@ -140,8 +133,6 @@ fun HomeScreen(
                             )
                         }
                         item { Spacer(modifier = Modifier.height(32.dp)) }
-
-
 
                         item {
                             TopBrandsSection(
