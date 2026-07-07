@@ -23,38 +23,12 @@ sealed interface CheckoutUiState {
         val deliveryAddress: CheckoutDeliveryAddressUiModel? = null,
         val isLoadingAddress: Boolean = false,
         val paymentMethod: CheckoutPaymentMethodUi = CheckoutPaymentMethodUi.CashOnDelivery,
-        val cardInfo: CardInfoUiModel = CardInfoUiModel(),
         val isProcessingPayment: Boolean = false,
+        val showPaymentSuccessDialog: Boolean = false,
+        val pendingPaymentId: String? = null,
     ) : CheckoutUiState
 
     data class Error(@param:StringRes val messageRes: Int) : CheckoutUiState
-}
-
-data class CardInfoUiModel(
-    val number: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-    val month: String = "",
-    val year: String = "",
-    val cvv: String = "",
-
-    @StringRes val numberError: Int? = null,
-    @StringRes val firstNameError: Int? = null,
-    @StringRes val lastNameError: Int? = null,
-    @StringRes val monthError: Int? = null,
-    @StringRes val yearError: Int? = null,
-    @StringRes val cvvError: Int? = null,
-){
-    fun hasErrors(): Boolean {
-        return listOf(
-            numberError,
-            firstNameError,
-            lastNameError,
-            monthError,
-            yearError,
-            cvvError
-        ).any { it != null }
-    }
 }
 
 data class CheckoutCartItemUiModel(
@@ -78,6 +52,7 @@ data class CheckoutDetailsState(
     val deliveryAddress: CheckoutDeliveryAddressUiModel? = null,
     val isLoadingAddress: Boolean = false,
     val paymentMethod: CheckoutPaymentMethodUi = CheckoutPaymentMethodUi.CashOnDelivery,
-    val cardInfo: CardInfoUiModel = CardInfoUiModel(),
     val isProcessingPayment: Boolean = false,
+    val showPaymentSuccessDialog: Boolean = false,
+    val pendingPaymentId: String? = null
 )

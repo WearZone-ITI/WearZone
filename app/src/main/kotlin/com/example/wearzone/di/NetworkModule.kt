@@ -1,8 +1,9 @@
 package com.example.wearzone.di
 
 import android.util.Log
-import com.example.wearzone.data.di.PayMockOkHttp
-import com.example.wearzone.data.di.PayMockRetrofit
+import com.example.wearzone.BuildConfig
+import com.example.wearzone.data.di.PaymobOkHttp
+import com.example.wearzone.data.di.PaymobRetrofit
 import com.example.wearzone.data.di.MapboxAccessToken
 import com.example.wearzone.data.di.MapboxOkHttp
 import com.example.wearzone.data.di.MapboxRetrofit
@@ -14,14 +15,13 @@ import com.example.wearzone.data.remote.api.CartApiService
 import com.example.wearzone.data.remote.api.DiscountApiService
 import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
-import com.example.wearzone.data.remote.api.PayMockApiService
-import com.example.wearzone.data.remote.interceptor.PayMockAuthInterceptor
+import com.example.wearzone.data.remote.api.PaymobApiService
+import com.example.wearzone.data.remote.api.ProductApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.example.wearzone.data.remote.api.ProductApiService
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,13 +30,19 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import kotlin.jvm.java
+import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
+    private const val PAYMOB_BASE_URL = "https://accept.paymob.com/"
+
+    @Provides
+    @Named("secretKey")
+    fun providePaymobSecretKey(): String = BuildConfig.PAYMOB_SECRET_KEY
     private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
     private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
 
@@ -52,34 +58,38 @@ object NetworkModule {
     @Provides
     @ShopifyOkHttp
     fun provideShopifyOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor { chain ->
+        return OkHttpClient.Builder().addInterceptor { chain ->
                 val request = chain.request()
-                if (com.example.wearzone.BuildConfig.DEBUG) {
+                if (BuildConfig.DEBUG) {
                     Log.d("ShopifyRequest", "${request.method} ${request.url}")
                 }
-                val authenticatedRequest = request.newBuilder()
-                    .addHeader("X-Shopify-Access-Token", com.example.wearzone.BuildConfig.SHOPIFY_ADMIN_TOKEN)
-                    .addHeader("Content-Type", "application/json")
-                    .build()
+                val authenticatedRequest = request.newBuilder().addHeader(
+                        "X-Shopify-Access-Token",
+                        BuildConfig.SHOPIFY_ADMIN_TOKEN
+                    ).addHeader("Content-Type", "application/json").build()
                 chain.proceed(authenticatedRequest)
             }.build()
     }
 
     @Provides
-    @PayMockOkHttp
-    fun providePayMockOkHttpClient(
-        authInterceptor: PayMockAuthInterceptor
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor { chain ->
+    @PaymobOkHttp
+    fun providePaymobOkHttpClient(): OkHttpClient {
+        val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
+            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        }
+        return OkHttpClient.Builder().addInterceptor { chain ->
                 val request = chain.request()
-                if (com.example.wearzone.BuildConfig.DEBUG) {
-                    Log.d("PayMockRequest", "${request.method} ${request.url}")
+                val authenticatedRequest =
+                    request.newBuilder().addHeader("Content-Type", "application/json").build()
+
+                if (BuildConfig.DEBUG) {
+                    Log.d(
+                        "PaymobRequest",
+                        "${authenticatedRequest.method} ${authenticatedRequest.url}"
+                    )
                 }
-                chain.proceed(request)
-            }.build()
+                chain.proceed(authenticatedRequest)
+            }.addInterceptor(logging).build()
     }
 
     @Provides
@@ -90,32 +100,24 @@ object NetworkModule {
     @Provides
     @MapboxAccessToken
     fun provideMapboxAccessToken(): String =
-        com.example.wearzone.BuildConfig.MAPBOX_ACCESS_TOKEN
+        BuildConfig.MAPBOX_ACCESS_TOKEN
 
     @Provides
     @ShopifyRetrofit
     fun provideRetrofit(
-        @ShopifyOkHttp okHttpClient: OkHttpClient,
-        json: Json
+        @ShopifyOkHttp okHttpClient: OkHttpClient, json: Json
     ): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
+        return Retrofit.Builder().baseUrl(BASE_URL).client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build()
     }
 
     @Provides
-    @PayMockRetrofit
-    fun providePayMockRetrofit(
-        @PayMockOkHttp okHttpClient: OkHttpClient,
-        json: Json
+    @PaymobRetrofit
+    fun providePaymobRetrofit(
+        @PaymobOkHttp okHttpClient: OkHttpClient, json: Json
     ): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(PAYMOCK_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
+        return Retrofit.Builder().baseUrl(PAYMOB_BASE_URL).client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build()
     }
 
     @Provides
@@ -148,7 +150,7 @@ object NetworkModule {
     fun provideFirestore() = FirebaseFirestore.getInstance()
 
     @Provides
-    fun provideAuthService(@ShopifyRetrofit retrofit: Retrofit) : AuthApiService {
+    fun provideAuthService(@ShopifyRetrofit retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
     }
 
@@ -176,10 +178,10 @@ object NetworkModule {
         return retrofit.create(DiscountApiService::class.java)
     }
 
+
     @Provides
-    fun providePayMockApiService(
-        @PayMockRetrofit retrofit: Retrofit,
-    ): PayMockApiService {
-        return retrofit.create(PayMockApiService::class.java)
-    }
+    @Singleton
+    fun providePaymobApiService(@PaymobRetrofit retrofit: Retrofit): PaymobApiService =
+        retrofit.create(PaymobApiService::class.java)
+
 }

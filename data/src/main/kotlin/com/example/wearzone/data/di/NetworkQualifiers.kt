@@ -8,7 +8,7 @@ annotation class ShopifyRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class PayMockRetrofit
+annotation class PaymobRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -16,7 +16,7 @@ annotation class ShopifyOkHttp
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class PayMockOkHttp
+annotation class PaymobOkHttp
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
