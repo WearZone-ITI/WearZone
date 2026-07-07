@@ -1,5 +1,6 @@
 package com.example.wearzone.presentation.ai.chat
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -114,10 +115,15 @@ private fun ChatContent(
 ) {
     val listState = rememberLazyListState()
 
+    val renderedCardCount = uiState.messages.sumOf { it.products.size }
     LaunchedEffect(uiState.messages.size) {
         if (uiState.messages.isNotEmpty()) {
-            listState.animateScrollToItem(uiState.messages.size - 1)
+            listState.scrollToItem(uiState.messages.size - 1)
         }
+    }
+
+    LaunchedEffect(uiState.messages.lastOrNull()?.id, renderedCardCount) {
+        Log.d("WearZoneSmartChat", "ChatScreen render messages=${uiState.messages.size} cards=$renderedCardCount")
     }
 
     Scaffold(

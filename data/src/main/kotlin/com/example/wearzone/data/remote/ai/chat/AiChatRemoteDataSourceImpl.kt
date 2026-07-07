@@ -6,7 +6,6 @@ import com.example.wearzone.data.remote.ai.chat.dto.GroqMessage
 import com.example.wearzone.data.remote.ai.chat.dto.GroqRequest
 import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatRole
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -36,7 +35,9 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         If CATALOG_CONTEXT says a field is unavailable, say it is unavailable.
         If there are no matching products, say that clearly and do not suggest fake products.
         Keep responses concise, practical, and shopping-focused.
-        Do not output raw JSON, XML, function calls, or hidden metadata.
+        Do not output productId, imageUrl, raw product payloads, JSON, XML, function calls, or hidden metadata.
+        Product cards are rendered by Kotlin structured state; your job is wording only.
+        Limit the answer to about 120 words unless the user asks for detailed comparison.
     """.trimIndent()
 
     override suspend fun sendMessage(
@@ -75,10 +76,14 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
                     historyMessages +
                     GroqMessage(role = "user", content = groundedUserMessage),
             tools = null,
+            maxTokens = 380,
+            temperature = 0.2,
         )
 
-        val requestJson = Gson().toJson(request)
-        Log.d("GROQ_CHAT_DEBUG", "Outgoing grounded JSON payload: $requestJson")
+        Log.d(
+            "GROQ_CHAT_DEBUG",
+            "Outgoing grounded request intent=$intent history=${historyMessages.size} messageChars=${message.length} contextChars=${catalogContext.length}",
+        )
 
         val response = try {
             groqApiService.chatCompletions("Bearer $apiKey", request)
@@ -88,23 +93,23 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         }
 
         val rawCode = response.code()
-        val rawBodyString = if (response.isSuccessful) {
-            Gson().toJson(response.body())
+        val responseText = if (response.isSuccessful) {
+            response.body()
+                ?.choices
+                ?.firstOrNull()
+                ?.message
+                ?.content
+                ?.trim()
         } else {
             response.errorBody()?.string().orEmpty()
         }
-        Log.d("GROQ_CHAT_DEBUG", "Raw Incoming Response:\nCode: $rawCode\nBody:\n$rawBodyString")
+        Log.d("GROQ_CHAT_DEBUG", "Incoming response code=$rawCode bodyChars=${responseText.orEmpty().length}")
 
         if (!response.isSuccessful) {
             throw mapHttpErrorToException(rawCode)
         }
 
-        response.body()
-            ?.choices
-            ?.firstOrNull()
-            ?.message
-            ?.content
-            ?.trim()
+        responseText
             ?.takeIf { it.isNotBlank() }
             ?: throw IllegalStateException("Stylist response empty.")
     }

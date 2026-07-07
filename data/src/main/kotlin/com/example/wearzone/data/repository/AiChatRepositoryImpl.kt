@@ -1,5 +1,6 @@
 package com.example.wearzone.data.repository
 
+import android.util.Log
 import com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
 import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatProductCard
@@ -11,9 +12,11 @@ import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.model.ProductVariant
 import com.example.wearzone.domain.product.repository.IProductRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
@@ -37,6 +40,7 @@ class AiChatRepositoryImpl @Inject constructor(
         val trimmedMessage = message.trim()
         if (trimmedMessage.isBlank()) return DataResult.Success(Unit)
 
+        Log.d(TAG, "SmartChat query=\"$trimmedMessage\"")
         val historySnapshot = _history.value
         val userMessage = ChatMessage(
             id = UUID.randomUUID().toString(),
@@ -57,6 +61,10 @@ class AiChatRepositoryImpl @Inject constructor(
 
         return try {
             val retrieval = retrieveCatalogContext(trimmedMessage, historySnapshot)
+            Log.d(
+                TAG,
+                "AI request start intent=${retrieval.intent} cards=${retrieval.cards.size} contextChars=${retrieval.context.length}",
+            )
             val historyToSend = historySnapshot.filter { !it.isPending }
             val response = runCatching {
                 remoteDataSource.sendMessage(
@@ -69,6 +77,7 @@ class AiChatRepositoryImpl @Inject constructor(
                 retrieval.fallbackResponse
             }
 
+            Log.d(TAG, "AI request end intent=${retrieval.intent} responseChars=${response.length}")
             _history.value = _history.value.map { msg ->
                 if (msg.id == pendingMsgId) {
                     ChatMessage(
@@ -83,6 +92,7 @@ class AiChatRepositoryImpl @Inject constructor(
                     msg
                 }
             }
+            Log.d(TAG, "UI state update messageId=$pendingMsgId cards=${retrieval.cards.size} productIds=${retrieval.cards.joinToString { it.productId }}")
             DataResult.Success(Unit)
         } catch (e: Exception) {
             _history.value = _history.value.filter { it.id != pendingMsgId }
@@ -100,6 +110,7 @@ class AiChatRepositoryImpl @Inject constructor(
             ChatShoppingIntent.PRODUCT_SEARCH -> retrieveProductSearch(criteria)
             ChatShoppingIntent.PRODUCT_COMPARISON -> retrieveProductComparison(userQuery, historySnapshot)
             ChatShoppingIntent.OUTFIT_RECOMMENDATION -> retrieveOutfitRecommendation(criteria)
+            ChatShoppingIntent.CATALOG_OVERVIEW -> retrieveCatalogOverview(userQuery)
             ChatShoppingIntent.GENERAL_HELP -> CatalogRetrieval(
                 intent = intent,
                 context = "No catalog products were retrieved because the user did not ask for product search, comparison, or outfit recommendation.",
@@ -110,43 +121,86 @@ class AiChatRepositoryImpl @Inject constructor(
     }
 
     private suspend fun retrieveProductSearch(criteria: ProductSearchCriteria): CatalogRetrieval {
-        val allProducts = loadProductsOrThrow()
-        val search = searchCatalog(criteria, allProducts)
+        val allProducts = withContext(Dispatchers.IO) { loadProductsOrThrow() }
+        Log.d(TAG, "intent=PRODUCT_SEARCH criteria=$criteria totalProducts=${allProducts.size}")
+        val search = withContext(Dispatchers.Default) { searchCatalog(criteria, allProducts) }
         val exactCards = search.exactMatches.map { it.product.toChatCard(it.reason) }
         val fallbackCards = search.closestAlternatives.map { it.product.toChatCard(it.reason) }
         val cards = (exactCards + fallbackCards).distinctBy { it.productId }.take(MAX_CHAT_PRODUCTS)
+        Log.d(
+            TAG,
+            "search hardFiltered=${search.hardFilteredCount} ranked=${search.rankedCount} exact=${exactCards.size} fallback=${fallbackCards.size} selected=${cards.joinToString { it.productId }}",
+        )
         val context = buildSearchContext(criteria, exactCards, fallbackCards, search.noExactReason)
         val fallback = buildSearchFallback(criteria, exactCards, fallbackCards, search.noExactReason)
         return CatalogRetrieval(ChatShoppingIntent.PRODUCT_SEARCH, context, cards, fallback)
+    }
+
+    private suspend fun retrieveCatalogOverview(userQuery: String): CatalogRetrieval {
+        val allProducts = withContext(Dispatchers.IO) { loadProductsOrThrow() }
+        val overview = withContext(Dispatchers.Default) { buildCatalogOverview(userQuery, allProducts) }
+        Log.d(TAG, "intent=CATALOG_OVERVIEW totalProducts=${allProducts.size} sampleCards=${overview.cards.size} selected=${overview.cards.joinToString { it.productId }}")
+        return CatalogRetrieval(
+            intent = ChatShoppingIntent.CATALOG_OVERVIEW,
+            context = overview.context,
+            cards = overview.cards,
+            fallbackResponse = overview.fallbackResponse,
+        )
     }
 
     private suspend fun retrieveProductComparison(
         userQuery: String,
         historySnapshot: List<ChatMessage>,
     ): CatalogRetrieval {
-        val ids = extractRequestedProductIds(userQuery)
-            .ifEmpty { recentProductIdsFromHistory(historySnapshot, userQuery) }
-            .distinct()
-            .take(MAX_COMPARE_PRODUCTS)
+        val allProducts = withContext(Dispatchers.IO) { loadProductsOrThrow() }
+        Log.d(TAG, "intent=PRODUCT_COMPARISON query=\"$userQuery\" totalProducts=${allProducts.size}")
+
+        val requestedByTitle = withContext(Dispatchers.Default) {
+            resolveComparisonProductsByTitle(userQuery, allProducts)
+        }
+
+        val ids = when {
+            requestedByTitle.foundProducts.size >= 2 -> requestedByTitle.foundProducts.map { it.id }
+            requestedByTitle.requestedNames.isNotEmpty() -> emptyList()
+            else -> extractRequestedProductIds(userQuery)
+                .ifEmpty { recentProductIdsFromHistory(historySnapshot, userQuery) }
+                .distinct()
+                .take(MAX_COMPARE_PRODUCTS)
+        }
+
+        if (requestedByTitle.requestedNames.isNotEmpty() && requestedByTitle.foundProducts.size < 2) {
+            val foundCards = requestedByTitle.foundProducts.map {
+                it.toChatCard("Selected by title from the real catalog, but comparison needs another requested product.")
+            }
+            val missing = requestedByTitle.missingNames.joinToString().ifBlank { "one of the requested products" }
+            Log.d(TAG, "comparison titleResolve found=${requestedByTitle.foundProducts.map { it.id }} missing=${requestedByTitle.missingNames}")
+            return CatalogRetrieval(
+                intent = ChatShoppingIntent.PRODUCT_COMPARISON,
+                context = buildComparisonNotFoundContext(userQuery, requestedByTitle),
+                cards = foundCards,
+                fallbackResponse = "I found ${requestedByTitle.foundProducts.size} requested product(s), but I could not find: $missing. I did not replace it with unrelated products.",
+            )
+        }
 
         if (ids.size < 2) {
             return CatalogRetrieval(
                 intent = ChatShoppingIntent.PRODUCT_COMPARISON,
-                context = "The user asked for a comparison, but fewer than two real product IDs were available. Ask the user to pick two products from shown cards.",
+                context = "The user asked for a comparison, but fewer than two real product IDs or product titles were resolved. Ask the user to pick two products from shown cards.",
                 cards = emptyList(),
-                fallbackResponse = "I need two real catalog products to compare. Send two product IDs or ask me to show products first, then say which two you want compared.",
+                fallbackResponse = "I need two real catalog products to compare. Send two product titles, two product IDs, or ask me to show products first, then say which two you want compared.",
             )
         }
 
-        val summariesById = loadProductsOrNull().associateBy { it.id }
-        val details = ids.mapNotNull { id -> loadProductDetailOrNull(id) }
+        val summariesById = allProducts.associateBy { it.id }
+        val details = withContext(Dispatchers.IO) { ids.take(MAX_COMPARE_PRODUCTS).mapNotNull { id -> loadProductDetailOrNull(id) } }
 
         if (details.size < 2) {
             return CatalogRetrieval(
                 intent = ChatShoppingIntent.PRODUCT_COMPARISON,
                 context = "The requested product IDs could not be loaded from the real catalog. Do not compare guessed items.",
-                cards = emptyList(),
-                fallbackResponse = "I couldn't load enough real product details to compare those items. Try opening products from the cards or send two valid product IDs.",
+                cards = ids.mapNotNull { summariesById[it] }
+                    .map { it.toChatCard("Requested for comparison, but full details could not be loaded.") },
+                fallbackResponse = "I couldn't load enough real product details to compare those items. I did not compare guessed or replacement products.",
             )
         }
 
@@ -157,6 +211,7 @@ class AiChatRepositoryImpl @Inject constructor(
             )
         }
         val context = buildComparisonContext(details, summariesById)
+        Log.d(TAG, "comparison selected=${cards.joinToString { it.productId }} exactTitle=${requestedByTitle.requestedNames.isNotEmpty()}")
         return CatalogRetrieval(
             intent = ChatShoppingIntent.PRODUCT_COMPARISON,
             context = context,
@@ -166,11 +221,13 @@ class AiChatRepositoryImpl @Inject constructor(
     }
 
     private suspend fun retrieveOutfitRecommendation(criteria: ProductSearchCriteria): CatalogRetrieval {
-        val allProducts = loadProductsOrThrow()
-        val outfit = buildOutfit(criteria, allProducts)
+        val allProducts = withContext(Dispatchers.IO) { loadProductsOrThrow() }
+        Log.d(TAG, "intent=OUTFIT_RECOMMENDATION criteria=$criteria totalProducts=${allProducts.size}")
+        val outfit = withContext(Dispatchers.Default) { buildOutfit(criteria, allProducts) }
         val cards = outfit.selected.map { selected ->
             selected.product.toChatCard(selected.reason)
-        }
+        }.take(MAX_CHAT_PRODUCTS)
+        Log.d(TAG, "outfit selected=${cards.joinToString { it.productId }} notes=${outfit.notes}")
         val context = buildOutfitContext(criteria, outfit, cards)
         return CatalogRetrieval(
             intent = ChatShoppingIntent.OUTFIT_RECOMMENDATION,
@@ -187,10 +244,14 @@ class AiChatRepositoryImpl @Inject constructor(
         val materials = MATERIAL_KEYWORDS.filterTo(mutableSetOf()) { normalized.containsPhrase(it) }
         val styleTerms = STYLE_KEYWORDS.filterTo(mutableSetOf()) { normalized.containsPhrase(it) }
         val priceRange = parsePriceRange(normalized)
+        val hasKidsTerm = normalized.containsAnyPhrase(KIDS_QUERY_KEYWORDS)
+        val hasWomenTerm = normalized.containsAnyPhrase(WOMEN_QUERY_KEYWORDS)
+        val hasMenTerm = normalized.containsAnyPhrase(MEN_QUERY_KEYWORDS)
         val gender = when {
-            normalized.containsAnyPhrase(WOMEN_QUERY_KEYWORDS) -> ProductGender.WOMEN
-            normalized.containsAnyPhrase(MEN_QUERY_KEYWORDS) -> ProductGender.MEN
-            normalized.containsAnyPhrase(KIDS_QUERY_KEYWORDS) -> ProductGender.KIDS
+            hasKidsTerm && normalized.containsPhrase("kids") -> ProductGender.KIDS
+            hasWomenTerm -> ProductGender.WOMEN
+            hasMenTerm -> ProductGender.MEN
+            hasKidsTerm -> ProductGender.KIDS
             normalized.containsAnyPhrase(UNISEX_KEYWORDS) -> ProductGender.UNISEX
             else -> null
         }
@@ -206,7 +267,14 @@ class AiChatRepositoryImpl @Inject constructor(
                         token in WOMEN_QUERY_KEYWORDS ||
                         token in KIDS_QUERY_KEYWORDS
             }
-        val isBroadSearch = terms.isEmpty() || normalized.containsAnyPhrase(BROAD_SEARCH_TERMS)
+        val hasHardSearchConstraint = kinds.isNotEmpty() ||
+                colors.isNotEmpty() ||
+                materials.isNotEmpty() ||
+                gender != null ||
+                priceRange.first != null ||
+                priceRange.second != null
+        val isCatalogOverview = !hasHardSearchConstraint && normalized.containsAnyPhrase(CATALOG_OVERVIEW_TERMS)
+        val isBroadSearch = terms.isEmpty() || normalized.containsAnyPhrase(BROAD_SEARCH_TERMS) || isCatalogOverview
         val hasProductSearchSignal = kinds.isNotEmpty() ||
                 colors.isNotEmpty() ||
                 materials.isNotEmpty() ||
@@ -228,6 +296,7 @@ class AiChatRepositoryImpl @Inject constructor(
             maxPrice = priceRange.second,
             isBroadSearch = isBroadSearch,
             hasProductSearchSignal = hasProductSearchSignal,
+            isCatalogOverview = isCatalogOverview,
         )
     }
 
@@ -280,6 +349,7 @@ class AiChatRepositoryImpl @Inject constructor(
             normalized.contains("these two") && hasPreviousProducts -> ChatShoppingIntent.PRODUCT_COMPARISON
             normalized.contains("first two") && hasPreviousProducts -> ChatShoppingIntent.PRODUCT_COMPARISON
             normalized.containsAny(OUTFIT_TERMS) -> ChatShoppingIntent.OUTFIT_RECOMMENDATION
+            criteria.isCatalogOverview -> ChatShoppingIntent.CATALOG_OVERVIEW
             criteria.hasProductSearchSignal -> ChatShoppingIntent.PRODUCT_SEARCH
             else -> ChatShoppingIntent.GENERAL_HELP
         }
@@ -328,11 +398,15 @@ class AiChatRepositoryImpl @Inject constructor(
                 exactMatches = exactMatches,
                 closestAlternatives = emptyList(),
                 noExactReason = null,
+                hardFilteredCount = exactCandidates.size,
+                rankedCount = exactMatches.size,
             )
         }
 
         val fallbackCandidates = priceFiltered
             .filter { product -> criteria.matchesFallbackGender(product.genderClassification()) }
+            .filter { product -> criteria.matchesColors(product) }
+            .filter { product -> criteria.matchesMaterials(product) }
             .filter { product -> criteria.matchesFallbackProductKind(product) }
 
         val closestAlternatives = fallbackCandidates
@@ -346,6 +420,8 @@ class AiChatRepositoryImpl @Inject constructor(
             exactMatches = emptyList(),
             closestAlternatives = closestAlternatives,
             noExactReason = criteria.noExactReason(priceFiltered, exactGenderFiltered),
+            hardFilteredCount = exactCandidates.size,
+            rankedCount = closestAlternatives.size,
         )
     }
 
@@ -442,6 +518,12 @@ class AiChatRepositoryImpl @Inject constructor(
         if (!isOutOfStock) score += 12 else score -= 8
         if (criteria.isBroadSearch) score += 5
 
+        val titleMatchScore = titleRelevanceScore(criteria.normalizedQuery, titleText)
+        if (titleMatchScore > 0) {
+            score += titleMatchScore
+            reasons += if (titleMatchScore >= 120) "title matches the requested product name" else "title is highly relevant"
+        }
+
         criteria.gender?.let { requestedGender ->
             when {
                 productGender == requestedGender -> {
@@ -505,7 +587,7 @@ class AiChatRepositoryImpl @Inject constructor(
         criteria.normalizedTerms.forEach { token ->
             val variants = token.termVariants()
             val tokenScore = when {
-                titleText.containsAny(variants) -> 12
+                titleText.containsAny(variants) -> 18
                 typeText.containsAny(variants) -> 10
                 tagText.containsAny(variants) -> 8
                 colorText.containsAny(variants) -> 7
@@ -664,10 +746,10 @@ class AiChatRepositoryImpl @Inject constructor(
     ): Boolean {
         val requested = gender ?: return true
         return when (requested) {
-            ProductGender.WOMEN -> productGender == ProductGender.WOMEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN || allowOppositeShoesFallback
-            ProductGender.MEN -> productGender == ProductGender.MEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN || allowOppositeShoesFallback
-            ProductGender.KIDS -> productGender == ProductGender.KIDS || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
-            ProductGender.UNISEX -> productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.WOMEN -> productGender == ProductGender.WOMEN || productGender == ProductGender.UNISEX || allowOppositeShoesFallback
+            ProductGender.MEN -> productGender == ProductGender.MEN || productGender == ProductGender.UNISEX || allowOppositeShoesFallback
+            ProductGender.KIDS -> productGender == ProductGender.KIDS || productGender == ProductGender.UNISEX
+            ProductGender.UNISEX -> productGender == ProductGender.UNISEX
             ProductGender.UNKNOWN -> true
         }
     }
@@ -784,6 +866,170 @@ class AiChatRepositoryImpl @Inject constructor(
         }
     }.distinct()
 
+
+    private fun resolveComparisonProductsByTitle(
+        userQuery: String,
+        products: List<Product>,
+    ): ComparisonTitleResolution {
+        val normalizedQuery = userQuery.normalizedForSearch()
+        val exactTitleMatches = products
+            .filter { product -> normalizedQuery.containsPhrase(product.title.normalizedForSearch()) }
+            .sortedByDescending { it.title.normalizedForSearch().length }
+            .distinctBy { it.id }
+            .take(MAX_COMPARE_PRODUCTS)
+
+        if (exactTitleMatches.size >= 2) {
+            return ComparisonTitleResolution(
+                requestedNames = exactTitleMatches.map { it.title },
+                foundProducts = exactTitleMatches,
+                missingNames = emptyList(),
+            )
+        }
+
+        val requestedNames = extractComparisonNameChunks(normalizedQuery)
+        if (requestedNames.isEmpty()) {
+            return ComparisonTitleResolution(emptyList(), exactTitleMatches, emptyList())
+        }
+
+        val usedIds = mutableSetOf<String>()
+        val found = mutableListOf<Product>()
+        val missing = mutableListOf<String>()
+        requestedNames.forEach { requestedName ->
+            val best = products
+                .filter { it.id !in usedIds }
+                .map { product -> product to fuzzyTitleScore(requestedName, product.title.normalizedForSearch()) }
+                .filter { (_, score) -> score >= FUZZY_TITLE_MIN_SCORE }
+                .maxWithOrNull(compareBy<Pair<Product, Int>> { it.second }.thenByDescending { titleTokenOverlap(requestedName, it.first.title.normalizedForSearch()) })
+                ?.first
+            if (best != null) {
+                usedIds += best.id
+                found += best
+            } else {
+                missing += requestedName
+            }
+        }
+
+        return ComparisonTitleResolution(
+            requestedNames = requestedNames,
+            foundProducts = found.distinctBy { it.id }.take(MAX_COMPARE_PRODUCTS),
+            missingNames = missing,
+        )
+    }
+
+    private fun extractComparisonNameChunks(normalizedQuery: String): List<String> {
+        var value = normalizedQuery
+        COMPARISON_NOISE_TERMS.forEach { term ->
+            val phrase = Regex.escape(term.normalizedForSearch())
+            value = Regex("(^|\\s)$phrase($|\\s)").replace(value) { match ->
+                val prefix = if (match.value.startsWith(" ")) " " else ""
+                val suffix = if (match.value.endsWith(" ")) " " else ""
+                "$prefix|$suffix"
+            }
+        }
+        return value
+            .split("|")
+            .map { chunk ->
+                chunk.searchTokens()
+                    .filterNot { it in COMPARISON_EXTRA_STOP_WORDS }
+                    .joinToString(" ")
+            }
+            .filter { it.length >= 4 }
+            .filterNot { it.containsAnyPhrase(CATALOG_OVERVIEW_TERMS) }
+            .distinct()
+            .take(MAX_COMPARE_PRODUCTS)
+    }
+
+    private fun fuzzyTitleScore(requestedName: String, title: String): Int {
+        if (requestedName.isBlank() || title.isBlank()) return 0
+        if (requestedName == title) return 160
+        if (title.containsPhrase(requestedName) || requestedName.containsPhrase(title)) return 130
+        val overlap = titleTokenOverlap(requestedName, title)
+        val requestedTokenCount = requestedName.searchTokens().size.coerceAtLeast(1)
+        val titleTokenCount = title.searchTokens().size.coerceAtLeast(1)
+        val coverage = (overlap * 100) / requestedTokenCount
+        val titleCoverage = (overlap * 100) / titleTokenCount
+        return coverage + (titleCoverage / 2)
+    }
+
+    private fun titleTokenOverlap(left: String, right: String): Int {
+        val rightTokens = right.searchTokens().flatMap { it.termVariants() }.toSet()
+        return left.searchTokens().count { token -> token.termVariants().any { it in rightTokens } }
+    }
+
+    private fun titleRelevanceScore(query: String, title: String): Int {
+        if (query.isBlank() || title.isBlank()) return 0
+        return when {
+            query == title -> 160
+            query.containsPhrase(title) -> 140
+            title.containsPhrase(query) -> 120
+            else -> {
+                val score = fuzzyTitleScore(query, title)
+                if (score >= 95) score / 2 else 0
+            }
+        }
+    }
+
+    private fun buildCatalogOverview(
+        userQuery: String,
+        products: List<Product>,
+    ): CatalogOverview {
+        val uniqueProducts = products.distinctBy { it.id }
+        val bySlot = uniqueProducts.groupBy { product -> product.catalogSlot()?.displayName ?: product.productType.takeIf { it.isNotBlank() } ?: "Other" }
+        val byProductType = uniqueProducts
+            .groupBy { product -> product.productType.takeIf { it.isNotBlank() } ?: product.catalogSlot()?.displayName ?: "Other" }
+            .toList()
+            .sortedWith(compareByDescending<Pair<String, List<Product>>> { it.second.size }.thenBy { it.first })
+        val samples = bySlot.values
+            .mapNotNull { slotProducts ->
+                slotProducts
+                    .sortedWith(productSampleComparator())
+                    .firstOrNull()
+            }
+            .plus(uniqueProducts.sortedWith(productSampleComparator()))
+            .distinctBy { it.id }
+            .take(MAX_CHAT_PRODUCTS)
+            .map { product ->
+                product.toChatCard("Sample from ${product.catalogSlot()?.displayName ?: product.productType.ifBlank { "real catalog" }}.")
+            }
+
+        val context = buildString {
+            appendLine("Real WearZone full catalog overview for query: $userQuery")
+            appendLine("Total real products loaded: ${uniqueProducts.size}")
+            appendLine("Product types/categories:")
+            byProductType.take(16).forEach { (type, items) -> appendLine("- $type: ${items.size}") }
+            appendLine("Samples below are diverse examples, not the whole catalog:")
+            appendProductCards(samples)
+            if (uniqueProducts.size > samples.size) {
+                appendLine("Tell the user these are samples only; more real products exist in the catalog.")
+            }
+        }
+        val fallback = buildString {
+            appendLine("WearZone has ${uniqueProducts.size} real catalog products loaded.")
+            if (byProductType.isNotEmpty()) {
+                appendLine("Main product groups: ${byProductType.take(8).joinToString { "${it.first} (${it.second.size})" }}.")
+            }
+            appendLine("The cards below are only samples from different categories, not the entire catalog.")
+        }.trim()
+        return CatalogOverview(context = context, cards = samples, fallbackResponse = fallback)
+    }
+
+    private fun productSampleComparator(): Comparator<Product> =
+        compareByDescending<Product> { if (it.isOutOfStock) 0 else 1 }
+            .thenBy { it.catalogSlot()?.ordinal ?: Int.MAX_VALUE }
+            .thenBy { it.productType.normalizedForSearch() }
+            .thenBy { it.price }
+            .thenBy { it.title.normalizedForSearch() }
+
+    private fun buildComparisonNotFoundContext(
+        userQuery: String,
+        resolution: ComparisonTitleResolution,
+    ): String = buildString {
+        appendLine("The user asked to compare by product title: $userQuery")
+        appendLine("Found real requested products: ${resolution.foundProducts.joinToString { it.title }.ifBlank { "none" }}")
+        appendLine("Missing requested products: ${resolution.missingNames.joinToString().ifBlank { "unresolved requested product" }}")
+        appendLine("Do not replace missing products with unrelated products. Do not show women's alternatives for requested men's titles.")
+    }
+
     private fun buildSearchContext(
         criteria: ProductSearchCriteria,
         exactCards: List<ChatProductCard>,
@@ -815,11 +1061,11 @@ class AiChatRepositoryImpl @Inject constructor(
     }
 
     private fun StringBuilder.appendProductCards(cards: List<ChatProductCard>) {
-        cards.forEachIndexed { index, card ->
+        cards.take(MAX_CHAT_PRODUCTS).forEachIndexed { index, card ->
             appendLine(
-                "${index + 1}. productId=${card.productId}; title=${card.title}; imageUrl=${card.imageUrl ?: "Unavailable"}; " +
-                        "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; " +
-                        "category/productType=${card.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}; " +
+                "${index + 1}. ${card.title}; " +
+                        "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; " +
+                        "brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; category/productType=${card.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}; " +
                         "availability=${availabilityText(card.isOutOfStock)}; reason=${card.reason}"
             )
         }
@@ -832,15 +1078,14 @@ class AiChatRepositoryImpl @Inject constructor(
         appendLine("Compare these real WearZone products only:")
         details.forEachIndexed { index, detail ->
             val summary = summariesById[detail.id]
-            appendLine("${index + 1}. productId=${detail.id}")
-            appendLine("   title=${detail.title}")
+            appendLine("${index + 1}. title=${detail.title}")
             appendLine("   price=${formatPrice(detail.price, detail.currencyCode)}")
             appendLine("   brand/vendor=${detail.vendor.ifBlank { "Unavailable" }}")
             appendLine("   category/productType=${summary?.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}")
-            appendLine("   description=${detail.descriptionHtml.take(420).ifBlank { "Unavailable" }}")
+            appendLine("   description=${detail.descriptionHtml.take(180).ifBlank { "Unavailable" }}")
             appendLine("   colors=${detail.availableColors.ifEmpty { listOf("Unavailable") }.joinToString()}")
             appendLine("   sizes=${detail.availableSizes.ifEmpty { listOf("Unavailable") }.joinToString()}")
-            appendLine("   variants=${detail.variants.take(10).joinToString(" | ") { it.variantContext() }.ifBlank { "Unavailable" }}")
+            appendLine("   variants=${detail.variants.take(5).joinToString(" | ") { it.variantContext() }.ifBlank { "Unavailable" }}")
             appendLine("   availability=${if (detail.isOutOfStock) "Out of stock" else "Available or variant-dependent"}")
         }
     }
@@ -855,7 +1100,7 @@ class AiChatRepositoryImpl @Inject constructor(
         appendLine("Use only these selected real WearZone products:")
         cards.forEach { card ->
             appendLine(
-                "- productId=${card.productId}; title=${card.title}; slot/reason=${card.reason}; " +
+                "- title=${card.title}; slot/reason=${card.reason}; " +
                         "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; " +
                         "brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; category/productType=${card.productType ?: "Unavailable"}; " +
                         "availability=${availabilityText(card.isOutOfStock)}"
@@ -936,7 +1181,7 @@ class AiChatRepositoryImpl @Inject constructor(
         currencyCode = currencyCode,
         vendor = vendor,
         productType = productType.takeIf { it.isNotBlank() } ?: catalogSlot()?.displayName,
-        reason = reason,
+        reason = safeMatchReason(reason),
         isOutOfStock = isOutOfStock,
     )
 
@@ -948,9 +1193,23 @@ class AiChatRepositoryImpl @Inject constructor(
         currencyCode = currencyCode,
         vendor = vendor,
         productType = summary?.productType?.takeIf { it.isNotBlank() } ?: summary?.catalogSlot()?.displayName,
-        reason = reason,
+        reason = summary?.safeMatchReason(reason) ?: reason,
         isOutOfStock = isOutOfStock,
     )
+
+    private fun Product.safeMatchReason(reason: String): String {
+        val lower = reason.lowercase(Locale.ROOT)
+        val slot = catalogSlot()
+        val invalidBagReason = lower.contains("bag/accessory") && slot != CatalogSlot.BAG_ACCESSORY
+        val invalidShoesReason = lower.contains("shoes") && slot != CatalogSlot.SHOES
+        val invalidDressReason = lower.contains("dress") && slot != CatalogSlot.DRESS
+        val invalidTopReason = lower.contains("top") && slot == CatalogSlot.DRESS
+        return if (invalidBagReason || invalidShoesReason || invalidDressReason || invalidTopReason) {
+            "Because it is available in the real catalog."
+        } else {
+            reason.ifBlank { "Because it is available in the real catalog." }
+        }
+    }
 
     private fun Product.searchBlob(): String = listOf(
         title,
@@ -1131,6 +1390,9 @@ class AiChatRepositoryImpl @Inject constructor(
 
     private fun String.normalizedForSearch(): String {
         var value = lowercase(Locale.ROOT)
+            .replace("’s", "")
+            .replace("'s", "")
+            .replace("-", " ")
             .replace(Regex("[\\u064B-\\u065F\\u0670]"), "")
             .replace('أ', 'ا')
             .replace('إ', 'ا')
@@ -1159,7 +1421,19 @@ class AiChatRepositoryImpl @Inject constructor(
 
     private fun String.termVariants(): Set<String> = buildSet {
         add(this@termVariants)
-        if (endsWith("s") && length > 3) add(dropLast(1))
+        when {
+            this@termVariants == "dresses" -> add("dress")
+            this@termVariants == "shoes" -> add("shoe")
+            this@termVariants == "sneakers" -> add("sneaker")
+            this@termVariants == "shirts" -> add("shirt")
+            this@termVariants == "pants" -> add("pant")
+            this@termVariants.endsWith("es") && length > 4 -> add(dropLast(2))
+            this@termVariants.endsWith("s") && length > 4 -> add(dropLast(1))
+        }
+        if (this@termVariants == "man") add("men")
+        if (this@termVariants == "men") add("man")
+        if (this@termVariants == "woman") add("women")
+        if (this@termVariants == "women") add("woman")
         if (this@termVariants == "tee") add("t shirt")
         if (this@termVariants == "tshirt") add("t shirt")
         if (this@termVariants == "grey") add("gray")
@@ -1191,6 +1465,7 @@ class AiChatRepositoryImpl @Inject constructor(
         val maxPrice: Double?,
         val isBroadSearch: Boolean,
         val hasProductSearchSignal: Boolean,
+        val isCatalogOverview: Boolean,
     )
 
     private data class CatalogRetrieval(
@@ -1204,6 +1479,20 @@ class AiChatRepositoryImpl @Inject constructor(
         val exactMatches: List<ScoredProduct>,
         val closestAlternatives: List<ScoredProduct>,
         val noExactReason: String?,
+        val hardFilteredCount: Int,
+        val rankedCount: Int,
+    )
+
+    private data class CatalogOverview(
+        val context: String,
+        val cards: List<ChatProductCard>,
+        val fallbackResponse: String,
+    )
+
+    private data class ComparisonTitleResolution(
+        val requestedNames: List<String>,
+        val foundProducts: List<Product>,
+        val missingNames: List<String>,
     )
 
     private data class ScoredProduct(
@@ -1238,6 +1527,7 @@ class AiChatRepositoryImpl @Inject constructor(
         PRODUCT_SEARCH,
         PRODUCT_COMPARISON,
         OUTFIT_RECOMMENDATION,
+        CATALOG_OVERVIEW,
         GENERAL_HELP,
     }
 
@@ -1281,9 +1571,11 @@ class AiChatRepositoryImpl @Inject constructor(
     }
 
     private companion object {
+        const val TAG = "WearZoneSmartChat"
         const val MAX_CHAT_PRODUCTS = 8
         const val MAX_COMPARE_PRODUCTS = 4
         const val MAX_FALLBACK_PRODUCTS = 5
+        const val FUZZY_TITLE_MIN_SCORE = 65
 
         val STOP_WORDS = setOf(
             "show", "me", "find", "search", "for", "the", "a", "an", "and", "or", "to", "with", "of", "in", "on",
@@ -1293,12 +1585,19 @@ class AiChatRepositoryImpl @Inject constructor(
         val PRICE_STOP_WORDS = setOf("under", "below", "less", "than", "over", "above", "more", "maximum", "minimum", "max", "min", "up", "between", "egp")
         val PRODUCT_SEARCH_TERMS = setOf("show", "find", "search", "product", "products", "catalog", "available", "sell", "have", "wearzone")
         val BROAD_SEARCH_TERMS = setOf("all", "catalog", "clothes", "clothing", "products", "product", "what do you sell")
+        val CATALOG_OVERVIEW_TERMS = setOf(
+            "what products do you have", "what categories do you have", "what do you have", "what do you sell",
+            "catalog overview", "show catalog", "show me your catalog", "just these", "is that all", "only these",
+            "what available", "have what", "available products", "available categories"
+        )
         val COMPARISON_TERMS = setOf("compare", "comparison", "versus", "vs", "which is better", "difference between")
+        val COMPARISON_NOISE_TERMS = setOf("compare", "comparison", "versus", "vs", "which is better", "difference between", "better", "why", "and", "or")
+        val COMPARISON_EXTRA_STOP_WORDS = setOf("compare", "comparison", "versus", "vs", "which", "better", "why", "one", "the", "this", "that")
         val OUTFIT_TERMS = setOf("outfit", "look", "style me", "recommend me an outfit", "complete set", "match with", "wear with", "casual outfit")
 
-        val MEN_QUERY_KEYWORDS = setOf("men", "mens", "male", "man")
-        val WOMEN_QUERY_KEYWORDS = setOf("women", "womens", "female", "woman", "ladies", "lady", "girls", "girl")
-        val KIDS_QUERY_KEYWORDS = setOf("kids", "children", "child", "boys", "boy")
+        val MEN_QUERY_KEYWORDS = setOf("man", "men", "mens", "male")
+        val WOMEN_QUERY_KEYWORDS = setOf("woman", "women", "womens", "female", "ladies", "lady", "girls", "girl")
+        val KIDS_QUERY_KEYWORDS = setOf("kids", "children", "child", "boys", "boy", "girls", "girl")
         val MEN_KEYWORDS = MEN_QUERY_KEYWORDS + setOf("men collection", "menswear")
         val WOMEN_KEYWORDS = WOMEN_QUERY_KEYWORDS + setOf("women collection", "womenswear")
         val KIDS_KEYWORDS = KIDS_QUERY_KEYWORDS + setOf("kids collection")
@@ -1371,10 +1670,23 @@ class AiChatRepositoryImpl @Inject constructor(
             "اريد" to "want",
             "منتجات" to "products",
             "منتج" to "product",
+            "عندكم" to "have",
+            "عندك" to "have",
+            "ايه" to "what",
+            "اي" to "what",
+            "الموجوده" to "available",
+            "الموجود" to "available",
+            "موجوده" to "available",
+            "موجود" to "available",
+            "بس" to "only",
+            "دول" to "these",
+            "دي" to "these",
+            "هل ده كل" to "is that all",
             "رجالي" to "men",
             "رجال" to "men",
             "للرجال" to "men",
-            "اولادي" to "men",
+            "رجل" to "man",
+            "اولادي" to "kids boy",
             "حريمي" to "women",
             "نسائي" to "women",
             "نسويه" to "women",
@@ -1383,6 +1695,7 @@ class AiChatRepositoryImpl @Inject constructor(
             "سيدات" to "women",
             "بنات" to "women girls",
             "للبنات" to "women girls",
+            "بناتي" to "kids girl",
             "اطفال" to "kids",
             "اطفالي" to "kids",
             "ولادي" to "kids",

@@ -5,7 +5,9 @@ import com.google.gson.annotations.SerializedName
 data class GroqRequest(
     @SerializedName("model") val model: String = "llama-3.3-70b-versatile",
     @SerializedName("messages") val messages: List<GroqMessage>,
-    @SerializedName("tools") val tools: List<GroqTool>? = null
+    @SerializedName("tools") val tools: List<GroqTool>? = null,
+    @SerializedName("max_tokens") val maxTokens: Int? = null,
+    @SerializedName("temperature") val temperature: Double? = null,
 )
 
 data class GroqMessage(

@@ -1,5 +1,6 @@
 package com.example.wearzone.presentation.ai.chat
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.ai.chat.model.ChatRole
@@ -63,6 +64,7 @@ class ChatViewModel @Inject constructor(
                         }.toImmutableList(),
                     )
                 }.toImmutableList()
+                Log.d("WearZoneSmartChat", "UI mapping update messages=${uiMessages.size} totalCards=${uiMessages.sumOf { it.products.size }}")
                 _uiState.update { it.copy(messages = uiMessages) }
             }
         }

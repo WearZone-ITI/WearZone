@@ -15,6 +15,10 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     private val apiService: ProductApiService,
 ) : IProductRemoteDataSource {
 
+    private companion object {
+        const val SHOPIFY_MAX_PAGE_SIZE = 250
+    }
+
     override suspend fun getCategories(): List<CategoryDto> {
         return apiService.getCustomCollections().custom_collections.dashboardCategories()
     }
@@ -35,8 +39,7 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getProducts(vendor: String?): List<ProductDto> {
-        val response = apiService.getProducts(vendor = vendor)
-        return response.products.map { it.toProductDto() }
+        return fetchAllProducts(vendor = vendor, collectionId = null)
     }
 
     override suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto> {
@@ -46,10 +49,31 @@ class ProductRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getProducts(collectionId: Long?): List<ProductDto> {
-        return apiService
-            .getProducts(collectionId = collectionId)
-            .products
-            .map { it.toProductDto() }
+        return fetchAllProducts(vendor = null, collectionId = collectionId)
+    }
+
+    private suspend fun fetchAllProducts(
+        vendor: String?,
+        collectionId: Long?,
+    ): List<ProductDto> {
+        val products = mutableListOf<ProductDto>()
+        var sinceId: Long? = null
+
+        do {
+            val page = apiService
+                .getProducts(
+                    vendor = vendor,
+                    collectionId = collectionId,
+                    sinceId = sinceId,
+                    limit = SHOPIFY_MAX_PAGE_SIZE,
+                )
+                .products
+            if (page.isEmpty()) break
+            products += page.map { it.toProductDto() }
+            sinceId = page.maxOfOrNull { it.id }
+        } while (page.size == SHOPIFY_MAX_PAGE_SIZE && sinceId != null)
+
+        return products.distinctBy { it.id }
     }
 
     override suspend fun getProductDetail(productId: Long): ShopifyProductDetail {
