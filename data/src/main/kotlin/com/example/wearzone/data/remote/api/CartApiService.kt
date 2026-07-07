@@ -25,9 +25,9 @@ interface CartApiService {
         @Path("draft_order_id") draftOrderId: Long
     ): DraftOrderResponse
 
-    @DELETE("draft_orders/{id}.json")
+    @DELETE("admin/api/2024-04/draft_orders/{draft_order_id}.json")
     suspend fun deleteDraftOrder(
-        @Path("id")
+        @Path("draft_order_id")
         draftOrderId: Long,
     )
 }

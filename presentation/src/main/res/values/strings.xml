@@ -396,6 +396,8 @@
     <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
     <string name="product_detail_retry">Retry</string>
     <string name="product_detail_added_to_cart">Added to cart!</string>
+    <string name="product_detail_select_color">Select Color</string>
+    <string name="product_detail_select_color_first">Please select a color first.</string>
     <string name="product_detail_select_size_first">Please select a size first.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
     <string name="product_detail_auth_required">Please log in to continue.</string>

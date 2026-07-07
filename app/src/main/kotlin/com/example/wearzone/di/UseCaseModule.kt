@@ -254,12 +254,14 @@ object UseCaseModule {
         cartRepository: ICartRepository,
         customerIdProvider: ICustomerIdProvider,
         customerAddressRepository: ICustomerAddressRepository,
+        productRepository: IProductRepository,
     ): PlaceOrderUseCase =
         PlaceOrderUseCase(
             checkoutRepository = checkoutRepository,
             cartRepository = cartRepository,
             customerIdProvider = customerIdProvider,
             customerAddressRepository = customerAddressRepository,
+            productRepository = productRepository,
         )
 
  @Provides

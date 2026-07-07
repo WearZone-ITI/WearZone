@@ -16,13 +16,17 @@ sealed interface ProductDetailUiState {
         val descriptionHtml: String,
         val images: ImmutableList<String>,
         val availableSizes: ImmutableList<String>,
+        val availableColors: ImmutableList<String>,
         val selectedSize: String? = null,
+        val selectedColor: String? = null,
         val rating: Double,
         val reviewsCount: Int,
         val isFavorite: Boolean,
         val showRemoveDialog: Boolean = false,
         val reviews: ImmutableList<ClientReviewUiModel> = persistentListOf(),
-        val quantityInCart: Int = 0
+        val quantityInCart: Int = 0,
+        val isOutOfStock: Boolean = false,
+        val selectedVariantQuantity: Int = 0,
     ) : ProductDetailUiState
 }
 

@@ -8,5 +8,11 @@ data class Product(
     val price: Double,
     val currencyCode: String,
     val imageUrl: String?,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val productType: String = "",
+    val tags: List<String> = emptyList(),
+    val maxQuantity: Int = 0,
+    val isOutOfStock: Boolean = false,
+    val size: String? = null,
+    val color: String? = null,
 )

@@ -43,6 +43,7 @@ object NetworkModule {
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOB_BASE_URL = "https://accept.paymob.com/"
     private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
+    private const val MAX_LOG_BODY_BYTES = 64_000L
     private const val CURRENCY_BASE_URL = "https://open.er-api.com/"
 
     @Provides
@@ -61,17 +62,63 @@ object NetworkModule {
     @Provides
     @ShopifyOkHttp
     fun provideShopifyOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().addInterceptor { chain ->
-            val request = chain.request()
-            if (BuildConfig.DEBUG) {
-                Log.d("ShopifyRequest", "${request.method} ${request.url}")
+        return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+
+                if (BuildConfig.DEBUG) {
+                    Log.d("ShopifyRequest", "${request.method} ${request.url}")
+                }
+
+                val authenticatedRequest = request.newBuilder()
+                    .addHeader("X-Shopify-Access-Token", BuildConfig.SHOPIFY_ADMIN_TOKEN)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "application/json")
+                    .build()
+
+                val response = chain.proceed(authenticatedRequest)
+                logShopifyResponse(authenticatedRequest, response)
+                response
             }
-            val authenticatedRequest = request.newBuilder().addHeader(
-                "X-Shopify-Access-Token",
-                BuildConfig.SHOPIFY_ADMIN_TOKEN
-            ).addHeader("Content-Type", "application/json").build()
-            chain.proceed(authenticatedRequest)
-        }.build()
+            .build()
+    }
+
+
+    private fun logShopifyResponse(
+        request: okhttp3.Request,
+        response: okhttp3.Response,
+    ) {
+        val isOrderCreate = request.method == "POST" && request.url.encodedPath.endsWith("/orders.json")
+        if (!isOrderCreate && response.isSuccessful) return
+
+        val responseBody = try {
+            response.peekBody(MAX_LOG_BODY_BYTES).string()
+        } catch (_: Exception) {
+            "<unable to read response body>"
+        }
+        val requestBody = request.bodyAsText()
+        val tag = if (response.isSuccessful) "ShopifyResponse" else "ShopifyError"
+        val message = buildString {
+            append("HTTP ${response.code} ${request.method} ${request.url}")
+            if (requestBody.isNotBlank()) append("\nRequest body: $requestBody")
+            append("\nResponse body: $responseBody")
+        }
+        if (response.isSuccessful) {
+            Log.d(tag, message)
+        } else {
+            Log.e(tag, message)
+        }
+    }
+
+    private fun okhttp3.Request.bodyAsText(): String {
+        val requestBody = body ?: return ""
+        return try {
+            val buffer = okio.Buffer()
+            requestBody.writeTo(buffer)
+            buffer.readUtf8().take(MAX_LOG_BODY_BYTES.toInt())
+        } catch (_: Exception) {
+            "<unable to read request body>"
+        }
     }
 
     @Provides
