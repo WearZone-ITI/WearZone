@@ -21,7 +21,6 @@ import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.checkout.repository.IDiscountRepository
-import com.example.wearzone.domain.checkout.repository.IPayMockRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
 import com.example.wearzone.domain.customer.address.repository.IAddressLookupRepository
@@ -105,13 +104,10 @@ abstract class RepositoryModule {
         impl: CurrentLocationRepositoryImpl,
     ): ICurrentLocationRepository
 
-
     @Binds
     abstract fun bindCouponNotificationScheduler(
         impl: CouponNotificationSchedulerImpl,
     ): ICouponNotificationScheduler
-
-}
 
     @Binds
     abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository
