@@ -117,7 +117,7 @@ class ProductDetailViewModel @Inject constructor(
                         id = productDetail.id,
                         title = productDetail.title,
                         vendor = productDetail.vendor,
-                        price = formatMoney(selectedVariant?.price ?: productDetail.price, productDetail.currencyCode),
+                        basePriceEgp = selectedVariant?.price ?: productDetail.price,
                         descriptionHtml = productDetail.descriptionHtml,
                         images = productDetail.imagesWithVariantFirst(selectedVariant).toImmutableList(),
                         availableSizes = productDetail.availableSizes.toImmutableList(),
@@ -149,7 +149,7 @@ class ProductDetailViewModel @Inject constructor(
                 val variant = product.bestVariantFor(size, state.selectedColor)
                 state.copy(
                     selectedSize = size,
-                    price = formatMoney(variant?.price ?: product.price, product.currencyCode),
+                    basePriceEgp = variant?.price ?: product.price,
                     images = product.imagesWithVariantFirst(variant).toImmutableList(),
                     isOutOfStock = variant?.isAvailable == false,
                     selectedVariantQuantity = variant?.availableQuantity ?: 0,
@@ -167,7 +167,7 @@ class ProductDetailViewModel @Inject constructor(
                 val variant = product.bestVariantFor(state.selectedSize, color)
                 state.copy(
                     selectedColor = color,
-                    price = formatMoney(variant?.price ?: product.price, product.currencyCode),
+                    basePriceEgp = variant?.price ?: product.price,
                     images = product.imagesWithVariantFirst(variant).toImmutableList(),
                     isOutOfStock = variant?.isAvailable == false,
                     selectedVariantQuantity = variant?.availableQuantity ?: 0,
@@ -241,7 +241,7 @@ class ProductDetailViewModel @Inject constructor(
                 id = state.id,
                 title = state.title,
                 vendor = state.vendor,
-                price = state.price,
+                price = state.basePriceEgp.toString(),
                 currencyCode = "EGP",
                 imageUrl = state.images.firstOrNull() ?: "",
                 isOutOfStock = state.isOutOfStock,

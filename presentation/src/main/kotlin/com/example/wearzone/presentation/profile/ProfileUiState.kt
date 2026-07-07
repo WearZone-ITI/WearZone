@@ -3,6 +3,7 @@ package com.example.wearzone.presentation.profile
 import androidx.annotation.StringRes
 import com.example.presentation.R
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 sealed interface ProfileUiState {
     data object Loading : ProfileUiState
