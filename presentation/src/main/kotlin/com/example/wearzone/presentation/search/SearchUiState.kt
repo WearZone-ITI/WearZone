@@ -30,6 +30,6 @@ data class ProductSearchUiModel(
 )
 
 data class SearchFilterOptionUiModel(
-    val id: Long,
+    val id: String,
     val title: String,
 )
