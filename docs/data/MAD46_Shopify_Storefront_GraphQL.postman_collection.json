@@ -1,0 +1,554 @@
+{
+  "info": {
+    "_postman_id": "mad46-team3-storefront-graphql",
+    "name": "MAD46 Team 3 — Shopify Storefront GraphQL",
+    "description": "Storefront API GraphQL collection for the MAD46 iOS Shopify project.\n\nEndpoint: /api/{version}/graphql.json  (NOT /admin/api/)\nAuth header: X-Shopify-Storefront-Access-Token\n\nFlow:\n1. Set {{storefront_token}} in Variables\n2. Run 'Get Shop Info' to verify auth\n3. Run 'Login Customer' → copy accessToken → set {{customer_access_token}}\n4. Run 'Create Cart' → copy cart.id → set {{cart_id}}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key",   "value": "X-Shopify-Storefront-Access-Token", "type": "string" },
+      { "key": "value", "value": "{{storefront_token}}",               "type": "string" },
+      { "key": "in",    "value": "header",                             "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "hostname",             "value": "mad46-ios-team3.myshopify.com" },
+    { "key": "storefront_token",     "value": "YOUR_STOREFRONT_ACCESS_TOKEN_HERE" },
+    { "key": "api_version",          "value": "2024-01" },
+    { "key": "storefront_url",       "value": "https://{{hostname}}/api/{{api_version}}/graphql.json" },
+    { "key": "product_id",           "value": "gid://shopify/Product/REPLACE_ME" },
+    { "key": "collection_id",        "value": "gid://shopify/Collection/REPLACE_ME" },
+    { "key": "variant_id",           "value": "gid://shopify/ProductVariant/REPLACE_ME" },
+    { "key": "cart_id",              "value": "gid://shopify/Cart/REPLACE_ME" },
+    { "key": "cart_line_id",         "value": "gid://shopify/CartLine/REPLACE_ME" },
+    { "key": "customer_access_token","value": "PASTE_TOKEN_FROM_LOGIN_RESPONSE" },
+    { "key": "customer_address_id",  "value": "gid://shopify/MailingAddress/REPLACE_ME" }
+  ],
+  "item": [
+
+    {
+      "name": "🏪 Store",
+      "item": [
+        {
+          "name": "Get Shop Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetShopInfo {\n  shop {\n    name\n    description\n    primaryDomain { url host }\n    paymentSettings {\n      currencyCode\n      acceptedCardBrands\n      enabledPresentmentCurrencies\n    }\n  }\n}",
+                "variables": "{}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Verify auth and get the store base currency for exchange-rate conversion."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📦 Products",
+      "item": [
+        {
+          "name": "Get All Products (paginated)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProducts($first: Int!, $after: String) {\n  products(first: $first, after: $after) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        description\n        vendor\n        productType\n        tags\n        availableForSale\n        priceRange {\n          minVariantPrice { amount currencyCode }\n          maxVariantPrice { amount currencyCode }\n        }\n        compareAtPriceRange {\n          minVariantPrice { amount currencyCode }\n        }\n        images(first: 5) {\n          edges { node { id url altText width height } }\n        }\n        variants(first: 10) {\n          edges {\n            node {\n              id\n              title\n              availableForSale\n              quantityAvailable\n              price { amount currencyCode }\n              compareAtPrice { amount currencyCode }\n              selectedOptions { name value }\n              image { url altText }\n            }\n          }\n        }\n      }\n    }\n    pageInfo { hasNextPage hasPreviousPage endCursor startCursor }\n  }\n}",
+                "variables": "{\n  \"first\": 10,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §2 — Main product catalog with cursor-based pagination. Pass endCursor into 'after' for the next page."
+          }
+        },
+        {
+          "name": "Get Single Product by ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProduct($id: ID!) {\n  product(id: $id) {\n    id\n    title\n    description\n    descriptionHtml\n    vendor\n    productType\n    tags\n    availableForSale\n    priceRange {\n      minVariantPrice { amount currencyCode }\n      maxVariantPrice { amount currencyCode }\n    }\n    compareAtPriceRange {\n      minVariantPrice { amount currencyCode }\n    }\n    images(first: 20) {\n      edges { node { id url altText width height } }\n    }\n    options {\n      id\n      name\n      values\n    }\n    variants(first: 30) {\n      edges {\n        node {\n          id\n          title\n          availableForSale\n          quantityAvailable\n          price { amount currencyCode }\n          compareAtPrice { amount currencyCode }\n          selectedOptions { name value }\n          image { url altText }\n        }\n      }\n    }\n    metafields(identifiers: [\n      { namespace: \"reviews\", key: \"rating\" },\n      { namespace: \"reviews\", key: \"rating_count\" }\n    ]) {\n      key\n      namespace\n      value\n      type\n    }\n  }\n}",
+                "variables": "{\n  \"id\": \"{{product_id}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §2 — Full product detail: images, options/sizes, price, description, rating metafields."
+          }
+        },
+        {
+          "name": "Get Single Product by Handle",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProductByHandle($handle: String!) {\n  productByHandle(handle: $handle) {\n    id\n    title\n    description\n    vendor\n    availableForSale\n    priceRange {\n      minVariantPrice { amount currencyCode }\n    }\n    images(first: 10) {\n      edges { node { url altText } }\n    }\n    options { id name values }\n    variants(first: 30) {\n      edges {\n        node {\n          id\n          title\n          availableForSale\n          quantityAvailable\n          price { amount currencyCode }\n          selectedOptions { name value }\n        }\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"handle\": \"example-product-handle\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §2 — Alternative to fetching by GID. Handle is the URL slug (e.g. 'classic-white-sneaker')."
+          }
+        },
+        {
+          "name": "Get Products by Vendor (Brand Nav)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProductsByVendor($query: String!, $first: Int!, $after: String) {\n  products(first: $first, after: $after, query: $query) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        vendor\n        availableForSale\n        priceRange {\n          minVariantPrice { amount currencyCode }\n        }\n        images(first: 1) {\n          edges { node { url altText } }\n        }\n        variants(first: 5) {\n          edges {\n            node { id title availableForSale quantityAvailable price { amount currencyCode } }\n          }\n        }\n      }\n    }\n    pageInfo { hasNextPage endCursor }\n  }\n}",
+                "variables": "{\n  \"query\": \"vendor:Nike\",\n  \"first\": 20,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §2 — Brand/Vendor navigation. Replace 'Nike' with the actual brand. Storefront query syntax: vendor:BrandName"
+          }
+        },
+        {
+          "name": "Get Products Sorted by Price (Asc)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProductsByPriceAsc($first: Int!, $after: String) {\n  products(first: $first, after: $after, sortKey: PRICE, reverse: false) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        vendor\n        availableForSale\n        priceRange {\n          minVariantPrice { amount currencyCode }\n        }\n        images(first: 1) {\n          edges { node { url altText } }\n        }\n      }\n    }\n    pageInfo { hasNextPage endCursor }\n  }\n}",
+                "variables": "{\n  \"first\": 20,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Sort by price ascending. Storefront API has native PRICE sortKey (unlike Admin API). Set reverse: true for descending."
+          }
+        },
+        {
+          "name": "Get Best Selling Products",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetBestSellingProducts($first: Int!, $after: String) {\n  products(first: $first, after: $after, sortKey: BEST_SELLING) {\n    edges {\n      cursor\n      node {\n        id\n        title\n        vendor\n        availableForSale\n        priceRange {\n          minVariantPrice { amount currencyCode }\n        }\n        images(first: 1) {\n          edges { node { url altText } }\n        }\n      }\n    }\n    pageInfo { hasNextPage endCursor }\n  }\n}",
+                "variables": "{\n  \"first\": 20,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Best Seller sorting. Storefront API has native BEST_SELLING sortKey (unavailable in Admin API)."
+          }
+        },
+        {
+          "name": "Get Product Recommendations",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProductRecommendations($productId: ID!) {\n  productRecommendations(productId: $productId) {\n    id\n    title\n    vendor\n    availableForSale\n    priceRange {\n      minVariantPrice { amount currencyCode }\n    }\n    images(first: 1) {\n      edges { node { url altText } }\n    }\n  }\n}",
+                "variables": "{\n  \"productId\": \"{{product_id}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Bonus — Shopify-generated product recommendations based on purchase history and product relationships. Good for a 'You may also like' section on the product detail screen."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔍 Search",
+      "item": [
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query SearchProducts($query: String!, $first: Int!, $after: String) {\n  search(query: $query, first: $first, after: $after, types: [PRODUCT]) {\n    totalCount\n    edges {\n      cursor\n      node {\n        ... on Product {\n          id\n          title\n          vendor\n          availableForSale\n          priceRange {\n            minVariantPrice { amount currencyCode }\n          }\n          images(first: 1) {\n            edges { node { url altText } }\n          }\n          variants(first: 5) {\n            edges {\n              node { id title availableForSale quantityAvailable price { amount currencyCode } }\n            }\n          }\n        }\n      }\n    }\n    pageInfo { hasNextPage endCursor }\n  }\n}",
+                "variables": "{\n  \"query\": \"sneaker\",\n  \"first\": 20,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Global search across product titles, descriptions, tags, and vendor names. Returns totalCount for display."
+          }
+        },
+        {
+          "name": "Predictive Search (Autocomplete)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query PredictiveSearch($query: String!) {\n  predictiveSearch(query: $query, types: [PRODUCT, COLLECTION]) {\n    products {\n      id\n      title\n      vendor\n      priceRange {\n        minVariantPrice { amount currencyCode }\n      }\n      images(first: 1) {\n        edges { node { url altText } }\n      }\n    }\n    collections {\n      id\n      title\n      handle\n      image { url altText }\n    }\n  }\n}",
+                "variables": "{\n  \"query\": \"sne\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Realtime autocomplete suggestions as the user types. Fire on every keystroke with debounce (~300ms)."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🗂 Collections (Categories)",
+      "item": [
+        {
+          "name": "Get All Collections",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetCollections($first: Int!, $after: String) {\n  collections(first: $first, after: $after) {\n    edges {\n      node {\n        id\n        title\n        handle\n        description\n        image { url altText }\n        products(first: 1) {\n          edges { node { id } }\n        }\n      }\n    }\n    pageInfo { hasNextPage endCursor }\n  }\n}",
+                "variables": "{\n  \"first\": 50,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Main Categories and Sub-Categories. Agree with your team on a naming convention in Shopify admin."
+          }
+        },
+        {
+          "name": "Get Products in Collection",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetProductsByCollection($id: ID!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean) {\n  collection(id: $id) {\n    id\n    title\n    description\n    image { url altText }\n    products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          vendor\n          availableForSale\n          priceRange {\n            minVariantPrice { amount currencyCode }\n          }\n          images(first: 1) {\n            edges { node { url altText } }\n          }\n          variants(first: 5) {\n            edges {\n              node { id title availableForSale quantityAvailable price { amount currencyCode } }\n            }\n          }\n        }\n      }\n      pageInfo { hasNextPage endCursor }\n    }\n  }\n}",
+                "variables": "{\n  \"id\": \"{{collection_id}}\",\n  \"first\": 20,\n  \"after\": null,\n  \"sortKey\": \"BEST_SELLING\",\n  \"reverse\": false\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Filter products by category with sorting. sortKey options: MANUAL, BEST_SELLING, TITLE, PRICE, CREATED, COLLECTION_DEFAULT."
+          }
+        },
+        {
+          "name": "Get Collection by Handle",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetCollectionByHandle($handle: String!, $first: Int!) {\n  collectionByHandle(handle: $handle) {\n    id\n    title\n    description\n    image { url altText }\n    products(first: $first) {\n      edges {\n        node {\n          id\n          title\n          vendor\n          availableForSale\n          priceRange {\n            minVariantPrice { amount currencyCode }\n          }\n          images(first: 1) {\n            edges { node { url altText } }\n          }\n        }\n      }\n      pageInfo { hasNextPage endCursor }\n    }\n  }\n}",
+                "variables": "{\n  \"handle\": \"shoes\",\n  \"first\": 20\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §3 — Fetch a collection by its URL handle instead of GID."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Customers",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation RegisterCustomer($input: CustomerCreateInput!) {\n  customerCreate(input: $input) {\n    customer {\n      id\n      firstName\n      lastName\n      email\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"firstName\": \"Ahmed\",\n    \"lastName\": \"Hassan\",\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"SecurePass123!\",\n    \"acceptsMarketing\": false\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §1 — Create a customer account. After this, Shopify sends the verification email automatically if the store has it configured."
+          }
+        },
+        {
+          "name": "Login Customer (Get Access Token)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation LoginCustomer($input: CustomerAccessTokenCreateInput!) {\n  customerAccessTokenCreate(input: $input) {\n    customerAccessToken {\n      accessToken\n      expiresAt\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"SecurePass123!\"\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §1 — Login and get a customerAccessToken. Copy accessToken from the response into {{customer_access_token}} variable. Required for all customer-specific operations below."
+          }
+        },
+        {
+          "name": "Logout Customer (Delete Token)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation LogoutCustomer($customerAccessToken: String!) {\n  customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {\n    deletedAccessToken\n    deletedCustomerAccessTokenId\n    userErrors { field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §1 (Destructive Action) — Invalidates the session token. Show confirmation dialog before calling. Clear the token from local storage after success."
+          }
+        },
+        {
+          "name": "Get Customer Profile + Orders + Addresses",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetCustomer($customerAccessToken: String!) {\n  customer(customerAccessToken: $customerAccessToken) {\n    id\n    firstName\n    lastName\n    email\n    phone\n    createdAt\n    defaultAddress {\n      id firstName lastName address1 address2 city country phone zip\n    }\n    addresses(first: 10) {\n      edges {\n        node {\n          id\n          firstName\n          lastName\n          address1\n          address2\n          city\n          province\n          country\n          zip\n          phone\n        }\n      }\n    }\n    orders(first: 10, sortKey: PROCESSED_AT, reverse: true) {\n      edges {\n        node {\n          id\n          orderNumber\n          processedAt\n          financialStatus\n          fulfillmentStatus\n          currentTotalPrice { amount currencyCode }\n          lineItems(first: 5) {\n            edges {\n              node {\n                title\n                quantity\n                originalTotalPrice { amount currencyCode }\n                variant { id title image { url } }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Full account screen: welcome info, recent order history, saved addresses. One query covers all three."
+          }
+        },
+        {
+          "name": "Update Customer Profile",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation UpdateCustomer($customerAccessToken: String!, $customer: CustomerUpdateInput!) {\n  customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {\n    customer {\n      id\n      firstName\n      lastName\n      email\n      phone\n    }\n    customerAccessToken {\n      accessToken\n      expiresAt\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"customer\": {\n    \"firstName\": \"Ahmed\",\n    \"lastName\": \"Hassan\",\n    \"phone\": \"+201001234567\"\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Update profile. Note: if email or password is changed, a new customerAccessToken is returned — update your stored token."
+          }
+        },
+        {
+          "name": "Recover Password (Forgot Password)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation RecoverPassword($email: String!) {\n  customerRecover(email: $email) {\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"email\": \"ahmed@example.com\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §1 — Triggers a password reset email to the user. No token required."
+          }
+        },
+        {
+          "name": "Add Customer Address",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation AddCustomerAddress($customerAccessToken: String!, $address: MailingAddressInput!) {\n  customerAddressCreate(customerAccessToken: $customerAccessToken, address: $address) {\n    customerAddress {\n      id\n      firstName\n      lastName\n      address1\n      address2\n      city\n      country\n      zip\n      phone\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"address\": {\n    \"firstName\": \"Ahmed\",\n    \"lastName\": \"Hassan\",\n    \"address1\": \"15 El Nasr Road\",\n    \"address2\": \"Apt 3\",\n    \"city\": \"Port Said\",\n    \"country\": \"Egypt\",\n    \"zip\": \"42511\",\n    \"phone\": \"+201001234567\"\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Add delivery address. firstName, lastName, and phone are required per spec."
+          }
+        },
+        {
+          "name": "Update Customer Address",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation UpdateCustomerAddress($customerAccessToken: String!, $id: ID!, $address: MailingAddressInput!) {\n  customerAddressUpdate(customerAccessToken: $customerAccessToken, id: $id, address: $address) {\n    customerAddress {\n      id\n      address1\n      city\n      country\n      phone\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"id\": \"{{customer_address_id}}\",\n  \"address\": {\n    \"address1\": \"20 El Geish Road\",\n    \"city\": \"Port Said\",\n    \"country\": \"Egypt\",\n    \"phone\": \"+201001234567\"\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Edit an existing saved address."
+          }
+        },
+        {
+          "name": "Delete Customer Address",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation DeleteCustomerAddress($customerAccessToken: String!, $id: ID!) {\n  customerAddressDelete(customerAccessToken: $customerAccessToken, id: $id) {\n    deletedCustomerAddressId\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"id\": \"{{customer_address_id}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §2 (Destructive Action) — Always show a confirmation alert before calling. Spec: 'Execution should be halted until explicit user confirmation is programmatically verified.'"
+          }
+        },
+        {
+          "name": "Set Default Address",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation SetDefaultAddress($customerAccessToken: String!, $addressId: ID!) {\n  customerDefaultAddressUpdate(customerAccessToken: $customerAccessToken, addressId: $addressId) {\n    customer {\n      id\n      defaultAddress { id address1 city country }\n    }\n    customerUserErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"addressId\": \"{{customer_address_id}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Mark an address as the default shipping address."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Cart",
+      "item": [
+        {
+          "name": "Create Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateCart($input: CartInput!) {\n  cartCreate(input: $input) {\n    cart {\n      id\n      checkoutUrl\n      totalQuantity\n      cost {\n        subtotalAmount { amount currencyCode }\n        totalAmount { amount currencyCode }\n        totalTaxAmount { amount currencyCode }\n      }\n      lines(first: 20) {\n        edges {\n          node {\n            id\n            quantity\n            cost {\n              totalAmount { amount currencyCode }\n            }\n            merchandise {\n              ... on ProductVariant {\n                id\n                title\n                price { amount currencyCode }\n                availableForSale\n                quantityAvailable\n                image { url altText }\n                product { id title vendor }\n              }\n            }\n          }\n        }\n      }\n    }\n    userErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"lines\": [\n      {\n        \"merchandiseId\": \"{{variant_id}}\",\n        \"quantity\": 1\n      }\n    ],\n    \"buyerIdentity\": {\n      \"customerAccessToken\": \"{{customer_access_token}}\"\n    }\n  }\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §4 — Creates a cart and associates it with the logged-in customer. Copy cart.id into {{cart_id}}. checkoutUrl is used to redirect to payment."
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetCart($cartId: ID!) {\n  cart(id: $cartId) {\n    id\n    checkoutUrl\n    totalQuantity\n    discountCodes { code applicable }\n    cost {\n      subtotalAmount { amount currencyCode }\n      totalAmount { amount currencyCode }\n      totalTaxAmount { amount currencyCode }\n      checkoutChargeAmount { amount currencyCode }\n    }\n    lines(first: 20) {\n      edges {\n        node {\n          id\n          quantity\n          cost {\n            totalAmount { amount currencyCode }\n            amountPerQuantity { amount currencyCode }\n            compareAtAmountPerQuantity { amount currencyCode }\n          }\n          merchandise {\n            ... on ProductVariant {\n              id\n              title\n              price { amount currencyCode }\n              compareAtPrice { amount currencyCode }\n              availableForSale\n              quantityAvailable\n              selectedOptions { name value }\n              image { url altText }\n              product { id title vendor }\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"cartId\": \"{{cart_id}}\"\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §4 — Fetch current cart state. cost.totalAmount reflects dynamic pricing after discounts (Spec: Dynamic Pricing Calculation)."
+          }
+        },
+        {
+          "name": "Add Items to Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation AddCartLines($cartId: ID!, $lines: [CartLineInput!]!) {\n  cartLinesAdd(cartId: $cartId, lines: $lines) {\n    cart {\n      id\n      totalQuantity\n      cost {\n        subtotalAmount { amount currencyCode }\n        totalAmount { amount currencyCode }\n      }\n      lines(first: 20) {\n        edges {\n          node {\n            id\n            quantity\n            merchandise {\n              ... on ProductVariant {\n                id title price { amount currencyCode } quantityAvailable\n                product { title vendor }\n              }\n            }\n          }\n        }\n      }\n    }\n    userErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"cartId\": \"{{cart_id}}\",\n  \"lines\": [\n    {\n      \"merchandiseId\": \"{{variant_id}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §4 — Add a product variant to the existing cart. Can add multiple lines in one call."
+          }
+        },
+        {
+          "name": "Update Cart Line Quantity",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation UpdateCartLines($cartId: ID!, $lines: [CartLineUpdateInput!]!) {\n  cartLinesUpdate(cartId: $cartId, lines: $lines) {\n    cart {\n      id\n      totalQuantity\n      cost {\n        subtotalAmount { amount currencyCode }\n        totalAmount { amount currencyCode }\n      }\n      lines(first: 20) {\n        edges {\n          node {\n            id\n            quantity\n            merchandise {\n              ... on ProductVariant {\n                id title quantityAvailable availableForSale\n              }\n            }\n          }\n        }\n      }\n    }\n    userErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"cartId\": \"{{cart_id}}\",\n  \"lines\": [\n    {\n      \"id\": \"{{cart_line_id}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §4 — Update quantity for a specific line item. Use cart line id (from Get Cart response), not the variant id. Validate against quantityAvailable before calling (Stock Validation)."
+          }
+        },
+        {
+          "name": "Remove Items from Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation RemoveCartLines($cartId: ID!, $lineIds: [ID!]!) {\n  cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {\n    cart {\n      id\n      totalQuantity\n      cost {\n        subtotalAmount { amount currencyCode }\n        totalAmount { amount currencyCode }\n      }\n      lines(first: 20) {\n        edges {\n          node {\n            id quantity\n            merchandise {\n              ... on ProductVariant { id title }\n            }\n          }\n        }\n      }\n    }\n    userErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"cartId\": \"{{cart_id}}\",\n  \"lineIds\": [\"{{cart_line_id}}\"]\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §4 (Destructive Action) — Remove a line item. Show confirmation dialog before calling."
+          }
+        },
+        {
+          "name": "Apply Discount Code to Cart",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ApplyDiscountCode($cartId: ID!, $discountCodes: [String!]!) {\n  cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {\n    cart {\n      id\n      discountCodes { code applicable }\n      cost {\n        subtotalAmount { amount currencyCode }\n        totalAmount { amount currencyCode }\n      }\n    }\n    userErrors { code field message }\n  }\n}",
+                "variables": "{\n  \"cartId\": \"{{cart_id}}\",\n  \"discountCodes\": [\"SAVE10\"]\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §6 — Apply a discount code to the cart. Check discountCodes[].applicable in the response — false means the code exists but doesn't apply to this cart (wrong items, expired, etc)."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Orders",
+      "item": [
+        {
+          "name": "Get Customer Order History",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetCustomerOrders($customerAccessToken: String!, $first: Int!, $after: String) {\n  customer(customerAccessToken: $customerAccessToken) {\n    id\n    firstName\n    orders(first: $first, after: $after, sortKey: PROCESSED_AT, reverse: true) {\n      edges {\n        cursor\n        node {\n          id\n          orderNumber\n          processedAt\n          financialStatus\n          fulfillmentStatus\n          currentTotalPrice { amount currencyCode }\n          currentSubtotalPrice { amount currencyCode }\n          currentTotalDiscounts { amount currencyCode }\n          discountApplications(first: 5) {\n            edges {\n              node {\n                ... on DiscountCodeApplication {\n                  code\n                  value {\n                    ... on PricingPercentageValue { percentage }\n                    ... on MoneyV2 { amount currencyCode }\n                  }\n                }\n              }\n            }\n          }\n          lineItems(first: 10) {\n            edges {\n              node {\n                title\n                quantity\n                originalTotalPrice { amount currencyCode }\n                variant { id title image { url } }\n              }\n            }\n          }\n          shippingAddress {\n            firstName lastName address1 city country phone\n          }\n        }\n      }\n      pageInfo { hasNextPage endCursor }\n    }\n  }\n}",
+                "variables": "{\n  \"customerAccessToken\": \"{{customer_access_token}}\",\n  \"first\": 20,\n  \"after\": null\n}"
+              }
+            },
+            "url": { "raw": "{{storefront_url}}" },
+            "description": "Spec §5 — Account screen order history sorted newest first. Includes discount breakdown per order."
+          }
+        }
+      ]
+    }
+
+  ]
+}

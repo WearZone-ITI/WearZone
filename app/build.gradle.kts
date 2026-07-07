@@ -48,6 +48,8 @@ android {
         val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
         buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
 
+        val groqApiKey = localProperties.getProperty("GROQ_API_KEY", "").removeSurrounding("\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
         val paymobSecretKey = localProperties.getProperty("PAYMOB_SECRET_KEY", "")
         buildConfigField("String", "PAYMOB_SECRET_KEY", "\"$paymobSecretKey\"")
 
@@ -73,7 +75,15 @@ android {
         dataBinding = true
         viewBinding = true
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/INDEX.LIST"
+        }
+    }
 }
+
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
@@ -81,10 +91,13 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":presentation"))
     implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.hilt.work)
     implementation(libs.firebase.auth.ktx)
 
     //Omar
     implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.androidx.work.runtime.ktx)
+    ksp(libs.androidx.hilt.compiler)
     //Omar
 
     //Ahmed
@@ -136,6 +149,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     // Room
     implementation(libs.androidx.room.runtime)

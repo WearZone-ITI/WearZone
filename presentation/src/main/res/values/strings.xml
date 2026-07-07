@@ -364,6 +364,14 @@
     <!-- Alaa -->
     <!-- Alaa -->
     <!-- Ahmed -->
+    <string name="wearzone_ai">WearZone AI</string>
+    <string name="stylist_subtitle">Your personal stylist</string>
+    <string name="back">Back</string>
+    <string name="clear_chat">Clear Chat</string>
+    <string name="welcome_ai_title">Hi! I\'m WearZone AI ✨</string>
+    <string name="welcome_ai_subtitle">Ask me anything about fashion,\nproducts, or style recommendations.</string>
+    <string name="ask_fashion_hint">Ask about fashion...</string>
+    <string name="send">Send</string>
     <string name="login_successful">Login successful!</string>
     <string name="unexpected_credential_type">Unexpected credential type</string>
     <string name="google_sign_in_failed">Google Sign-In failed</string>

@@ -25,6 +25,7 @@ interface ProductApiService {
     suspend fun getProducts(
         @Query("vendor") vendor: String? = null,
         @Query("collection_id") collectionId: Long? = null,
+        @Query("since_id") sinceId: Long? = null,
         @Query("limit") limit: Int = 250,
         @Query("fields") fields: String = PRODUCT_LIST_FIELDS,
     ): ProductsResponse

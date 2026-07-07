@@ -55,6 +55,8 @@ foundation = "1.11.3"
 playServicesAdsApi = "25.4.0"
 benchmarkTraceprocessor = "1.4.1"
 tvMaterial = "1.1.0"
+hiltWork = "1.4.0"
+workRuntimeKtx = "2.11.2"
 #Hend
 
 [libraries]
@@ -137,6 +139,9 @@ javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "j
 play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 androidx-benchmark-traceprocessor = { group = "androidx.benchmark", name = "benchmark-traceprocessor", version.ref = "benchmarkTraceprocessor" }
 androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 #Hend
 
 [plugins]

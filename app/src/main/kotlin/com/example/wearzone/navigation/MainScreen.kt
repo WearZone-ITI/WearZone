@@ -85,6 +85,7 @@ fun MainScreen(
     onNavigateToProductList: (Long, String) -> Unit,
     onNavigateToBrands: () -> Unit,
     onNavigateToVendorProducts: (String) -> Unit,
+    onNavigateToChat: () -> Unit,
 ) {
     val bottomNavController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -188,6 +189,7 @@ fun MainScreen(
                     onNavigateToBrand = { brandName -> onNavigateToVendorProducts(brandName) },
                     onNavigateToBrands = { onNavigateToBrands() },
                     onNavigateToSearch = { bottomNavController.navigate(Route.SearchRoute) },
+                    onNavigateToChat = onNavigateToChat,
                     onShowSnackbar = { message ->
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(message)

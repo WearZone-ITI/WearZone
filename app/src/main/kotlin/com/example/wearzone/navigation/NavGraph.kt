@@ -334,6 +334,14 @@ fun NavGraph(
 
         // Ahmed
         // Ahmed
+        composable<Route.ChatRoute> {
+            com.example.wearzone.presentation.ai.chat.ChatScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetail = { productId ->
+                    navController.navigate(Route.ProductDetailRoute(productId))
+                }
+            )
+        }
 
         // Omar
         composable<Route.HomeRoute> {
@@ -346,7 +354,8 @@ fun NavGraph(
                 onNavigateToLogin = { navController.navigate(Route.LoginRoute) },
                 onNavigateToRegister = { navController.navigate(Route.RegisterRoute) },
                 onShowSnackbar = { message -> },
-                onNavigateToSearch = {}
+                onNavigateToSearch = {},
+                onNavigateToChat = { navController.navigate(Route.ChatRoute) }
             )
         }
         composable<Route.MainRoute> {
@@ -383,6 +392,9 @@ fun NavGraph(
                 },
                 onNavigateToVendorProducts = { vendorName ->
                     navController.navigate(Route.VendorProductsRoute(vendorName))
+                },
+                onNavigateToChat = {
+                    navController.navigate(Route.ChatRoute)
                 }
             )
         }

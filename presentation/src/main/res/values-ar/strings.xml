@@ -366,7 +366,15 @@
     <string name="add_to_cart">تمت الاضافه الى الكارت</string>
     <string name="failed_to_add_to_cart">فشل الاضافة الى الكارت</string>
     <!--  Hend  -->
-    <!--  Ahmed  -->
+    <!-- Ahmed -->
+    <string name="wearzone_ai">مساعد WearZone</string>
+    <string name="stylist_subtitle">منسق أزيائك الخاص</string>
+    <string name="back">رجوع</string>
+    <string name="clear_chat">مسح المحادثة</string>
+    <string name="welcome_ai_title">أهلاً! أنا مساعد WearZone الذكي ✨</string>
+    <string name="welcome_ai_subtitle">اسألني أي شيء عن الموضة، المنتجات، أو نصائح التنسيق.</string>
+    <string name="ask_fashion_hint">اسأل عن الموضة…</string>
+    <string name="send">إرسال</string>
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="unexpected_credential_type">نوع بيانات الاعتماد غير متوقع</string>
     <string name="google_sign_in_failed">فشل تسجيل الدخول باستخدام Google</string>

@@ -20,6 +20,7 @@ import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
 import com.example.wearzone.data.remote.api.PaymobApiService
 import com.example.wearzone.data.remote.api.ProductApiService
+import com.example.wearzone.data.remote.ai.chat.api.GroqApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -55,6 +56,7 @@ object NetworkModule {
         return Json {
             ignoreUnknownKeys = true
             coerceInputValues = true
+            explicitNulls = false
             encodeDefaults = true
         }
     }
@@ -244,6 +246,22 @@ object NetworkModule {
         @ShopifyRetrofit retrofit: Retrofit,
     ): DiscountApiService {
         return retrofit.create(DiscountApiService::class.java)
+    }
+
+@Provides
+    fun provideGroqApiService(): GroqApiService {
+        val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
+            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        }
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.groq.com/openai/v1/")
+            .client(okHttpClient)
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+            .build()
+        return retrofit.create(GroqApiService::class.java)
     }
 
     @Provides

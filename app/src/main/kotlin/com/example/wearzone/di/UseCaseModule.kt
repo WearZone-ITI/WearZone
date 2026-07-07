@@ -1,6 +1,10 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
@@ -48,6 +52,7 @@ import com.example.wearzone.domain.customer.address.usecase.ReverseGeocodeAddres
 import com.example.wearzone.domain.customer.address.usecase.SearchAddressSuggestionsUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
+import com.example.wearzone.domain.notifications.usecase.GetRandomCouponOfferUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -140,6 +145,11 @@ object UseCaseModule {
     ): CheckEmailVerifiedUseCase = CheckEmailVerifiedUseCase(repository)
 
 
+
+    @Provides
+    fun provideGetRandomCouponOfferUseCase(): GetRandomCouponOfferUseCase {
+        return GetRandomCouponOfferUseCase()
+    }
 
     @Provides
     fun provideLoginWithEmailUseCase(
@@ -401,5 +411,22 @@ object UseCaseModule {
         cancelOrder = cancelOrder,
     )
 
+    @Provides
+    fun provideSendChatMessageUseCase(
+        repository: IAiChatRepository
+    ): SendChatMessageUseCase =
+        SendChatMessageUseCase(repository)
+
+    @Provides
+    fun provideClearChatHistoryUseCase(
+        repository: IAiChatRepository
+    ): ClearChatHistoryUseCase =
+        ClearChatHistoryUseCase(repository)
+
+    @Provides
+    fun provideGetChatHistoryUseCase(
+        repository: IAiChatRepository
+    ): GetChatHistoryUseCase =
+        GetChatHistoryUseCase(repository)
 
 }
