@@ -394,6 +394,8 @@
     <string name="product_detail_error_loading">فشل تحميل المنتج. يرجى المحاولة مرة أخرى.</string>
     <string name="product_detail_retry">إعادة المحاولة</string>
     <string name="product_detail_added_to_cart">تمت الإضافة إلى السلة!</string>
+    <string name="product_detail_select_color">اختر اللون</string>
+    <string name="product_detail_select_color_first">يرجى اختيار اللون أولاً.</string>
     <string name="product_detail_select_size_first">يرجى اختيار المقاس أولاً.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d تقييمات)</string>
     <string name="product_detail_auth_required">يرجى تسجيل الدخول للمتابعة.</string>

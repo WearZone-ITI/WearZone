@@ -7,6 +7,7 @@ import com.example.wearzone.data.local.entity.toDomain
 import com.example.wearzone.data.local.entity.toEntity
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
+import com.example.wearzone.data.remote.dto.DraftOrderCustomer
 import com.example.wearzone.data.remote.dto.DraftOrderLineItem
 import com.example.wearzone.data.remote.dto.DraftOrderPayload
 import com.example.wearzone.data.remote.dto.DraftOrderRequest
@@ -141,15 +142,11 @@ class CartRepositoryImpl @Inject constructor(
             val lineItems = currentItems.mapNotNull { item ->
 
                     val variantId = item.variantId.toLongOrNull()
-
-                    val productId = item.productId.toLongOrNull()
-
-                    if (variantId == null || productId == null) {
-                        return@mapNotNull null
-                    }
+                        ?: return@mapNotNull null
 
                     DraftOrderLineItem(
-                        variantId = variantId, quantity = item.quantity
+                        variantId = variantId,
+                        quantity = item.quantity.coerceIn(1, item.maxQuantity.coerceAtLeast(1))
                     )
                 }
 
@@ -159,7 +156,9 @@ class CartRepositoryImpl @Inject constructor(
 
             val request = DraftOrderRequest(
                 draftOrder = DraftOrderPayload(
-                    lineItems = lineItems, useCustomerDefaultAddress = true
+                    lineItems = lineItems,
+                    customer = DraftOrderCustomer(customerId),
+                    useCustomerDefaultAddress = true
                 )
             )
 

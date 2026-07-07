@@ -13,7 +13,9 @@ import com.example.wearzone.domain.checkout.model.CheckoutPaymentMethod
 import com.example.wearzone.domain.checkout.model.DiscountLookupException
 import com.example.wearzone.domain.checkout.model.EmptyCartCheckoutException
 import com.example.wearzone.domain.checkout.model.EmptyDiscountCodeException
+import com.example.wearzone.domain.checkout.model.InvalidCheckoutAddressException
 import com.example.wearzone.domain.checkout.model.InvalidCheckoutLineItemException
+import com.example.wearzone.domain.checkout.model.CheckoutVariantValidationException
 import com.example.wearzone.domain.checkout.model.InvalidDiscountCodeException
 import com.example.wearzone.domain.checkout.model.MissingCheckoutAddressException
 import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
@@ -362,7 +364,12 @@ class CheckoutViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     isPlacingOrder.value = false
-                    _uiEffect.send(CheckoutUiEffect.ShowMessage(error.toMessageRes()))
+                    val detailedMessage = error.toDetailedCheckoutMessage()
+                    if (detailedMessage != null) {
+                        _uiEffect.send(CheckoutUiEffect.ShowTextMessage(detailedMessage))
+                    } else {
+                        _uiEffect.send(CheckoutUiEffect.ShowMessage(error.toMessageRes()))
+                    }
                 }
         }
     }
@@ -426,13 +433,24 @@ class CheckoutViewModel @Inject constructor(
             else -> R.string.checkout_discount_unavailable
         }
 
+    private fun Throwable.toDetailedCheckoutMessage(): String? =
+        when (this) {
+            is InvalidCheckoutLineItemException,
+            is InvalidCheckoutAddressException,
+            is CheckoutVariantValidationException,
+            is CheckoutOrderCreationException -> message?.takeIf { it.isNotBlank() }
+            else -> null
+        }
+
     private fun Throwable.toMessageRes(): Int =
         when (this) {
             is EmptyCartCheckoutException -> R.string.checkout_error_empty_cart
             is InvalidCheckoutLineItemException -> R.string.checkout_error_invalid_cart
             is ShopifyCustomerIdUnavailableException -> R.string.checkout_error_customer_id_unavailable
             is MissingCheckoutAddressException -> R.string.checkout_error_no_address
+            is InvalidCheckoutAddressException -> R.string.checkout_error_no_address
             is CheckoutCartClearException -> R.string.checkout_error_clear_cart
+            is CheckoutVariantValidationException -> R.string.checkout_error_invalid_cart
             is CheckoutOrderCreationException -> R.string.checkout_error_order_creation
             else -> R.string.checkout_error_generic
         }

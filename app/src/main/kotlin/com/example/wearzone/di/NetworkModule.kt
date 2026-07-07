@@ -39,6 +39,7 @@ object NetworkModule {
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
     private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
+    private const val MAX_LOG_BODY_BYTES = 64_000L
 
     @Provides
     fun provideJson(): Json {
@@ -61,9 +62,50 @@ object NetworkModule {
                 val authenticatedRequest = request.newBuilder()
                     .addHeader("X-Shopify-Access-Token", com.example.wearzone.BuildConfig.SHOPIFY_ADMIN_TOKEN)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "application/json")
                     .build()
-                chain.proceed(authenticatedRequest)
+                val response = chain.proceed(authenticatedRequest)
+                logShopifyResponse(authenticatedRequest, response)
+                response
             }.build()
+    }
+
+
+    private fun logShopifyResponse(
+        request: okhttp3.Request,
+        response: okhttp3.Response,
+    ) {
+        val isOrderCreate = request.method == "POST" && request.url.encodedPath.endsWith("/orders.json")
+        if (!isOrderCreate && response.isSuccessful) return
+
+        val responseBody = try {
+            response.peekBody(MAX_LOG_BODY_BYTES).string()
+        } catch (_: Exception) {
+            "<unable to read response body>"
+        }
+        val requestBody = request.bodyAsText()
+        val tag = if (response.isSuccessful) "ShopifyResponse" else "ShopifyError"
+        val message = buildString {
+            append("HTTP ${response.code} ${request.method} ${request.url}")
+            if (requestBody.isNotBlank()) append("\nRequest body: $requestBody")
+            append("\nResponse body: $responseBody")
+        }
+        if (response.isSuccessful) {
+            Log.d(tag, message)
+        } else {
+            Log.e(tag, message)
+        }
+    }
+
+    private fun okhttp3.Request.bodyAsText(): String {
+        val requestBody = body ?: return ""
+        return try {
+            val buffer = okio.Buffer()
+            requestBody.writeTo(buffer)
+            buffer.readUtf8().take(MAX_LOG_BODY_BYTES.toInt())
+        } catch (_: Exception) {
+            "<unable to read request body>"
+        }
     }
 
     @Provides

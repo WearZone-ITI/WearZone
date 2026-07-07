@@ -12,6 +12,7 @@ data class CheckoutOrderRequest(
 data class CheckoutLineItem(
     val variantId: Long,
     val quantity: Int,
+    val price: Double,
 )
 
 data class CheckoutShippingAddress(
@@ -24,6 +25,8 @@ data class CheckoutShippingAddress(
     val country: String?,
     val zip: String?,
     val phone: String?,
+    val provinceCode: String? = null,
+    val countryCode: String? = null,
 )
 
 data class CheckoutOrder(
@@ -32,6 +35,8 @@ data class CheckoutOrder(
 )
 
 class EmptyCartCheckoutException : Exception()
-class InvalidCheckoutLineItemException : Exception()
-class CheckoutOrderCreationException(cause: Throwable? = null) : Exception(cause)
+class InvalidCheckoutLineItemException(message: String? = null) : Exception(message)
+class InvalidCheckoutAddressException(message: String? = null) : Exception(message)
+class CheckoutVariantValidationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
+class CheckoutOrderCreationException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
 class CheckoutCartClearException : Exception()

@@ -111,6 +111,7 @@ fun ProductDetailScreen(
                 val successState = uiState as ProductDetailUiState.Success
                 ProductDetailBottomBar(
                     quantityInCart = successState.quantityInCart,
+                    addToCartEnabled = !successState.isOutOfStock,
                     onAddToCartClick = { viewModel.handleIntent(ProductDetailUiIntent.OnAddToCartClick) },
                     onWriteReviewClick = { viewModel.handleIntent(ProductDetailUiIntent.OnWriteReviewClick) }
                 )
@@ -303,20 +304,57 @@ private fun ProductDetailContent(
                         rating = state.rating, reviewsCount = state.reviewsCount
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(id = R.string.product_detail_select_size),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SizeSelector(
-                        sizes = state.availableSizes,
-                        selectedSize = state.selectedSize,
-                        onSizeSelected = { onIntent(ProductDetailUiIntent.SelectSize(it)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    if (state.isOutOfStock) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(id = R.string.cart_out_of_stock),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AppTheme.colors.error,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    } else if (state.selectedVariantQuantity in 1..5) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(id = R.string.cart_low_stock_format, state.selectedVariantQuantity),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    if (state.availableSizes.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = stringResource(id = R.string.product_detail_select_size),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SizeSelector(
+                            sizes = state.availableSizes,
+                            selectedSize = state.selectedSize,
+                            onSizeSelected = { onIntent(ProductDetailUiIntent.SelectSize(it)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    if (state.availableColors.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = stringResource(id = R.string.product_detail_select_color),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SizeSelector(
+                            sizes = state.availableColors,
+                            selectedSize = state.selectedColor,
+                            onSizeSelected = { onIntent(ProductDetailUiIntent.SelectColor(it)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
                     HorizontalDivider(
@@ -387,6 +425,7 @@ private fun ProductDetailContent(
 @Composable
 private fun ProductDetailBottomBar(
     quantityInCart: Int,
+    addToCartEnabled: Boolean,
     onAddToCartClick: () -> Unit,
     onWriteReviewClick: () -> Unit
 ) {
@@ -438,6 +477,7 @@ private fun ProductDetailBottomBar(
 
             Button(
                 onClick = onAddToCartClick,
+                enabled = addToCartEnabled,
                 modifier = Modifier.height(48.dp),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(

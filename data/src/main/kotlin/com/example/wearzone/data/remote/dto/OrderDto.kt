@@ -30,13 +30,15 @@ data class ShopifyOrderPayloadDto(
     val customer: ShopifyOrderCustomerDto,
     @SerialName("shipping_address")
     val shippingAddress: ShopifyOrderShippingAddressDto? = null,
+    @SerialName("billing_address")
+    val billingAddress: ShopifyOrderShippingAddressDto? = null,
     @SerialName("discount_codes")
     val discountCodes: List<ShopifyOrderDiscountCodeDto>? = null,
     val note: String? = null,
     @SerialName("financial_status")
     val financialStatus: String = "pending",
     @SerialName("inventory_behaviour")
-    val inventoryBehaviour: String = "decrement_obeying_policy",
+    val inventoryBehaviour: String = "bypass",
 )
 
 @Serializable
@@ -44,6 +46,7 @@ data class ShopifyOrderLineItemRequestDto(
     @SerialName("variant_id")
     val variantId: Long,
     val quantity: Int,
+    val price: String? = null,
 )
 
 @Serializable
@@ -64,6 +67,10 @@ data class ShopifyOrderShippingAddressDto(
     val country: String? = null,
     val zip: String? = null,
     val phone: String? = null,
+    @SerialName("province_code")
+    val provinceCode: String? = null,
+    @SerialName("country_code")
+    val countryCode: String? = null,
 )
 
 @Serializable
@@ -126,6 +133,10 @@ data class OrderAddressDto(
     val country: String? = null,
     val zip: String? = null,
     val phone: String? = null,
+    @SerialName("province_code")
+    val provinceCode: String? = null,
+    @SerialName("country_code")
+    val countryCode: String? = null,
 )
 
 @Serializable
