@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.components.LoginForm
 import com.example.wearzone.presentation.auth.login.components.SocialLoginButtons
+import com.example.wearzone.presentation.common.NetworkStatusBanner
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.AppTypography
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -219,13 +220,17 @@ private fun LoginContent(
             }
 
             if (uiState is LoginUiState.Error) {
-                Spacer(modifier = Modifier.height(8.dp))
                 val isWarning = uiState.message.contains("fill", ignoreCase = true) || uiState.message.contains("empty", ignoreCase = true)
-                Text(
-                    text = uiState.message,
-                    style = AppTypography.bodyMedium,
-                    color = if (isWarning) AppTheme.colors.warning else AppTheme.colors.error
-                )
+                if (isWarning) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.message,
+                        style = AppTypography.bodyMedium,
+                        color = AppTheme.colors.warning
+                    )
+                } else {
+                    NetworkStatusBanner(message = uiState.message)
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

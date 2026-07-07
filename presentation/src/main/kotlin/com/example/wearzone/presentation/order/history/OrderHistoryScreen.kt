@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.OrderListSkeleton
 import com.example.wearzone.presentation.common.PremiumEmptyState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -125,8 +126,8 @@ private fun OrderHistoryContent(
                 onContinueBrowsing = onContinueBrowsing,
             )
 
-            is OrderHistoryUiState.Error -> OrderHistoryErrorContent(
-                messageRes = uiState.messageRes,
+            is OrderHistoryUiState.Error -> NetworkErrorState(
+                modifier = Modifier.fillMaxSize(),
                 onRetry = { onIntent(OrderHistoryUiIntent.OnRetry) },
             )
 

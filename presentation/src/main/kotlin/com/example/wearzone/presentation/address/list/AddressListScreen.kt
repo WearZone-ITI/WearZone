@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.address.list.components.AddressCard
 import com.example.wearzone.presentation.address.list.components.AddressDeleteConfirmationDialog
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.PremiumEmptyState
 import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -65,8 +66,8 @@ fun AddressListScreen(
     onNavigateBack: () -> Unit,
     onNavigateToAddAddress: () -> Unit,
     onNavigateToEditAddress: (Long) -> Unit,
-    onNavigateToLogin: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
     refreshAfterChange: Boolean = false,
     onRefreshAfterChangeConsumed: () -> Unit = {},
     viewModel: AddressListViewModel = hiltViewModel(),
@@ -111,8 +112,11 @@ fun AddressListScreen(
                 is AddressListUiEffect.ShowDeleteConfirmation -> {
                     pendingDeleteAddressId = effect.addressId
                 }
-                is AddressListUiEffect.ShowMessage -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(context.getString(effect.messageRes))
+                is AddressListUiEffect.ShowMessage -> {
+                    val message = context.getString(effect.messageRes)
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(message)
+                    }
                 }
             }
         }
@@ -129,7 +133,6 @@ fun AddressListScreen(
             uiState = uiState,
             onIntent = viewModel::handleIntent,
             onNavigateToLogin = onNavigateToLogin,
-            onNavigateToRegister = onNavigateToRegister,
             onContinueBrowsing = onNavigateBack,
             modifier = Modifier.padding(innerPadding),
         )
@@ -151,7 +154,6 @@ private fun AddressListContent(
     uiState: AddressListUiState,
     onIntent: (AddressListUiIntent) -> Unit,
     onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
     onContinueBrowsing: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -175,8 +177,8 @@ private fun AddressListContent(
                 )
             }
             is AddressListUiState.Error -> {
-                ErrorAddressesContent(
-                    messageRes = uiState.messageRes,
+                NetworkErrorState(
+                    modifier = Modifier.fillMaxSize(),
                     onRetry = { onIntent(AddressListUiIntent.OnRetry) },
                 )
             }
@@ -286,32 +288,6 @@ private fun EmptyAddressesContent(
         buttonText = stringResource(R.string.address_add_new),
         onButtonClick = onAddClicked,
     )
-}
-
-@Composable
-private fun ErrorAddressesContent(
-    messageRes: Int,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(messageRes),
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colors.error,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        AddressPrimaryButton(
-            textRes = R.string.search_retry,
-            onClick = onRetry,
-        )
-    }
 }
 
 @Composable

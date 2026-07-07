@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.PremiumEmptyState
 import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.ColorScheme
@@ -175,30 +176,10 @@ fun CategoriesScreen(
                 }
 
                 is CategoriesUiState.Error -> {
-                    Column(
+                    NetworkErrorState(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                           text = if (state.args != null) {
-                                stringResource(id = state.resId, state.args)
-                            } else {
-                                stringResource(id = state.resId)
-                            },
-                            color = themeColors.error,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Button(
-                            onClick = { viewModel.handleIntent(CategoriesUiIntent.OnRetry) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = themeColors.selected,
-                                contentColor = themeColors.onAccent
-                            )
-                        ) {
-                            Text(text = stringResource(id = R.string.categories_retry_button))
-                        }
-                    }
+                        onRetry = { viewModel.handleIntent(CategoriesUiIntent.OnRetry) }
+                    )
                 }
 
                 is CategoriesUiState.Empty -> {

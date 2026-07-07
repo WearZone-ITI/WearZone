@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -131,44 +132,10 @@ fun ProductDetailScreen(
                 }
 
                 is ProductDetailUiState.Error -> {
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.WifiOff,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(bottom = 16.dp)
-                                .size(120.dp),
-                            tint = AppTheme.colors.error
-                        )
-                        Text(
-                            text = stringResource(id = state.messageRes),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = AppTheme.colors.textSecondary,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Button(
-                            onClick = { viewModel.handleIntent(ProductDetailUiIntent.Retry) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .height(48.dp)
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.product_detail_retry),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
+                    NetworkErrorState(
+                        modifier = Modifier.fillMaxSize(),
+                        onRetry = { viewModel.handleIntent(ProductDetailUiIntent.Retry) }
+                    )
                 }
 
                 is ProductDetailUiState.Success -> {

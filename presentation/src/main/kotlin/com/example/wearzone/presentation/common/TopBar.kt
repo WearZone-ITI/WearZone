@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,9 +57,9 @@ fun TopBar(
                 IconButton(onClick = { onAddToCartClick()
                 }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_cart),
-                        contentDescription = "Cart",
-                        tint = Color.Unspecified,
+                        imageVector = Icons.Outlined.ShoppingCart,
+                        contentDescription = stringResource(id = R.string.content_desc_cart),
+                        tint = AppTheme.colors.textPrimary,
                     )
                 }
                 if (cartItemCount > 0) {

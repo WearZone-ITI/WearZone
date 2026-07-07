@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Brand
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.collections.immutable.ImmutableList
 
@@ -89,14 +90,14 @@ fun BrandsScreen(
                 is BrandsUiState.Loading -> {
                     FullScreenLoader()
                 }
+
                 is BrandsUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        color = AppTheme.colors.error,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.clickable { viewModel.handleIntent(BrandsUiIntent.LoadBrands) }
+                    NetworkErrorState(
+                        modifier = Modifier.fillMaxSize(),
+                        onRetry = { viewModel.handleIntent(BrandsUiIntent.LoadBrands) }
                     )
                 }
+
                 is BrandsUiState.Success -> {
                     BrandsGrid(
                         brands = state.brands,
