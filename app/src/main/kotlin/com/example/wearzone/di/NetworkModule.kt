@@ -247,7 +247,7 @@ object NetworkModule {
         return retrofit.create(DiscountApiService::class.java)
     }
 
-    @Provides
+@Provides
     fun provideGroqApiService(): com.example.wearzone.data.remote.ai.chat.api.GroqApiService {
         val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
             level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
@@ -263,6 +263,7 @@ object NetworkModule {
         return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GroqApiService::class.java)
     }
 
+    @Provides
     fun provideCurrencyApiService(
         @CurrencyRetrofit retrofit: Retrofit,
     ): CurrencyApiService {
