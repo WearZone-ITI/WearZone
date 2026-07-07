@@ -121,9 +121,6 @@ fun CheckoutScreen(
                 is CheckoutUiEffect.ShowMessage -> coroutineScope.launch {
                     snackbarHostState.showSnackbar(context.getString(effect.messageRes))
                 }
-                is CheckoutUiEffect.ShowTextMessage -> coroutineScope.launch {
-                    snackbarHostState.showSnackbar(effect.message)
-                }
             }
         }
     }

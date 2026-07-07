@@ -40,12 +40,10 @@ class CheckoutRepositoryImpl @Inject constructor(
                 remoteDataSource.createOrder(dto).toDomain()
             }.fold(
                 onSuccess = { order ->
-                    Log.d(TAG, "Shopify order created successfully: id=${order.id}, name=${order.name.orEmpty()}")
                     Result.success(order)
                 },
                 onFailure = { error ->
                     val mappedError = error.toOrderCreationException()
-                    Log.e(TAG, mappedError.message ?: "Shopify order create failed", error)
                     Result.failure(mappedError)
                 },
             )
@@ -98,12 +96,7 @@ class CheckoutRepositoryImpl @Inject constructor(
     private fun Double.toDiscountAmountString(): String =
         String.format(Locale.US, "%.2f", this)
 
-    private companion object {
-        const val DISCOUNT_TYPE_PERCENTAGE = "percentage"
-        const val DISCOUNT_TYPE_FIXED_AMOUNT = "fixed_amount"
-        const val ORDER_NOTE_CASH_ON_DELIVERY = "Payment method: Cash on Delivery"
-        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (Paymob)"
-    }
+
     private fun Double.toOrderPriceString(): String =
         String.format(Locale.US, "%.2f", this)
 
@@ -182,9 +175,9 @@ class CheckoutRepositoryImpl @Inject constructor(
     private companion object {
         const val TAG = "ShopifyOrderCreate"
         const val DISCOUNT_TYPE_PERCENTAGE = "percentage"
+        const val MAX_USER_ERROR_BODY_CHARS = 500
         const val DISCOUNT_TYPE_FIXED_AMOUNT = "fixed_amount"
         const val ORDER_NOTE_CASH_ON_DELIVERY = "Payment method: Cash on Delivery"
-        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (PayMock)"
-        const val MAX_USER_ERROR_BODY_CHARS = 500
+        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (Paymob)"
     }
 }
