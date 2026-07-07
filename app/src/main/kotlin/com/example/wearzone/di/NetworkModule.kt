@@ -39,13 +39,12 @@ object NetworkModule {
 
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOB_BASE_URL = "https://accept.paymob.com/"
+    private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
+    private const val MAX_LOG_BODY_BYTES = 64_000L
 
     @Provides
     @Named("secretKey")
     fun providePaymobSecretKey(): String = BuildConfig.PAYMOB_SECRET_KEY
-    private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
-    private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
-    private const val MAX_LOG_BODY_BYTES = 64_000L
 
     @Provides
     fun provideJson(): Json {
