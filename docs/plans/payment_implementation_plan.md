@@ -1,47 +1,48 @@
-# Payment Feature Implementation Plan (with PayMock Gateway)
+# Payment Feature Implementation Plan (Paymob SDK Integration)
 
 ## Goal Description
-Implement a **Native Payment** feature using **PayMock Gateway** (https://github.com/PayMock/gateway) as the external payment handler. The app will collect card details, process payment via PayMock, and then create a "Paid" order in Shopify using the Admin REST API with the PayMock transaction reference.
+Implement a production-grade payment flow using the **Paymob SDK**. The app integrates the Paymob mobile SDK to handle secure credit card payments. Upon successful payment verification, the app automatically creates a "Paid" order in Shopify and clears the local cart.
 
-## User Review Required
-- **PayMock Endpoint**: I will assume PayMock is running at a configurable base URL (e.g., `http://localhost:8080/api/v1` for local dev).
-- **API Key**: A placeholder or environment-provided API key for PayMock will be needed.
-- **Shopify Order Status**: Once PayMock approves the payment, I will set the Shopify order's `financial_status` to `paid` and include the PayMock `payment_id` in the order's `note` or `transaction` details.
+## Architecture & Flow
+1. **Payment Intention**: App calls `CreatePaymentIntentionUseCase` to get a `clientSecret` from the backend/BFF.
+2. **SDK Launch**: The `CheckoutScreen` uses `PaymobSdkLauncher` to open the Paymob UI with the `clientSecret`.
+3. **Result Handling**: `PaymobSdkListener` captures the transaction result (Success/Failure).
+4. **Order Automation**: On success, `CheckoutViewModel` automatically triggers `PlaceOrderUseCase` with the `transactionId`.
+5. **UI Feedback**: A polished loading overlay displays "Securing Payment..." followed by "Placing Order..." with branded icons.
 
-## Proposed Changes
+## Implemented Components
 
 ### Domain Layer
-- **[CheckoutPaymentMethod](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/model/CheckoutPaymentMethod.kt)**: Add `CreditCard` to the enum.
-- **[NEW] [CardInfo](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/model/CardInfo.kt)**: Model for card details.
-- **[NEW] [ProcessPayMockPaymentUseCase](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/usecase/ProcessPayMockPaymentUseCase.kt)**: Use case to call PayMock API and get a transaction ID.
+- **[CreatePaymentIntentionUseCase.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/usecase/CreatePaymentIntentionUseCase.kt)**: Requests a payment intent from Paymob.
+- **[PlaceOrderUseCase.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/usecase/PlaceOrderUseCase.kt)**: Creates the Shopify order and clears the Room cart.
+- **[PaymobPayment.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/domain/src/main/kotlin/com/example/wearzone/domain/checkout/model/PaymobPayment.kt)**: Domain models for intentions and responses.
 
 ### Data Layer
-- **[NEW] [PayMockApiService](file:///C:/Users/user/AndroidStudioProjects/WearZone/data/src/main/kotlin/com/example/wearzone/data/remote/api/PayMockApiService.kt)**: Retrofit interface for PayMock (`POST /payments`).
-- **[CheckoutRepositoryImpl](file:///C:/Users/user/AndroidStudioProjects/WearZone/data/src/main/kotlin/com/example/wearzone/data/repository/CheckoutRepositoryImpl.kt)**: Update `createOrder` to accept a `paymentId` and set `financial_status: "paid"`.
+- **[PaymobApiService.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/data/src/main/kotlin/com/example/wearzone/data/remote/api/PaymobApiService.kt)**: Retrofit service for Paymob communication.
+- **[PaymobRepositoryImpl.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/data/src/main/kotlin/com/example/wearzone/data/repository/PaymobRepositoryImpl.kt)**: Handles the API calls for payment intentions.
+- **[PaymobMappers.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/data/src/main/kotlin/com/example/wearzone/data/remote/mapper/PaymobMappers.kt)**: Maps SDK and API DTOs to domain models.
 
 ### Presentation Layer
-- **[CheckoutPaymentMethodUi](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutDeliveryAddressUiModel.kt)**: Add `CreditCard` and translations.
-- **[CheckoutUiIntent](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutUiIntent.kt)**: Add intents for payment method selection and card data input.
-- **[CheckoutViewModel](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutViewModel.kt)**: Coordinate PayMock payment call *before* creating the Shopify order.
-- **[NEW] [CreditCardForm](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/components/CreditCardForm.kt)**: Native UI for card details.
-- **[CheckoutScreen](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutScreen.kt)**: Integrate the new payment method and form.
+- **[CheckoutViewModel.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutViewModel.kt)**: Orchestrates the flow, manages `isPlacingOrder` and `isProcessingPayment` states.
+- **[CheckoutScreen.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/CheckoutScreen.kt)**:
+    - Integrates `PaymobSdkLauncher`.
+    - Features the **Polished Loading Overlay** with dynamic icons (Lock/Bag).
+    - Features the **Enhanced Confirmation Dialog** (95% width).
+- **[PaymobSdkLauncher.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/PaymobSdkLauncher.kt)**: Helper to encapsulate SDK initialization and launch logic.
+- **[PaymentMethodSelector.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/kotlin/com/example/wearzone/presentation/checkout/components/PaymentMethodSelector.kt)**: UI for selecting between COD and Credit Card.
 
-### Localization
-- **[strings.xml](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/res/values/strings.xml)**: Add strings for PayMock, Card details, and payment statuses.
-- **[strings.xml (Arabic)](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/res/values-ar/strings.xml)**: Arabic translations for all checkout/payment strings.
-
-### Testing
-- **[CheckoutViewModelTest](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/test/java/com/example/presentation/checkout/CheckoutViewModelTest.kt)**: Verify the flow: PayMock Payment -> Shopify Order Creation.
+### Resources
+- **[strings.xml](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/main/res/values/strings.xml)**: Localized strings for "Securing Payment", "Placing Order", etc. (EN/AR).
 
 ## Verification Plan
 
 ### Automated Tests
-- Run updated ViewModel tests.
-  ```powershell
-  ./gradlew :presentation:testDebugUnitTest --tests "com.example.presentation.checkout.CheckoutViewModelTest"
-  ```
+- **[CheckoutViewModelTest.kt](file:///C:/Users/user/AndroidStudioProjects/WearZone/presentation/src/test/java/com/example/presentation/checkout/CheckoutViewModelTest.kt)**: Verifies state transitions and order automation logic.
 
 ### Manual Verification
-- Test "Credit Card" flow: enter mock card data, verify PayMock API call, verify Shopify order created with `financial_status: paid`.
-- Test "Cash on Delivery" flow: verify Shopify order created with `financial_status: pending`.
-- Verify full localization in Arabic.
+- **E2E Flow**: 
+    1. Select "Credit Card".
+    2. Click "Place Order" (verify large dialog).
+    3. Complete Paymob flow (verify "Securing Payment...").
+    4. Observe automatic return and "Placing Order..." overlay.
+    5. Verify navigation to Order History.

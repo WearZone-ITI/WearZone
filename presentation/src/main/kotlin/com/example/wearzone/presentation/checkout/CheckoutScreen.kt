@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,21 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,13 +37,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.checkout.components.CheckoutOrderSummaryCard
-import com.example.wearzone.presentation.checkout.components.CreditCardForm
 import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
-import com.example.wearzone.presentation.checkout.components.PaymentMethodCard
+import com.example.wearzone.presentation.checkout.components.PaymentMethodSelector
 import com.example.wearzone.presentation.checkout.components.PromoCodeCard
 import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
+import com.paymob.paymob_sdk.ui.PaymobSdkListener
 
 @Composable
 fun CheckoutScreen(
@@ -89,6 +77,46 @@ fun CheckoutScreen(
                 CheckoutUiEffect.NavigateToOrderHistory -> onNavigateToOrderHistory()
                 CheckoutUiEffect.NavigateToAddressList -> onNavigateToAddressList()
                 CheckoutUiEffect.NavigateToAddAddress -> onNavigateToAddAddress()
+                is CheckoutUiEffect.NavigateToPaymobSdk -> {
+                    launchPaymobSdk(
+                        context = context ,
+                        clientSecret = effect.clientSecret,
+                        paymobSdkListener = object : PaymobSdkListener {
+
+                            override fun onSuccess(payResponse: HashMap<String, String?>) {
+                                val transactionId = payResponse["id"] ?: payResponse["transaction_id"] ?: payResponse["txn_id"]
+                                viewModel.handleIntent(
+                                    CheckoutUiIntent.OnPaymobPaymentResult(
+                                        isSuccess = true,
+                                        transactionId = transactionId
+                                    )
+                                )
+                            }
+
+                            override fun onFailure(msg: String?) {
+                                viewModel.handleIntent(
+                                    CheckoutUiIntent.OnPaymobPaymentResult(
+                                        isSuccess = false,
+                                        transactionId = null,
+                                        errorMessage = msg
+                                    )
+                                )
+                            }
+
+                            override fun onPending() {
+                                viewModel.handleIntent(
+                                    CheckoutUiIntent.OnPaymobPaymentResult(
+                                        isSuccess = false,
+                                        transactionId = null,
+                                        errorMessage = "Payment Pending"
+                                    )
+                                )
+                            }
+
+                        }
+                    )
+                }
+
                 CheckoutUiEffect.ShowConfirmOrderDialog -> showConfirmDialog = true
                 is CheckoutUiEffect.ShowMessage -> coroutineScope.launch {
                     snackbarHostState.showSnackbar(context.getString(effect.messageRes))
@@ -189,9 +217,64 @@ private fun CheckoutContent(
                     messageRes = uiState.messageRes,
                     onRetry = { onIntent(CheckoutUiIntent.OnRetry) },
                 )
-                is CheckoutUiState.Content -> CheckoutLoadedContent(
-                    state = uiState,
-                    onIntent = onIntent,
+                is CheckoutUiState.Content -> {
+                    CheckoutLoadedContent(
+                        state = uiState,
+                        onIntent = onIntent,
+                    )
+
+                    if (uiState.isProcessingPayment || uiState.isPlacingOrder) {
+                        PaymentLoadingOverlay(
+                            isPlacingOrder = uiState.isPlacingOrder
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaymentLoadingOverlay(isPlacingOrder: Boolean = false) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = AppTheme.colors.surface),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .height(260.dp)
+                .padding(horizontal = 16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = AppTheme.colors.selected,
+                    modifier = Modifier.size(48.dp),
+                    strokeWidth = 4.dp
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(
+                        if (isPlacingOrder) R.string.checkout_placing_order
+                        else R.string.checkout_securing_payment
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppTheme.colors.textPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.checkout_do_not_close),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AppTheme.colors.textSecondary
                 )
             }
         }
@@ -229,30 +312,12 @@ private fun CheckoutLoadedContent(
             )
         }
         item {
-            PaymentMethodCard(
-                paymentMethodLabelRes = state.paymentMethod.labelRes(),
-                paymentMethodDescriptionRes = state.paymentMethod.descriptionRes(),
-                onClick = {
-                    val next = if (state.paymentMethod == CheckoutPaymentMethodUi.CashOnDelivery) {
-                        CheckoutPaymentMethodUi.CreditCard
-                    } else {
-                        CheckoutPaymentMethodUi.CashOnDelivery
-                    }
-                    onIntent(CheckoutUiIntent.OnPaymentMethodSelected(next))
-                }
+            PaymentMethodSelector(
+                selectedMethod = state.paymentMethod,
+                onMethodSelected = { onIntent(CheckoutUiIntent.OnPaymentMethodSelected(it)) }
             )
         }
-        if (state.paymentMethod == CheckoutPaymentMethodUi.CreditCard) {
-            item {
-                CreditCardForm(
-                    cardInfo = state.cardInfo,
-                    onNumberChange = { onIntent(CheckoutUiIntent.OnCardNumberChanged(it)) },
-                    onNameChange = { first, last -> onIntent(CheckoutUiIntent.OnCardHolderNameChanged(first, last)) },
-                    onExpiryChange = { month, year -> onIntent(CheckoutUiIntent.OnCardExpiryChanged(month, year)) },
-                    onCvvChange = { onIntent(CheckoutUiIntent.OnCardCvvChanged(it)) },
-                )
-            }
-        }
+
         item {
             PromoCodeCard(
                 promoCodeText = state.promoCodeText,
@@ -421,6 +486,7 @@ private fun ConfirmOrderDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxWidth(0.95f),
         title = { Text(text = stringResource(R.string.checkout_confirm_title)) },
         text = { Text(text = stringResource(R.string.checkout_confirm_message)) },
         confirmButton = {
