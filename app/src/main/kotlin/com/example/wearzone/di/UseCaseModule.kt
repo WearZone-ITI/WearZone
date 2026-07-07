@@ -2,7 +2,9 @@ package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
+import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
+import com.example.wearzone.domain.account.usecase.ConvertPriceUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderDetailsUseCase
 import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.account.usecase.OrderHistoryUseCases
@@ -377,6 +379,12 @@ object UseCaseModule {
     fun provideCancelOrderUseCase(
         repository: IOrderHistoryRepository,
     ): CancelOrderUseCase = CancelOrderUseCase(repository)
+
+    @Provides
+    fun provideConvertPriceUseCase(
+        settingsRepository: ISettingsRepository,
+        currencyRepository: ICurrencyRepository
+    ): ConvertPriceUseCase = ConvertPriceUseCase(settingsRepository, currencyRepository)
 
     @Provides
     fun provideOrderHistoryUseCases(

@@ -9,8 +9,8 @@ sealed interface CartUiState {
     data class Content(
         val items: ImmutableList<CartItemUiModel>,
         val itemCount: Int,
-        val subtotal: String,
-        val total: String,
+        val subtotalAmount: Double,
+        val totalAmount: Double,
     ) : CartUiState
     data class Error(val message: String) : CartUiState
 }
@@ -20,7 +20,7 @@ data class CartItemUiModel(
     val productId: String,
     val title: String,
     val vendor: String,
-    val price: String,
+    val basePriceEgp: Double,
     val quantity: Int,
     val maxQuantity: Int,
     val imageUrl: String?,

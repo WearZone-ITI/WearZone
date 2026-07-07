@@ -25,7 +25,7 @@ data class ProductSearchUiModel(
     val id: String,
     val title: String,
     val vendor: String,
-    val formattedPrice: String,
+    val basePriceEgp: Double,
     val imageUrl: String?,
 )
 

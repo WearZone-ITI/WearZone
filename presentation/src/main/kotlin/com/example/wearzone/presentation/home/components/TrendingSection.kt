@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -31,13 +30,12 @@ fun TrendingSection(products: List<Product>, onProductClick: (String) -> Unit, o
         ) {
             Text(
                 text = stringResource(id = R.string.home_trending_now),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 color = AppTheme.colors.textPrimary,
             )
             Text(
                 text = stringResource(id = R.string.home_see_all),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = AppTheme.colors.textSecondary,
                 modifier = Modifier.clickable { }
             )

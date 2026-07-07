@@ -12,7 +12,7 @@ sealed interface ProductDetailUiState {
         val id: String,
         val title: String,
         val vendor: String,
-        val price: String,
+        val basePriceEgp: Double,
         val descriptionHtml: String,
         val images: ImmutableList<String>,
         val availableSizes: ImmutableList<String>,

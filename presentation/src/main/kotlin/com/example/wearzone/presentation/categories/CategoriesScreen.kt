@@ -19,7 +19,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.PremiumEmptyState
+import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -137,9 +138,7 @@ fun CategoriesScreen(
 
             when (val state = uiState) {
                 is CategoriesUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = themeColors.textPrimary)
-                    }
+                    ProductGridSkeleton(modifier = Modifier.fillMaxSize())
                 }
 
                 is CategoriesUiState.Success -> {
@@ -194,7 +193,7 @@ fun CategoriesScreen(
                             onClick = { viewModel.handleIntent(CategoriesUiIntent.OnRetry) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = themeColors.selected,
-                                contentColor = if (MaterialTheme.colorScheme.isLight()) Color.White else Color.Black
+                                contentColor = themeColors.onAccent
                             )
                         ) {
                             Text(text = stringResource(id = R.string.categories_retry_button))
@@ -203,22 +202,18 @@ fun CategoriesScreen(
                 }
 
                 is CategoriesUiState.Empty -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = if (state.searchQuery.isNotBlank()) {
-                                stringResource(id = R.string.categories_no_results_found, state.searchQuery)
-                            } else {
-                                stringResource(id = R.string.categories_no_data_available)
-                            },
-                            color = themeColors.textSecondary,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    PremiumEmptyState(
+                        lottieResId = com.example.presentation.R.raw.no_search_found,
+                        title = if (state.searchQuery.isNotBlank()) {
+                            stringResource(id = R.string.categories_no_results_found, state.searchQuery)
+                        } else {
+                            stringResource(id = R.string.categories_no_data_available)
+                        },
+                        description = "",
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }
     }
 }
-
-@Composable
-private fun ColorScheme.isLight() = this.background.luminance() > 0.5f

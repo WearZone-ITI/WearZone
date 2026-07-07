@@ -153,7 +153,14 @@ fun NavGraph(
                 onNavigateToRegister = {
                     navigateToRegisterForProtectedRoute(Route.CheckoutRoute)
                 }, 
-                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) }
+                onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) },
+                onContinueShopping = {
+                    navController.navigate(Route.MainRoute) {
+                        popUpTo<Route.MainRoute> {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 

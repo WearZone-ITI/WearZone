@@ -12,7 +12,9 @@ import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
 import com.example.wearzone.data.repository.CheckoutRepositoryImpl
+import com.example.wearzone.data.repository.CurrencyRepositoryImpl
 import com.example.wearzone.data.repository.DiscountRepositoryImpl
+import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.data.repository.PaymentRepositoryImpl
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
@@ -38,6 +40,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -98,5 +101,8 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository
-}
 
+    @Binds
+    @Singleton
+    abstract fun bindCurrencyRepository(impl: CurrencyRepositoryImpl): ICurrencyRepository
+}

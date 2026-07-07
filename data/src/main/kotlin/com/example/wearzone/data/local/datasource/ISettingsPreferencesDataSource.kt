@@ -9,6 +9,7 @@ interface ISettingsPreferencesDataSource {
     suspend fun setThemeMode(themeMode: ThemeMode)
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setLanguage(languageCode: String)
+    suspend fun setCurrency(currencyCode: String)
     suspend fun setCustomerId(id: Long?)
     suspend fun setDraftOrderId(id: Long?)
     fun observeDraftOrderId(): Flow<Long?>

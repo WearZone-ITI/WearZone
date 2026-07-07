@@ -4,4 +4,5 @@ data class SettingsPreferences(
     val themeMode: ThemeMode = ThemeMode.SystemDefault,
     val notificationsEnabled: Boolean = true,
     val languageCode: String = "en",
+    val selectedCurrency: String = "EGP",
 )

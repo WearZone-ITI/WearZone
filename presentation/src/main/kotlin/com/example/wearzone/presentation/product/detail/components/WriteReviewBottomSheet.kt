@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
 
+import com.example.wearzone.presentation.common.theme.AppTheme
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteReviewBottomSheet(
@@ -86,7 +88,7 @@ fun WriteReviewBottomSheet(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = stringResource(id = R.string.product_detail_review_stars_desc, i),
-                            tint = if (isSelected) Color(0xFFD4AF37) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                            tint = if (isSelected) AppTheme.colors.accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                             modifier = Modifier.size(36.dp)
                         )
                     }

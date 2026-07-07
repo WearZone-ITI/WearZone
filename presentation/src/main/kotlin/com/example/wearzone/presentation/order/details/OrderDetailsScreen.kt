@@ -69,6 +69,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.OrderStatusTone
 import kotlinx.coroutines.launch
@@ -480,7 +481,7 @@ private fun OrderItemRow(item: OrderDetailsItemUiModel) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = item.formattedPrice,
+                        text = formatPrice(item.basePriceEgp * item.quantity),
                         style = MaterialTheme.typography.titleMedium,
                         color = AppTheme.colors.textPrimary,
                         fontWeight = FontWeight.Bold,
@@ -563,16 +564,16 @@ private fun SummaryCard(order: OrderDetailsUiModel) {
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(18.dp))
-        SummaryRow(R.string.order_details_subtotal, order.subtotal)
-        SummaryRow(R.string.order_details_shipping, order.shipping)
-        SummaryRow(R.string.order_details_tax, order.tax)
+        SummaryRow(R.string.order_details_subtotal, formatPrice(order.subtotalAmount))
+        SummaryRow(R.string.order_details_shipping, formatPrice(order.shippingAmount))
+        SummaryRow(R.string.order_details_tax, formatPrice(order.taxAmount))
         HorizontalDivider(
             color = AppTheme.colors.divider,
             modifier = Modifier.padding(vertical = 14.dp),
         )
         SummaryRow(
             labelRes = R.string.cart_total,
-            value = order.total,
+            value = formatPrice(order.totalAmount),
             isTotal = true,
         )
     }

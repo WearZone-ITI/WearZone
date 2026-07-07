@@ -33,6 +33,7 @@ class SettingsPreferencesDataSourceImpl(
                     themeMode = preferences[THEME_MODE_KEY].toThemeMode(),
                     notificationsEnabled = preferences[NOTIFICATIONS_ENABLED_KEY] ?: true,
                     languageCode = preferences[LANGUAGE_CODE_KEY] ?: DEFAULT_LANGUAGE_CODE,
+                    selectedCurrency = preferences[SELECTED_CURRENCY_KEY] ?: DEFAULT_CURRENCY_CODE,
                 )
             }
 
@@ -51,6 +52,12 @@ class SettingsPreferencesDataSourceImpl(
     override suspend fun setLanguage(languageCode: String) {
         dataStore.edit { preferences ->
             preferences[LANGUAGE_CODE_KEY] = languageCode
+        }
+    }
+
+    override suspend fun setCurrency(currencyCode: String) {
+        dataStore.edit { preferences ->
+            preferences[SELECTED_CURRENCY_KEY] = currencyCode
         }
     }
 
@@ -84,9 +91,11 @@ class SettingsPreferencesDataSourceImpl(
 
     private companion object {
         const val DEFAULT_LANGUAGE_CODE = "en"
+        const val DEFAULT_CURRENCY_CODE = "EGP"
         val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         val NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("notifications_enabled")
         val LANGUAGE_CODE_KEY = stringPreferencesKey("language_code")
+        val SELECTED_CURRENCY_KEY = stringPreferencesKey("selected_currency")
         val CUSTOMER_ID_KEY = longPreferencesKey("customer_id")
         val DRAFT_ORDER_ID_KEY = longPreferencesKey("draft_order_id")
     }

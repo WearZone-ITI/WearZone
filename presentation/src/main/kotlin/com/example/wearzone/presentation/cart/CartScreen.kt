@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.FullScreenLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
@@ -59,6 +58,7 @@ fun CartScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToCheckout: () -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -86,6 +86,7 @@ fun CartScreen(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToRegister = onNavigateToRegister,
         onIntent = viewModel::handleIntent,
+        onContinueShopping = onContinueShopping,
     )
 
     pendingRemoveVariantId?.let { variantId ->
@@ -135,6 +136,7 @@ private fun CartContent(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onIntent: (CartUiIntent) -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     val content = uiState as? CartUiState.Content
 
@@ -145,8 +147,7 @@ private fun CartContent(
                     Text(
                         text = stringResource(id = R.string.app_name),
                         color = AppTheme.colors.textPrimary,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -179,8 +180,8 @@ private fun CartContent(
         bottomBar = {
             if (content != null) {
                 PriceSummaryBar(
-                    subtotal = content.subtotal,
-                    total = content.total,
+                    subtotalAmount = content.subtotalAmount,
+                    totalAmount = content.totalAmount,
                     onCheckout = { onIntent(CartUiIntent.OnCheckoutClicked) },
                 )
             }
@@ -195,16 +196,14 @@ private fun CartContent(
                 .background(AppTheme.colors.background),
         ) {
             when (uiState) {
-                CartUiState.Loading -> CircularProgressIndicator(
-                    color = AppTheme.colors.selected,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                CartUiState.Loading -> FullScreenLoader(modifier = Modifier.align(Alignment.Center))
                 CartUiState.LoginRequired -> SignInRequiredDialog(
                     messageRes = R.string.sign_in_required_cart_message,
                     onSignInRegister = onNavigateToLogin,
                     onContinueBrowsing = onNavigateBack,
                 )
                 CartUiState.Empty -> EmptyCartContent(
+                    onContinueShopping = onContinueShopping,
                     modifier = Modifier.padding(horizontal = 32.dp),
                 )
                 is CartUiState.Error -> CartErrorContent(
@@ -243,7 +242,7 @@ private fun CartItemsContent(
                 Text(
                     text = stringResource(id = R.string.cart_item_count_format, state.itemCount),
                     color = AppTheme.colors.textSecondary,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             }
         }
