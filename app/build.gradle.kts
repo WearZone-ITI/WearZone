@@ -39,8 +39,8 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
-        val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "\"\""
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", googleClientId)
+        val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", "")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleClientId\"")
 
         val storefrontToken = localProperties.getProperty("SHOPIFY_STOREFRONT_TOKEN", "")
         buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"$storefrontToken\"")

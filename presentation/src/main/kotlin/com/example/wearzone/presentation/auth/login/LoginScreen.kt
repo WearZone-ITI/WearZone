@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,19 +38,18 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.presentation.BuildConfig
 import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.components.LoginForm
 import com.example.wearzone.presentation.auth.login.components.SocialLoginButtons
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.AppTypography
-import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
+    googleWebClientId: String,
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToEmailVerification: (String) -> Unit,
@@ -68,6 +66,7 @@ fun LoginScreen(
     val loginSuccessful = stringResource(R.string.login_successful)
     val unexpectedCredential = stringResource(R.string.unexpected_credential_type)
     val googleFailed = stringResource(R.string.google_sign_in_failed)
+    val googleNotConfigured = stringResource(R.string.google_sign_in_not_configured)
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
@@ -81,9 +80,14 @@ fun LoginScreen(
                 }
                 is LoginUiEffect.LaunchGoogleSignIn -> {
                     try {
+                        if (googleWebClientId.isBlank()) {
+                            snackbarHostState.showSnackbar(googleNotConfigured)
+                            return@collect
+                        }
+
                         val googleIdOption = GetGoogleIdOption.Builder()
                             .setFilterByAuthorizedAccounts(false)
-                            .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                            .setServerClientId(googleWebClientId)
                             .setAutoSelectEnabled(true)
                             .build()
 
