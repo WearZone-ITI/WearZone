@@ -29,6 +29,10 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         You are the WearZone AI shopping assistant.
         You must answer using ONLY the products explicitly provided in CATALOG_CONTEXT.
         Never invent product names, IDs, prices, brands, images, sizes, colors, variants, or availability.
+        Respect the retrieval labels exactly: use "Exact matches" only for products listed under Exact matches, and use "Closest alternatives" only for fallback products.
+        If CATALOG_CONTEXT says "No exact matches found", say that clearly before any alternatives.
+        Never claim a fallback item matches the full query.
+        Never suggest products that violate hard filters such as price, gender, product type, color, or material.
         If CATALOG_CONTEXT says a field is unavailable, say it is unavailable.
         If there are no matching products, say that clearly and do not suggest fake products.
         Keep responses concise, practical, and shopping-focused.
@@ -68,8 +72,8 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         val request = GroqRequest(
             model = "llama-3.1-8b-instant",
             messages = listOf(GroqMessage(role = "system", content = systemPrompt)) +
-                historyMessages +
-                GroqMessage(role = "user", content = groundedUserMessage),
+                    historyMessages +
+                    GroqMessage(role = "user", content = groundedUserMessage),
             tools = null,
         )
 

@@ -4,13 +4,13 @@ import com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
 import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatProductCard
 import com.example.wearzone.domain.ai.chat.model.ChatRole
+import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.model.ProductVariant
 import com.example.wearzone.domain.product.repository.IProductRepository
-import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,34 +94,29 @@ class AiChatRepositoryImpl @Inject constructor(
         userQuery: String,
         historySnapshot: List<ChatMessage>,
     ): CatalogRetrieval {
-        val intent = detectIntent(userQuery, historySnapshot)
+        val criteria = parseSearchCriteria(userQuery)
+        val intent = detectIntent(criteria, historySnapshot)
         return when (intent) {
-            ChatShoppingIntent.PRODUCT_SEARCH -> retrieveProductSearch(userQuery)
+            ChatShoppingIntent.PRODUCT_SEARCH -> retrieveProductSearch(criteria)
             ChatShoppingIntent.PRODUCT_COMPARISON -> retrieveProductComparison(userQuery, historySnapshot)
-            ChatShoppingIntent.OUTFIT_RECOMMENDATION -> retrieveOutfitRecommendation(userQuery)
+            ChatShoppingIntent.OUTFIT_RECOMMENDATION -> retrieveOutfitRecommendation(criteria)
             ChatShoppingIntent.GENERAL_HELP -> CatalogRetrieval(
                 intent = intent,
                 context = "No catalog products were retrieved because the user did not ask for product search, comparison, or outfit recommendation.",
                 cards = emptyList(),
-                fallbackResponse = "I can help you search WearZone products, compare real items, or build an outfit from the current catalog. Try asking for a category, color, brand, or style.",
+                fallbackResponse = "I can help you search WearZone products, compare real items, or build an outfit from the current catalog. Try asking for a category, color, brand, style, or budget.",
             )
         }
     }
 
-    private suspend fun retrieveProductSearch(userQuery: String): CatalogRetrieval {
+    private suspend fun retrieveProductSearch(criteria: ProductSearchCriteria): CatalogRetrieval {
         val allProducts = loadProductsOrThrow()
-        val ranked = rankProductsForQuery(userQuery, allProducts).take(MAX_CHAT_PRODUCTS)
-        val cards = ranked.map { (product, reason) -> product.toChatCard(reason) }
-        val context = if (cards.isEmpty()) {
-            "No real WearZone catalog products matched the query: \"$userQuery\". Do not invent alternatives."
-        } else {
-            buildProductCardsContext(cards)
-        }
-        val fallback = if (cards.isEmpty()) {
-            "I checked the real WearZone catalog, but I couldn't find products matching \"$userQuery\". No fake items from me — the catalog said no."
-        } else {
-            buildSearchFallback(cards)
-        }
+        val search = searchCatalog(criteria, allProducts)
+        val exactCards = search.exactMatches.map { it.product.toChatCard(it.reason) }
+        val fallbackCards = search.closestAlternatives.map { it.product.toChatCard(it.reason) }
+        val cards = (exactCards + fallbackCards).distinctBy { it.productId }.take(MAX_CHAT_PRODUCTS)
+        val context = buildSearchContext(criteria, exactCards, fallbackCards, search.noExactReason)
+        val fallback = buildSearchFallback(criteria, exactCards, fallbackCards, search.noExactReason)
         return CatalogRetrieval(ChatShoppingIntent.PRODUCT_SEARCH, context, cards, fallback)
     }
 
@@ -130,7 +125,7 @@ class AiChatRepositoryImpl @Inject constructor(
         historySnapshot: List<ChatMessage>,
     ): CatalogRetrieval {
         val ids = extractRequestedProductIds(userQuery)
-            .ifEmpty { recentProductIdsFromHistory(historySnapshot) }
+            .ifEmpty { recentProductIdsFromHistory(historySnapshot, userQuery) }
             .distinct()
             .take(MAX_COMPARE_PRODUCTS)
 
@@ -170,13 +165,13 @@ class AiChatRepositoryImpl @Inject constructor(
         )
     }
 
-    private suspend fun retrieveOutfitRecommendation(userQuery: String): CatalogRetrieval {
+    private suspend fun retrieveOutfitRecommendation(criteria: ProductSearchCriteria): CatalogRetrieval {
         val allProducts = loadProductsOrThrow()
-        val outfit = buildOutfit(userQuery, allProducts)
-        val cards = outfit.selected.map { (slot, product) ->
-            product.toChatCard("${slot.displayName}: ${product.bestReasonFor(userQuery)}")
+        val outfit = buildOutfit(criteria, allProducts)
+        val cards = outfit.selected.map { selected ->
+            selected.product.toChatCard(selected.reason)
         }
-        val context = buildOutfitContext(userQuery, outfit, cards)
+        val context = buildOutfitContext(criteria, outfit, cards)
         return CatalogRetrieval(
             intent = ChatShoppingIntent.OUTFIT_RECOMMENDATION,
             context = context,
@@ -185,36 +180,120 @@ class AiChatRepositoryImpl @Inject constructor(
         )
     }
 
+    private fun parseSearchCriteria(rawQuery: String): ProductSearchCriteria {
+        val normalized = rawQuery.normalizedForSearch()
+        val kinds = inferKinds(normalized)
+        val colors = COLOR_KEYWORDS.filterTo(mutableSetOf()) { normalized.containsPhrase(it) }
+        val materials = MATERIAL_KEYWORDS.filterTo(mutableSetOf()) { normalized.containsPhrase(it) }
+        val styleTerms = STYLE_KEYWORDS.filterTo(mutableSetOf()) { normalized.containsPhrase(it) }
+        val priceRange = parsePriceRange(normalized)
+        val gender = when {
+            normalized.containsAnyPhrase(WOMEN_QUERY_KEYWORDS) -> ProductGender.WOMEN
+            normalized.containsAnyPhrase(MEN_QUERY_KEYWORDS) -> ProductGender.MEN
+            normalized.containsAnyPhrase(KIDS_QUERY_KEYWORDS) -> ProductGender.KIDS
+            normalized.containsAnyPhrase(UNISEX_KEYWORDS) -> ProductGender.UNISEX
+            else -> null
+        }
+        val terms = normalized.searchTokens()
+            .filterNot { token ->
+                token in PRODUCT_SEARCH_TERMS ||
+                        token in BROAD_SEARCH_TERMS ||
+                        token in COLOR_KEYWORDS ||
+                        token in MATERIAL_KEYWORDS ||
+                        token in STYLE_KEYWORDS ||
+                        token in PRICE_STOP_WORDS ||
+                        token in MEN_QUERY_KEYWORDS ||
+                        token in WOMEN_QUERY_KEYWORDS ||
+                        token in KIDS_QUERY_KEYWORDS
+            }
+        val isBroadSearch = terms.isEmpty() || normalized.containsAnyPhrase(BROAD_SEARCH_TERMS)
+        val hasProductSearchSignal = kinds.isNotEmpty() ||
+                colors.isNotEmpty() ||
+                materials.isNotEmpty() ||
+                gender != null ||
+                priceRange.first != null ||
+                priceRange.second != null ||
+                normalized.containsAnyPhrase(PRODUCT_SEARCH_TERMS)
+
+        return ProductSearchCriteria(
+            rawQuery = rawQuery,
+            normalizedQuery = normalized,
+            normalizedTerms = terms,
+            gender = gender,
+            requestedKinds = kinds,
+            colors = colors,
+            materials = materials,
+            styleTerms = styleTerms,
+            minPrice = priceRange.first,
+            maxPrice = priceRange.second,
+            isBroadSearch = isBroadSearch,
+            hasProductSearchSignal = hasProductSearchSignal,
+        )
+    }
+
+    private fun inferKinds(normalized: String): Set<ProductKind> = buildSet {
+        if (normalized.containsAnyPhrase(BOOT_KEYWORDS)) add(ProductKind.BOOTS)
+        if (normalized.containsAnyPhrase(SNEAKER_KEYWORDS)) add(ProductKind.SNEAKERS)
+        if (normalized.containsAnyPhrase(LOAFER_KEYWORDS)) add(ProductKind.LOAFERS)
+        if (normalized.containsAnyPhrase(SANDAL_KEYWORDS)) add(ProductKind.SANDALS)
+        if (normalized.containsAnyPhrase(HEEL_KEYWORDS)) add(ProductKind.HEELS)
+        if (normalized.containsAnyPhrase(SHOES_QUERY_KEYWORDS) && none { it.isShoeLike && it != ProductKind.SHOES }) add(ProductKind.SHOES)
+        if (normalized.containsAnyPhrase(DRESS_KEYWORDS)) add(ProductKind.DRESS)
+        if (normalized.containsAnyPhrase(T_SHIRT_KEYWORDS)) add(ProductKind.T_SHIRT)
+        if (normalized.containsAnyPhrase(SHIRT_QUERY_KEYWORDS)) add(ProductKind.SHIRT)
+        if (normalized.containsAnyPhrase(BLOUSE_KEYWORDS)) add(ProductKind.BLOUSE)
+        if (normalized.containsAnyPhrase(HOODIE_KEYWORDS)) add(ProductKind.HOODIE)
+        if (normalized.containsAnyPhrase(JACKET_KEYWORDS)) add(ProductKind.JACKET)
+        if (normalized.containsAnyPhrase(TOP_QUERY_KEYWORDS) && ProductKind.DRESS !in this) add(ProductKind.TOP)
+        if (normalized.containsAnyPhrase(JEANS_KEYWORDS)) add(ProductKind.JEANS)
+        if (normalized.containsAnyPhrase(PANTS_QUERY_KEYWORDS)) add(ProductKind.PANTS)
+        if (normalized.containsAnyPhrase(SHORTS_KEYWORDS)) add(ProductKind.SHORTS)
+        if (normalized.containsAnyPhrase(SKIRT_KEYWORDS)) add(ProductKind.SKIRT)
+        if (normalized.containsAnyPhrase(BAG_KEYWORDS)) add(ProductKind.BAG)
+        if (normalized.containsAnyPhrase(ACCESSORY_QUERY_KEYWORDS)) add(ProductKind.ACCESSORY)
+    }
+
+    private fun parsePriceRange(normalized: String): Pair<Double?, Double?> {
+        Regex("""between\s+(\d+(?:\.\d+)?)\s+(?:and|to)\s+(\d+(?:\.\d+)?)""").find(normalized)?.let { match ->
+            val first = match.groupValues[1].toDoubleOrNull()
+            val second = match.groupValues[2].toDoubleOrNull()
+            if (first != null && second != null) return minOf(first, second) to maxOf(first, second)
+        }
+
+        val max = PRICE_MAX_PATTERNS.firstNotNullOfOrNull { pattern ->
+            Regex(pattern).find(normalized)?.groupValues?.getOrNull(1)?.toDoubleOrNull()
+        }
+        val min = PRICE_MIN_PATTERNS.firstNotNullOfOrNull { pattern ->
+            Regex(pattern).find(normalized)?.groupValues?.getOrNull(1)?.toDoubleOrNull()
+        }
+        return min to max
+    }
+
     private fun detectIntent(
-        message: String,
+        criteria: ProductSearchCriteria,
         historySnapshot: List<ChatMessage>,
     ): ChatShoppingIntent {
-        val normalized = message.normalized()
+        val normalized = criteria.normalizedQuery
         val hasPreviousProducts = historySnapshot.any { it.products.isNotEmpty() }
-        val comparisonTerms = listOf("compare", "comparison", "versus", " vs ", "which is better", "difference between")
-        val outfitTerms = listOf("outfit", "look", "style me", "recommend me an outfit", "complete set", "match with", "wear with")
-        val productTerms = listOf(
-            "show", "find", "search", "product", "products", "catalog", "available", "do you have",
-            "t shirt", "shirt", "shoe", "sneaker", "bag", "dress", "hoodie", "jacket", "pants", "jeans", "shorts",
-        )
         return when {
-            comparisonTerms.any { normalized.contains(it.trim().normalized()) } -> ChatShoppingIntent.PRODUCT_COMPARISON
+            normalized.containsAny(COMPARISON_TERMS) -> ChatShoppingIntent.PRODUCT_COMPARISON
             normalized.contains("these two") && hasPreviousProducts -> ChatShoppingIntent.PRODUCT_COMPARISON
-            outfitTerms.any { normalized.contains(it.normalized()) } -> ChatShoppingIntent.OUTFIT_RECOMMENDATION
-            productTerms.any { normalized.contains(it.normalized()) } || extractColors(normalized).isNotEmpty() -> ChatShoppingIntent.PRODUCT_SEARCH
+            normalized.contains("first two") && hasPreviousProducts -> ChatShoppingIntent.PRODUCT_COMPARISON
+            normalized.containsAny(OUTFIT_TERMS) -> ChatShoppingIntent.OUTFIT_RECOMMENDATION
+            criteria.hasProductSearchSignal -> ChatShoppingIntent.PRODUCT_SEARCH
             else -> ChatShoppingIntent.GENERAL_HELP
         }
     }
 
     private suspend fun loadProductsOrThrow(): List<Product> {
         return when (val result = productRepository.getProducts()) {
-            is DataResult.Success -> result.data
+            is DataResult.Success -> result.data.distinctBy { it.id }
             is DataResult.Error -> throw IllegalStateException("Unable to load real WearZone products.")
         }
     }
 
     private suspend fun loadProductsOrNull(): List<Product> = when (val result = productRepository.getProducts()) {
-        is DataResult.Success -> result.data
+        is DataResult.Success -> result.data.distinctBy { it.id }
         is DataResult.Error -> emptyList()
     }
 
@@ -226,110 +305,443 @@ class AiChatRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun rankProductsForQuery(query: String, products: List<Product>): List<Pair<Product, String>> {
-        val normalizedQuery = query.normalized()
-        val broadQuery = normalizedQuery.isBlank() || BROAD_SEARCH_TERMS.any { normalizedQuery.contains(it) }
-        val queryTokens = normalizedQuery.tokens()
-        val requestedSlots = inferSlotsFromQuery(normalizedQuery)
-        val requestedColors = extractColors(normalizedQuery)
+    private fun searchCatalog(criteria: ProductSearchCriteria, products: List<Product>): CatalogSearchResult {
+        val priceFiltered = products
+            .distinctBy { it.id }
+            .filter { product -> criteria.matchesPrice(product.price) }
 
-        return products.mapNotNull { product ->
-            val blob = product.searchBlob()
-            val slot = product.catalogSlot()
-            if (requestedSlots.isNotEmpty() && slot !in requestedSlots) return@mapNotNull null
-            if (requestedColors.isNotEmpty() && requestedColors.none { blob.contains(it) }) return@mapNotNull null
+        val exactGenderFiltered = priceFiltered.filter { product -> criteria.matchesExactGender(product.genderClassification()) }
+        val exactCandidates = exactGenderFiltered
+            .filter { product -> criteria.matchesExactProductKind(product) }
+            .filter { product -> criteria.matchesColors(product) }
+            .filter { product -> criteria.matchesMaterials(product) }
 
-            var score = 0
-            var tokenHits = 0
-            if (broadQuery) score += 1
-            if (normalizedQuery.isNotBlank() && blob.contains(normalizedQuery)) score += 10
-            if (requestedSlots.isNotEmpty() && slot in requestedSlots) score += 8
-            requestedColors.forEach { color ->
-                if (blob.contains(color)) score += 6
-            }
-            queryTokens.forEach { token ->
-                val tokenVariants = token.variants()
-                val hit = tokenVariants.any { blob.contains(it) }
-                if (hit) {
-                    tokenHits++
-                    score += when {
-                        product.title.normalized().containsAny(tokenVariants) -> 5
-                        product.productType.normalized().containsAny(tokenVariants) -> 4
-                        product.vendor.normalized().containsAny(tokenVariants) -> 3
-                        else -> 2
-                    }
-                }
-            }
+        val exactMatches = exactCandidates
+            .mapNotNull { product -> product.scoreFor(criteria, MatchBucket.EXACT) }
+            .filter { it.score > 0 || criteria.isBroadSearch }
+            .sortedWith(productScoreComparator())
+            .let { diversifyScoredProducts(it) }
+            .take(MAX_CHAT_PRODUCTS)
 
-            val categoryOnlyQuery = requestedSlots.isNotEmpty() && queryTokens.all { it.isSlotToken() }
-            if (!broadQuery && queryTokens.isNotEmpty() && tokenHits == 0 && !categoryOnlyQuery) return@mapNotNull null
-            if (score <= 0) return@mapNotNull null
+        if (exactMatches.isNotEmpty()) {
+            return CatalogSearchResult(
+                exactMatches = exactMatches,
+                closestAlternatives = emptyList(),
+                noExactReason = null,
+            )
+        }
 
-            product to product.bestReasonFor(query)
-        }.sortedWith(
-            compareByDescending<Pair<Product, String>> { if (it.first.isOutOfStock) 0 else 1 }
-                .thenByDescending { pair ->
-                    val blob = pair.first.searchBlob()
-                    var score = 0
-                    if (requestedSlots.isNotEmpty() && pair.first.catalogSlot() in requestedSlots) score += 8
-                    requestedColors.forEach { if (blob.contains(it)) score += 6 }
-                    queryTokens.forEach { token -> if (token.variants().any { blob.contains(it) }) score += 3 }
-                    score
-                }
-                .thenBy { it.first.price }
+        val fallbackCandidates = priceFiltered
+            .filter { product -> criteria.matchesFallbackGender(product.genderClassification()) }
+            .filter { product -> criteria.matchesFallbackProductKind(product) }
+
+        val closestAlternatives = fallbackCandidates
+            .mapNotNull { product -> product.scoreFor(criteria, MatchBucket.ALTERNATIVE) }
+            .filter { it.score > 0 || criteria.isBroadSearch }
+            .sortedWith(productScoreComparator())
+            .let { diversifyScoredProducts(it) }
+            .take(MAX_FALLBACK_PRODUCTS)
+
+        return CatalogSearchResult(
+            exactMatches = emptyList(),
+            closestAlternatives = closestAlternatives,
+            noExactReason = criteria.noExactReason(priceFiltered, exactGenderFiltered),
         )
     }
 
-    private fun buildOutfit(query: String, products: List<Product>): OutfitSelection {
-        val selected = linkedMapOf<CatalogSlot, Product>()
-        val missing = mutableListOf<CatalogSlot>()
-        val slots = listOf(CatalogSlot.TOP, CatalogSlot.BOTTOM, CatalogSlot.SHOES)
-        val optionalSlots = listOf(CatalogSlot.BAG_ACCESSORY)
-        val alreadySelected = mutableSetOf<String>()
-
-        slots.forEach { slot ->
-            val best = products
-                .filter { it.id !in alreadySelected && it.catalogSlot() == slot }
-                .map { product -> product to outfitScore(query, product) }
-                .filter { (_, score) -> score >= 0 }
-                .sortedWith(compareByDescending<Pair<Product, Int>> { if (it.first.isOutOfStock) 0 else 1 }.thenByDescending { it.second })
-                .firstOrNull()
-                ?.first
-            if (best == null) {
-                missing += slot
-            } else {
-                selected[slot] = best
-                alreadySelected += best.id
-            }
-        }
-
-        optionalSlots.forEach { slot ->
-            val best = products
-                .filter { it.id !in alreadySelected && it.catalogSlot() == slot }
-                .map { product -> product to outfitScore(query, product) }
-                .sortedWith(compareByDescending<Pair<Product, Int>> { if (it.first.isOutOfStock) 0 else 1 }.thenByDescending { it.second })
-                .firstOrNull()
-                ?.first
-            if (best != null) {
-                selected[slot] = best
-                alreadySelected += best.id
-            }
-        }
-
-        return OutfitSelection(selected = selected, missingRequiredSlots = missing)
+    private fun ProductSearchCriteria.matchesPrice(price: Double): Boolean {
+        if (minPrice != null && price < minPrice) return false
+        if (maxPrice != null && price > maxPrice) return false
+        return true
     }
 
-    private fun outfitScore(query: String, product: Product): Int {
-        val normalizedQuery = query.normalized()
-        val tokens = normalizedQuery.tokens()
-        val colors = extractColors(normalizedQuery)
+    private fun ProductSearchCriteria.matchesExactGender(productGender: ProductGender): Boolean {
+        val requested = gender ?: return true
+        return when (requested) {
+            ProductGender.MEN -> productGender == ProductGender.MEN || productGender == ProductGender.UNISEX
+            ProductGender.WOMEN -> productGender == ProductGender.WOMEN || productGender == ProductGender.UNISEX
+            ProductGender.KIDS -> productGender == ProductGender.KIDS || productGender == ProductGender.UNISEX
+            ProductGender.UNISEX -> productGender == ProductGender.UNISEX
+            ProductGender.UNKNOWN -> true
+        }
+    }
+
+    private fun ProductSearchCriteria.matchesFallbackGender(productGender: ProductGender): Boolean {
+        val requested = gender ?: return true
+        return when (requested) {
+            ProductGender.MEN -> productGender == ProductGender.MEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.WOMEN -> productGender == ProductGender.WOMEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.KIDS -> productGender == ProductGender.KIDS || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.UNISEX -> productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.UNKNOWN -> true
+        }
+    }
+
+    private fun ProductSearchCriteria.matchesExactProductKind(product: Product): Boolean {
+        if (requestedKinds.isEmpty()) return true
+        val kinds = product.productKinds()
+        return requestedKinds.any { requested -> requested.matchesExactly(kinds) }
+    }
+
+    private fun ProductSearchCriteria.matchesFallbackProductKind(product: Product): Boolean {
+        if (requestedKinds.isEmpty()) return true
+        val slot = product.catalogSlot()
+        return requestedKinds.any { requested ->
+            when (requested) {
+                ProductKind.BOOTS,
+                ProductKind.SNEAKERS,
+                ProductKind.LOAFERS,
+                ProductKind.SANDALS,
+                ProductKind.HEELS -> slot == CatalogSlot.SHOES
+                ProductKind.SHOES -> slot == CatalogSlot.SHOES
+                ProductKind.T_SHIRT,
+                ProductKind.SHIRT,
+                ProductKind.TOP,
+                ProductKind.BLOUSE,
+                ProductKind.HOODIE,
+                ProductKind.JACKET -> slot == CatalogSlot.TOP
+                ProductKind.PANTS,
+                ProductKind.JEANS,
+                ProductKind.TROUSERS,
+                ProductKind.SHORTS,
+                ProductKind.SKIRT -> slot == CatalogSlot.BOTTOM
+                ProductKind.DRESS -> slot == CatalogSlot.DRESS
+                ProductKind.BAG -> slot == CatalogSlot.BAG_ACCESSORY
+                ProductKind.ACCESSORY -> slot == CatalogSlot.BAG_ACCESSORY
+            }
+        }
+    }
+
+    private fun ProductSearchCriteria.matchesColors(product: Product): Boolean {
+        if (colors.isEmpty()) return true
         val blob = product.searchBlob()
-        var score = if (product.isOutOfStock) -5 else 1
-        colors.forEach { color -> if (blob.contains(color)) score += 5 }
-        tokens.forEach { token -> if (token.variants().any { blob.contains(it) }) score += 2 }
-        if (blob.contains("casual")) score += 1
-        if (blob.contains("new arrivals")) score += 1
+        return colors.any { color -> blob.containsPhrase(color) }
+    }
+
+    private fun ProductSearchCriteria.matchesMaterials(product: Product): Boolean {
+        if (materials.isEmpty()) return true
+        val blob = product.searchBlob()
+        return materials.any { material -> blob.containsPhrase(material) }
+    }
+
+    private fun Product.scoreFor(criteria: ProductSearchCriteria, bucket: MatchBucket): ScoredProduct? {
+        val blob = searchBlob()
+        val titleText = title.normalizedForSearch()
+        val typeText = productType.normalizedForSearch()
+        val tagText = tags.joinToString(" ").normalizedForSearch()
+        val vendorText = vendor.normalizedForSearch()
+        val colorText = color.orEmpty().normalizedForSearch()
+        val sizeText = size.orEmpty().normalizedForSearch()
+        val kinds = productKinds()
+        val productGender = genderClassification()
+        val slot = catalogSlot()
+
+        var score = 0
+        val reasons = mutableListOf<String>()
+
+        if (!isOutOfStock) score += 12 else score -= 8
+        if (criteria.isBroadSearch) score += 5
+
+        criteria.gender?.let { requestedGender ->
+            when {
+                productGender == requestedGender -> {
+                    score += 35
+                    reasons += "gender matches ${requestedGender.displayName}"
+                }
+                productGender == ProductGender.UNISEX -> {
+                    score += 18
+                    reasons += "unisex item fits ${requestedGender.displayName} request"
+                }
+                productGender == ProductGender.UNKNOWN && bucket == MatchBucket.ALTERNATIVE -> {
+                    score += 5
+                    reasons += "gender unavailable, shown only as a fallback"
+                }
+            }
+        }
+
+        criteria.requestedKinds.forEach { requested ->
+            if (requested.matchesExactly(kinds)) {
+                score += when {
+                    titleText.containsAny(requested.keywords) -> 55
+                    typeText.containsAny(requested.keywords) -> 45
+                    tagText.containsAny(requested.keywords) -> 38
+                    else -> 28
+                }
+                reasons += "matches ${requested.displayName}"
+            } else if (bucket == MatchBucket.ALTERNATIVE && slot != null && requested.matchesSlot(slot)) {
+                score += 14
+                reasons += "closest ${slot.displayName.lowercase(Locale.ROOT)} alternative, not exact ${requested.displayName}"
+            }
+        }
+
+        criteria.colors.forEach { color ->
+            if (blob.containsPhrase(color)) {
+                score += when {
+                    colorText.containsPhrase(color) -> 34
+                    titleText.containsPhrase(color) -> 28
+                    tagText.containsPhrase(color) -> 24
+                    else -> 16
+                }
+                reasons += "matches $color color"
+            } else if (bucket == MatchBucket.ALTERNATIVE) {
+                reasons += "requested $color color unavailable on this alternative"
+            }
+        }
+
+        criteria.materials.forEach { material ->
+            if (blob.containsPhrase(material)) {
+                score += when {
+                    titleText.containsPhrase(material) -> 28
+                    typeText.containsPhrase(material) -> 24
+                    tagText.containsPhrase(material) -> 20
+                    else -> 14
+                }
+                reasons += "matches $material material"
+            } else if (bucket == MatchBucket.ALTERNATIVE) {
+                reasons += "requested $material material unavailable on this alternative"
+            }
+        }
+
+        criteria.normalizedTerms.forEach { token ->
+            val variants = token.termVariants()
+            val tokenScore = when {
+                titleText.containsAny(variants) -> 12
+                typeText.containsAny(variants) -> 10
+                tagText.containsAny(variants) -> 8
+                colorText.containsAny(variants) -> 7
+                sizeText.containsAny(variants) -> 5
+                vendorText.containsAny(variants) -> 5
+                blob.containsAny(variants) -> 3
+                else -> 0
+            }
+            if (tokenScore > 0) score += tokenScore
+        }
+
+        criteria.styleTerms.forEach { style ->
+            if (blob.containsPhrase(style)) {
+                score += 8
+                reasons += "fits $style style"
+            }
+        }
+
+        if (criteria.maxPrice != null) {
+            score += ((criteria.maxPrice - price).coerceAtLeast(0.0) / criteria.maxPrice.coerceAtLeast(1.0) * 8).toInt()
+            reasons += "within ${formatPrice(criteria.maxPrice, currencyCode)} budget"
+        }
+        if (criteria.minPrice != null) reasons += "above ${formatPrice(criteria.minPrice, currencyCode)} minimum"
+
+        if (criteria.normalizedQuery.isNotBlank() && blob.contains(criteria.normalizedQuery)) {
+            score += 45
+            reasons += "contains the full query phrase"
+        }
+
+        if (score <= 0 && !criteria.isBroadSearch) return null
+        val prefix = if (bucket == MatchBucket.EXACT) "Exact match" else "Closest alternative"
+        val reasonText = reasons.distinct().take(3).joinToString(", ").ifBlank {
+            if (bucket == MatchBucket.EXACT) "available in the real WearZone catalog" else "nearest real catalog item after exact filters found nothing"
+        }
+        return ScoredProduct(this, score, "$prefix: $reasonText.")
+    }
+
+    private fun productScoreComparator(): Comparator<ScoredProduct> =
+        compareByDescending<ScoredProduct> { if (it.product.isOutOfStock) 0 else 1 }
+            .thenByDescending { it.score }
+            .thenBy { it.product.price }
+            .thenBy { it.product.title.normalizedForSearch() }
+
+    private fun diversifyScoredProducts(products: List<ScoredProduct>): List<ScoredProduct> {
+        val result = mutableListOf<ScoredProduct>()
+        val perType = mutableMapOf<String, Int>()
+        val perVendor = mutableMapOf<String, Int>()
+
+        products.forEach { scored ->
+            val typeKey = scored.product.productType.normalizedForSearch().ifBlank { scored.product.catalogSlot()?.name.orEmpty() }
+            val vendorKey = scored.product.vendor.normalizedForSearch().ifBlank { "unknown" }
+            if ((perType[typeKey] ?: 0) < 2 && (perVendor[vendorKey] ?: 0) < 3) {
+                result += scored
+                perType[typeKey] = (perType[typeKey] ?: 0) + 1
+                perVendor[vendorKey] = (perVendor[vendorKey] ?: 0) + 1
+            }
+        }
+
+        if (result.size < MAX_CHAT_PRODUCTS) {
+            products.forEach { scored ->
+                if (result.none { it.product.id == scored.product.id }) result += scored
+                if (result.size >= MAX_CHAT_PRODUCTS) return@forEach
+            }
+        }
+        return result.distinctBy { it.product.id }
+    }
+
+    private fun buildOutfit(criteria: ProductSearchCriteria, products: List<Product>): OutfitSelection {
+        val priceFiltered = products.distinctBy { it.id }.filter { criteria.matchesPrice(it.price) }
+        val eligible = priceFiltered.filter { product -> criteria.matchesOutfitGender(product.genderClassification(), allowOppositeShoesFallback = false) }
+        val selectedIds = mutableSetOf<String>()
+        val selected = mutableListOf<OutfitItem>()
+        val notes = mutableListOf<String>()
+
+        fun pick(slot: CatalogSlot, required: Boolean, fallbackOppositeGenderForShoes: Boolean = false): OutfitItem? {
+            val primaryPool = eligible
+                .filter { it.id !in selectedIds }
+                .filter { it.catalogSlot() == slot }
+            val primary = primaryPool.bestOutfitProduct(criteria, slot, fallback = false)
+            if (primary != null) {
+                selectedIds += primary.product.id
+                return primary
+            }
+
+            val unknownPool = priceFiltered
+                .filter { it.id !in selectedIds }
+                .filter { it.catalogSlot() == slot }
+                .filter { product ->
+                    val gender = product.genderClassification()
+                    gender == ProductGender.UNKNOWN || gender == ProductGender.UNISEX
+                }
+            val unknownFallback = unknownPool.bestOutfitProduct(criteria, slot, fallback = true)
+            if (unknownFallback != null) {
+                selectedIds += unknownFallback.product.id
+                return unknownFallback
+            }
+
+            if (slot == CatalogSlot.SHOES && fallbackOppositeGenderForShoes && criteria.gender != null) {
+                val oppositeShoe = priceFiltered
+                    .filter { it.id !in selectedIds }
+                    .filter { it.catalogSlot() == CatalogSlot.SHOES }
+                    .filter { product ->
+                        val gender = product.genderClassification()
+                        (criteria.gender == ProductGender.WOMEN && gender == ProductGender.MEN) ||
+                                (criteria.gender == ProductGender.MEN && gender == ProductGender.WOMEN)
+                    }
+                    .bestOutfitProduct(criteria, slot, fallback = true, forcedReason = "Fallback shoes: no ${criteria.gender.displayName}/unisex shoes were available; this is opposite-gender stock.")
+                if (oppositeShoe != null) {
+                    selectedIds += oppositeShoe.product.id
+                    return oppositeShoe
+                }
+            }
+
+            if (required) notes += "${slot.displayName} unavailable in the real catalog for this outfit."
+            return null
+        }
+
+        val gender = criteria.gender
+        val womenRequested = gender == ProductGender.WOMEN
+        val menRequested = gender == ProductGender.MEN
+
+        if (womenRequested) {
+            val dressOption = buildOutfitOption(criteria, eligible, listOf(CatalogSlot.DRESS, CatalogSlot.SHOES), listOf(CatalogSlot.BAG_ACCESSORY))
+            val separatesOption = buildOutfitOption(criteria, eligible, listOf(CatalogSlot.TOP, CatalogSlot.BOTTOM, CatalogSlot.SHOES), listOf(CatalogSlot.BAG_ACCESSORY))
+            val useDress = dressOption.requiredFound >= 2 && dressOption.totalScore >= separatesOption.totalScore
+            if (useDress) {
+                pick(CatalogSlot.DRESS, required = true)?.let(selected::add)
+                pick(CatalogSlot.SHOES, required = true, fallbackOppositeGenderForShoes = true)?.let(selected::add)
+                pick(CatalogSlot.BAG_ACCESSORY, required = false)?.let(selected::add)
+            } else {
+                pick(CatalogSlot.TOP, required = true)?.let(selected::add)
+                pick(CatalogSlot.BOTTOM, required = true)?.let(selected::add)
+                pick(CatalogSlot.SHOES, required = true, fallbackOppositeGenderForShoes = true)?.let(selected::add)
+                pick(CatalogSlot.BAG_ACCESSORY, required = false)?.let(selected::add)
+            }
+        } else {
+            pick(CatalogSlot.TOP, required = true)?.let(selected::add)
+            pick(CatalogSlot.BOTTOM, required = true)?.let(selected::add)
+            pick(CatalogSlot.SHOES, required = true, fallbackOppositeGenderForShoes = !menRequested)?.let(selected::add)
+            pick(CatalogSlot.BAG_ACCESSORY, required = false)?.let(selected::add)
+        }
+
+        if (selected.none { it.slot == CatalogSlot.BAG_ACCESSORY }) {
+            notes += "Bag/accessory is unavailable or not compatible in the real catalog."
+        }
+
+        return OutfitSelection(
+            selected = selected.distinctBy { it.product.id },
+            notes = notes.distinct(),
+        )
+    }
+
+    private fun ProductSearchCriteria.matchesOutfitGender(
+        productGender: ProductGender,
+        allowOppositeShoesFallback: Boolean,
+    ): Boolean {
+        val requested = gender ?: return true
+        return when (requested) {
+            ProductGender.WOMEN -> productGender == ProductGender.WOMEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN || allowOppositeShoesFallback
+            ProductGender.MEN -> productGender == ProductGender.MEN || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN || allowOppositeShoesFallback
+            ProductGender.KIDS -> productGender == ProductGender.KIDS || productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.UNISEX -> productGender == ProductGender.UNISEX || productGender == ProductGender.UNKNOWN
+            ProductGender.UNKNOWN -> true
+        }
+    }
+
+    private fun buildOutfitOption(
+        criteria: ProductSearchCriteria,
+        products: List<Product>,
+        requiredSlots: List<CatalogSlot>,
+        optionalSlots: List<CatalogSlot>,
+    ): OutfitOptionScore {
+        val selectedIds = mutableSetOf<String>()
+        var requiredFound = 0
+        var totalScore = 0
+        (requiredSlots + optionalSlots).forEach { slot ->
+            val best = products
+                .filter { it.id !in selectedIds && it.catalogSlot() == slot }
+                .bestOutfitProduct(criteria, slot, fallback = false)
+            if (best != null) {
+                selectedIds += best.product.id
+                totalScore += best.score
+                if (slot in requiredSlots) requiredFound++
+            }
+        }
+        return OutfitOptionScore(requiredFound, totalScore)
+    }
+
+    private fun List<Product>.bestOutfitProduct(
+        criteria: ProductSearchCriteria,
+        slot: CatalogSlot,
+        fallback: Boolean,
+        forcedReason: String? = null,
+    ): OutfitItem? = map { product ->
+        val score = outfitScore(criteria, product, slot)
+        val prefix = if (fallback) "Fallback ${slot.displayName.lowercase(Locale.ROOT)}" else slot.displayName
+        val reason = forcedReason ?: "$prefix: ${product.bestOutfitReason(criteria)}"
+        OutfitItem(slot, product, score, reason)
+    }
+        .sortedWith(compareByDescending<OutfitItem> { if (it.product.isOutOfStock) 0 else 1 }.thenByDescending { it.score }.thenBy { it.product.price })
+        .firstOrNull()
+
+    private fun outfitScore(criteria: ProductSearchCriteria, product: Product, slot: CatalogSlot): Int {
+        val blob = product.searchBlob()
+        var score = if (product.isOutOfStock) -10 else 10
+        if (product.catalogSlot() == slot) score += 35
+        criteria.gender?.let { requested ->
+            when (product.genderClassification()) {
+                requested -> score += 30
+                ProductGender.UNISEX -> score += 14
+                ProductGender.UNKNOWN -> score += 3
+                else -> score -= 30
+            }
+        }
+        criteria.colors.forEach { color -> if (blob.containsPhrase(color)) score += 12 }
+        criteria.materials.forEach { material -> if (blob.containsPhrase(material)) score += 8 }
+        criteria.styleTerms.forEach { style -> if (blob.containsPhrase(style)) score += 12 }
+        if (criteria.styleTerms.isEmpty() && blob.containsPhrase("casual")) score += 3
+        criteria.normalizedTerms.forEach { term -> if (blob.containsAny(term.termVariants())) score += 2 }
         return score
+    }
+
+    private fun Product.bestOutfitReason(criteria: ProductSearchCriteria): String {
+        val parts = mutableListOf<String>()
+        criteria.gender?.let { requested ->
+            when (genderClassification()) {
+                requested -> parts += "matches ${requested.displayName}"
+                ProductGender.UNISEX -> parts += "unisex fit for ${requested.displayName}"
+                ProductGender.UNKNOWN -> parts += "gender unavailable, used as fallback"
+                else -> parts += "gender fallback"
+            }
+        }
+        criteria.styleTerms.firstOrNull { searchBlob().containsPhrase(it) }?.let { parts += "fits $it style" }
+        criteria.colors.firstOrNull { searchBlob().containsPhrase(it) }?.let { parts += "matches $it color" }
+        if (!isOutOfStock) parts += "available or variant-dependent"
+        return parts.distinct().take(3).joinToString(", ").ifBlank { "selected from real WearZone catalog" }
     }
 
     private fun extractRequestedProductIds(message: String): List<String> {
@@ -345,23 +757,70 @@ class AiChatRepositoryImpl @Inject constructor(
             .toList()
     }
 
-    private fun recentProductIdsFromHistory(historySnapshot: List<ChatMessage>): List<String> {
-        return historySnapshot
+    private fun recentProductIdsFromHistory(historySnapshot: List<ChatMessage>, userQuery: String): List<String> {
+        val recentCards = historySnapshot
             .asReversed()
-            .flatMap { it.products }
-            .map { it.productId }
-            .distinct()
-            .take(2)
+            .firstOrNull { it.products.isNotEmpty() }
+            ?.products
+            .orEmpty()
+
+        val normalized = userQuery.normalizedForSearch()
+        val ordinals = extractOrdinals(normalized)
+        if (ordinals.isNotEmpty()) {
+            return ordinals.mapNotNull { ordinal -> recentCards.getOrNull(ordinal - 1)?.productId }
+        }
+
+        return recentCards.map { it.productId }.take(2)
     }
 
-    private fun buildProductCardsContext(cards: List<ChatProductCard>): String = buildString {
-        appendLine("Real WearZone products retrieved before AI response. Use only these products:")
+    private fun extractOrdinals(normalized: String): List<Int> = buildList {
+        if (normalized.contains("first two") || normalized.contains("these two")) {
+            add(1)
+            add(2)
+            return@buildList
+        }
+        ORDINAL_TERMS.forEach { (term, index) ->
+            if (normalized.containsPhrase(term)) add(index)
+        }
+    }.distinct()
+
+    private fun buildSearchContext(
+        criteria: ProductSearchCriteria,
+        exactCards: List<ChatProductCard>,
+        fallbackCards: List<ChatProductCard>,
+        noExactReason: String?,
+    ): String = buildString {
+        appendLine("Real WearZone catalog retrieval result for query: ${criteria.rawQuery}")
+        appendLine("Hard filters applied before ranking:")
+        appendLine("- price: ${criteria.priceFilterText()}")
+        appendLine("- gender: ${criteria.gender?.displayName ?: "not specified"}")
+        appendLine("- product type/category: ${criteria.requestedKinds.joinToString { it.displayName }.ifBlank { "not specified" }}")
+        appendLine("- colors: ${criteria.colors.joinToString().ifBlank { "not specified" }}")
+        appendLine("- materials: ${criteria.materials.joinToString().ifBlank { "not specified" }}")
+        if (exactCards.isNotEmpty()) {
+            appendLine("\nExact matches:")
+            appendProductCards(exactCards)
+            appendLine("Use the heading 'Exact matches' in the response. Do not call fallback products exact matches.")
+        } else {
+            appendLine("\nNo exact matches found.")
+            appendLine(noExactReason ?: "No real catalog product satisfied all hard filters.")
+            if (fallbackCards.isNotEmpty()) {
+                appendLine("\nClosest alternatives:")
+                appendProductCards(fallbackCards)
+                appendLine("Use the heading 'Closest alternatives' and clearly state why these are not exact matches.")
+            } else {
+                appendLine("No closest alternatives are allowed without violating the hard filters. Do not invent products.")
+            }
+        }
+    }
+
+    private fun StringBuilder.appendProductCards(cards: List<ChatProductCard>) {
         cards.forEachIndexed { index, card ->
             appendLine(
                 "${index + 1}. productId=${card.productId}; title=${card.title}; imageUrl=${card.imageUrl ?: "Unavailable"}; " +
-                    "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; " +
-                    "category/productType=${card.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}; " +
-                    "availability=${availabilityText(card.isOutOfStock)}; reason=${card.reason}"
+                        "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; " +
+                        "category/productType=${card.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}; " +
+                        "availability=${availabilityText(card.isOutOfStock)}; reason=${card.reason}"
             )
         }
     }
@@ -387,29 +846,50 @@ class AiChatRepositoryImpl @Inject constructor(
     }
 
     private fun buildOutfitContext(
-        query: String,
+        criteria: ProductSearchCriteria,
         outfit: OutfitSelection,
         cards: List<ChatProductCard>,
     ): String = buildString {
-        appendLine("User requested an outfit for: $query")
+        appendLine("User requested an outfit for: ${criteria.rawQuery}")
+        appendLine("Outfit rules already applied deterministically before AI response.")
         appendLine("Use only these selected real WearZone products:")
         cards.forEach { card ->
             appendLine(
                 "- productId=${card.productId}; title=${card.title}; slot/reason=${card.reason}; " +
-                    "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; " +
-                    "brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; category/productType=${card.productType ?: "Unavailable"}; " +
-                    "availability=${availabilityText(card.isOutOfStock)}"
+                        "price=${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Unavailable"}; " +
+                        "brand/vendor=${card.vendor.ifBlank { "Unavailable" }}; category/productType=${card.productType ?: "Unavailable"}; " +
+                        "availability=${availabilityText(card.isOutOfStock)}"
             )
         }
-        if (outfit.missingRequiredSlots.isNotEmpty()) {
-            appendLine("Missing required outfit slots in real catalog: ${outfit.missingRequiredSlots.joinToString { it.displayName }}. Say this clearly. Do not invent missing items.")
+        if (outfit.notes.isNotEmpty()) {
+            appendLine("Catalog limitations to say clearly: ${outfit.notes.joinToString(" ")}")
         }
+        if (cards.isEmpty()) appendLine("No outfit products were found. Do not invent missing items.")
     }
 
-    private fun buildSearchFallback(cards: List<ChatProductCard>): String = buildString {
-        appendLine("I found these real WearZone products:")
-        cards.forEach { card ->
-            appendLine("• ${card.title} — ${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Price unavailable"} — ${card.vendor.ifBlank { "Brand unavailable" }}. ${card.reason}")
+    private fun buildSearchFallback(
+        criteria: ProductSearchCriteria,
+        exactCards: List<ChatProductCard>,
+        fallbackCards: List<ChatProductCard>,
+        noExactReason: String?,
+    ): String = buildString {
+        if (exactCards.isNotEmpty()) {
+            appendLine("Exact matches from the real WearZone catalog:")
+            exactCards.forEach { card ->
+                appendLine("• ${card.title} — ${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Price unavailable"} — ${card.vendor.ifBlank { "Brand unavailable" }}. ${card.reason}")
+            }
+            return@buildString
+        }
+
+        appendLine("No exact matches found for \"${criteria.rawQuery}\".")
+        appendLine(noExactReason ?: "No real catalog product satisfied all hard filters.")
+        if (fallbackCards.isNotEmpty()) {
+            appendLine("Closest alternatives that still respect hard filters:")
+            fallbackCards.forEach { card ->
+                appendLine("• ${card.title} — ${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Price unavailable"} — ${card.vendor.ifBlank { "Brand unavailable" }}. ${card.reason}")
+            }
+        } else {
+            appendLine("I did not show alternatives because that would violate the hard filters or require fake products.")
         }
     }.trim()
 
@@ -423,8 +903,10 @@ class AiChatRepositoryImpl @Inject constructor(
             appendLine("• ${detail.title}: ${formatPrice(detail.price, detail.currencyCode)}")
             appendLine("  Brand: ${detail.vendor.ifBlank { "Unavailable" }}")
             appendLine("  Category: ${summary?.productType?.takeIf { it.isNotBlank() } ?: "Unavailable"}")
+            appendLine("  Description: ${detail.descriptionHtml.take(160).ifBlank { "Unavailable" }}")
             appendLine("  Colors: ${detail.availableColors.ifEmpty { listOf("Unavailable") }.joinToString()}")
             appendLine("  Sizes: ${detail.availableSizes.ifEmpty { listOf("Unavailable") }.joinToString()}")
+            appendLine("  Variants: ${detail.variants.take(5).joinToString(" | ") { it.variantContext() }.ifBlank { "Unavailable" }}")
             appendLine("  Availability: ${if (detail.isOutOfStock) "Out of stock" else "Available or variant-dependent"}")
         }
     }.trim()
@@ -434,15 +916,15 @@ class AiChatRepositoryImpl @Inject constructor(
         cards: List<ChatProductCard>,
     ): String = buildString {
         if (cards.isEmpty()) {
-            append("I couldn't build an outfit because no matching real catalog products were available.")
+            append("I couldn't build an outfit because no compatible real catalog products were available. I did not invent replacements.")
             return@buildString
         }
-        appendLine("I built this outfit from real WearZone catalog items:")
+        appendLine("Outfit from real WearZone catalog items:")
         cards.forEach { card ->
             appendLine("• ${card.reason}: ${card.title} — ${card.price?.let { formatPrice(it, card.currencyCode) } ?: "Price unavailable"}")
         }
-        if (outfit.missingRequiredSlots.isNotEmpty()) {
-            appendLine("Missing from the real catalog: ${outfit.missingRequiredSlots.joinToString { it.displayName }}. I did not invent replacements.")
+        if (outfit.notes.isNotEmpty()) {
+            appendLine(outfit.notes.joinToString(" "))
         }
     }.trim()
 
@@ -453,7 +935,7 @@ class AiChatRepositoryImpl @Inject constructor(
         price = price,
         currencyCode = currencyCode,
         vendor = vendor,
-        productType = productType.takeIf { it.isNotBlank() },
+        productType = productType.takeIf { it.isNotBlank() } ?: catalogSlot()?.displayName,
         reason = reason,
         isOutOfStock = isOutOfStock,
     )
@@ -465,27 +947,10 @@ class AiChatRepositoryImpl @Inject constructor(
         price = price,
         currencyCode = currencyCode,
         vendor = vendor,
-        productType = summary?.productType?.takeIf { it.isNotBlank() },
+        productType = summary?.productType?.takeIf { it.isNotBlank() } ?: summary?.catalogSlot()?.displayName,
         reason = reason,
         isOutOfStock = isOutOfStock,
     )
-
-    private fun Product.bestReasonFor(query: String): String {
-        val normalizedQuery = query.normalized()
-        val blob = searchBlob()
-        val reasons = mutableListOf<String>()
-        val slot = catalogSlot()
-        if (slot != null && inferSlotsFromQuery(normalizedQuery).contains(slot)) {
-            reasons += "matches ${slot.displayName.lowercase(Locale.ROOT)} category"
-        }
-        extractColors(normalizedQuery).firstOrNull { blob.contains(it) }?.let { reasons += "matches $it color" }
-        normalizedQuery.tokens().firstOrNull { token -> token.variants().any { blob.contains(it) } }?.let { reasons += "matches \"$it\"" }
-        if (vendor.isNotBlank() && normalizedQuery.contains(vendor.normalized())) reasons += "matches brand/vendor"
-        if (isOutOfStock) reasons += "currently out of stock"
-        return reasons.distinct().take(2).joinToString(prefix = "Because it ").ifBlank {
-            "Because it is available in the real WearZone catalog."
-        }
-    }
 
     private fun Product.searchBlob(): String = listOf(
         title,
@@ -494,55 +959,96 @@ class AiChatRepositoryImpl @Inject constructor(
         tags.joinToString(" "),
         size.orEmpty(),
         color.orEmpty(),
-    ).joinToString(" ").normalized()
+    ).joinToString(" ").normalizedForSearch()
 
-    private fun Product.catalogSlot(): CatalogSlot? {
+    private fun Product.genderClassification(): ProductGender {
         val blob = searchBlob()
+        val hasUnisex = blob.containsAnyPhrase(UNISEX_KEYWORDS)
+        val hasWomen = blob.containsAnyPhrase(WOMEN_KEYWORDS)
+        val hasMen = blob.containsAnyPhrase(MEN_KEYWORDS)
+        val hasKids = blob.containsAnyPhrase(KIDS_KEYWORDS)
         return when {
-            blob.containsAny(SHOES_KEYWORDS) -> CatalogSlot.SHOES
-            blob.containsAny(BAG_ACCESSORY_KEYWORDS) -> CatalogSlot.BAG_ACCESSORY
-            blob.containsAny(BOTTOM_KEYWORDS) -> CatalogSlot.BOTTOM
-            blob.containsAny(TOP_KEYWORDS) -> CatalogSlot.TOP
-            else -> null
+            hasUnisex || (hasMen && hasWomen) -> ProductGender.UNISEX
+            hasWomen -> ProductGender.WOMEN
+            hasMen -> ProductGender.MEN
+            hasKids -> ProductGender.KIDS
+            else -> ProductGender.UNKNOWN
         }
     }
 
-    private fun inferSlotsFromQuery(normalizedQuery: String): Set<CatalogSlot> = buildSet {
-        if (normalizedQuery.containsAny(TOP_QUERY_KEYWORDS)) add(CatalogSlot.TOP)
-        if (normalizedQuery.containsAny(BOTTOM_KEYWORDS)) add(CatalogSlot.BOTTOM)
-        if (normalizedQuery.containsAny(SHOES_KEYWORDS)) add(CatalogSlot.SHOES)
-        if (normalizedQuery.containsAny(BAG_ACCESSORY_KEYWORDS)) add(CatalogSlot.BAG_ACCESSORY)
+    private fun Product.productKinds(): Set<ProductKind> {
+        val blob = searchBlob()
+        return buildSet {
+            if (blob.containsAnyPhrase(BOOT_KEYWORDS)) {
+                add(ProductKind.BOOTS)
+                add(ProductKind.SHOES)
+            }
+            if (blob.containsAnyPhrase(SNEAKER_KEYWORDS)) {
+                add(ProductKind.SNEAKERS)
+                add(ProductKind.SHOES)
+            }
+            if (blob.containsAnyPhrase(LOAFER_KEYWORDS)) {
+                add(ProductKind.LOAFERS)
+                add(ProductKind.SHOES)
+            }
+            if (blob.containsAnyPhrase(SANDAL_KEYWORDS)) {
+                add(ProductKind.SANDALS)
+                add(ProductKind.SHOES)
+            }
+            if (blob.containsAnyPhrase(HEEL_KEYWORDS)) {
+                add(ProductKind.HEELS)
+                add(ProductKind.SHOES)
+            }
+            if (blob.containsAnyPhrase(SHOES_KEYWORDS)) add(ProductKind.SHOES)
+            if (blob.containsAnyPhrase(DRESS_KEYWORDS)) add(ProductKind.DRESS)
+            if (blob.containsAnyPhrase(T_SHIRT_KEYWORDS)) {
+                add(ProductKind.T_SHIRT)
+                add(ProductKind.TOP)
+            }
+            if (blob.containsAnyPhrase(SHIRT_KEYWORDS)) {
+                add(ProductKind.SHIRT)
+                add(ProductKind.TOP)
+            }
+            if (blob.containsAnyPhrase(BLOUSE_KEYWORDS)) {
+                add(ProductKind.BLOUSE)
+                add(ProductKind.TOP)
+            }
+            if (blob.containsAnyPhrase(HOODIE_KEYWORDS)) {
+                add(ProductKind.HOODIE)
+                add(ProductKind.TOP)
+            }
+            if (blob.containsAnyPhrase(JACKET_KEYWORDS)) {
+                add(ProductKind.JACKET)
+                add(ProductKind.TOP)
+            }
+            if (blob.containsAnyPhrase(TOP_KEYWORDS) && ProductKind.DRESS !in this) add(ProductKind.TOP)
+            if (blob.containsAnyPhrase(PANTS_KEYWORDS)) {
+                add(ProductKind.PANTS)
+                add(ProductKind.TROUSERS)
+            }
+            if (blob.containsAnyPhrase(JEANS_KEYWORDS)) {
+                add(ProductKind.JEANS)
+                add(ProductKind.PANTS)
+                add(ProductKind.TROUSERS)
+            }
+            if (blob.containsAnyPhrase(SHORTS_KEYWORDS)) add(ProductKind.SHORTS)
+            if (blob.containsAnyPhrase(SKIRT_KEYWORDS)) add(ProductKind.SKIRT)
+            if (blob.containsAnyPhrase(BAG_KEYWORDS)) add(ProductKind.BAG)
+            if (blob.containsAnyPhrase(ACCESSORY_KEYWORDS)) add(ProductKind.ACCESSORY)
+        }
     }
 
-    private fun extractColors(normalizedText: String): Set<String> = COLOR_KEYWORDS.filterTo(mutableSetOf()) { color ->
-        Regex("""\b${Regex.escape(color)}\b""").containsMatchIn(normalizedText)
+    private fun Product.catalogSlot(): CatalogSlot? {
+        val kinds = productKinds()
+        return when {
+            kinds.any { it.isShoeLike } -> CatalogSlot.SHOES
+            ProductKind.BAG in kinds || ProductKind.ACCESSORY in kinds -> CatalogSlot.BAG_ACCESSORY
+            ProductKind.DRESS in kinds -> CatalogSlot.DRESS
+            kinds.any { it.isBottomLike } -> CatalogSlot.BOTTOM
+            kinds.any { it.isTopLike } -> CatalogSlot.TOP
+            else -> null
+        }
     }
-
-    private fun String.normalized(): String = lowercase(Locale.ROOT)
-        .replace("&", " and ")
-        .replace("t-shirts", "t shirts")
-        .replace("t-shirt", "t shirt")
-        .replace(Regex("[^a-z0-9]+"), " ")
-        .replace(Regex("\\s+"), " ")
-        .trim()
-
-    private fun String.tokens(): List<String> = split(' ')
-        .map { it.trim() }
-        .filter { it.length > 1 && it !in STOP_WORDS }
-        .distinct()
-
-    private fun String.variants(): Set<String> = buildSet {
-        add(this@variants)
-        if (endsWith("s") && length > 3) add(dropLast(1))
-        if (this@variants == "tee") add("t shirt")
-        if (this@variants == "tshirt") add("t shirt")
-        if (this@variants == "grey") add("gray")
-        if (this@variants == "gray") add("grey")
-    }
-
-    private fun String.containsAny(values: Iterable<String>): Boolean = values.any { contains(it) }
-
-    private fun String.isSlotToken(): Boolean = SLOT_QUERY_TOKENS.any { slotToken -> variants().contains(slotToken) || slotToken.contains(this) }
 
     private fun ProductVariant.variantContext(): String {
         val parts = listOf(
@@ -556,6 +1062,33 @@ class AiChatRepositoryImpl @Inject constructor(
         return parts.joinToString(", ")
     }
 
+    private fun ProductSearchCriteria.noExactReason(
+        priceFiltered: List<Product>,
+        exactGenderFiltered: List<Product>,
+    ): String = buildString {
+        val hardFilters = mutableListOf<String>()
+        if (maxPrice != null) hardFilters += "price must be <= ${formatPrice(maxPrice, "EGP")}"
+        if (minPrice != null) hardFilters += "price must be >= ${formatPrice(minPrice, "EGP")}"
+        gender?.let { hardFilters += "gender must be ${it.displayName} or unisex for exact matches" }
+        if (requestedKinds.isNotEmpty()) hardFilters += "product type must be ${requestedKinds.joinToString { it.displayName }}"
+        if (colors.isNotEmpty()) hardFilters += "color must include ${colors.joinToString()}"
+        if (materials.isNotEmpty()) hardFilters += "material must include ${materials.joinToString()}"
+
+        when {
+            priceFiltered.isEmpty() && (minPrice != null || maxPrice != null) -> append("No real products satisfy the requested price filter.")
+            exactGenderFiltered.isEmpty() && gender != null -> append("No real products satisfy the requested gender filter after price filtering.")
+            else -> append("No real products satisfy all exact filters together.")
+        }
+        if (hardFilters.isNotEmpty()) append(" Filters: ${hardFilters.joinToString("; ")}.")
+    }
+
+    private fun ProductSearchCriteria.priceFilterText(): String = when {
+        minPrice != null && maxPrice != null -> "${formatPrice(minPrice, "EGP")} to ${formatPrice(maxPrice, "EGP")}"
+        maxPrice != null -> "<= ${formatPrice(maxPrice, "EGP")}"
+        minPrice != null -> ">= ${formatPrice(minPrice, "EGP")}"
+        else -> "not specified"
+    }
+
     private fun formatPrice(price: Double, currencyCode: String): String {
         val cleanPrice = if (price % 1.0 == 0.0) price.toInt().toString() else "%.2f".format(Locale.US, price)
         return "$cleanPrice ${currencyCode.ifBlank { "EGP" }}"
@@ -567,6 +1100,99 @@ class AiChatRepositoryImpl @Inject constructor(
         null -> "Unavailable"
     }
 
+    private fun ProductKind.matchesExactly(productKinds: Set<ProductKind>): Boolean = when (this) {
+        ProductKind.SHOES -> productKinds.any { it.isShoeLike }
+        ProductKind.T_SHIRT -> ProductKind.T_SHIRT in productKinds || ProductKind.SHIRT in productKinds || ProductKind.TOP in productKinds
+        ProductKind.SHIRT -> ProductKind.SHIRT in productKinds || ProductKind.T_SHIRT in productKinds || ProductKind.TOP in productKinds
+        ProductKind.TOP -> ProductKind.TOP in productKinds && ProductKind.DRESS !in productKinds
+        ProductKind.PANTS,
+        ProductKind.TROUSERS -> productKinds.any { it == ProductKind.PANTS || it == ProductKind.TROUSERS || it == ProductKind.JEANS }
+        ProductKind.BAG -> ProductKind.BAG in productKinds
+        ProductKind.ACCESSORY -> ProductKind.ACCESSORY in productKinds || ProductKind.BAG in productKinds
+        else -> this in productKinds
+    }
+
+    private fun ProductKind.matchesSlot(slot: CatalogSlot): Boolean = when (slot) {
+        CatalogSlot.SHOES -> isShoeLike
+        CatalogSlot.TOP -> isTopLike
+        CatalogSlot.BOTTOM -> isBottomLike
+        CatalogSlot.DRESS -> this == ProductKind.DRESS
+        CatalogSlot.BAG_ACCESSORY -> this == ProductKind.BAG || this == ProductKind.ACCESSORY
+    }
+
+    private val ProductKind.isShoeLike: Boolean
+        get() = this in setOf(ProductKind.SHOES, ProductKind.SNEAKERS, ProductKind.BOOTS, ProductKind.LOAFERS, ProductKind.SANDALS, ProductKind.HEELS)
+
+    private val ProductKind.isTopLike: Boolean
+        get() = this in setOf(ProductKind.TOP, ProductKind.T_SHIRT, ProductKind.SHIRT, ProductKind.BLOUSE, ProductKind.HOODIE, ProductKind.JACKET)
+
+    private val ProductKind.isBottomLike: Boolean
+        get() = this in setOf(ProductKind.PANTS, ProductKind.JEANS, ProductKind.TROUSERS, ProductKind.SHORTS, ProductKind.SKIRT)
+
+    private fun String.normalizedForSearch(): String {
+        var value = lowercase(Locale.ROOT)
+            .replace(Regex("[\\u064B-\\u065F\\u0670]"), "")
+            .replace('أ', 'ا')
+            .replace('إ', 'ا')
+            .replace('آ', 'ا')
+            .replace('ى', 'ي')
+            .replace('ة', 'ه')
+            .replace('ؤ', 'و')
+            .replace('ئ', 'ي')
+            .replace("&", " and ")
+            .replace("t-shirts", "t shirts")
+            .replace("t-shirt", "t shirt")
+            .replace("tshirt", "t shirt")
+        ARABIC_QUERY_SYNONYMS.forEach { (source, target) ->
+            value = value.replace(source, " $target ")
+        }
+        return value
+            .replace(Regex("[^a-z0-9.]+"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
+
+    private fun String.searchTokens(): List<String> = split(' ')
+        .map { it.trim() }
+        .filter { it.length > 1 && it !in STOP_WORDS && it.toDoubleOrNull() == null }
+        .distinct()
+
+    private fun String.termVariants(): Set<String> = buildSet {
+        add(this@termVariants)
+        if (endsWith("s") && length > 3) add(dropLast(1))
+        if (this@termVariants == "tee") add("t shirt")
+        if (this@termVariants == "tshirt") add("t shirt")
+        if (this@termVariants == "grey") add("gray")
+        if (this@termVariants == "gray") add("grey")
+        if (this@termVariants == "trainer") add("sneaker")
+        if (this@termVariants == "sneaker") add("trainer")
+    }
+
+    private fun String.containsAny(values: Iterable<String>): Boolean = values.any { containsPhrase(it) }
+
+    private fun String.containsAnyPhrase(values: Iterable<String>): Boolean = values.any { containsPhrase(it) }
+
+    private fun String.containsPhrase(value: String): Boolean {
+        val phrase = value.normalizedForSearch()
+        if (phrase.isBlank()) return false
+        return Regex("(^|\\s)${Regex.escape(phrase)}($|\\s)").containsMatchIn(this)
+    }
+
+    private data class ProductSearchCriteria(
+        val rawQuery: String,
+        val normalizedQuery: String,
+        val normalizedTerms: List<String>,
+        val gender: ProductGender?,
+        val requestedKinds: Set<ProductKind>,
+        val colors: Set<String>,
+        val materials: Set<String>,
+        val styleTerms: Set<String>,
+        val minPrice: Double?,
+        val maxPrice: Double?,
+        val isBroadSearch: Boolean,
+        val hasProductSearchSignal: Boolean,
+    )
+
     private data class CatalogRetrieval(
         val intent: ChatShoppingIntent,
         val context: String,
@@ -574,10 +1200,39 @@ class AiChatRepositoryImpl @Inject constructor(
         val fallbackResponse: String,
     )
 
-    private data class OutfitSelection(
-        val selected: LinkedHashMap<CatalogSlot, Product>,
-        val missingRequiredSlots: List<CatalogSlot>,
+    private data class CatalogSearchResult(
+        val exactMatches: List<ScoredProduct>,
+        val closestAlternatives: List<ScoredProduct>,
+        val noExactReason: String?,
     )
+
+    private data class ScoredProduct(
+        val product: Product,
+        val score: Int,
+        val reason: String,
+    )
+
+    private data class OutfitSelection(
+        val selected: List<OutfitItem>,
+        val notes: List<String>,
+    )
+
+    private data class OutfitItem(
+        val slot: CatalogSlot,
+        val product: Product,
+        val score: Int,
+        val reason: String,
+    )
+
+    private data class OutfitOptionScore(
+        val requiredFound: Int,
+        val totalScore: Int,
+    )
+
+    private enum class MatchBucket {
+        EXACT,
+        ALTERNATIVE,
+    }
 
     private enum class ChatShoppingIntent {
         PRODUCT_SEARCH,
@@ -586,33 +1241,213 @@ class AiChatRepositoryImpl @Inject constructor(
         GENERAL_HELP,
     }
 
+    private enum class ProductGender(val displayName: String) {
+        MEN("men"),
+        WOMEN("women"),
+        KIDS("kids"),
+        UNISEX("unisex"),
+        UNKNOWN("unknown"),
+    }
+
     private enum class CatalogSlot(val displayName: String) {
         TOP("Top"),
         BOTTOM("Bottom"),
+        DRESS("Dress"),
         SHOES("Shoes"),
         BAG_ACCESSORY("Bag/Accessory"),
+    }
+
+    private enum class ProductKind(val displayName: String, val keywords: Set<String>) {
+        T_SHIRT("t-shirt/shirt/top", setOf("t shirt", "tee", "shirt", "top")),
+        SHIRT("shirt/top", setOf("shirt", "top")),
+        TOP("top", setOf("top", "blouse", "shirt", "tee", "t shirt")),
+        BLOUSE("blouse/top", setOf("blouse", "top")),
+        HOODIE("hoodie", setOf("hoodie", "sweatshirt")),
+        JACKET("jacket", setOf("jacket", "coat")),
+        DRESS("dress", setOf("dress")),
+        PANTS("pants/bottom", setOf("pants", "pant", "trousers", "trouser", "bottom", "jeans")),
+        JEANS("jeans", setOf("jeans", "denim")),
+        TROUSERS("trousers", setOf("trousers", "trouser", "pants")),
+        SHORTS("shorts", setOf("shorts", "short")),
+        SKIRT("skirt", setOf("skirt")),
+        SHOES("shoes/footwear", setOf("shoe", "shoes", "footwear", "sneaker", "boot", "loafer", "sandal", "heel")),
+        SNEAKERS("sneakers", setOf("sneaker", "sneakers", "trainer", "trainers")),
+        BOOTS("boots", setOf("boot", "boots")),
+        LOAFERS("loafers", setOf("loafer", "loafers")),
+        SANDALS("sandals", setOf("sandal", "sandals")),
+        HEELS("heels", setOf("heel", "heels")),
+        BAG("bag", setOf("bag", "bags", "backpack", "purse", "wallet")),
+        ACCESSORY("accessory", setOf("accessory", "accessories", "belt", "cap", "hat", "sunglasses")),
     }
 
     private companion object {
         const val MAX_CHAT_PRODUCTS = 8
         const val MAX_COMPARE_PRODUCTS = 4
+        const val MAX_FALLBACK_PRODUCTS = 5
 
         val STOP_WORDS = setOf(
             "show", "me", "find", "search", "for", "the", "a", "an", "and", "or", "to", "with", "of", "in", "on",
             "products", "product", "please", "do", "you", "have", "available", "wearzone", "recommend", "want", "need",
+            "something", "like", "under", "below", "less", "than", "over", "above", "more", "maximum", "minimum", "max", "min", "egp",
         )
-        val BROAD_SEARCH_TERMS = setOf("all", "catalog", "clothes", "clothing", "products", "what do you sell")
+        val PRICE_STOP_WORDS = setOf("under", "below", "less", "than", "over", "above", "more", "maximum", "minimum", "max", "min", "up", "between", "egp")
+        val PRODUCT_SEARCH_TERMS = setOf("show", "find", "search", "product", "products", "catalog", "available", "sell", "have", "wearzone")
+        val BROAD_SEARCH_TERMS = setOf("all", "catalog", "clothes", "clothing", "products", "product", "what do you sell")
+        val COMPARISON_TERMS = setOf("compare", "comparison", "versus", "vs", "which is better", "difference between")
+        val OUTFIT_TERMS = setOf("outfit", "look", "style me", "recommend me an outfit", "complete set", "match with", "wear with", "casual outfit")
+
+        val MEN_QUERY_KEYWORDS = setOf("men", "mens", "male", "man")
+        val WOMEN_QUERY_KEYWORDS = setOf("women", "womens", "female", "woman", "ladies", "lady", "girls", "girl")
+        val KIDS_QUERY_KEYWORDS = setOf("kids", "children", "child", "boys", "boy")
+        val MEN_KEYWORDS = MEN_QUERY_KEYWORDS + setOf("men collection", "menswear")
+        val WOMEN_KEYWORDS = WOMEN_QUERY_KEYWORDS + setOf("women collection", "womenswear")
+        val KIDS_KEYWORDS = KIDS_QUERY_KEYWORDS + setOf("kids collection")
+        val UNISEX_KEYWORDS = setOf("unisex", "all gender", "all genders")
+
         val COLOR_KEYWORDS = setOf(
             "black", "white", "blue", "navy", "red", "green", "gray", "grey", "brown", "beige", "cream",
             "pink", "yellow", "orange", "purple", "gold", "silver", "maroon", "khaki",
         )
-        val TOP_KEYWORDS = setOf(
-            "t shirt", "shirt", "tee", "polo", "hoodie", "jacket", "coat", "top", "blouse", "sweater", "sweatshirt", "dress",
+        val MATERIAL_KEYWORDS = setOf("leather", "cotton", "denim", "linen", "wool", "suede", "polyester", "viscose", "knit", "canvas")
+        val STYLE_KEYWORDS = setOf("casual", "formal", "semi formal", "summer", "winter", "night", "day", "party", "parties", "sport", "classic", "streetwear")
+
+        val BOOT_KEYWORDS = setOf("boot", "boots")
+        val SNEAKER_KEYWORDS = setOf("sneaker", "sneakers", "trainer", "trainers")
+        val LOAFER_KEYWORDS = setOf("loafer", "loafers")
+        val SANDAL_KEYWORDS = setOf("sandal", "sandals")
+        val HEEL_KEYWORDS = setOf("heel", "heels")
+        val SHOES_KEYWORDS = setOf("shoe", "shoes", "footwear") + BOOT_KEYWORDS + SNEAKER_KEYWORDS + LOAFER_KEYWORDS + SANDAL_KEYWORDS + HEEL_KEYWORDS
+        val SHOES_QUERY_KEYWORDS = SHOES_KEYWORDS + setOf("foot wear")
+
+        val DRESS_KEYWORDS = setOf("dress", "dresses", "gown")
+        val T_SHIRT_KEYWORDS = setOf("t shirt", "tee", "tees")
+        val SHIRT_KEYWORDS = setOf("shirt", "shirts", "polo")
+        val SHIRT_QUERY_KEYWORDS = SHIRT_KEYWORDS
+        val BLOUSE_KEYWORDS = setOf("blouse", "blouses")
+        val HOODIE_KEYWORDS = setOf("hoodie", "hoodies", "sweatshirt", "sweatshirts")
+        val JACKET_KEYWORDS = setOf("jacket", "jackets", "coat", "coats")
+        val TOP_KEYWORDS = T_SHIRT_KEYWORDS + SHIRT_KEYWORDS + BLOUSE_KEYWORDS + HOODIE_KEYWORDS + JACKET_KEYWORDS + setOf("top", "tops", "sweater", "sweaters")
+        val TOP_QUERY_KEYWORDS = TOP_KEYWORDS
+
+        val PANTS_KEYWORDS = setOf("pant", "pants", "trouser", "trousers")
+        val PANTS_QUERY_KEYWORDS = PANTS_KEYWORDS + setOf("bottom", "bottoms")
+        val JEANS_KEYWORDS = setOf("jean", "jeans", "denim")
+        val SHORTS_KEYWORDS = setOf("short", "shorts")
+        val SKIRT_KEYWORDS = setOf("skirt", "skirts")
+        val BAG_KEYWORDS = setOf("bag", "bags", "backpack", "purse", "wallet", "handbag")
+        val ACCESSORY_KEYWORDS = setOf("accessory", "accessories", "belt", "cap", "hat", "sunglasses", "scarf")
+        val ACCESSORY_QUERY_KEYWORDS = ACCESSORY_KEYWORDS
+
+        val PRICE_MAX_PATTERNS = listOf(
+            "(?:under|below|less than|max|maximum|up to|no more than|not above|<=|lte)\\s+(\\d+(?:\\.\\d+)?)",
+            "(\\d+(?:\\.\\d+)?)\\s*(?:egp)?\\s*(?:or less|and below|max)",
         )
-        val TOP_QUERY_KEYWORDS = TOP_KEYWORDS + setOf("t shirts", "shirts", "tees", "tops", "dresses")
-        val BOTTOM_KEYWORDS = setOf("pant", "pants", "jean", "jeans", "trouser", "trousers", "short", "shorts", "skirt", "leggings", "jogger", "sweatpant")
-        val SHOES_KEYWORDS = setOf("shoe", "shoes", "sneaker", "sneakers", "trainer", "boot", "boots", "sandal", "sandals", "heel", "heels", "loafer")
-        val BAG_ACCESSORY_KEYWORDS = setOf("bag", "bags", "backpack", "purse", "wallet", "belt", "cap", "hat", "accessory", "accessories", "sunglasses")
-        val SLOT_QUERY_TOKENS = TOP_QUERY_KEYWORDS + BOTTOM_KEYWORDS + SHOES_KEYWORDS + BAG_ACCESSORY_KEYWORDS
+        val PRICE_MIN_PATTERNS = listOf(
+            "(?:over|above|more than|min|minimum|from|>=|gte)\\s+(\\d+(?:\\.\\d+)?)",
+            "(\\d+(?:\\.\\d+)?)\\s*(?:egp)?\\s*(?:or more|and above|min)",
+        )
+
+        val ORDINAL_TERMS = mapOf(
+            "first" to 1,
+            "second" to 2,
+            "third" to 3,
+            "fourth" to 4,
+            "1st" to 1,
+            "2nd" to 2,
+            "3rd" to 3,
+            "4th" to 4,
+        )
+
+        val ARABIC_QUERY_SYNONYMS = linkedMapOf(
+            "دورلي" to "search",
+            "دور" to "search",
+            "ابحث" to "search",
+            "بحث" to "search",
+            "وريني" to "show",
+            "اعرض" to "show",
+            "عرض" to "show",
+            "هاتلي" to "show",
+            "عاوز" to "want",
+            "اريد" to "want",
+            "منتجات" to "products",
+            "منتج" to "product",
+            "رجالي" to "men",
+            "رجال" to "men",
+            "للرجال" to "men",
+            "اولادي" to "men",
+            "حريمي" to "women",
+            "نسائي" to "women",
+            "نسويه" to "women",
+            "نساء" to "women",
+            "للسيدات" to "women",
+            "سيدات" to "women",
+            "بنات" to "women girls",
+            "للبنات" to "women girls",
+            "اطفال" to "kids",
+            "اطفالي" to "kids",
+            "ولادي" to "kids",
+            "الاحذيه" to "shoes footwear",
+            "احذيه" to "shoes footwear",
+            "حذاء" to "shoes footwear",
+            "جزمه" to "shoes footwear",
+            "جزم" to "shoes footwear",
+            "شوز" to "shoes footwear",
+            "بوت" to "boots",
+            "جزمه بوت" to "boots",
+            "تيشيرت" to "t shirt shirt top",
+            "تي شيرت" to "t shirt shirt top",
+            "تشيرت" to "t shirt shirt top",
+            "قميص" to "shirt top",
+            "قمصان" to "shirts tops",
+            "بلوزه" to "blouse top",
+            "فستان" to "dress",
+            "فساتين" to "dresses",
+            "بنطلون" to "pants jeans trousers",
+            "بناطيل" to "pants jeans trousers",
+            "جينز" to "jeans denim",
+            "شورت" to "shorts",
+            "جيبه" to "skirt",
+            "شنطه" to "bag",
+            "شنط" to "bags",
+            "حقيبه" to "bag",
+            "اكسسوارات" to "accessories",
+            "اكسسوار" to "accessory",
+            "اسود" to "black",
+            "سوداء" to "black",
+            "ابيض" to "white",
+            "بيضاء" to "white",
+            "ازرق" to "blue",
+            "كحلي" to "navy",
+            "احمر" to "red",
+            "اخضر" to "green",
+            "رمادي" to "gray",
+            "رصاصي" to "gray",
+            "بني" to "brown",
+            "بيج" to "beige",
+            "كريمي" to "cream",
+            "وردي" to "pink",
+            "اصفر" to "yellow",
+            "برتقالي" to "orange",
+            "بنفسجي" to "purple",
+            "ذهبي" to "gold",
+            "فضي" to "silver",
+            "جلد" to "leather",
+            "قطن" to "cotton",
+            "كتان" to "linen",
+            "صوف" to "wool",
+            "دنيم" to "denim",
+            "كاجوال" to "casual",
+            "رسمي" to "formal",
+            "فورمال" to "formal",
+            "صيفي" to "summer",
+            "شتوي" to "winter",
+            "اقل من" to "under",
+            "اقل" to "under",
+            "تحت" to "under",
+            "لحد" to "up to",
+            "حتي" to "up to",
+            "فوق" to "over",
+            "اكثر من" to "over",
+        )
     }
 }
