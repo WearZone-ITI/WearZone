@@ -5,6 +5,7 @@ data class CheckoutDeliveryAddressUiModel(
     val recipientName: String,
     val addressLines: String,
     val countryLine: String,
+    val phone: String?
 )
 
 enum class CheckoutPaymentMethodUi {

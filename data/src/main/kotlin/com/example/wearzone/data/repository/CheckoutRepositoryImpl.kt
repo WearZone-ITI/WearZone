@@ -84,7 +84,7 @@ class CheckoutRepositoryImpl @Inject constructor(
         const val DISCOUNT_TYPE_PERCENTAGE = "percentage"
         const val DISCOUNT_TYPE_FIXED_AMOUNT = "fixed_amount"
         const val ORDER_NOTE_CASH_ON_DELIVERY = "Payment method: Cash on Delivery"
-        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (PayMock)"
+        const val ORDER_NOTE_CREDIT_CARD = "Payment method: Credit Card (Paymob)"
     }
 
     private fun CheckoutShippingAddress.toDto(): ShopifyOrderShippingAddressDto =
