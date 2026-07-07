@@ -436,6 +436,7 @@
     <string name="wishlist_items_saved">%1$d عناصر محفوظة</string>
     <string name="wishlist_sold_out">مباع</string>
     <string name="wishlist_out_of_stock">نفذت الكمية</string>
+    <string name="wishlist_discover_styles">اكتشف ازياء</string>
     <string name="wishlist_empty_title">قائمة أمنياتك فارغة</string>
     <string name="wishlist_empty_subtitle">احفظ العناصر التي تحبها لعرضها لاحقًا.</string>
     <string name="wishlist_item_removed">تمت إزالة العنصر من المفضلة</string>
@@ -507,6 +508,9 @@
     <string name="error_network">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="error_server">خطأ في الخادم (%1$s)</string>
     <string name="error_unknown">حدث خطأ ما، يرجى المحاولة لاحقاً</string>
+    <string name="no_internet_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="no_internet_description">لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.</string>
+    <string name="retry_button">إعادة المحاولة</string>
     <string name="promo_limited_time_sale">عرض لفترة محدودة</string>
     <string name="promo_discount_off">خصم</string>
     <string name="promo_shop_now">تسوق الآن</string>

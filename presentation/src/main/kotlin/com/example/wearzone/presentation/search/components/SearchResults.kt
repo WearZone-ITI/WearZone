@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.NetworkErrorState
 import com.example.wearzone.presentation.common.PremiumEmptyState
 import com.example.wearzone.presentation.common.theme.AppColors
 import com.example.wearzone.presentation.search.SearchUiIntent
@@ -27,11 +28,9 @@ fun SearchResults(
 ) {
     when {
         state.isLoading -> ProductGridSkeleton(modifier = modifier)
-        state.hasError -> SearchMessage(
-            title = stringResource(id = R.string.search_error_title),
-            subtitle = stringResource(id = R.string.search_error_subtitle),
-            actionLabel = stringResource(id = R.string.search_retry),
-            onAction = { onIntent(SearchUiIntent.OnRetry) },
+        state.hasError -> NetworkErrorState(
+            modifier = modifier.fillMaxSize(),
+            onRetry = { onIntent(SearchUiIntent.OnRetry) },
         )
         state.products.isEmpty() && state.hasSearched -> PremiumEmptyState(
             modifier = modifier,
