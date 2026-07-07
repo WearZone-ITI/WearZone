@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.wearzone.BuildConfig
+import com.example.wearzone.R as AppR
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.auth.emailverification.EmailVerificationScreen
@@ -301,6 +303,7 @@ fun NavGraph(
         // Ahmed
         composable<Route.LoginRoute> {
             LoginScreen(
+                googleWebClientId = stringResource(AppR.string.default_web_client_id),
                 onNavigateToHome = {
                     navigateToPendingOrMain(Route.LoginRoute)
                 },

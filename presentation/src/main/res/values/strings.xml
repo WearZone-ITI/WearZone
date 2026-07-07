@@ -15,7 +15,6 @@
     <string name="onboarding_delivery_moment_title">Unbox Your Style</string>
     <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
     <string name="login_placeholder_title">Login Screen</string>
-    <string name="default_web_client_id">1048875285452-s9p9gonupp17tr9sgs8iu4g12ot1m428.apps.googleusercontent.com</string>
     <!-- Profile and Settings -->
     <string name="profile_brand_title">WearZone</string>
     <string name="profile_guest_name">Guest</string>
@@ -368,6 +367,7 @@
     <string name="login_successful">Login successful!</string>
     <string name="unexpected_credential_type">Unexpected credential type</string>
     <string name="google_sign_in_failed">Google Sign-In failed</string>
+    <string name="google_sign_in_not_configured">Google Sign-In is not configured. Missing Web client ID.</string>
     <string name="content_desc_google_sign_in">Sign in with Google</string>
     <string name="content_desc_apple_sign_in">Sign in with Apple</string>
     <string name="welcome_back">Welcome Back</string>
