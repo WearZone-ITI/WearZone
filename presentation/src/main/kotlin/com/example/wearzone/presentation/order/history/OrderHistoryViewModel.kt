@@ -140,7 +140,7 @@ class OrderHistoryViewModel @Inject constructor(
                 ?: orderNumber?.let { "#$it" }
                 ?: "",
             placedDate = createdAt.toPlacedDate(),
-            formattedTotalPrice = totalPrice.toCurrencyText(currencyCode),
+            totalPriceAmount = totalPrice,
             statuses = buildStatuses().toImmutableList(),
             thumbnails = lineItems
                 .firstOrNull { it.imageUrl?.isNotBlank() == true }

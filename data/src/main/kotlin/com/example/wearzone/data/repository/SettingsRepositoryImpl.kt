@@ -40,4 +40,11 @@ class SettingsRepositoryImpl @Inject constructor(
                 dataSource.setLanguage(languageCode)
             }
         }
+
+    override suspend fun setCurrency(currencyCode: String): Result<Unit> =
+        withContext(ioDispatcher) {
+            runCatchingCancellable {
+                dataSource.setCurrency(currencyCode)
+            }
+        }
 }

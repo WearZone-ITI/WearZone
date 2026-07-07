@@ -146,13 +146,13 @@ class OrderDetailsViewModel @Inject constructor(
             placedDate = createdAt.toDisplayDateTime(),
             status = toStatusUiModel(),
             timeline = buildTimeline().toImmutableList(),
-            items = lineItems.map { it.toUiModel(currencyCode) }.toImmutableList(),
+            items = lineItems.map { it.toUiModel() }.toImmutableList(),
             shippingAddress = shippingAddress?.toUiModel(),
             paymentMethods = paymentMethods.toImmutableList(),
-            subtotal = subtotalPrice.toCurrencyText(currencyCode),
-            shipping = shippingPrice.toCurrencyText(currencyCode),
-            tax = taxPrice.toCurrencyText(currencyCode),
-            total = totalPrice.toCurrencyText(currencyCode),
+            subtotalAmount = subtotalPrice,
+            shippingAmount = shippingPrice,
+            taxAmount = taxPrice,
+            totalAmount = totalPrice,
             canCancel = canCancel,
         )
 
@@ -231,13 +231,13 @@ class OrderDetailsViewModel @Inject constructor(
         return timeline
     }
 
-    private fun OrderDetailsLineItem.toUiModel(currencyCode: String): OrderDetailsItemUiModel =
+    private fun OrderDetailsLineItem.toUiModel(): OrderDetailsItemUiModel =
         OrderDetailsItemUiModel(
             id = id,
             title = title,
             variantInfo = variantTitle.orEmpty(),
             quantity = quantity,
-            formattedPrice = (price * quantity).toCurrencyText(currencyCode),
+            basePriceEgp = price,
             imageUrl = imageUrl,
         )
 

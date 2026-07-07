@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.wearzone.presentation.product.detail.ClientReviewUiModel
 
+import com.example.wearzone.presentation.common.theme.AppTheme
+
 @Composable
 fun ReviewListCard(
     review: ClientReviewUiModel,
@@ -96,7 +98,7 @@ fun ReviewListCard(
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = if (i <= ratingInt) Color(0xFFFFB200) else MaterialTheme.colorScheme.outlineVariant,
+                                tint = if (i <= ratingInt) AppTheme.colors.accent else MaterialTheme.colorScheme.outlineVariant,
                                 modifier = Modifier.size(16.dp)
                             )
                         }

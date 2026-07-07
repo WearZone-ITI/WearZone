@@ -8,14 +8,17 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.wearzone.domain.settings.model.ThemeMode
 import com.example.wearzone.localization.LocalizedApp
 import com.example.wearzone.navigation.NavGraph
+import com.example.wearzone.presentation.common.LocalCurrencyState
 import com.example.wearzone.presentation.common.theme.AppThemeViewModel
 import com.example.wearzone.presentation.common.theme.WearZoneTheme
+import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
 fun App(
     viewModel: AppThemeViewModel = hiltViewModel(),
 ) {
     val preferences by viewModel.settingsPreferences.collectAsState()
+    val currencyState by viewModel.currencyState.collectAsState()
     val systemDarkTheme = isSystemInDarkTheme()
 
     val useDarkTheme = when (preferences.themeMode) {
@@ -26,7 +29,9 @@ fun App(
 
     LocalizedApp(languageCode = preferences.languageCode) {
         WearZoneTheme(darkTheme = useDarkTheme) {
-            NavGraph()
+            CompositionLocalProvider(LocalCurrencyState provides currencyState) {
+                NavGraph()
+            }
         }
     }
 }

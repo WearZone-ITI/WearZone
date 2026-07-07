@@ -2,16 +2,19 @@ package com.example.wearzone.di
 
 import android.util.Log
 import com.example.wearzone.BuildConfig
-import com.example.wearzone.data.di.PaymobOkHttp
-import com.example.wearzone.data.di.PaymobRetrofit
+import com.example.wearzone.data.di.CurrencyOkHttp
+import com.example.wearzone.data.di.CurrencyRetrofit
 import com.example.wearzone.data.di.MapboxAccessToken
 import com.example.wearzone.data.di.MapboxOkHttp
 import com.example.wearzone.data.di.MapboxRetrofit
+import com.example.wearzone.data.di.PaymobOkHttp
+import com.example.wearzone.data.di.PaymobRetrofit
 import com.example.wearzone.data.di.ShopifyOkHttp
 import com.example.wearzone.data.di.ShopifyRetrofit
 import com.example.wearzone.data.remote.api.AddressApiService
 import com.example.wearzone.data.remote.api.AuthApiService
 import com.example.wearzone.data.remote.api.CartApiService
+import com.example.wearzone.data.remote.api.CurrencyApiService
 import com.example.wearzone.data.remote.api.DiscountApiService
 import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
@@ -39,12 +42,12 @@ object NetworkModule {
 
     private const val BASE_URL = "https://mad46-and9.myshopify.com/"
     private const val PAYMOB_BASE_URL = "https://accept.paymob.com/"
+    private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
+    private const val CURRENCY_BASE_URL = "https://open.er-api.com/"
 
     @Provides
     @Named("secretKey")
     fun providePaymobSecretKey(): String = BuildConfig.PAYMOB_SECRET_KEY
-    private const val PAYMOCK_BASE_URL = "http://10.87.46.72:8000/api/v1/"
-    private const val MAPBOX_BASE_URL = "https://api.mapbox.com/"
 
     @Provides
     fun provideJson(): Json {
@@ -59,16 +62,16 @@ object NetworkModule {
     @ShopifyOkHttp
     fun provideShopifyOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder().addInterceptor { chain ->
-                val request = chain.request()
-                if (BuildConfig.DEBUG) {
-                    Log.d("ShopifyRequest", "${request.method} ${request.url}")
-                }
-                val authenticatedRequest = request.newBuilder().addHeader(
-                        "X-Shopify-Access-Token",
-                        BuildConfig.SHOPIFY_ADMIN_TOKEN
-                    ).addHeader("Content-Type", "application/json").build()
-                chain.proceed(authenticatedRequest)
-            }.build()
+            val request = chain.request()
+            if (BuildConfig.DEBUG) {
+                Log.d("ShopifyRequest", "${request.method} ${request.url}")
+            }
+            val authenticatedRequest = request.newBuilder().addHeader(
+                "X-Shopify-Access-Token",
+                BuildConfig.SHOPIFY_ADMIN_TOKEN
+            ).addHeader("Content-Type", "application/json").build()
+            chain.proceed(authenticatedRequest)
+        }.build()
     }
 
     @Provides
@@ -78,18 +81,18 @@ object NetworkModule {
             level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder().addInterceptor { chain ->
-                val request = chain.request()
-                val authenticatedRequest =
-                    request.newBuilder().addHeader("Content-Type", "application/json").build()
+            val request = chain.request()
+            val authenticatedRequest =
+                request.newBuilder().addHeader("Content-Type", "application/json").build()
 
-                if (BuildConfig.DEBUG) {
-                    Log.d(
-                        "PaymobRequest",
-                        "${authenticatedRequest.method} ${authenticatedRequest.url}"
-                    )
-                }
-                chain.proceed(authenticatedRequest)
-            }.addInterceptor(logging).build()
+            if (BuildConfig.DEBUG) {
+                Log.d(
+                    "PaymobRequest",
+                    "${authenticatedRequest.method} ${authenticatedRequest.url}"
+                )
+            }
+            chain.proceed(authenticatedRequest)
+        }.addInterceptor(logging).build()
     }
 
     @Provides
@@ -128,6 +131,24 @@ object NetworkModule {
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(MAPBOX_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @CurrencyOkHttp
+    fun provideCurrencyOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder().build()
+
+    @Provides
+    @CurrencyRetrofit
+    fun provideCurrencyRetrofit(
+        @CurrencyOkHttp okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(CURRENCY_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -178,10 +199,15 @@ object NetworkModule {
         return retrofit.create(DiscountApiService::class.java)
     }
 
+    @Provides
+    fun provideCurrencyApiService(
+        @CurrencyRetrofit retrofit: Retrofit,
+    ): CurrencyApiService {
+        return retrofit.create(CurrencyApiService::class.java)
+    }
 
     @Provides
     @Singleton
     fun providePaymobApiService(@PaymobRetrofit retrofit: Retrofit): PaymobApiService =
         retrofit.create(PaymobApiService::class.java)
-
 }
