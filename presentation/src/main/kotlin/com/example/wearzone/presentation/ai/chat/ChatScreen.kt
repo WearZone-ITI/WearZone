@@ -213,20 +213,17 @@ private fun ChatContent(
                         } else {
                             Column {
                                 AiMessageBubble(message.text, message.isPending)
-                                if (!message.isPending) {
-                                    val products = remember(message.rawText) { parseProductsFromMessage(message.rawText) }
-                                    if (products.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Column(
-                                            modifier = Modifier.padding(start = 36.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            products.forEach { product ->
-                                                ProductCardInChat(
-                                                    product = product,
-                                                    onClick = { onNavigateToProductDetail(product.id) }
-                                                )
-                                            }
+                                if (!message.isPending && message.products.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Column(
+                                        modifier = Modifier.padding(start = 36.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        message.products.forEach { product ->
+                                            ProductCardInChat(
+                                                product = product,
+                                                onClick = { onNavigateToProductDetail(product.productId) }
+                                            )
                                         }
                                     }
                                 }
@@ -452,22 +449,15 @@ private fun ErrorBanner(
     }
 }
 
-data class ParsedProduct(
-    val id: String,
-    val title: String,
-    val price: String,
-    val imageUrl: String
-)
-
 @Composable
 fun ProductCardInChat(
-    product: ParsedProduct,
+    product: ChatUiProductCard,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
-            .widthIn(max = 280.dp)
+            .widthIn(max = 320.dp)
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
@@ -483,7 +473,7 @@ fun ProductCardInChat(
                 contentDescription = product.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(68.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(AppTheme.colors.surfaceVariant)
             )
@@ -494,15 +484,45 @@ fun ProductCardInChat(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.textPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = product.price?.let { formatChatPrice(it, product.currencyCode) } ?: "Price unavailable",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppTheme.colors.accent,
+                    fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (product.price.isNotEmpty()) {
+                val meta = listOfNotNull(
+                    "ID: ${product.productId}",
+                    product.vendor.takeIf { it.isNotBlank() },
+                    product.productType?.takeIf { it.isNotBlank() },
+                    when (product.isOutOfStock) {
+                        true -> "Out of stock"
+                        false -> null
+                        null -> null
+                    }
+                ).joinToString(" • ")
+                if (meta.isNotBlank()) {
                     Text(
-                        text = product.price,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AppTheme.colors.accent,
-                        fontWeight = FontWeight.Medium
+                        text = meta,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppTheme.colors.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (product.reason.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = product.reason,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppTheme.colors.textSecondary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -510,38 +530,7 @@ fun ProductCardInChat(
     }
 }
 
-fun parseProductsFromMessage(text: String): List<ParsedProduct> {
-    val idRegex = Regex("""\[ID:\s*(\d+)\]""", RegexOption.IGNORE_CASE)
-    val idMatches = idRegex.findAll(text).toList()
-    if (idMatches.isEmpty()) return emptyList()
-
-    val titleRegex = Regex("""\*\*(.*?)\*\*""")
-    val priceRegex = Regex(
-        """(?:\$|EGP|USD|LE|€|£)\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*(?:EGP|USD|LE|\$|€|£)""",
-        RegexOption.IGNORE_CASE
-    )
-    val imageUrlRegex = Regex("""image_url":\s*"(.*?)"""")
-
-    val parsedProducts = mutableListOf<ParsedProduct>()
-    var lastIndex = 0
-    for (i in idMatches.indices) {
-        val idMatch = idMatches[i]
-        val id = idMatch.groupValues[1]
-        val endIndex = idMatch.range.last + 1
-        val segment = text.substring(lastIndex, endIndex)
-
-        val title = titleRegex.find(segment)?.groupValues?.get(1)
-            ?: titleRegex.find(text.substring(idMatch.range.first))?.groupValues?.get(1)
-            ?: "Product Info"
-
-        val price = priceRegex.find(segment)?.value
-            ?: priceRegex.find(text.substring(idMatch.range.first))?.value
-            ?: ""
-
-        val imageUrl = imageUrlRegex.find(text.substring(idMatch.range.first))?.groupValues?.get(1) ?: ""
-
-        parsedProducts.add(ParsedProduct(id = id, title = title, price = price, imageUrl = imageUrl))
-        lastIndex = endIndex
-    }
-    return parsedProducts
+private fun formatChatPrice(price: Double, currencyCode: String): String {
+    val cleanPrice = if (price % 1.0 == 0.0) price.toInt().toString() else "%.2f".format(java.util.Locale.US, price)
+    return "$cleanPrice ${currencyCode.ifBlank { "EGP" }}"
 }

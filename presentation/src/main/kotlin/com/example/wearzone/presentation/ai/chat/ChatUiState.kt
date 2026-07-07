@@ -14,7 +14,20 @@ data class ChatUiMessage(
     val id: String,
     val isFromUser: Boolean,
     val text: String,
-    val rawText: String, // Store raw text for product parsing
+    val rawText: String,
     val timestamp: Long,
-    val isPending: Boolean = false
+    val isPending: Boolean = false,
+    val products: ImmutableList<ChatUiProductCard> = persistentListOf(),
+)
+
+data class ChatUiProductCard(
+    val productId: String,
+    val title: String,
+    val imageUrl: String?,
+    val price: Double?,
+    val currencyCode: String,
+    val vendor: String,
+    val productType: String?,
+    val reason: String,
+    val isOutOfStock: Boolean?,
 )

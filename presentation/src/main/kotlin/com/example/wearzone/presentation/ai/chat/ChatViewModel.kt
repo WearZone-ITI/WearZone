@@ -47,7 +47,20 @@ class ChatViewModel @Inject constructor(
                         text = if (msg.role == ChatRole.USER) msg.content else formatAiResponse(msg.content),
                         rawText = msg.content,
                         timestamp = msg.timestamp,
-                        isPending = msg.isPending
+                        isPending = msg.isPending,
+                        products = msg.products.map { product ->
+                            ChatUiProductCard(
+                                productId = product.productId,
+                                title = product.title,
+                                imageUrl = product.imageUrl,
+                                price = product.price,
+                                currencyCode = product.currencyCode,
+                                vendor = product.vendor,
+                                productType = product.productType,
+                                reason = product.reason,
+                                isOutOfStock = product.isOutOfStock,
+                            )
+                        }.toImmutableList(),
                     )
                 }.toImmutableList()
                 _uiState.update { it.copy(messages = uiMessages) }
@@ -56,8 +69,7 @@ class ChatViewModel @Inject constructor(
     }
 
     private fun formatAiResponse(text: String): String {
-        // Strip [ID: 12345] data blocks from the UI text to prevent leakage
-        return text.replace(Regex("""\[ID:\s*\d+\]"""), "").trim()
+        return text.trim()
     }
 
     fun handleIntent(intent: ChatUiIntent) {
