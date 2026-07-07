@@ -20,6 +20,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,8 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,7 +68,7 @@ import kotlinx.coroutines.launch
 
 data class BottomNavItem<T : Any>(
     val route: T,
-    val iconRes: Int,
+    val icon: ImageVector,
     val labelRes: Int,
     val contentDescriptionRes: Int
 )
@@ -89,14 +94,14 @@ fun MainScreen(
     val currentDestination = navBackStackEntry?.destination
     val shouldHideBottomBar =
         currentDestination?.hasRoute(Route.AddressAddRoute::class) == true ||
-            currentDestination?.hasRoute(Route.AddressEditRoute::class) == true
+                currentDestination?.hasRoute(Route.AddressEditRoute::class) == true
 
     val navItems = listOf(
-        BottomNavItem(Route.HomeRoute, R.drawable.ic_home, R.string.nav_home, R.string.nav_home),
-        BottomNavItem(Route.CategoriesRoute, R.drawable.ic_categories, R.string.nav_categories, R.string.nav_categories),
-        BottomNavItem(Route.SearchRoute, R.drawable.ic_search, R.string.nav_search, R.string.content_desc_search),
-        BottomNavItem(Route.WishlistRoute, R.drawable.ic_wishlist, R.string.nav_wishlist, R.string.nav_wishlist),
-        BottomNavItem(Route.ProfileRoute, R.drawable.ic_profile, R.string.nav_profile, R.string.nav_profile)
+        BottomNavItem(Route.HomeRoute, Icons.Default.Home, R.string.nav_home, R.string.nav_home),
+        BottomNavItem(Route.CategoriesRoute, Icons.Outlined.List, R.string.nav_categories, R.string.nav_categories),
+        BottomNavItem(Route.SearchRoute, Icons.Outlined.Search, R.string.nav_search, R.string.content_desc_search),
+        BottomNavItem(Route.WishlistRoute, Icons.Outlined.FavoriteBorder, R.string.nav_wishlist, R.string.nav_wishlist),
+        BottomNavItem(Route.ProfileRoute, Icons.Outlined.Person, R.string.nav_profile, R.string.nav_profile)
     )
 
     Scaffold(
@@ -405,10 +410,10 @@ fun AnimatedCurvedNavigationBar(
                     if (!isSelected) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                painter = painterResource(id = item.iconRes),
+                                imageVector = item.icon,
                                 contentDescription = stringResource(id = item.contentDescriptionRes),
                                 modifier = Modifier.size(24.dp),
-                                tint = Color.Unspecified
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
@@ -441,10 +446,10 @@ fun AnimatedCurvedNavigationBar(
         ) {
             val selectedItem = items[selectedIndex]
             Icon(
-                painter = painterResource(id = selectedItem.iconRes),
+                imageVector = selectedItem.icon,
                 contentDescription = stringResource(id = selectedItem.contentDescriptionRes),
                 modifier = Modifier.size(26.dp),
-                tint = Color.Unspecified
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

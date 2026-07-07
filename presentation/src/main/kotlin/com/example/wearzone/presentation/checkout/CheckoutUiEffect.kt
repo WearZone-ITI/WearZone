@@ -8,5 +8,7 @@ sealed interface CheckoutUiEffect {
     data object NavigateToAddressList : CheckoutUiEffect
     data object NavigateToAddAddress : CheckoutUiEffect
     data object ShowConfirmOrderDialog : CheckoutUiEffect
+    data class NavigateToPaymobSdk(val clientSecret: String) : CheckoutUiEffect
+
     data class ShowMessage(@param:StringRes val messageRes: Int) : CheckoutUiEffect
 }

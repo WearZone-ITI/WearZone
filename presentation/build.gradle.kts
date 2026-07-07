@@ -30,6 +30,12 @@ android {
         val googleClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "\"\""
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", googleClientId)
 
+        buildConfigField(
+            "String",
+            "PAYMOB_PUBLIC_KEY",
+            "\"${localProperties.getProperty("PAYMOB_PUBLIC_KEY") ?: ""}\""
+        )
+
         val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
     }
@@ -37,6 +43,8 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        dataBinding = true
+        viewBinding = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -91,6 +99,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     //icons
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.paymob.sdk)
+
     //Hend
 
 
@@ -119,8 +129,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    // Material Icons Extended
-    implementation(libs.androidx.material.icons.extended)
 
     // Lottie Compose loader
     implementation(libs.lottie.compose)

@@ -120,6 +120,11 @@ class VendorProductsViewModel @Inject constructor(
                 return@launch
             }
 
+            if (product.isOutOfStock || product.maxQuantity <= 0) {
+                _uiEffect.send(VendorProductsUiEffect.ShowSnackbar(R.string.cart_out_of_stock))
+                return@launch
+            }
+
             val item = CartItem(
                 variantId = product.variantId,
                 productId = product.id,
@@ -128,9 +133,9 @@ class VendorProductsViewModel @Inject constructor(
                 price = product.price,
                 currencyCode = product.currencyCode,
                 quantity = 1,
-                maxQuantity = 10,
+                maxQuantity = product.maxQuantity,
                 imageUrl = product.imageUrl,
-                size = "M" // Default size fallback
+                size = selectedProductLabel(product.size, product.color)
             )
 
             when (addToCartUseCase(item)) {
@@ -157,7 +162,7 @@ class VendorProductsViewModel @Inject constructor(
                 price = product.price.toString(),
                 currencyCode = product.currencyCode,
                 imageUrl = product.imageUrl ?: "",
-                isOutOfStock = false
+                isOutOfStock = product.isOutOfStock
             )
 
             toggleFavoriteUseCase(item, userId)
@@ -168,4 +173,7 @@ class VendorProductsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun selectedProductLabel(size: String?, color: String?): String? =
+        listOfNotNull(size, color).joinToString(" / ").takeIf { it.isNotBlank() }
 }

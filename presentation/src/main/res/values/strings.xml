@@ -210,7 +210,7 @@
     <string name="order_details_order_number">Order %1$s</string>
     <string name="order_details_tracking_title">Tracking</string>
     <string name="order_details_timeline_placed">Order Placed</string>
-    <string name="order_details_timeline_processing">Processing</string>
+    <string name="order_details_timeline_preparing">Preparing Order</string>
     <string name="order_details_timeline_shipped">Shipped</string>
     <string name="order_details_timeline_cancelled">Cancelled</string>
     <string name="order_details_timeline_unavailable">Not available yet</string>
@@ -293,7 +293,7 @@
     <string name="checkout_payment_cash_on_delivery">Cash on Delivery</string>
     <string name="checkout_payment_cash_on_delivery_description">Pay with cash when your order arrives.</string>
     <string name="checkout_payment_credit_card">Credit Card</string>
-    <string name="checkout_payment_credit_card_description">Pay securely with your credit card via PayMock.</string>
+    <string name="checkout_payment_credit_card_description">Pay securely with your credit card via Paymob.</string>
     <string name="checkout_card_details_title">CARD DETAILS</string>
     <string name="checkout_card_number">Card Number</string>
     <string name="checkout_card_first_name">First Name</string>
@@ -303,6 +303,10 @@
     <string name="checkout_card_cvv">CVV</string>
     <string name="checkout_error_invalid_card_details">Please enter valid card details.</string>
     <string name="checkout_error_payment_failed">Payment processing failed. Please check your card info.</string>
+    <string name="checkout_securing_payment">Securing Payment...</string>
+    <string name="checkout_placing_order">Placing Order...</string>
+    <string name="checkout_do_not_close">Please do not close the app</string>
+
     <string name="card_number_required">Card number is required</string>
     <string name="card_number_invalid">Please enter a valid card number</string>
     <string name="card_first_name_required">First name is required</string>
@@ -400,6 +404,8 @@
     <string name="product_detail_error_loading">Failed to load product. Please try again.</string>
     <string name="product_detail_retry">Retry</string>
     <string name="product_detail_added_to_cart">Added to cart!</string>
+    <string name="product_detail_select_color">Select Color</string>
+    <string name="product_detail_select_color_first">Please select a color first.</string>
     <string name="product_detail_select_size_first">Please select a size first.</string>
     <string name="product_detail_reviews">%1$.1f (%2$d reviews)</string>
     <string name="product_detail_auth_required">Please log in to continue.</string>

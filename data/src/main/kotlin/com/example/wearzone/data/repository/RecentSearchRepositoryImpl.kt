@@ -1,4 +1,4 @@
-package com.example.wearzone.data.repository.search
+package com.example.wearzone.data.repository
 
 import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.local.search.RecentSearchDao

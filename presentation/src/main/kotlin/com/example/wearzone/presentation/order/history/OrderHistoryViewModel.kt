@@ -143,43 +143,76 @@ class OrderHistoryViewModel @Inject constructor(
             totalPriceAmount = totalPrice,
             statuses = buildStatuses().toImmutableList(),
             thumbnails = lineItems
-                .take(3)
-                .map { lineItem ->
-                    OrderThumbnailUiModel(
-                        id = lineItem.id,
-                        imageUrl = lineItem.imageUrl?.takeIf { it.isNotBlank() },
+                .firstOrNull { it.imageUrl?.isNotBlank() == true }
+                ?.let { lineItem ->
+                    listOf(
+                        OrderThumbnailUiModel(
+                            id = lineItem.id,
+                            imageUrl = lineItem.imageUrl,
+                        )
                     )
-                }
-                .toImmutableList(),
+                }?.toImmutableList() ?: emptyList<OrderThumbnailUiModel>().toImmutableList(),
             canTrack = !trackingUrl.isNullOrBlank() || !trackingNumber.isNullOrBlank(),
         )
 
     private fun OrderHistory.buildStatuses(): List<OrderStatusUiModel> {
         val statuses = mutableListOf<OrderStatusUiModel>()
-        financialStatus?.toStatusUiModel()?.let(statuses::add)
-        fulfillmentStatus?.toStatusUiModel()?.let(statuses::add)
-        when (orderStatus) {
-            OrderStatus.Cancelled -> statuses.add(
+
+        // 1. Highest Priority: Cancelled Status
+        if (orderStatus == OrderStatus.Cancelled) {
+            statuses.add(
                 OrderStatusUiModel(
                     labelRes = R.string.order_history_status_cancelled,
                     tone = OrderStatusTone.Error,
                 )
             )
-            OrderStatus.Closed -> statuses.add(
+            return statuses
+        }
+
+        // 2. Financial Status (Paid vs Pending)
+        val isPaid = financialStatus?.contains("paid", ignoreCase = true) == true
+        val isCashOnDelivery = paymentGatewayNames.any {
+            it.contains("manual", ignoreCase = true) ||
+                    it.contains("cash", ignoreCase = true)
+        }
+
+        if (isPaid) {
+            statuses.add(
+                OrderStatusUiModel(
+                    label = "Paid",
+                    tone = OrderStatusTone.Success,
+                )
+            )
+        } else {
+            if (isCashOnDelivery) {
+                statuses.add(
+                    OrderStatusUiModel(
+                        labelRes = R.string.checkout_payment_cash_on_delivery,
+                        tone = OrderStatusTone.Warning,
+                    )
+                )
+            }
+            statuses.add(
+                OrderStatusUiModel(
+                    label = "Pending",
+                    tone = OrderStatusTone.Warning,
+                )
+            )
+        }
+
+        // 3. Fulfillment Status (only if not cancelled)
+        fulfillmentStatus?.toStatusUiModel()?.let(statuses::add)
+
+        // 4. Closed Status
+        if (orderStatus == OrderStatus.Closed) {
+            statuses.add(
                 OrderStatusUiModel(
                     labelRes = R.string.order_history_status_closed,
                     tone = OrderStatusTone.Neutral,
                 )
             )
-            OrderStatus.Open -> if (statuses.isEmpty()) {
-                statuses.add(
-                    OrderStatusUiModel(
-                        labelRes = R.string.order_history_status_open,
-                        tone = OrderStatusTone.Success,
-                    )
-                )
-            }
         }
+
         return statuses
     }
 

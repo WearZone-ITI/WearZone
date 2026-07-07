@@ -23,7 +23,13 @@ class SearchProductsUseCase(
         val matchesMinPrice = filters.minPrice?.let { price >= it } ?: true
         val matchesMaxPrice = filters.maxPrice?.let { price <= it } ?: true
         val matchesBrand = filters.brandTitle?.let { vendor.equals(it, ignoreCase = true) } ?: true
-        val matchesCategory = filters.categoryTitle?.let { title.contains(it, ignoreCase = true) } ?: true
+        val matchesCategory = filters.categoryTitle?.let { category ->
+            title.contains(category, ignoreCase = true) ||
+                productType.equals(category, ignoreCase = true) ||
+                tags.any { tag ->
+                    tag.equals(category, ignoreCase = true) || tag.contains(category, ignoreCase = true)
+                }
+        } ?: true
         return matchesQuery && matchesMinPrice && matchesMaxPrice && matchesBrand && matchesCategory
     }
 }

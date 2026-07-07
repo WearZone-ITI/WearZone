@@ -124,6 +124,11 @@ class HomeViewModel @Inject constructor(
                 return@launch
             }
 
+            if (product.isOutOfStock || product.maxQuantity <= 0) {
+                sendEffect(HomeUiEffect.ShowSnackbar(R.string.cart_out_of_stock))
+                return@launch
+            }
+
             val item = CartItem(
                 variantId = product.variantId,
                 productId = product.id,
@@ -132,9 +137,9 @@ class HomeViewModel @Inject constructor(
                 price = product.price,
                 currencyCode = product.currencyCode,
                 quantity = 1,
-                maxQuantity = 10,
+                maxQuantity = product.maxQuantity,
                 imageUrl = product.imageUrl,
-                size = "M"
+                size = selectedProductLabel(product.size, product.color)
             )
             when (addToCartUseCase(item)) {
                 is DataResult.Success -> {
@@ -166,7 +171,7 @@ class HomeViewModel @Inject constructor(
                 price = product.price.toString(),
                 currencyCode = product.currencyCode,
                 imageUrl = product.imageUrl ?: "",
-                isOutOfStock = false
+                isOutOfStock = product.isOutOfStock
             )
             toggleFavoriteUseCase(item, user.uid)
             if (isAdding) {
@@ -252,6 +257,9 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    private fun selectedProductLabel(size: String?, color: String?): String? =
+        listOfNotNull(size, color).joinToString(" / ").takeIf { it.isNotBlank() }
 
     private fun sendEffect(effect: HomeUiEffect) {
         viewModelScope.launch {
