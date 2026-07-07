@@ -8,7 +8,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
@@ -40,6 +42,49 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getOrCreateShopifyCustomerId(firebaseUser: FirebaseUser): Long {
+        val savedCustomerId = getSavedShopifyCustomerId(firebaseUser.uid)?.takeIf { it > 0L }
+        if (savedCustomerId != null) {
+            saveCustomerIdInFireStore(firebaseUser = firebaseUser, customerId = savedCustomerId)
+            return savedCustomerId
+        }
+
+        val email = firebaseUser.email?.trim().orEmpty()
+        if (email.isBlank()) {
+            throw IllegalStateException("Google account has no email address")
+        }
+
+        val existingCustomerId = findShopifyCustomerIdByEmail(email)
+        val customerId = existingCustomerId ?: createShopifyCustomer(firebaseUser, email)
+        saveCustomerIdInFireStore(firebaseUser = firebaseUser, customerId = customerId)
+        return customerId
+    }
+
+    private suspend fun findShopifyCustomerIdByEmail(email: String): Long? {
+        val response = authApiService.searchCustomers(query = "email:$email")
+        return response.customers.firstOrNull { customer ->
+            customer.email.equals(email, ignoreCase = true)
+        }?.id ?: response.customers.firstOrNull()?.id
+    }
+
+    private suspend fun createShopifyCustomer(firebaseUser: FirebaseUser, email: String): Long {
+        val displayName = firebaseUser.displayName.orEmpty().trim()
+        val nameParts = displayName.split(" ").filter { it.isNotBlank() }
+        val firstName = nameParts.firstOrNull() ?: email.substringBefore('@')
+        val lastName = nameParts.drop(1).joinToString(" ")
+
+        val request = CustomerRequest(
+            customer = CustomerDto(
+                firstName = firstName,
+                lastName = lastName,
+                email = email,
+                verifiedEmail = true,
+                sendEmailWelcome = false,
+            ),
+        )
+        return authApiService.createCustomer(request).customer.id
+    }
+
     override suspend fun register(
         name: String,
         email: String,
@@ -65,7 +110,7 @@ class AuthRemoteDataSourceImpl @Inject constructor(
             )
             val customerResponse = authApiService.createCustomer(request)
 
-            saveCustomerIdInFireStore(uid = user.uid, customerId = customerResponse.customer.id)
+            saveCustomerIdInFireStore(firebaseUser = user, customerId = customerResponse.customer.id)
 
             return RegisterResult(firebaseUser = user, customerId = customerResponse.customer.id)
         } catch (e: Exception) {
@@ -96,15 +141,23 @@ class AuthRemoteDataSourceImpl @Inject constructor(
 
 
     private suspend fun saveCustomerIdInFireStore(
-        uid: String,
+        firebaseUser: FirebaseUser,
         customerId: Long,
     ) {
-        val data = mapOf("customerId" to customerId)
-        firestore.collection("users").document(uid).set(data).await()
+        val data = mapOf(
+            "customerId" to customerId,
+            "email" to firebaseUser.email.orEmpty(),
+            "displayName" to firebaseUser.displayName.orEmpty(),
+            "photoUrl" to firebaseUser.photoUrl?.toString().orEmpty(),
+            "updatedAt" to FieldValue.serverTimestamp(),
+        )
+        firestore.collection("users")
+            .document(firebaseUser.uid)
+            .set(data, SetOptions.merge())
+            .await()
     }
 
     override suspend fun sendPasswordResetEmail(email: String) {
         firebaseAuth.sendPasswordResetEmail(email).await()
     }
-
 }

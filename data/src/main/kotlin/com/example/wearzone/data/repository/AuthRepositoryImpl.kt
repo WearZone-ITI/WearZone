@@ -34,8 +34,18 @@ class AuthRepositoryImpl @Inject constructor(
         withContext(ioDispatcher) {
             runCatchingCancellable {
                 val firebaseUser = remoteDataSource.signInWithGoogleCredential(idToken)
-                saveShopifyCustomerIdLocally(firebaseUser)
-                firebaseUser.toDomain()
+                try {
+                    val customerId = remoteDataSource.getOrCreateShopifyCustomerId(firebaseUser)
+                    settingsDataSource.setCustomerId(customerId)
+                    settingsDataSource.setDraftOrderId(null)
+                    firebaseUser.toDomain()
+                } catch (error: Exception) {
+                    if (error is CancellationException) throw error
+                    remoteDataSource.signOut()
+                    settingsDataSource.setCustomerId(null)
+                    settingsDataSource.setDraftOrderId(null)
+                    throw error
+                }
             }
         }
 
