@@ -25,6 +25,7 @@ import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.data.repository.SettingsRepositoryImpl
 import com.example.wearzone.domain.category.repository.ICategoryRepository
 import com.example.wearzone.data.repository.WishlistRepositoryImpl
+import com.example.wearzone.domain.notifications.scheduler.ICouponNotificationScheduler
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
 import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
 import dagger.Binds

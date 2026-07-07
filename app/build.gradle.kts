@@ -78,6 +78,7 @@ dependencies {
     //Omar
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.androidx.work.runtime.ktx)
+    ksp(libs.androidx.hilt.compiler)
     //Omar
 
     //Ahmed

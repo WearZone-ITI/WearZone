@@ -36,6 +36,7 @@ import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressUs
 import com.example.wearzone.domain.customer.address.usecase.GetCustomerAddressesUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
+import com.example.wearzone.domain.notifications.usecase.GetRandomCouponOfferUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -117,13 +118,10 @@ object UseCaseModule {
         return GetProductDetailUseCase(repository)
     }
 
-    // --- ADDED: provides the coupon-picking use case used by CouponReminderWorker ---
     @Provides
     fun provideGetRandomCouponOfferUseCase(): GetRandomCouponOfferUseCase {
         return GetRandomCouponOfferUseCase()
     }
-
-
 
     @Provides
     fun provideLoginWithEmailUseCase(

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="coupon_notification_channel_name" tools:ignore="StringFormatInvalid">Coupon Offers</string>
+    <string name="coupon_notification_channel_description" tools:ignore="StringFormatInvalid">Notifications for latest WearZone coupon offers and discounts.</string>
 
-    <string name="coupon_notification_channel_name">Coupons &amp; Offers</string>
-    <string name="coupon_notification_channel_description">Notifications about discount coupons and special offers</string>
-    <string name="coupon_notification_title">A gift is waiting for you 🎁</string>
-    <string name="coupon_notification_body">Enjoy %1$d%% off with code %2$s. Tap to shop now!</string>
+    <string name="coupon_notification_title">WearZone Live Discounts</string>
+    <string name="coupon_notification_message">Discount %1$d%% Code: %2$s</string>
 
+    <string name="coupon_copied_toast">Coupon code copied: %1$s</string>
 </resources>

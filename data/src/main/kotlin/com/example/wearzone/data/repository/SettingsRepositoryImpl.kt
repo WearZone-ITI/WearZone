@@ -3,6 +3,7 @@ package com.example.wearzone.data.repository
 import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.domain.common.runCatchingCancellable
+import com.example.wearzone.domain.notifications.scheduler.ICouponNotificationScheduler
 import com.example.wearzone.domain.settings.model.SettingsPreferences
 import com.example.wearzone.domain.settings.model.ThemeMode
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 class SettingsRepositoryImpl @Inject constructor(
     private val dataSource: ISettingsPreferencesDataSource,
-    private val couponNotificationScheduler: ICouponNotificationScheduler, // ADDED
+    private val couponNotificationScheduler: ICouponNotificationScheduler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ISettingsRepository {
 

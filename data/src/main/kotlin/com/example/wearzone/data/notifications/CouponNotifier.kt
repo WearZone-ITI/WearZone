@@ -3,7 +3,9 @@ package com.example.wearzone.data.notifications
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -25,23 +27,41 @@ class CouponNotifier @Inject constructor(
 
         ensureChannelExists()
 
-        val message = context.getString(
-            R.string.coupon_notification_body,
+        val localizedMessage = context.getString(
+            R.string.coupon_notification_message,
             offer.discountPercentage,
-            offer.code,
+            offer.code
+        )
+
+        val receiverIntent = Intent(context, NotificationReceiver::class.java).apply {
+            putExtra(NotificationReceiver.KEY_COUPON_CODE, offer.code)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            offer.code.hashCode(),
+            receiverIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_coupon_notification)
             .setContentTitle(context.getString(R.string.coupon_notification_title))
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setContentText(localizedMessage)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(localizedMessage))
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
         runCatching {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        }.onFailure {
+            it.printStackTrace()
         }
     }
 

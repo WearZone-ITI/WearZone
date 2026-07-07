@@ -1,5 +1,12 @@
 package com.example.wearzone.presentation.settings
 
+// --- ADDED imports below (runtime notification-permission request) ---
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+// --- end added imports ---
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +79,24 @@ fun SettingsScreen(
     var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
 
+    // --- ADDED: request POST_NOTIFICATIONS (Android 13+) when the user turns the toggle ON ---
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { /* No-op: the toggle already reflects the user's intent either way. */ },
+    )
+
+    fun onNotificationsToggled(enabled: Boolean) {
+        if (enabled &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            currentContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        viewModel.handleIntent(SettingsUiIntent.OnNotificationsToggled(enabled))
+    }
+    // --- end added block ---
+
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
             when (effect) {
@@ -93,10 +118,18 @@ fun SettingsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = AppTheme.colors.background,
     ) { innerPadding ->
+        // MODIFIED: onIntent used to be `viewModel::handleIntent` directly.
+        // Now it intercepts the notifications toggle to request permission first.
         SettingsContent(
             uiState = uiState,
             appVersion = appVersion,
-            onIntent = viewModel::handleIntent,
+            onIntent = { intent ->
+                if (intent is SettingsUiIntent.OnNotificationsToggled) {
+                    onNotificationsToggled(intent.enabled)
+                } else {
+                    viewModel.handleIntent(intent)
+                }
+            },
             modifier = Modifier.padding(innerPadding),
         )
     }

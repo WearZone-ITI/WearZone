@@ -2,6 +2,7 @@ package com.example.wearzone.data.notifications
 
 import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.wearzone.domain.notifications.scheduler.ICouponNotificationScheduler
@@ -17,9 +18,10 @@ class CouponNotificationSchedulerImpl @Inject constructor(
 
     override fun start() {
         val request = PeriodicWorkRequestBuilder<CouponReminderWorker>(
-            REPEAT_INTERVAL_HOURS,
-            TimeUnit.HOURS,
+            REPEAT_INTERVAL_MINUTES,
+            TimeUnit.MINUTES,
         ).build()
+
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WORK_NAME,
@@ -32,8 +34,14 @@ class CouponNotificationSchedulerImpl @Inject constructor(
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
     }
 
+    override fun triggerNow() {
+        val request = OneTimeWorkRequestBuilder<CouponReminderWorker>().build()
+        WorkManager.getInstance(context).enqueue(request)
+    }
+
     private companion object {
         const val WORK_NAME = "coupon_reminder_work"
-        const val REPEAT_INTERVAL_HOURS = 24L
+
+        const val REPEAT_INTERVAL_MINUTES = 15L
     }
 }
