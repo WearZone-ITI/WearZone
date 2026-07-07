@@ -21,12 +21,14 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +45,7 @@ import com.example.wearzone.presentation.auth.login.components.LoginForm
 import com.example.wearzone.presentation.auth.login.components.SocialLoginButtons
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.theme.AppTypography
+import com.example.wearzone.presentation.onboarding.OnboardingUiIntent
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
@@ -255,6 +258,19 @@ private fun LoginContent(
                     style = AppTypography.labelMedium,
                     color = AppTheme.colors.textPrimary,
                     modifier = Modifier.clickable { onIntent(LoginUiIntent.OnRegisterClicked) }
+                )
+            }
+
+            Spacer(Modifier.padding(12.dp))
+
+            TextButton(
+                onClick = { onIntent(LoginUiIntent.OnJoinAsGuestClicked) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_continue_as_guest),
+                    color = AppTheme.colors.textSecondary,
+                    textAlign = TextAlign.Center,
                 )
             }
         }

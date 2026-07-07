@@ -10,4 +10,5 @@ sealed interface LoginUiIntent {
     data object OnGuestModeClicked : LoginUiIntent
     data object OnRegisterClicked : LoginUiIntent
     data object OnForgotPasswordClicked : LoginUiIntent
+    data object OnJoinAsGuestClicked : LoginUiIntent
 }
