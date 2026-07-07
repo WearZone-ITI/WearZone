@@ -1,6 +1,10 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
@@ -406,4 +410,23 @@ object UseCaseModule {
         getOrderDetails = getOrderDetails,
         cancelOrder = cancelOrder,
     )
+
+    @Provides
+    fun provideSendChatMessageUseCase(
+        repository: IAiChatRepository
+    ): SendChatMessageUseCase =
+        SendChatMessageUseCase(repository)
+
+    @Provides
+    fun provideClearChatHistoryUseCase(
+        repository: IAiChatRepository
+    ): ClearChatHistoryUseCase =
+        ClearChatHistoryUseCase(repository)
+
+    @Provides
+    fun provideGetChatHistoryUseCase(
+        repository: IAiChatRepository
+    ): GetChatHistoryUseCase =
+        GetChatHistoryUseCase(repository)
+
 }

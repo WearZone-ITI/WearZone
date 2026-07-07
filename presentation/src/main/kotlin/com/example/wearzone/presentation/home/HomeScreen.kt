@@ -37,7 +37,7 @@ import com.example.wearzone.presentation.home.components.TopBrandsSection
 import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
-
+import androidx.compose.material.icons.filled.Face
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -48,6 +48,7 @@ fun HomeScreen(
     onNavigateToBrands: () -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToCart : ()->Unit,
+    onNavigateToChat: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onShowSnackbar: (String) -> Unit
@@ -79,6 +80,18 @@ fun HomeScreen(
                 cartItemCount = if (uiState is HomeUiState.Success) (uiState as HomeUiState.Success).cartItemCount else 0,
                 onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnCartClicked) }
             )
+        },
+        floatingActionButton = {
+            androidx.compose.material3.FloatingActionButton(
+                onClick = onNavigateToChat,
+                containerColor = AppTheme.colors.accent,
+                contentColor = AppTheme.colors.onAccent
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Face,
+                    contentDescription = "AI Assistant"
+                )
+            }
         },
         containerColor = AppTheme.colors.background,
     ) { paddingValues ->

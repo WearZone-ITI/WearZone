@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
-
 }
 
 android {
@@ -40,14 +39,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
 }
 
 dependencies {
     implementation(project(":domain"))
-    implementation(libs.androidx.work.runtime.ktx)
+    
     //Omar
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.hilt.work)
