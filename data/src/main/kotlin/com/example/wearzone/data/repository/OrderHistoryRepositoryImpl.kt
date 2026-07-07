@@ -161,6 +161,7 @@ class OrderHistoryRepositoryImpl @Inject constructor(
                 !closedAt.isNullOrBlank() -> OrderStatus.Closed
                 else -> OrderStatus.Open
             },
+            paymentGatewayNames = paymentGatewayNames,
             lineItems = lineItems.map { it.toDomain(productImagesById) },
             trackingNumber = fulfillments.firstNotNullOfOrNull {
                 it.trackingNumber?.takeIf { trackingNumber -> trackingNumber.isNotBlank() }
