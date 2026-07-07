@@ -60,6 +60,7 @@ class LoginViewModel @Inject constructor(
             is LoginUiIntent.OnForgotPasswordClicked -> {
                 sendEffect(LoginUiEffect.NavigateToForgotPassword)
             }
+            is LoginUiIntent.OnJoinAsGuestClicked -> sendEffect(LoginUiEffect.NavigateToHome)
         }
     }
 

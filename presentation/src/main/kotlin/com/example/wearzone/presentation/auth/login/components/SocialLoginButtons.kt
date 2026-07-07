@@ -43,21 +43,5 @@ fun SocialLoginButtons(
                 tint = Color.Unspecified
             )
         }
-
-        OutlinedButton(
-            onClick = { onIntent(LoginUiIntent.OnGuestModeClicked) },
-            modifier = Modifier
-                .weight(1f)
-                .height(56.dp),
-            shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(1.dp, AppTheme.colors.border),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppTheme.colors.textPrimary)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_guest),
-                contentDescription = "Guest Mode",
-                tint = Color.Unspecified
-            )
-        }
     }
 }

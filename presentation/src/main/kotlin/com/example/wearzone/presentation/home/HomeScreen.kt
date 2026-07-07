@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.common.GreetingSection
@@ -53,7 +54,7 @@ fun HomeScreen(
     onNavigateToRegister: () -> Unit,
     onShowSnackbar: (String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showSignInRequiredDialog by remember { mutableStateOf(false) }
     var signInRequiredMessageRes by remember { mutableStateOf(R.string.sign_in_required_message) }

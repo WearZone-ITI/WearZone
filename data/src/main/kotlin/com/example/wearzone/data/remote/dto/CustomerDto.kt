@@ -10,9 +10,14 @@ data class CustomerResponse(
 )
 
 @Serializable
+data class CustomersResponse(
+    val customers: List<ShopifyCustomer> = emptyList(),
+)
+
+@Serializable
 data class ShopifyCustomer(
     val id: Long,
-    val email: String
+    val email: String? = null,
 )
 
 @Serializable

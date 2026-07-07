@@ -24,20 +24,8 @@ private const val LAST_ONBOARDING_PAGE = 2
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    observeOnboardingCompletedUseCase: ObserveOnboardingCompletedUseCase,
     private val setOnboardingCompletedUseCase: SetOnboardingCompletedUseCase,
-    private val logoutUseCase: LogoutUseCase,
 ) : ViewModel() {
-
-    val hasCompletedOnboarding: StateFlow<Boolean?> =
-        observeOnboardingCompletedUseCase()
-            .map<Boolean, Boolean?> { it }
-            .catch { emit(false) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = null,
-            )
 
     private val _uiState = MutableStateFlow<OnboardingUiState>(OnboardingUiState.Idle())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
@@ -48,7 +36,6 @@ class OnboardingViewModel @Inject constructor(
     fun handleIntent(intent: OnboardingUiIntent) {
         when (intent) {
             OnboardingUiIntent.OnGetStartedClicked -> completeOnboarding()
-            OnboardingUiIntent.OnContinueAsGuestClicked -> navigateToGuest()
             OnboardingUiIntent.OnNextPageClicked -> showNextPage()
             OnboardingUiIntent.OnPreviousPageClicked -> showPreviousPage()
             is OnboardingUiIntent.OnPageSelected -> selectPage(intent.page)
@@ -64,34 +51,6 @@ class OnboardingViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.value = OnboardingUiState.Idle(page)
                     _uiEffect.send(OnboardingUiEffect.NavigateToLogin)
-                }
-                .onFailure {
-                    _uiState.value = OnboardingUiState.Error(
-                        messageRes = R.string.onboarding_error_unable_to_continue,
-                        currentPage = page,
-                    )
-                }
-        }
-    }
-
-    private fun navigateToGuest() {
-        viewModelScope.launch {
-            val page = _uiState.value.currentPage
-            _uiState.value = OnboardingUiState.Saving(page)
-
-            logoutUseCase()
-                .onSuccess {
-                    setOnboardingCompletedUseCase(true)
-                        .onSuccess {
-                            _uiState.value = OnboardingUiState.Idle(page)
-                            _uiEffect.send(OnboardingUiEffect.NavigateToGuest)
-                        }
-                        .onFailure {
-                            _uiState.value = OnboardingUiState.Error(
-                                messageRes = R.string.onboarding_error_unable_to_continue,
-                                currentPage = page,
-                            )
-                        }
                 }
                 .onFailure {
                     _uiState.value = OnboardingUiState.Error(
