@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="coupon_notification_channel_name" tools:ignore="StringFormatInvalid">عروض الكوبونات</string>
+    <string name="coupon_notification_channel_description" tools:ignore="StringFormatInvalid">إشعارات بأحدث عروض كوبونات وتخفيضات WearZone.</string>
+
+    <string name="coupon_notification_title">تخفيضات WearZone المباشرة</string>
+    <string name="coupon_notification_message">خصم %1$d%% كود: %2$s</string>
+    <string name="coupon_copied_toast">تم نسخ كود الخصم: %1$s</string>
+</resources>

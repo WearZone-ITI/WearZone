@@ -3,6 +3,7 @@ package com.example.wearzone.data.repository
 import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.domain.common.runCatchingCancellable
+import com.example.wearzone.domain.notifications.scheduler.ICouponNotificationScheduler
 import com.example.wearzone.domain.settings.model.SettingsPreferences
 import com.example.wearzone.domain.settings.model.ThemeMode
 import com.example.wearzone.domain.settings.repository.ISettingsRepository
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 class SettingsRepositoryImpl @Inject constructor(
     private val dataSource: ISettingsPreferencesDataSource,
+    private val couponNotificationScheduler: ICouponNotificationScheduler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ISettingsRepository {
 
@@ -31,8 +33,16 @@ class SettingsRepositoryImpl @Inject constructor(
         withContext(ioDispatcher) {
             runCatchingCancellable {
                 dataSource.setNotificationsEnabled(enabled)
+                // ADDED: start/stop the periodic coupon-reminder work immediately
+                // instead of waiting for the worker to notice the flag changed.
+                if (enabled) {
+                    couponNotificationScheduler.start()
+                } else {
+                    couponNotificationScheduler.stop()
+                }
             }
         }
+
 
     override suspend fun setLanguage(languageCode: String): Result<Unit> =
         withContext(ioDispatcher) {
