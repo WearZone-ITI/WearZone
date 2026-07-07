@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.OrderThumbnailUiModel
 import com.example.wearzone.presentation.order.history.OrderHistoryUiModel
@@ -97,7 +98,7 @@ fun OrderHistoryCard(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = order.formattedTotalPrice,
+                        text = formatPrice(order.totalPriceAmount),
                         style = MaterialTheme.typography.headlineSmall,
                         color = AppTheme.colors.textPrimary,
                         fontWeight = FontWeight.Bold,

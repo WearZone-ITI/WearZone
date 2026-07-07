@@ -214,7 +214,7 @@
     <string name="order_details_order_number">الطلب %1$s</string>
     <string name="order_details_tracking_title">التتبع</string>
     <string name="order_details_timeline_placed">تم إنشاء الطلب</string>
-    <string name="order_details_timeline_processing">قيد المعالجة</string>
+    <string name="order_details_timeline_preparing">تجهيز الطلب</string>
     <string name="order_details_timeline_shipped">تم الشحن</string>
     <string name="order_details_timeline_cancelled">تم الإلغاء</string>
     <string name="order_details_timeline_unavailable">غير متاح بعد</string>

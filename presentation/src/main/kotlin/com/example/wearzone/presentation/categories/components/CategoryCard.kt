@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,7 +51,7 @@ fun CategoryCard(
                 translationY = -4f
             },
         shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+        border = BorderStroke(1.dp, themeColors.border.copy(alpha = 0.15f)),
         colors = CardDefaults.cardColors(
             containerColor = themeColors.surfaceVariant
         ),
@@ -92,7 +93,7 @@ fun CategoryCard(
                 Text(
                     text = category.name.uppercase(),
                     color = Color.White,
-                    fontSize = if (isFullWidth) 24.sp else 19.sp,
+                    style = if (isFullWidth) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.5.sp
                 )
@@ -101,7 +102,7 @@ fun CategoryCard(
                     modifier = Modifier
                         .width(28.dp)
                         .height(3.dp)
-                        .background(Color.White.copy(alpha = 0.6f), RoundedCornerShape(2.dp))
+                        .background(themeColors.accent, RoundedCornerShape(2.dp))
                 )
             }
         }

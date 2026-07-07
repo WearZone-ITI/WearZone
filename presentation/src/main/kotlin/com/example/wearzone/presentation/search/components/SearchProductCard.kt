@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppColors
 import com.example.wearzone.presentation.search.ProductSearchUiModel
 
@@ -63,7 +64,7 @@ fun SearchProductCard(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = product.formattedPrice,
+            text = formatPrice(product.basePriceEgp),
             color = AppColors.Primary,
             fontWeight = FontWeight.Bold,
         )

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
@@ -82,7 +82,7 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                 ) {
                     Text(
                         text = stringResource(id = R.string.hero_banner_shop_now),
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -96,8 +96,7 @@ fun HeroBannerSection(product: Product?, onProductClick: (String) -> Unit) {
                 ) {
                     Text(
                         text = stringResource(id = R.string.hero_banner_recommended),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         color = AppTheme.colors.onAccent,
                     )                }
             }

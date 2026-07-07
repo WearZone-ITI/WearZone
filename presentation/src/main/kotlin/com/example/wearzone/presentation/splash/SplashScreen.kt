@@ -12,6 +12,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.wearzone.presentation.common.WearZoneAnimatedLoader
 import kotlinx.coroutines.delay
 
+import com.example.wearzone.presentation.common.theme.AppTheme
+
 @Composable
 fun SplashScreen(
     onNavigateToOnboarding: () -> Unit,
@@ -38,7 +40,7 @@ fun SplashScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF9F9F9)),
+            .background(AppTheme.colors.background),
         contentAlignment = Alignment.Center
     ) {
         WearZoneAnimatedLoader()

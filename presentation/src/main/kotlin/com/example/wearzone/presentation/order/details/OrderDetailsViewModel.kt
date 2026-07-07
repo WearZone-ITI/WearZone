@@ -146,36 +146,43 @@ class OrderDetailsViewModel @Inject constructor(
             placedDate = createdAt.toDisplayDateTime(),
             status = toStatusUiModel(),
             timeline = buildTimeline().toImmutableList(),
-            items = lineItems.map { it.toUiModel(currencyCode) }.toImmutableList(),
+            items = lineItems.map { it.toUiModel() }.toImmutableList(),
             shippingAddress = shippingAddress?.toUiModel(),
             paymentMethods = paymentMethods.toImmutableList(),
-            subtotal = subtotalPrice.toCurrencyText(currencyCode),
-            shipping = shippingPrice.toCurrencyText(currencyCode),
-            tax = taxPrice.toCurrencyText(currencyCode),
-            total = totalPrice.toCurrencyText(currencyCode),
+            subtotalAmount = subtotalPrice,
+            shippingAmount = shippingPrice,
+            taxAmount = taxPrice,
+            totalAmount = totalPrice,
             canCancel = canCancel,
         )
 
     private fun OrderDetails.toStatusUiModel(): OrderDetailsStatusUiModel {
-        val label = when (orderStatus) {
-            OrderStatus.Cancelled -> R.string.order_history_status_cancelled
-            OrderStatus.Closed -> R.string.order_history_status_closed
-            OrderStatus.Open -> null
-        }
-        return if (label != null) {
-            OrderDetailsStatusUiModel(
-                labelRes = label,
-                tone = if (orderStatus == OrderStatus.Cancelled) OrderStatusTone.Error else OrderStatusTone.Neutral,
+        // 1. Highest Priority: Cancelled
+        if (orderStatus == OrderStatus.Cancelled) {
+            return OrderDetailsStatusUiModel(
+                labelRes = R.string.order_history_status_cancelled,
+                tone = OrderStatusTone.Error,
             )
-        } else {
-            val status = fulfillmentStatus?.takeIf { it.isNotBlank() }
-                ?: financialStatus?.takeIf { it.isNotBlank() }
-                ?: return OrderDetailsStatusUiModel(
-                    labelRes = R.string.order_history_status_open,
-                    tone = OrderStatusTone.Success,
-                )
-            OrderDetailsStatusUiModel(label = status.toTitleCase(), tone = status.toTone())
         }
+
+        // 2. Financial Status (Paid vs Pending)
+        val isPaid = financialStatus?.contains("paid", ignoreCase = true) == true
+        if (isPaid) {
+            return OrderDetailsStatusUiModel(
+                label = "Paid",
+                tone = OrderStatusTone.Success,
+            )
+        }
+
+        // 3. Fallback to Open/Pending or Fulfillment
+        val status = fulfillmentStatus?.takeIf { it.isNotBlank() }
+            ?: financialStatus?.takeIf { it.isNotBlank() }
+            ?: return OrderDetailsStatusUiModel(
+                labelRes = R.string.order_history_status_open,
+                tone = OrderStatusTone.Success,
+            )
+        
+        return OrderDetailsStatusUiModel(label = status.toTitleCase(), tone = status.toTone())
     }
 
     private fun OrderDetails.buildTimeline(): List<OrderTimelineUiModel> {
@@ -188,13 +195,16 @@ class OrderDetailsViewModel @Inject constructor(
                 isActive = true,
             )
         )
+        val isPaid = financialStatus?.contains("paid", ignoreCase = true) == true
+        val isPending = financialStatus?.contains("pending", ignoreCase = true) == true
         val processingDescription = financialStatus?.toTitleCase().orEmpty()
+        
         timeline.add(
             OrderTimelineUiModel(
-                labelRes = R.string.order_details_timeline_processing,
+                labelRes = R.string.order_details_timeline_preparing,
                 description = processingDescription,
-                tone = financialStatus.orEmpty().toTone(),
-                isActive = true,
+                tone = if (isPaid) OrderStatusTone.Success else OrderStatusTone.Warning,
+                isActive = isPaid || isPending,
             )
         )
         if (orderStatus == OrderStatus.Cancelled) {
@@ -221,13 +231,13 @@ class OrderDetailsViewModel @Inject constructor(
         return timeline
     }
 
-    private fun OrderDetailsLineItem.toUiModel(currencyCode: String): OrderDetailsItemUiModel =
+    private fun OrderDetailsLineItem.toUiModel(): OrderDetailsItemUiModel =
         OrderDetailsItemUiModel(
             id = id,
             title = title,
             variantInfo = variantTitle.orEmpty(),
             quantity = quantity,
-            formattedPrice = (price * quantity).toCurrencyText(currencyCode),
+            basePriceEgp = price,
             imageUrl = imageUrl,
         )
 

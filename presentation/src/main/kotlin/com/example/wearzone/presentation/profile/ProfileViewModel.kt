@@ -3,17 +3,28 @@ package com.example.wearzone.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.account.model.OrderHistory
+import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
+import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
+import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
+import com.example.wearzone.domain.settings.usecase.SetNotificationsEnabledUseCase
+import com.example.wearzone.domain.settings.usecase.SetThemeModeUseCase
+import com.example.wearzone.domain.settings.repository.ISettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,6 +36,11 @@ class ProfileViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
+    private val getOrderHistoryUseCase: GetOrderHistoryUseCase,
+    private val getCurrentCustomerIdUseCase: GetCurrentCustomerIdUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
+    private val settingsRepository: ISettingsRepository,
+    private val currencyRepository: ICurrencyRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -36,6 +52,8 @@ class ProfileViewModel @Inject constructor(
     init {
         loadProfile()
         observeCart()
+        observeSettings()
+        fetchCurrencyRates()
     }
 
     fun handleIntent(intent: ProfileUiIntent) {
@@ -43,7 +61,8 @@ class ProfileViewModel @Inject constructor(
             ProfileUiIntent.OnMyOrdersClicked -> navigateIfAuthenticated(ProfileUiEffect.NavigateToOrders)
             ProfileUiIntent.OnWishlistClicked -> navigateIfAuthenticated(ProfileUiEffect.NavigateToWishlist)
             ProfileUiIntent.OnSavedAddressesClicked -> navigateIfAuthenticated(ProfileUiEffect.NavigateToSavedAddresses)
-            ProfileUiIntent.OnCurrencyClicked -> sendEffect(ProfileUiEffect.ShowError(R.string.profile_currency_todo))
+            ProfileUiIntent.OnCurrencyClicked -> Unit // Handled by UI
+            is ProfileUiIntent.OnCurrencySelected -> updateCurrency(intent.currencyCode)
             ProfileUiIntent.OnSettingsClicked -> sendEffect(ProfileUiEffect.NavigateToSettings)
             ProfileUiIntent.OnLogoutClicked -> requestLogout()
             ProfileUiIntent.OnLogoutConfirmed -> confirmLogout()
@@ -63,15 +82,32 @@ class ProfileViewModel @Inject constructor(
                 _uiEffect.send(ProfileUiEffect.ShowSignInRequired)
                 return@launch
             }
+            
             val user = getCurrentUserUseCase()
+            val customerIdResult = getCurrentCustomerIdUseCase()
+            
+            val recentOrders = customerIdResult.getOrNull()?.let { id ->
+                getOrderHistoryUseCase(id).getOrNull()?.take(2)?.map { it.toRecentOrderUi() }
+            } ?: emptyList()
+
             _uiState.value = ProfileUiState.Content(
                 displayName = user?.displayName,
                 email = user?.email,
                 photoUrl = user?.photoUrl,
-                recentOrders = profileRecentOrders(),
+                recentOrders = recentOrders.toImmutableList(),
                 isAuthenticated = user != null,
             )
         }
+    }
+
+    private fun OrderHistory.toRecentOrderUi(): RecentOrderUiModel {
+        val firstItem = lineItems.firstOrNull()
+        return RecentOrderUiModel(
+            id = id.toString(),
+            statusLabel = financialStatus?.replaceFirstChar { it.uppercase() },
+            title = firstItem?.title ?: "",
+            imageUrl = firstItem?.imageUrl,
+        )
     }
 
     private fun navigateIfAuthenticated(effect: ProfileUiEffect) {
@@ -121,6 +157,32 @@ class ProfileViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun observeSettings() {
+        viewModelScope.launch {
+            observeSettingsPreferencesUseCase().collect { preferences ->
+                _uiState.update { state ->
+                    if (state is ProfileUiState.Content) {
+                        state.copy(selectedCurrency = preferences.selectedCurrency)
+                    } else {
+                        state
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchCurrencyRates() {
+        viewModelScope.launch {
+            currencyRepository.fetchRates()
+        }
+    }
+
+    private fun updateCurrency(currencyCode: String) {
+        viewModelScope.launch {
+            settingsRepository.setCurrency(currencyCode)
         }
     }
 }

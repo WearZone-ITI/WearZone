@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.ProductGridSkeleton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -101,9 +101,7 @@ fun WishlistScreen(
             // Content
             when (val state = uiState) {
                 is WishlistUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = AppTheme.colors.selected)
-                    }
+                    ProductGridSkeleton(modifier = Modifier.fillMaxSize())
                 }
                 is WishlistUiState.GuestState -> {
                     SignInRequiredDialog(
@@ -129,7 +127,7 @@ fun WishlistScreen(
                     }
                     
                     if (state.items.isEmpty()) {
-                        WishlistEmptyState()
+                        WishlistEmptyState(onContinueBrowsing = onContinueBrowsing)
                     } else {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
