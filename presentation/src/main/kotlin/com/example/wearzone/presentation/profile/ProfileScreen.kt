@@ -208,6 +208,7 @@ private fun ProfileLoadedContent(
                 uiState.recentOrders.forEach { order ->
                     RecentOrderCard(
                         order = order,
+                        onClick = { onIntent(ProfileUiIntent.OnMyOrdersClicked) },
                         modifier = Modifier.weight(1f),
                     )
                 }

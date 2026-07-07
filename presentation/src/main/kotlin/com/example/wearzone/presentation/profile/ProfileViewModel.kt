@@ -3,12 +3,16 @@ package com.example.wearzone.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.account.model.OrderHistory
+import com.example.wearzone.domain.account.usecase.GetOrderHistoryUseCase
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +29,8 @@ class ProfileViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val observeCartUseCase: ObserveCartUseCase,
+    private val getOrderHistoryUseCase: GetOrderHistoryUseCase,
+    private val getCurrentCustomerIdUseCase: GetCurrentCustomerIdUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -63,15 +69,32 @@ class ProfileViewModel @Inject constructor(
                 _uiEffect.send(ProfileUiEffect.ShowSignInRequired)
                 return@launch
             }
+            
             val user = getCurrentUserUseCase()
+            val customerIdResult = getCurrentCustomerIdUseCase()
+            
+            val recentOrders = customerIdResult.getOrNull()?.let { id ->
+                getOrderHistoryUseCase(id).getOrNull()?.take(2)?.map { it.toRecentOrderUi() }
+            } ?: emptyList()
+
             _uiState.value = ProfileUiState.Content(
                 displayName = user?.displayName,
                 email = user?.email,
                 photoUrl = user?.photoUrl,
-                recentOrders = profileRecentOrders(),
+                recentOrders = recentOrders.toImmutableList(),
                 isAuthenticated = user != null,
             )
         }
+    }
+
+    private fun OrderHistory.toRecentOrderUi(): RecentOrderUiModel {
+        val firstItem = lineItems.firstOrNull()
+        return RecentOrderUiModel(
+            id = id.toString(),
+            statusLabel = financialStatus?.replaceFirstChar { it.uppercase() },
+            title = firstItem?.title ?: "",
+            imageUrl = firstItem?.imageUrl,
+        )
     }
 
     private fun navigateIfAuthenticated(effect: ProfileUiEffect) {

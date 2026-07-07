@@ -210,7 +210,7 @@
     <string name="order_details_order_number">Order %1$s</string>
     <string name="order_details_tracking_title">Tracking</string>
     <string name="order_details_timeline_placed">Order Placed</string>
-    <string name="order_details_timeline_processing">Processing</string>
+    <string name="order_details_timeline_preparing">Preparing Order</string>
     <string name="order_details_timeline_shipped">Shipped</string>
     <string name="order_details_timeline_cancelled">Cancelled</string>
     <string name="order_details_timeline_unavailable">Not available yet</string>

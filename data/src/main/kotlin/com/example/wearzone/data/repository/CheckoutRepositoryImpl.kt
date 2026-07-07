@@ -54,6 +54,7 @@ class CheckoutRepositoryImpl @Inject constructor(
                 },
                 note = paymentId?.let { "Payment ID: $it\n" }.orEmpty() + paymentMethod.toOrderNote(),
                 financialStatus = if (paymentMethod == CheckoutPaymentMethod.CreditCard) "paid" else "pending",
+                inventoryBehaviour = "decrement_obeying_policy",
             )
         )
 
