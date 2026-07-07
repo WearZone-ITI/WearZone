@@ -104,13 +104,6 @@ fun NavGraph(
                         }
                     }
                 },
-                onNavigateToGuest = {
-                    navController.navigate(Route.MainRoute) {
-                        popUpTo<Route.OnboardingRoute> {
-                            inclusive = true
-                        }
-                    }
-                },
             )
         }
         composable<Route.SettingsRoute> {
