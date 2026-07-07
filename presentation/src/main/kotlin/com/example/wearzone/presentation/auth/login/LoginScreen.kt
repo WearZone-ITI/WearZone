@@ -21,6 +21,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +38,6 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.presentation.BuildConfig
 import com.example.presentation.R
 import com.example.wearzone.presentation.auth.login.components.LoginForm
 import com.example.wearzone.presentation.auth.login.components.SocialLoginButtons
@@ -49,6 +49,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
+    googleWebClientId: String,
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToEmailVerification: (String) -> Unit,
@@ -65,6 +66,7 @@ fun LoginScreen(
     val loginSuccessful = stringResource(R.string.login_successful)
     val unexpectedCredential = stringResource(R.string.unexpected_credential_type)
     val googleFailed = stringResource(R.string.google_sign_in_failed)
+    val googleNotConfigured = stringResource(R.string.google_sign_in_not_configured)
 
     LaunchedEffect(Unit) {
         viewModel.uiEffect.collect { effect ->
@@ -78,9 +80,14 @@ fun LoginScreen(
                 }
                 is LoginUiEffect.LaunchGoogleSignIn -> {
                     try {
+                        if (googleWebClientId.isBlank()) {
+                            snackbarHostState.showSnackbar(googleNotConfigured)
+                            return@collect
+                        }
+
                         val googleIdOption = GetGoogleIdOption.Builder()
                             .setFilterByAuthorizedAccounts(false)
-                            .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                            .setServerClientId(googleWebClientId)
                             .setAutoSelectEnabled(true)
                             .build()
 
@@ -255,6 +262,19 @@ private fun LoginContent(
                     style = AppTypography.labelMedium,
                     color = AppTheme.colors.textPrimary,
                     modifier = Modifier.clickable { onIntent(LoginUiIntent.OnRegisterClicked) }
+                )
+            }
+
+            Spacer(Modifier.padding(12.dp))
+
+            TextButton(
+                onClick = { onIntent(LoginUiIntent.OnJoinAsGuestClicked) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_continue_as_guest),
+                    color = AppTheme.colors.textSecondary,
+                    textAlign = TextAlign.Center,
                 )
             }
         }

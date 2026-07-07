@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,7 +44,6 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 @Composable
 fun OnboardingScreen(
     onNavigateToLogin: () -> Unit,
-    onNavigateToGuest: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -54,7 +52,6 @@ fun OnboardingScreen(
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 OnboardingUiEffect.NavigateToLogin -> onNavigateToLogin()
-                OnboardingUiEffect.NavigateToGuest -> onNavigateToGuest()
             }
         }
     }
@@ -238,18 +235,6 @@ private fun FinalPageActions(
                 fontWeight = FontWeight.SemiBold,
             )
         }
-    }
-    Spacer(modifier = Modifier.height(12.dp))
-    TextButton(
-        onClick = { onIntent(OnboardingUiIntent.OnContinueAsGuestClicked) },
-        enabled = !isSaving,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = stringResource(R.string.onboarding_continue_as_guest),
-            color = AppTheme.colors.textSecondary,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 

@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.SignInRequiredDialog
@@ -104,6 +105,11 @@ fun ProfileScreen(
         if (uiState is ProfileUiState.Guest) {
             showSignInRequiredDialog = true
         }
+    }
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.handleIntent(ProfileUiIntent.OnRetry)
+        onPauseOrDispose { }
     }
 
     Scaffold(

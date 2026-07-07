@@ -378,6 +378,7 @@
     <string name="login_successful">تم تسجيل الدخول بنجاح!</string>
     <string name="unexpected_credential_type">نوع بيانات الاعتماد غير متوقع</string>
     <string name="google_sign_in_failed">فشل تسجيل الدخول باستخدام Google</string>
+    <string name="google_sign_in_not_configured">تسجيل الدخول باستخدام Google غير مهيأ. معرف عميل الويب غير موجود.</string>
     <string name="content_desc_google_sign_in">تسجيل الدخول باستخدام Google</string>
     <string name="content_desc_apple_sign_in">تسجيل الدخول باستخدام Apple</string>
     <string name="welcome_back">مرحبًا بعودتك</string>
