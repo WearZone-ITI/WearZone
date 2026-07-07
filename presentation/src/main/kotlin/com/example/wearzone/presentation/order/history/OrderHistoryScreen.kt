@@ -20,7 +20,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import com.example.wearzone.presentation.common.OrderListSkeleton
+import com.example.wearzone.presentation.common.PremiumEmptyState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -110,12 +111,14 @@ private fun OrderHistoryContent(
             .background(AppTheme.colors.background),
     ) {
         when (uiState) {
-            OrderHistoryUiState.Loading -> CircularProgressIndicator(
-                color = AppTheme.colors.selected,
-                modifier = Modifier.align(Alignment.Center),
-            )
+            OrderHistoryUiState.Loading -> OrderListSkeleton()
 
-            OrderHistoryUiState.Empty -> OrderHistoryEmptyContent()
+            OrderHistoryUiState.Empty -> PremiumEmptyState(
+                lottieResId = com.example.presentation.R.raw.cart_is_empty,
+                title = stringResource(R.string.order_history_empty_title),
+                description = stringResource(R.string.order_history_empty_subtitle),
+                modifier = Modifier.fillMaxSize()
+            )
 
             OrderHistoryUiState.SignInRequired -> SignInRequiredDialog(
                 onSignInRegister = onNavigateToLogin,
@@ -214,11 +217,7 @@ private fun OrderHistoryHeader(
             color = AppTheme.colors.textSecondary,
         )
         if (isRefreshing) {
-            Spacer(modifier = Modifier.height(12.dp))
-            CircularProgressIndicator(
-                color = AppTheme.colors.selected,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            )
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }

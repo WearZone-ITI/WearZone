@@ -44,7 +44,7 @@ fun RemoveFavoriteDialog(
             .shadow(
                 elevation = 32.dp,
                 shape = RoundedCornerShape(12.dp),
-                spotColor = Color.Black.copy(alpha = 0.12f)
+                spotColor = AppTheme.colors.scrim.copy(alpha = 0.12f)
             )
             .clip(RoundedCornerShape(12.dp))
             .background(AppTheme.colors.background)

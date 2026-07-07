@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,14 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.presentation.R
+import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun PriceSummaryBar(
-    subtotal: String,
-    total: String,
+    subtotalAmount: Double,
+    totalAmount: Double,
     onCheckout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -40,7 +41,7 @@ fun PriceSummaryBar(
             .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        SummaryLine(label = stringResource(id = R.string.cart_subtotal), value = subtotal)
+        SummaryLine(label = stringResource(id = R.string.cart_subtotal), value = formatPrice(subtotalAmount))
         Spacer(modifier = Modifier.height(8.dp))
         SummaryLine(
             label = stringResource(id = R.string.cart_shipping),
@@ -56,15 +57,13 @@ fun PriceSummaryBar(
             Text(
                 text = stringResource(id = R.string.cart_total),
                 color = AppTheme.colors.textPrimary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = total,
+                text = formatPrice(totalAmount),
                 color = AppTheme.colors.textPrimary,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -81,9 +80,7 @@ fun PriceSummaryBar(
         ) {
             Text(
                 text = stringResource(id = R.string.cart_proceed_to_checkout),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp,
+                style = MaterialTheme.typography.labelLarge,
             )
             Icon(
                 imageVector = Icons.Default.ArrowForward,
@@ -100,14 +97,13 @@ private fun SummaryLine(label: String, value: String) {
         Text(
             text = label,
             color = AppTheme.colors.textSecondary,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
         )
         Text(
             text = value,
             color = AppTheme.colors.textSecondary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
         )
     }
 }

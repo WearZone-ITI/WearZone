@@ -5,28 +5,29 @@ import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
+import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.checkout.model.CheckoutCartClearException
+import com.example.wearzone.domain.checkout.model.CheckoutData
 import com.example.wearzone.domain.checkout.model.CheckoutOrderCreationException
 import com.example.wearzone.domain.checkout.model.CheckoutPaymentMethod
+import com.example.wearzone.domain.checkout.model.CheckoutVariantValidationException
+import com.example.wearzone.domain.checkout.model.CustomerInfo
 import com.example.wearzone.domain.checkout.model.DiscountLookupException
 import com.example.wearzone.domain.checkout.model.EmptyCartCheckoutException
 import com.example.wearzone.domain.checkout.model.EmptyDiscountCodeException
+import com.example.wearzone.domain.checkout.model.InvalidCheckoutAddressException
 import com.example.wearzone.domain.checkout.model.InvalidCheckoutLineItemException
 import com.example.wearzone.domain.checkout.model.InvalidDiscountCodeException
 import com.example.wearzone.domain.checkout.model.MissingCheckoutAddressException
 import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
+import com.example.wearzone.domain.checkout.usecase.CreatePaymentIntentionUseCase
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
-import com.example.wearzone.domain.checkout.usecase.ProcessPayMockPaymentUseCase
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
 import com.example.wearzone.domain.customer.address.model.ShopifyCustomerIdUnavailableException
 import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
-import com.example.wearzone.presentation.checkout.validation.CardValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.Locale
-import javax.inject.Inject
-import kotlin.math.max
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -38,6 +39,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Locale
+import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
@@ -46,7 +50,8 @@ class CheckoutViewModel @Inject constructor(
     private val applyDiscountCodeUseCase: ApplyDiscountCodeUseCase,
     private val customerAddressUseCases: CustomerAddressUseCases,
     private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
-    private val processPayMockPaymentUseCase: ProcessPayMockPaymentUseCase,
+    private val createPaymentIntentionUseCase: CreatePaymentIntentionUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
 ) : ViewModel() {
 
     private val hasCheckoutAccess = MutableStateFlow<Boolean?>(null)
@@ -55,12 +60,11 @@ class CheckoutViewModel @Inject constructor(
     private var applyDiscountJob: Job? = null
     private val checkoutDetails = MutableStateFlow(CheckoutDetailsState())
 
-    private val cartItems = observeCartUseCase()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            emptyList(),
-        )
+    private val cartItems = observeCartUseCase().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList(),
+    )
 
     val uiState = combine(
         cartItems,
@@ -79,13 +83,11 @@ class CheckoutViewModel @Inject constructor(
                 checkoutDetails = details,
             )
         }
-    }
-        .catch { emit(CheckoutUiState.Error(R.string.checkout_error_generic)) }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            CheckoutUiState.Loading,
-        )
+    }.catch { emit(CheckoutUiState.Error(R.string.checkout_error_generic)) }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        CheckoutUiState.Loading,
+    )
 
     private val _uiEffect = Channel<CheckoutUiEffect>(Channel.BUFFERED)
     val uiEffect: Flow<CheckoutUiEffect> = _uiEffect.receiveAsFlow()
@@ -107,16 +109,26 @@ class CheckoutViewModel @Inject constructor(
             CheckoutUiIntent.OnAddAddressClicked -> sendEffect(CheckoutUiEffect.NavigateToAddAddress)
             CheckoutUiIntent.OnRefreshAddresses -> loadDeliveryAddress()
             is CheckoutUiIntent.OnPaymentMethodSelected -> onPaymentMethodSelected(intent.method)
-            is CheckoutUiIntent.OnCardNumberChanged -> onCardNumberChanged(intent.number)
-            is CheckoutUiIntent.OnCardHolderNameChanged -> onCardHolderNameChanged(
-                intent.firstName,
-                intent.lastName,
+            is CheckoutUiIntent.OnPaymobPaymentResult -> onPaymobPaymentResult(
+                intent.isSuccess, intent.transactionId, intent.errorMessage
             )
-            is CheckoutUiIntent.OnCardExpiryChanged -> onCardExpiryChanged(
-                intent.month,
-                intent.year,
+
+            CheckoutUiIntent.OnPaymentSuccessConfirmed -> confirmPaymobSuccess()
+        }
+    }
+
+    private fun confirmPaymobSuccess() {
+        viewModelScope.launch {
+
+            val paymentId = checkoutDetails.value.pendingPaymentId
+
+            checkoutDetails.value = checkoutDetails.value.copy(
+                showPaymentSuccessDialog = false, pendingPaymentId = null
             )
-            is CheckoutUiIntent.OnCardCvvChanged -> onCardCvvChanged(intent.cvv)
+
+            isPlacingOrder.value = true
+
+            placeOrderInternal(paymentId)
         }
     }
 
@@ -130,7 +142,7 @@ class CheckoutViewModel @Inject constructor(
 
                 AuthAccessState.AuthenticatedMissingCustomerId,
                 AuthAccessState.Guest,
-                -> {
+                    -> {
                     hasCheckoutAccess.value = false
                 }
             }
@@ -166,43 +178,15 @@ class CheckoutViewModel @Inject constructor(
             deliveryAddress = checkoutDetails.deliveryAddress,
             isLoadingAddress = checkoutDetails.isLoadingAddress,
             paymentMethod = checkoutDetails.paymentMethod,
-            cardInfo = checkoutDetails.cardInfo,
             isProcessingPayment = checkoutDetails.isProcessingPayment,
+
+            showPaymentSuccessDialog = checkoutDetails.showPaymentSuccessDialog,
+            pendingPaymentId = checkoutDetails.pendingPaymentId,
         )
     }
 
     private fun onPaymentMethodSelected(method: CheckoutPaymentMethodUi) {
         checkoutDetails.value = checkoutDetails.value.copy(paymentMethod = method)
-    }
-
-    private fun onCardNumberChanged(number: String) {
-        checkoutDetails.value = checkoutDetails.value.copy(
-            cardInfo = checkoutDetails.value.cardInfo.copy(number = number),
-        )
-    }
-
-    private fun onCardHolderNameChanged(firstName: String, lastName: String) {
-        checkoutDetails.value = checkoutDetails.value.copy(
-            cardInfo = checkoutDetails.value.cardInfo.copy(
-                firstName = firstName,
-                lastName = lastName,
-            ),
-        )
-    }
-
-    private fun onCardExpiryChanged(month: String, year: String) {
-        checkoutDetails.value = checkoutDetails.value.copy(
-            cardInfo = checkoutDetails.value.cardInfo.copy(
-                month = month,
-                year = year,
-            ),
-        )
-    }
-
-    private fun onCardCvvChanged(cvv: String) {
-        checkoutDetails.value = checkoutDetails.value.copy(
-            cardInfo = checkoutDetails.value.cardInfo.copy(cvv = cvv),
-        )
     }
 
     private fun loadDeliveryAddress() {
@@ -216,22 +200,19 @@ class CheckoutViewModel @Inject constructor(
                 return@launch
             }
 
-            customerAddressUseCases.getAddresses(customerId)
-                .onSuccess { addresses ->
-                    val selected = checkoutDetails.value.selectedAddressId?.let { selectedId ->
-                        addresses.firstOrNull { it.id == selectedId }
-                    } ?: addresses.firstOrNull { it.isDefault }
-                        ?: addresses.firstOrNull()
+            customerAddressUseCases.getAddresses(customerId).onSuccess { addresses ->
+                val selected = checkoutDetails.value.selectedAddressId?.let { selectedId ->
+                    addresses.firstOrNull { it.id == selectedId }
+                } ?: addresses.firstOrNull { it.isDefault } ?: addresses.firstOrNull()
 
-                    checkoutDetails.value = checkoutDetails.value.copy(
-                        isLoadingAddress = false,
-                        selectedAddressId = selected?.id,
-                        deliveryAddress = selected?.toDeliveryUiModel(),
-                    )
-                }
-                .onFailure {
-                    checkoutDetails.value = checkoutDetails.value.copy(isLoadingAddress = false)
-                }
+                checkoutDetails.value = checkoutDetails.value.copy(
+                    isLoadingAddress = false,
+                    selectedAddressId = selected?.id,
+                    deliveryAddress = selected?.toDeliveryUiModel(),
+                )
+            }.onFailure {
+                checkoutDetails.value = checkoutDetails.value.copy(isLoadingAddress = false)
+            }
         }
     }
 
@@ -259,22 +240,20 @@ class CheckoutViewModel @Inject constructor(
             applyDiscountCodeUseCase(
                 code = promoState.value.promoCodeText,
                 subtotal = subtotal,
-            )
-                .onSuccess { discount ->
-                    promoState.value = promoState.value.copy(
-                        appliedDiscount = discount,
-                        discountErrorRes = null,
-                        promoCodeText = discount.code,
-                        isApplyingDiscount = false,
-                    )
-                    _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_discount_applied))
-                }
-                .onFailure { error ->
-                    promoState.value = promoState.value.copy(
-                        isApplyingDiscount = false,
-                        discountErrorRes = error.toDiscountMessageRes(),
-                    )
-                }
+            ).onSuccess { discount ->
+                promoState.value = promoState.value.copy(
+                    appliedDiscount = discount,
+                    discountErrorRes = null,
+                    promoCodeText = discount.code,
+                    isApplyingDiscount = false,
+                )
+                _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_discount_applied))
+            }.onFailure { error ->
+                promoState.value = promoState.value.copy(
+                    isApplyingDiscount = false,
+                    discountErrorRes = error.toDiscountMessageRes(),
+                )
+            }
         }
     }
 
@@ -295,76 +274,105 @@ class CheckoutViewModel @Inject constructor(
                 return@launch
             }
 
-            if (checkoutDetails.value.paymentMethod == CheckoutPaymentMethodUi.CreditCard) {
-                val validatedCard = CardValidator.validateCard(checkoutDetails.value.cardInfo)
-
-                checkoutDetails.value = checkoutDetails.value.copy(cardInfo = validatedCard)
-
-                if (validatedCard.hasErrors()) {
-                    return@launch
-                }
-            }
-
             _uiEffect.send(CheckoutUiEffect.ShowConfirmOrderDialog)
         }
     }
 
     private fun submitOrder() {
         viewModelScope.launch {
-            if (isPlacingOrder.value) return@launch
+            if (isPlacingOrder.value || checkoutDetails.value.isProcessingPayment) return@launch
 
             val items = cartItems.value
             if (items.isEmpty()) return@launch
 
-            val subtotal = items.sumOf { it.price * it.quantity }
-            val discountAmount = promoState.value.appliedDiscount?.calculatedAmount ?: 0.0
-            val totalAmount = max(subtotal - discountAmount, 0.0)
-            val currencyCode = items.firstOrNull()?.currencyCode.orEmpty()
-
-            var paymentId: String? = null
-
             if (checkoutDetails.value.paymentMethod == CheckoutPaymentMethodUi.CreditCard) {
-                checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = true)
-
-                processPayMockPaymentUseCase(totalAmount, currencyCode)
-                    .onSuccess { response ->
-                        paymentId = response.id
-                        checkoutDetails.value = checkoutDetails.value.copy(
-                            isProcessingPayment = false,
-                        )
-                    }
-                    .onFailure {
-                        checkoutDetails.value = checkoutDetails.value.copy(
-                            isProcessingPayment = false,
-                        )
-                        _uiEffect.send(
-                            CheckoutUiEffect.ShowMessage(R.string.checkout_error_payment_failed),
-                        )
-                        return@launch
-                    }
+                startPaymobPayment()
+                return@launch
             }
 
             isPlacingOrder.value = true
-
-            placeOrderUseCase(
-                discount = promoState.value.appliedDiscount,
-                selectedAddressId = checkoutDetails.value.selectedAddressId,
-                paymentMethod = when (checkoutDetails.value.paymentMethod) {
-                    CheckoutPaymentMethodUi.CashOnDelivery -> CheckoutPaymentMethod.CashOnDelivery
-                    CheckoutPaymentMethodUi.CreditCard -> CheckoutPaymentMethod.CreditCard
-                },
-                paymentId = paymentId,
-            )
-                .onSuccess {
-                    isPlacingOrder.value = false
-                    promoState.value = PromoState()
-                    _uiEffect.send(CheckoutUiEffect.NavigateToOrderHistory)
-                }
-                .onFailure { error ->
-                    isPlacingOrder.value = false
-                    _uiEffect.send(CheckoutUiEffect.ShowMessage(error.toMessageRes()))
-                }
+            placeOrderInternal(paymentId = null)
         }
+    }
+
+    private suspend fun startPaymobPayment() {
+        checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = true)
+
+        val items = cartItems.value
+        val subtotal = items.sumOf { it.price * it.quantity }
+        val discountAmount = promoState.value.appliedDiscount?.calculatedAmount ?: 0.0
+        val totalAmount = max(subtotal - discountAmount, 0.0)
+        val address = checkoutDetails.value.deliveryAddress
+        val user = getCurrentUserUseCase()
+
+        if (address == null || user == null) {
+            checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = false)
+            _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_error_no_address))
+            return
+        }
+
+        val names = user.displayName?.trim()?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
+
+        val firstName = names.firstOrNull() ?: "Guest"
+
+        val lastName = names.drop(1).joinToString(" ").ifBlank { "User" }
+
+        val checkoutData = CheckoutData(
+            cartItems = items,
+            totalAmount = (totalAmount * 100).toLong(),
+            customerInfo = CustomerInfo(
+                firstName = firstName,
+                lastName = lastName,
+                email = user.email,
+                phone = address.phone ?: "01279336697"
+            )
+        )
+
+        createPaymentIntentionUseCase(checkoutData).onSuccess { intention ->
+                checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = false)
+                _uiEffect.send(CheckoutUiEffect.NavigateToPaymobSdk(intention.clientSecret))
+            }
+
+            .onFailure {
+                checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = false)
+                _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_error_payment_failed))
+            }
+    }
+
+    private fun onPaymobPaymentResult(
+        isSuccess: Boolean,
+        transactionId: String?,
+        errorMessage: String?,
+    ) {
+        viewModelScope.launch {
+
+            if (!isSuccess) {
+                _uiEffect.send(CheckoutUiEffect.ShowMessage(R.string.checkout_error_payment_failed))
+                return@launch
+            }
+
+            isPlacingOrder.value = true
+            placeOrderInternal(transactionId)
+        }
+    }
+
+    private suspend fun placeOrderInternal(paymentId: String?) {
+        placeOrderUseCase(
+            discount = promoState.value.appliedDiscount,
+            selectedAddressId = checkoutDetails.value.selectedAddressId,
+            paymentMethod = when (checkoutDetails.value.paymentMethod) {
+                CheckoutPaymentMethodUi.CashOnDelivery -> CheckoutPaymentMethod.CashOnDelivery
+                CheckoutPaymentMethodUi.CreditCard -> CheckoutPaymentMethod.CreditCard
+            },
+            paymentId = paymentId,
+        ).onSuccess {
+                isPlacingOrder.value = false
+                promoState.value = PromoState()
+                _uiEffect.send(CheckoutUiEffect.NavigateToOrderHistory)
+            }.onFailure { error ->
+                isPlacingOrder.value = false
+                _uiEffect.send(CheckoutUiEffect.ShowMessage(error.toMessageRes()))
+            }
     }
 
     private fun retryLoad() {
@@ -381,13 +389,11 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private fun CustomerAddress.toDeliveryUiModel(): CheckoutDeliveryAddressUiModel {
-        val recipient = name?.takeIf { it.isNotBlank() }
-            ?: listOfNotNull(firstName, lastName)
-                .joinToString(" ")
+        val recipient =
+            name?.takeIf { it.isNotBlank() } ?: listOfNotNull(firstName, lastName).joinToString(" ")
                 .ifBlank { "-" }
 
-        val cityParts = listOfNotNull(city, province, zip)
-            .filter { it.isNotBlank() }
+        val cityParts = listOfNotNull(city, province, zip).filter { it.isNotBlank() }
 
         return CheckoutDeliveryAddressUiModel(
             id = id,
@@ -396,48 +402,59 @@ class CheckoutViewModel @Inject constructor(
                 address1,
                 address2,
                 cityParts.joinToString(", ").ifBlank { null },
-            )
-                .filter { it.isNotBlank() }
-                .joinToString("\n"),
+            ).filter { it.isNotBlank() }.joinToString("\n"),
             countryLine = countryName ?: country.orEmpty(),
+            phone = this.phone,
         )
     }
 
-    private fun CartItem.toUiModel(): CheckoutCartItemUiModel =
-        CheckoutCartItemUiModel(
-            variantId = variantId,
-            title = title,
-            vendor = vendor,
-            quantity = quantity,
-            formattedPrice = formatMoney(price * quantity, currencyCode),
-            imageUrl = imageUrl,
-        )
+    private fun CartItem.toUiModel(): CheckoutCartItemUiModel = CheckoutCartItemUiModel(
+        variantId = variantId,
+        title = title,
+        vendor = vendor,
+        quantity = quantity,
+        formattedPrice = formatMoney(price * quantity, currencyCode),
+        imageUrl = imageUrl,
+    )
 
     private fun formatMoney(amount: Double, currencyCode: String): String {
         val suffix = currencyCode.ifBlank { DEFAULT_CURRENCY_CODE }
         return String.format(Locale.US, "%.2f %s", amount, suffix)
     }
 
-    private fun Throwable.toDiscountMessageRes(): Int =
-        when (this) {
-            is EmptyDiscountCodeException -> R.string.checkout_discount_required
-            is InvalidDiscountCodeException -> R.string.checkout_discount_invalid
-            is DiscountLookupException -> R.string.checkout_discount_unavailable
-            else -> R.string.checkout_discount_unavailable
-        }
+    private fun CheckoutDeliveryAddressUiModel.cityPart(): String {
+        return addressLines.split("\n").lastOrNull() ?: "NA"
+    }
 
-    private fun Throwable.toMessageRes(): Int =
-        when (this) {
-            is EmptyCartCheckoutException -> R.string.checkout_error_empty_cart
-            is InvalidCheckoutLineItemException -> R.string.checkout_error_invalid_cart
-            is ShopifyCustomerIdUnavailableException -> R.string.checkout_error_customer_id_unavailable
-            is MissingCheckoutAddressException -> R.string.checkout_error_no_address
-            is CheckoutCartClearException -> R.string.checkout_error_clear_cart
-            is CheckoutOrderCreationException -> R.string.checkout_error_order_creation
-            else -> R.string.checkout_error_generic
-        }
+    private fun CheckoutDeliveryAddressUiModel.streetPart(): String {
+        return addressLines.split("\n").firstOrNull() ?: "NA"
+    }
+
+    private fun Throwable.toDiscountMessageRes(): Int = when (this) {
+        is EmptyDiscountCodeException -> R.string.checkout_discount_required
+        is InvalidDiscountCodeException -> R.string.checkout_discount_invalid
+        is DiscountLookupException -> R.string.checkout_discount_unavailable
+        else -> R.string.checkout_discount_unavailable
+    }
+
+    private fun Throwable.toDetailedCheckoutMessage(): String? = when (this) {
+        is InvalidCheckoutLineItemException, is InvalidCheckoutAddressException, is CheckoutVariantValidationException, is CheckoutOrderCreationException -> message?.takeIf { it.isNotBlank() }
+        else -> null
+    }
+
+    private fun Throwable.toMessageRes(): Int = when (this) {
+        is EmptyCartCheckoutException -> R.string.checkout_error_empty_cart
+        is InvalidCheckoutLineItemException -> R.string.checkout_error_invalid_cart
+        is ShopifyCustomerIdUnavailableException -> R.string.checkout_error_customer_id_unavailable
+        is MissingCheckoutAddressException -> R.string.checkout_error_no_address
+        is InvalidCheckoutAddressException -> R.string.checkout_error_no_address
+        is CheckoutCartClearException -> R.string.checkout_error_clear_cart
+        is CheckoutVariantValidationException -> R.string.checkout_error_invalid_cart
+        is CheckoutOrderCreationException -> R.string.checkout_error_order_creation
+        else -> R.string.checkout_error_generic
+    }
 
     private companion object {
-        const val DEFAULT_CURRENCY_CODE = "USD"
+        const val DEFAULT_CURRENCY_CODE = "EG"
     }
 }

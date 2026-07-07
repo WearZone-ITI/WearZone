@@ -20,7 +20,7 @@ data class OrderHistoryUiModel(
     val id: Long,
     val displayName: String,
     val placedDate: String,
-    val formattedTotalPrice: String,
+    val totalPriceAmount: Double,
     val statuses: ImmutableList<OrderStatusUiModel>,
     val thumbnails: ImmutableList<OrderThumbnailUiModel>,
     val canTrack: Boolean,

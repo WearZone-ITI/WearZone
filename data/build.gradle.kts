@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
@@ -18,7 +20,22 @@ android {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val localProperties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+
+        buildConfigField("String", "PAYMOB_SECRET_KEY", "\"${localProperties.getProperty("PAYMOB_SECRET_KEY") ?: ""}\"")
+        buildConfigField("String", "PAYMOB_PUBLIC_KEY", "\"${localProperties.getProperty("PAYMOB_PUBLIC_KEY") ?: ""}\"")
+        buildConfigField("String", "PAYMOB_INTEGRATION_ID", "\"${localProperties.getProperty("PAYMOB_INTEGRATION_ID") ?: "0"}\"")
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -41,6 +58,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.play.services.location)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     testImplementation(libs.mockk)

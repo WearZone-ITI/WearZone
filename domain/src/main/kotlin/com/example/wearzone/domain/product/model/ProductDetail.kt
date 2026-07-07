@@ -12,5 +12,20 @@ data class ProductDetail(
     val availableSizes: List<String>,
     val rating: Double,
     val reviewsCount: Int,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val variants: List<ProductVariant> = emptyList(),
+    val availableColors: List<String> = emptyList(),
+    val isOutOfStock: Boolean = false,
 )
+
+data class ProductVariant(
+    val id: String,
+    val title: String,
+    val price: Double,
+    val availableQuantity: Int,
+    val size: String?,
+    val color: String?,
+    val imageUrl: String?,
+) {
+    val isAvailable: Boolean get() = availableQuantity > 0
+}

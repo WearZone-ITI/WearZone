@@ -14,8 +14,8 @@ import com.example.wearzone.domain.checkout.model.CheckoutPaymentMethod
 import com.example.wearzone.domain.checkout.model.EmptyDiscountCodeException
 import com.example.wearzone.domain.checkout.model.InvalidDiscountCodeException
 import com.example.wearzone.domain.checkout.usecase.ApplyDiscountCodeUseCase
+import com.example.wearzone.domain.checkout.usecase.CreatePaymentIntentionUseCase
 import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
-import com.example.wearzone.domain.checkout.usecase.ProcessPayMockPaymentUseCase
 import com.example.wearzone.domain.customer.address.model.AddressInput
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
 import com.example.wearzone.domain.customer.address.repository.ICustomerAddressRepository
@@ -63,7 +63,7 @@ class CheckoutViewModelTest {
     private val observeCartUseCase: ObserveCartUseCase = mockk()
     private val placeOrderUseCase: PlaceOrderUseCase = mockk()
     private val applyDiscountCodeUseCase: ApplyDiscountCodeUseCase = mockk()
-    private val processPayMockPaymentUseCase: ProcessPayMockPaymentUseCase = mockk()
+    private val createPaymentIntentionUseCase: CreatePaymentIntentionUseCase = mockk()
 
     private val cartFlow = MutableSharedFlow<List<CartItem>>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -95,8 +95,8 @@ class CheckoutViewModelTest {
                 FakeAuthRepository(),
                 customerIdProvider,
             ),
-            customerAddressUseCases = createAddressUseCases(addressRepository),
-            processPayMockPaymentUseCase = processPayMockPaymentUseCase,
+            createPaymentIntentionUseCase = createPaymentIntentionUseCase,
+            getCurrentUserUseCase = mockk { coEvery { this@mockk.invoke() } returns (null as User?) }
         )
     }
 
@@ -348,14 +348,7 @@ class CheckoutViewModelTest {
     }
 
     @Test
-    fun `place order with Credit Card triggers PayMock vaulting and passes payment ID`() = runTest {
-        val payMockResponse = com.example.wearzone.domain.checkout.model.PayMockPaymentResponse(
-            id = "pay_123",
-            status = "approved",
-            amount = 100.0,
-            currency = "USD"
-        )
-        coEvery { processPayMockPaymentUseCase(any(), any()) } returns Result.success(payMockResponse)
+    fun `place order with Credit Card triggers Paymob payment result and isPlacingOrder becomes true`() = runTest {
         coEvery {
             placeOrderUseCase(
                 discount = any(),
@@ -366,18 +359,37 @@ class CheckoutViewModelTest {
         } returns Result.success(CheckoutOrder(id = 1L, name = "#1001"))
 
         createViewModel()
-        awaitContent()
+        
+        // Ensure cart is loaded and state is Content
+        cartFlow.emit(listOf(cartItem()))
+        advanceUntilIdle()
 
-        viewModel.handleIntent(CheckoutUiIntent.OnPaymentMethodSelected(com.example.wearzone.presentation.checkout.CheckoutPaymentMethodUi.CreditCard))
-        viewModel.handleIntent(CheckoutUiIntent.OnCardNumberChanged("1234567890123456"))
-        viewModel.handleIntent(CheckoutUiIntent.OnCardHolderNameChanged("John", "Doe"))
-        viewModel.handleIntent(CheckoutUiIntent.OnCardExpiryChanged("12", "2025"))
-        viewModel.handleIntent(CheckoutUiIntent.OnCardCvvChanged("123"))
+        viewModel.uiState.test {
+            // Initial content
+            var initialState = awaitItem()
+            while (initialState !is CheckoutUiState.Content) {
+                initialState = awaitItem()
+            }
+            assertFalse("isPlacingOrder should be false initially", (initialState as CheckoutUiState.Content).isPlacingOrder)
 
-        viewModel.handleIntent(CheckoutUiIntent.OnSubmitOrderConfirmed)
+            viewModel.handleIntent(
+                CheckoutUiIntent.OnPaymobPaymentResult(
+                    isSuccess = true,
+                    transactionId = "pay_123"
+                )
+            )
+
+            // State should transition to isPlacingOrder = true
+            var state = awaitItem()
+            while (state is CheckoutUiState.Content && !state.isPlacingOrder) {
+                state = awaitItem()
+            }
+            assertTrue("isPlacingOrder should be true after payment success", (state as CheckoutUiState.Content).isPlacingOrder)
+            
+            cancelAndIgnoreRemainingEvents()
+        }
 
         coVerify {
-            processPayMockPaymentUseCase(100.0, "USD")
             placeOrderUseCase(
                 discount = null,
                 selectedAddressId = DEFAULT_ADDRESS_ID,

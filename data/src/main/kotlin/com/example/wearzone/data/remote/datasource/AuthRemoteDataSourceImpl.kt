@@ -83,6 +83,18 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    override suspend fun sendEmailVerification() {
+        val user = firebaseAuth.currentUser ?: throw IllegalStateException("No signed-in user")
+        user.sendEmailVerification().await()
+    }
+
+    override suspend fun isEmailVerified(): Boolean {
+        val user = firebaseAuth.currentUser ?: return false
+        user.reload().await()
+        return user.isEmailVerified
+    }
+
+
     private suspend fun saveCustomerIdInFireStore(
         uid: String,
         customerId: Long,
@@ -90,4 +102,9 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         val data = mapOf("customerId" to customerId)
         firestore.collection("users").document(uid).set(data).await()
     }
+
+    override suspend fun sendPasswordResetEmail(email: String) {
+        firebaseAuth.sendPasswordResetEmail(email).await()
+    }
+
 }

@@ -10,6 +10,7 @@ data class OrderHistory(
     val financialStatus: String?,
     val fulfillmentStatus: String?,
     val orderStatus: OrderStatus,
+    val paymentGatewayNames: List<String>,
     val lineItems: List<OrderHistoryLineItem>,
     val trackingNumber: String?,
     val trackingUrl: String?,

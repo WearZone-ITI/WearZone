@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.presentation.address.list.components.AddressCard
 import com.example.wearzone.presentation.address.list.components.AddressDeleteConfirmationDialog
+import com.example.wearzone.presentation.common.PremiumEmptyState
 import com.example.wearzone.presentation.common.SignInRequiredDialog
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -278,33 +279,13 @@ private fun AddressCardsContent(
 private fun EmptyAddressesContent(
     onAddClicked: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.address_empty_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = AppTheme.colors.textPrimary,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(R.string.address_empty_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colors.textSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        Spacer(modifier = Modifier.height(28.dp))
-        AddressPrimaryButton(
-            textRes = R.string.address_add_new,
-            onClick = onAddClicked,
-        )
-    }
+    PremiumEmptyState(
+        lottieResId = R.raw.no_address,
+        title = stringResource(R.string.address_empty_title),
+        description = stringResource(R.string.address_empty_subtitle),
+        buttonText = stringResource(R.string.address_add_new),
+        onButtonClick = onAddClicked,
+    )
 }
 
 @Composable

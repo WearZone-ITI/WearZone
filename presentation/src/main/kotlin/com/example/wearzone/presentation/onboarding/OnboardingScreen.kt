@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +38,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -108,18 +108,14 @@ private fun OnboardingContent(
         Text(
             text = stringResource(page.titleRes),
             color = AppTheme.colors.textPrimary,
-            fontFamily = FontFamily.Serif,
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 40.sp,
+            style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = stringResource(page.descriptionRes),
             color = AppTheme.colors.textSecondary,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(28.dp))
@@ -139,7 +135,7 @@ private fun OnboardingContent(
             Text(
                 text = stringResource(uiState.messageRes),
                 color = AppTheme.colors.error,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
         }

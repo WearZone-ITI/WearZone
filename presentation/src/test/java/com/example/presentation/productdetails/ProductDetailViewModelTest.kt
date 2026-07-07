@@ -19,6 +19,8 @@ import com.example.wearzone.presentation.product.detail.ProductDetailUiEffect
 import com.example.wearzone.presentation.product.detail.ProductDetailUiIntent
 import com.example.wearzone.presentation.product.detail.ProductDetailUiState
 import com.example.wearzone.presentation.product.detail.ProductDetailViewModel
+import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.product.repository.IReviewRepository
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -43,6 +45,8 @@ class ProductDetailViewModelTest {
     private val observeWishlistUseCase = mockk<ObserveWishlistUseCase>()
     private val toggleFavoriteUseCase = mockk<ToggleFavoriteUseCase>()
     private val addToCartUseCase = mockk<AddToCartUseCase>()
+    private val reviewRepository = mockk<IReviewRepository>()
+    private val observeCartUseCase = mockk<ObserveCartUseCase>()
     private val savedStateHandle = SavedStateHandle(mapOf("productId" to "1"))
 
     private val testDispatcher = StandardTestDispatcher()
@@ -52,6 +56,8 @@ class ProductDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
         coEvery { authRepository.getCurrentUser() } returns null
         every { observeWishlistUseCase(any()) } returns flowOf(emptyList())
+        every { reviewRepository.getReviewsForProduct(any()) } returns flowOf(emptyList())
+        every { observeCartUseCase() } returns flowOf(emptyList())
     }
 
     @After
@@ -67,7 +73,9 @@ class ProductDetailViewModelTest {
             GetCurrentUserUseCase(authRepository),
             observeWishlistUseCase,
             toggleFavoriteUseCase,
-            addToCartUseCase
+            addToCartUseCase,
+            reviewRepository,
+            observeCartUseCase
         )
     }
 

@@ -12,8 +12,10 @@ sealed interface CheckoutUiIntent {
     data object OnAddAddressClicked : CheckoutUiIntent
     data object OnRefreshAddresses : CheckoutUiIntent
     data class OnPaymentMethodSelected(val method: CheckoutPaymentMethodUi) : CheckoutUiIntent
-    data class OnCardNumberChanged(val number: String) : CheckoutUiIntent
-    data class OnCardHolderNameChanged(val firstName: String, val lastName: String) : CheckoutUiIntent
-    data class OnCardExpiryChanged(val month: String, val year: String) : CheckoutUiIntent
-    data class OnCardCvvChanged(val cvv: String) : CheckoutUiIntent
+    data class OnPaymobPaymentResult(
+        val isSuccess: Boolean,
+        val transactionId: String?,
+        val errorMessage: String? = null,
+    ) : CheckoutUiIntent
+    data object OnPaymentSuccessConfirmed : CheckoutUiIntent
 }

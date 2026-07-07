@@ -47,6 +47,13 @@ android {
 
         val adminToken = localProperties.getProperty("SHOPIFY_ADMIN_TOKEN", "")
         buildConfigField("String", "SHOPIFY_ADMIN_TOKEN", "\"$adminToken\"")
+
+        val paymobSecretKey = localProperties.getProperty("PAYMOB_SECRET_KEY", "")
+        buildConfigField("String", "PAYMOB_SECRET_KEY", "\"$paymobSecretKey\"")
+
+        val mapboxAccessToken = localProperties.getProperty("MAPBOX_ACCESS_TOKEN", "")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"$mapboxAccessToken\"")
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] = mapboxAccessToken
     }
 
     buildTypes {
@@ -63,6 +70,8 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        dataBinding = true
+        viewBinding = true
     }
 }
 
@@ -99,6 +108,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.database.ktx)
+    implementation(libs.logging.interceptor)
     //Hend
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
