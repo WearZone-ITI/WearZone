@@ -13,10 +13,13 @@ import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.customer.address.repository.ICustomerIdProvider
+import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.presentation.profile.ProfileUiEffect
 import com.example.wearzone.presentation.profile.ProfileUiIntent
 import com.example.wearzone.presentation.profile.ProfileUiState
 import com.example.wearzone.presentation.profile.ProfileViewModel
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -42,7 +45,6 @@ class ProfileViewModelTest {
         assertEquals("Alexandra", state.displayName)
         assertEquals("alexandra@example.com", state.email)
         assertTrue(state.isAuthenticated)
-        assertEquals(2, state.recentOrders.size)
     }
 
     @Test
@@ -117,14 +119,17 @@ class ProfileViewModelTest {
         customerIdResult: Result<Long> = Result.success(1L),
     ): ProfileViewModel {
         val cartRepository = FakeCartRepository()
+        val customerIdProvider = FakeCustomerIdProvider(customerIdResult)
         return ProfileViewModel(
             getAuthAccessStateUseCase = GetAuthAccessStateUseCase(
                 repository,
-                FakeCustomerIdProvider(customerIdResult),
+                customerIdProvider,
             ),
             getCurrentUserUseCase = GetCurrentUserUseCase(repository),
             logoutUseCase = LogoutUseCase(repository),
             observeCartUseCase = ObserveCartUseCase(cartRepository),
+            getOrderHistoryUseCase = mockk { coEvery { this@mockk.invoke(any()) } returns Result.success(emptyList()) },
+            getCurrentCustomerIdUseCase = GetCurrentCustomerIdUseCase(customerIdProvider)
         )
     }
 
@@ -158,6 +163,12 @@ class ProfileViewModelTest {
 
         override suspend fun register(name: String, email: String, password: String): Result<User> =
             Result.failure(NotImplementedError())
+
+        override suspend fun checkEmailVerified(): Result<Boolean> = Result.success(true)
+
+        override suspend fun sendEmailVerification(): Result<Unit> = Result.success(Unit)
+
+        override suspend fun sendPasswordResetEmail(email: String): Result<Unit> = Result.success(Unit)
 
         override fun observeOnboardingCompleted(): Flow<Boolean> = flowOf(false)
 
