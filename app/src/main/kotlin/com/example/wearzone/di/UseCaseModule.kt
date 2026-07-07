@@ -48,6 +48,7 @@ import com.example.wearzone.domain.customer.address.usecase.ReverseGeocodeAddres
 import com.example.wearzone.domain.customer.address.usecase.SearchAddressSuggestionsUseCase
 import com.example.wearzone.domain.customer.address.usecase.SetDefaultCustomerAddressUseCase
 import com.example.wearzone.domain.customer.address.usecase.UpdateCustomerAddressUseCase
+import com.example.wearzone.domain.notifications.usecase.GetRandomCouponOfferUseCase
 import com.example.wearzone.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.example.wearzone.domain.onboarding.usecase.SetOnboardingCompletedUseCase
 import com.example.wearzone.domain.product.repository.IProductRepository
@@ -140,6 +141,11 @@ object UseCaseModule {
     ): CheckEmailVerifiedUseCase = CheckEmailVerifiedUseCase(repository)
 
 
+
+    @Provides
+    fun provideGetRandomCouponOfferUseCase(): GetRandomCouponOfferUseCase {
+        return GetRandomCouponOfferUseCase()
+    }
 
     @Provides
     fun provideLoginWithEmailUseCase(
@@ -400,6 +406,4 @@ object UseCaseModule {
         getOrderDetails = getOrderDetails,
         cancelOrder = cancelOrder,
     )
-
-
 }

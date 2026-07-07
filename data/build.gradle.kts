@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
+
 }
 
 android {
@@ -44,10 +45,13 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(libs.androidx.work.runtime.ktx)
     //Omar
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
     //Omar
 
     //Ahmed
