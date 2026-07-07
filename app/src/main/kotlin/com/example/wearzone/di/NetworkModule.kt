@@ -20,6 +20,7 @@ import com.example.wearzone.data.remote.api.MapboxApiService
 import com.example.wearzone.data.remote.api.OrderApiService
 import com.example.wearzone.data.remote.api.PaymobApiService
 import com.example.wearzone.data.remote.api.ProductApiService
+import com.example.wearzone.data.remote.ai.chat.api.GroqApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -248,7 +249,7 @@ object NetworkModule {
     }
 
 @Provides
-    fun provideGroqApiService(): com.example.wearzone.data.remote.ai.chat.api.GroqApiService {
+    fun provideGroqApiService(): GroqApiService {
         val loggingInterceptor = okhttp3.logging.HttpLoggingInterceptor().apply {
             level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
         }
@@ -260,7 +261,7 @@ object NetworkModule {
             .client(okHttpClient)
             .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
             .build()
-        return retrofit.create(com.example.wearzone.data.remote.ai.chat.api.GroqApiService::class.java)
+        return retrofit.create(GroqApiService::class.java)
     }
 
     @Provides

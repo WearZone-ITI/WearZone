@@ -1,6 +1,10 @@
 package com.example.wearzone.di
 
 import com.example.wearzone.domain.auth.repository.IAuthRepository
+import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
+import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
@@ -409,20 +413,20 @@ object UseCaseModule {
 
     @Provides
     fun provideSendChatMessageUseCase(
-        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
-    ): com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase =
-        com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase(repository)
+        repository: IAiChatRepository
+    ): SendChatMessageUseCase =
+        SendChatMessageUseCase(repository)
 
     @Provides
     fun provideClearChatHistoryUseCase(
-        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
-    ): com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase =
-        com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase(repository)
+        repository: IAiChatRepository
+    ): ClearChatHistoryUseCase =
+        ClearChatHistoryUseCase(repository)
 
     @Provides
     fun provideGetChatHistoryUseCase(
-        repository: com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
-    ): com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase =
-        com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase(repository)
+        repository: IAiChatRepository
+    ): GetChatHistoryUseCase =
+        GetChatHistoryUseCase(repository)
 
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.wearzone.BuildConfig
 import com.example.wearzone.data.local.datasource.CartLocalDataSourceImpl
 import com.example.wearzone.data.local.datasource.CurrentLocationDataSourceImpl
 import com.example.wearzone.data.local.datasource.ICartLocalDataSource
@@ -14,6 +15,9 @@ import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.datasource.OnboardingPreferencesDataSourceImpl
 import com.example.wearzone.data.local.datasource.SettingsPreferencesDataSourceImpl
 import com.example.wearzone.data.local.datasource.StaticCountryLocalDataSourceImpl
+import com.example.wearzone.data.remote.ai.chat.AiChatRemoteDataSourceImpl
+import com.example.wearzone.data.remote.ai.chat.GroqApiKey
+import com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
 import com.example.wearzone.data.remote.datasource.AuthRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CartRemoteDataSourceImpl
 import com.example.wearzone.data.remote.datasource.CategoryRemoteDataSourceImpl
@@ -100,8 +104,8 @@ abstract class DataSourceModule {
 
     @Binds
     abstract fun bindAiChatRemoteDataSource(
-        impl: com.example.wearzone.data.remote.ai.chat.AiChatRemoteDataSourceImpl,
-    ): com.example.wearzone.data.remote.ai.chat.IAiChatRemoteDataSource
+        impl: AiChatRemoteDataSourceImpl,
+    ): IAiChatRemoteDataSource
 
     @Binds
     abstract fun bindAddressLookupRemoteDataSource(
@@ -148,8 +152,8 @@ abstract class DataSourceModule {
             return SettingsPreferencesDataSourceImpl(dataStore)
         }
         @Provides
-        @com.example.wearzone.data.remote.ai.chat.GroqApiKey
-        fun provideGroqApiKey(): String = com.example.wearzone.BuildConfig.GROQ_API_KEY
+        @GroqApiKey
+        fun provideGroqApiKey(): String = BuildConfig.GROQ_API_KEY
 
     }
 }

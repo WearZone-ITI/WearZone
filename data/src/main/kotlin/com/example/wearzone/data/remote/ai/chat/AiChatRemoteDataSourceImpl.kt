@@ -20,10 +20,6 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
     private val groqApiService: GroqApiService,
 ) : IAiChatRemoteDataSource {
 
-    init {
-        Log.d("GROQ_CHAT_DEBUG", "Target Key Length: ${apiKey.length}")
-    }
-
     private val systemPrompt = """
         You are the WearZone AI shopping assistant.
         You must answer using ONLY the products explicitly provided in CATALOG_CONTEXT.

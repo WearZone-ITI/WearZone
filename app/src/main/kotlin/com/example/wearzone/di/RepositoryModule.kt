@@ -12,12 +12,14 @@ import com.example.wearzone.data.repository.OrderHistoryRepositoryImpl
 import com.example.wearzone.data.repository.ProductRepositoryImpl
 import com.example.wearzone.data.repository.RecentSearchRepositoryImpl
 import com.example.wearzone.data.repository.CartRepositoryImpl
+import com.example.wearzone.data.repository.AiChatRepositoryImpl
 import com.example.wearzone.data.repository.CheckoutRepositoryImpl
 import com.example.wearzone.data.repository.CurrencyRepositoryImpl
 import com.example.wearzone.data.repository.DiscountRepositoryImpl
 import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.data.repository.PaymentRepositoryImpl
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
+import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 import com.example.wearzone.domain.auth.repository.IAuthRepository
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
 import com.example.wearzone.domain.checkout.repository.IDiscountRepository
@@ -91,7 +93,7 @@ abstract class RepositoryModule {
     abstract fun bindOrderHistoryRepository(impl: OrderHistoryRepositoryImpl): IOrderHistoryRepository
 
     @Binds
-    abstract fun bindAiChatRepository(impl: com.example.wearzone.data.repository.AiChatRepositoryImpl): com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
+    abstract fun bindAiChatRepository(impl: AiChatRepositoryImpl): IAiChatRepository
 
     @Binds
     abstract fun bindCountryRepository(impl: CountryRepositoryImpl): ICountryRepository
