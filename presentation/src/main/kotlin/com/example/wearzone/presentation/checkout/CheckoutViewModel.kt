@@ -27,6 +27,8 @@ import com.example.wearzone.domain.checkout.usecase.PlaceOrderUseCase
 import com.example.wearzone.domain.customer.address.model.CustomerAddress
 import com.example.wearzone.domain.customer.address.model.ShopifyCustomerIdUnavailableException
 import com.example.wearzone.domain.customer.address.usecase.CustomerAddressUseCases
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
+import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
@@ -36,12 +38,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
+import kotlin.math.roundToLong
 
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
@@ -52,6 +56,8 @@ class CheckoutViewModel @Inject constructor(
     private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val createPaymentIntentionUseCase: CreatePaymentIntentionUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
+    private val currencyRepository: ICurrencyRepository,
 ) : ViewModel() {
 
     private val hasCheckoutAccess = MutableStateFlow<Boolean?>(null)
@@ -66,13 +72,29 @@ class CheckoutViewModel @Inject constructor(
         emptyList(),
     )
 
+    private val selectedCurrency = observeSettingsPreferencesUseCase()
+        .map { it.selectedCurrency }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            DEFAULT_CURRENCY_CODE
+        )
+
     val uiState = combine(
         cartItems,
         isPlacingOrder,
         promoState,
         checkoutDetails,
         hasCheckoutAccess,
-    ) { items, placingOrder, promo, details, hasAccess ->
+        selectedCurrency
+    ) { args: Array<Any?> ->
+        val items = args[0] as List<CartItem>
+        val placingOrder = args[1] as Boolean
+        val promo = args[2] as PromoState
+        val details = args[3] as CheckoutDetailsState
+        val hasAccess = args[4] as Boolean?
+        val currency = args[5] as String
+
         when (hasAccess) {
             null -> CheckoutUiState.Loading
             false -> CheckoutUiState.SignInRequired
@@ -81,6 +103,7 @@ class CheckoutViewModel @Inject constructor(
                 placingOrder = placingOrder,
                 promoState = promo,
                 checkoutDetails = details,
+                currency = currency
             )
         }
     }.catch { emit(CheckoutUiState.Error(R.string.checkout_error_generic)) }.stateIn(
@@ -154,22 +177,24 @@ class CheckoutViewModel @Inject constructor(
         placingOrder: Boolean,
         promoState: PromoState,
         checkoutDetails: CheckoutDetailsState,
+        currency: String
     ): CheckoutUiState {
         if (items.isEmpty()) return CheckoutUiState.Empty
 
-        val subtotalAmount = items.sumOf { it.price * it.quantity }
-        val currencyCode = items.firstOrNull()?.currencyCode.orEmpty()
-        val discountAmount = promoState.appliedDiscount?.calculatedAmount ?: 0.0
+        val rate = currencyRepository.getRateFor(currency)
+
+        val subtotalAmount = items.sumOf { it.price * it.quantity } * rate
+        val discountAmount = (promoState.appliedDiscount?.calculatedAmount ?: 0.0) * rate
         val totalAmount = max(subtotalAmount - discountAmount, 0.0)
 
         return CheckoutUiState.Content(
-            items = items.map { it.toUiModel() }.toImmutableList(),
+            items = items.map { it.toUiModel(currency, rate) }.toImmutableList(),
             itemCount = items.sumOf { it.quantity },
-            subtotal = formatMoney(subtotalAmount, currencyCode),
+            subtotal = formatMoney(subtotalAmount, currency),
             formattedDiscount = promoState.appliedDiscount?.let {
-                formatMoney(discountAmount, currencyCode)
+                formatMoney(discountAmount, currency)
             },
-            total = formatMoney(totalAmount, currencyCode),
+            total = formatMoney(totalAmount, currency),
             promoCodeText = promoState.promoCodeText,
             appliedDiscountCode = promoState.appliedDiscount?.code,
             discountErrorRes = promoState.discountErrorRes,
@@ -299,9 +324,15 @@ class CheckoutViewModel @Inject constructor(
         checkoutDetails.value = checkoutDetails.value.copy(isProcessingPayment = true)
 
         val items = cartItems.value
-        val subtotal = items.sumOf { it.price * it.quantity }
-        val discountAmount = promoState.value.appliedDiscount?.calculatedAmount ?: 0.0
-        val totalAmount = max(subtotal - discountAmount, 0.0)
+        // Shopify base prices are in USD
+        val subtotalUsd = items.sumOf { it.price * it.quantity }
+        val discountUsd = promoState.value.appliedDiscount?.calculatedAmount ?: 0.0
+        val totalUsd = max(subtotalUsd - discountUsd, 0.0)
+
+        // Paymob requires EGP
+        val egpRate = currencyRepository.getRateFor("EGP")
+        val totalEgp = totalUsd * egpRate
+
         val address = checkoutDetails.value.deliveryAddress
         val user = getCurrentUserUseCase()
 
@@ -319,13 +350,13 @@ class CheckoutViewModel @Inject constructor(
 
         val checkoutData = CheckoutData(
             cartItems = items,
-            totalAmount = (totalAmount * 100).toLong(),
+            totalAmount = (totalEgp * 100).roundToLong(), // Paymob amount in EGP cents
             customerInfo = CustomerInfo(
                 firstName = firstName,
                 lastName = lastName,
                 email = user.email,
-                phone = address.phone ?: "01279336697"
-            )
+                phone = address.phone ?: "01279336697",
+                ),
         )
 
         createPaymentIntentionUseCase(checkoutData).onSuccess { intention ->
@@ -408,12 +439,12 @@ class CheckoutViewModel @Inject constructor(
         )
     }
 
-    private fun CartItem.toUiModel(): CheckoutCartItemUiModel = CheckoutCartItemUiModel(
+    private fun CartItem.toUiModel(currency: String, rate: Double): CheckoutCartItemUiModel = CheckoutCartItemUiModel(
         variantId = variantId,
         title = title,
         vendor = vendor,
         quantity = quantity,
-        formattedPrice = formatMoney(price * quantity, currencyCode),
+        formattedPrice = formatMoney(price * quantity * rate, currency),
         imageUrl = imageUrl,
     )
 
@@ -455,6 +486,6 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private companion object {
-        const val DEFAULT_CURRENCY_CODE = "EG"
+        const val DEFAULT_CURRENCY_CODE = "EGP"
     }
 }
