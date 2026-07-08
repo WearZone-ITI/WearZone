@@ -61,6 +61,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(libs.androidx.benchmark.traceprocessor)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.foundation)
     //Omar
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.tv.material)

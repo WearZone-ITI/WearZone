@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +42,8 @@ import com.example.wearzone.presentation.checkout.components.DeliveryAddressCard
 import com.example.wearzone.presentation.checkout.components.PaymentMethodSelector
 import com.example.wearzone.presentation.checkout.components.PromoCodeCard
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.WearZoneDialog
+import com.example.wearzone.presentation.common.WearZoneDialogTone
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.launch
 import com.paymob.paymob_sdk.ui.PaymobSdkListener
@@ -361,10 +364,10 @@ private fun CheckoutBottomBar(
         Button(
             onClick = onSubmit,
             enabled = !state.isPlacingOrder &&
-                !state.isApplyingDiscount &&
-                !state.isLoadingAddress &&
-                !state.isProcessingPayment &&
-                state.deliveryAddress != null ,
+                    !state.isApplyingDiscount &&
+                    !state.isLoadingAddress &&
+                    !state.isProcessingPayment &&
+                    state.deliveryAddress != null ,
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppTheme.colors.selected,
@@ -481,23 +484,16 @@ private fun ConfirmOrderDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        modifier = Modifier.fillMaxWidth(0.95f),
-        title = { Text(text = stringResource(R.string.checkout_confirm_title)) },
-        text = { Text(text = stringResource(R.string.checkout_confirm_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.checkout_confirm_place_order),
-                    color = AppTheme.colors.selected,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cart_dialog_cancel))
-            }
-        },
+    WearZoneDialog(
+        title = stringResource(R.string.checkout_confirm_title),
+        message = stringResource(R.string.checkout_confirm_message),
+        confirmText = stringResource(R.string.checkout_confirm_place_order),
+        cancelText = stringResource(R.string.cart_dialog_cancel),
+        onConfirm = onConfirm,
+        onCancel = onDismiss,
+        onDismiss = onDismiss,
+        icon = Icons.Outlined.ShoppingBag,
+        iconContentDescription = stringResource(R.string.checkout_confirm_place_order),
+        tone = WearZoneDialogTone.Default,
     )
 }

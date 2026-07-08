@@ -106,10 +106,12 @@ abstract class RepositoryModule {
         impl: CurrentLocationRepositoryImpl,
     ): ICurrentLocationRepository
 
+
     @Binds
     abstract fun bindCouponNotificationScheduler(
         impl: CouponNotificationSchedulerImpl,
     ): ICouponNotificationScheduler
+
 
     @Binds
     abstract fun bindReviewRepository(impl: ReviewRepositoryImpl): IReviewRepository
