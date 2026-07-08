@@ -14,6 +14,15 @@
     <string name="onboarding_delivery_moment_image_description">Woman opening a fashion package</string>
     <string name="onboarding_delivery_moment_title">Unbox Your Style</string>
     <string name="onboarding_delivery_moment_description">Finish onboarding to get ready for your WearZone journey.</string>
+    <string name="onboarding_secure_checkout_image_description">Secure checkout and payment for a fashion order</string>
+    <string name="onboarding_secure_checkout_title">Checkout Securely</string>
+    <string name="onboarding_secure_checkout_description">Add items to your cart, save your address, and complete your order with confidence.</string>
+    <string name="onboarding_ecommerce_image_description">Fashion shopping app with product cards</string>
+    <string name="onboarding_ecommerce_title">Shop Your Favorite Fashion</string>
+    <string name="onboarding_ecommerce_description">Browse curated products, explore categories, and find the styles that match you.</string>
+    <string name="onboarding_ai_assistant_image_description">AI fashion assistant chat on a phone</string>
+    <string name="onboarding_ai_assistant_title">Ask Your AI Style Assistant</string>
+    <string name="onboarding_ai_assistant_description">Get smart help choosing outfits, finding products, and making better shopping decisions.</string>
     <string name="login_placeholder_title">Login Screen</string>
     <!-- Profile and Settings -->
     <string name="profile_brand_title">WearZone</string>

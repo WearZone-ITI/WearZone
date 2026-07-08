@@ -246,22 +246,13 @@ private data class OnboardingPage(
 )
 
 private fun onboardingPages(): List<OnboardingPage> = listOf(
-    OnboardingPage(
-        imageRes = R.drawable.onboarding_style_discovery,
-        imageDescriptionRes = R.string.onboarding_style_discovery_image_description,
-        titleRes = R.string.onboarding_style_discovery_title,
-        descriptionRes = R.string.onboarding_style_discovery_description,
-    ),
-    OnboardingPage(
-        imageRes = R.drawable.onboarding_shopping_flow,
-        imageDescriptionRes = R.string.onboarding_shopping_flow_image_description,
-        titleRes = R.string.onboarding_shopping_flow_title,
-        descriptionRes = R.string.onboarding_shopping_flow_description,
-    ),
-    OnboardingPage(
-        imageRes = R.drawable.onboarding_delivery_moment,
-        imageDescriptionRes = R.string.onboarding_delivery_moment_image_description,
-        titleRes = R.string.onboarding_delivery_moment_title,
-        descriptionRes = R.string.onboarding_delivery_moment_description,
-    ),
+    OnboardingPage( imageRes = R.drawable.onboarding1,
+        imageDescriptionRes = R.string.onboarding_ecommerce_image_description,
+        titleRes = R.string.onboarding_ecommerce_title,
+        descriptionRes = R.string.onboarding_ecommerce_description, ),
+    OnboardingPage( imageRes = R.drawable.onboarding2,
+        imageDescriptionRes = R.string.onboarding_ai_assistant_image_description,
+        titleRes = R.string.onboarding_ai_assistant_title,
+        descriptionRes = R.string.onboarding_ai_assistant_description, ),
+    OnboardingPage( imageRes = R.drawable.onboarding3, imageDescriptionRes = R.string.onboarding_secure_checkout_image_description, titleRes = R.string.onboarding_secure_checkout_title, descriptionRes = R.string.onboarding_secure_checkout_description, )
 )
