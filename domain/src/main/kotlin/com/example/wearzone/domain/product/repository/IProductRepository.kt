@@ -13,6 +13,8 @@ interface IProductRepository {
         collectionId: Long? = null
     ): DataResult<List<Product>>
 
+    suspend fun getProductsPreview(limit: Int): DataResult<List<Product>>
+
     suspend fun getProductDetail(productId: Long): DataResult<ProductDetail>
     suspend fun getProductsByVendor(vendor: String): DataResult<List<Product>>
 }

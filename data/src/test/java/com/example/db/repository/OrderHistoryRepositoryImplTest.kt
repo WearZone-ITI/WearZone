@@ -139,6 +139,8 @@ class OrderHistoryRepositoryImplTest {
 
         override suspend fun getProducts(vendor: String?): List<ProductDto> = products
 
+        override suspend fun getProductsPreview(limit: Int): List<ProductDto> = products.take(limit)
+
         override suspend fun getProducts(collectionId: Long?): List<ProductDto> = products
 
         override suspend fun getProductsByIds(productIds: List<Long>): List<ProductDto> {

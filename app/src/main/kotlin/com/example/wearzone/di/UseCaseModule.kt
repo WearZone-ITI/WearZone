@@ -5,6 +5,7 @@ import com.example.wearzone.domain.ai.chat.repository.IAiChatRepository
 import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
+import com.example.wearzone.domain.ai.chat.usecase.TranscribeVoiceUseCase
 import com.example.wearzone.domain.account.repository.IOrderHistoryRepository
 import com.example.wearzone.domain.account.repository.ICurrencyRepository
 import com.example.wearzone.domain.account.usecase.CancelOrderUseCase
@@ -27,6 +28,7 @@ import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
@@ -223,6 +225,14 @@ object UseCaseModule {
         repository: ICartRepository,
     ): ObserveCartUseCase {
         return ObserveCartUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveCartItemCountUseCase(
+        repository: ICartRepository,
+        getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
+    ): ObserveCartItemCountUseCase {
+        return ObserveCartItemCountUseCase(repository, getAuthAccessStateUseCase)
     }
 
     @Provides
@@ -428,5 +438,11 @@ object UseCaseModule {
         repository: IAiChatRepository
     ): GetChatHistoryUseCase =
         GetChatHistoryUseCase(repository)
+
+    @Provides
+    fun provideTranscribeVoiceUseCase(
+        repository: IAiChatRepository
+    ): TranscribeVoiceUseCase =
+        TranscribeVoiceUseCase(repository)
 
 }

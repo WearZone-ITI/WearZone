@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.BasicTextField
@@ -83,6 +84,7 @@ import com.example.wearzone.presentation.address.form.components.AddressCountryS
 import com.example.wearzone.presentation.address.form.components.AddressMapPickerDialog
 import com.example.wearzone.presentation.address.form.components.AddressMapPreviewCard
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.rememberKeyboardVisibility
 import com.example.wearzone.presentation.common.theme.AppTheme
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -139,6 +141,9 @@ fun AddressFormScreen(
         }
     }
 
+    val isKeyboardVisible by rememberKeyboardVisibility()
+    var isAnyFormFieldFocused by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             AddressFormTopBar(
@@ -148,7 +153,7 @@ fun AddressFormScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            if (!uiState.isLoading && !uiState.isSignInRequired) {
+            if (!isKeyboardVisible && !isAnyFormFieldFocused && !uiState.isLoading && !uiState.isSignInRequired) {
                 StickySaveAddressBar(
                     uiState = uiState,
                     onClick = { viewModel.handleIntent(AddressFormUiIntent.OnSaveClicked) },
@@ -163,6 +168,7 @@ fun AddressFormScreen(
             onNavigateToLogin = onNavigateToLogin,
             onNavigateToRegister = onNavigateToRegister,
             onContinueBrowsing = onNavigateBack,
+            onFormFieldFocusChanged = { isAnyFormFieldFocused = it },
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -214,6 +220,7 @@ private fun AddressFormContent(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onContinueBrowsing: () -> Unit,
+    onFormFieldFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -235,6 +242,7 @@ private fun AddressFormContent(
             AddressFormLoadedContent(
                 uiState = uiState,
                 onIntent = onIntent,
+                onFormFieldFocusChanged = onFormFieldFocusChanged,
             )
         }
     }
@@ -244,6 +252,7 @@ private fun AddressFormContent(
 private fun AddressFormLoadedContent(
     uiState: AddressFormUiState,
     onIntent: (AddressFormUiIntent) -> Unit,
+    onFormFieldFocusChanged: (Boolean) -> Unit,
 ) {
     var countrySelectorOpenSignal by remember { mutableIntStateOf(0) }
 
@@ -274,6 +283,7 @@ private fun AddressFormLoadedContent(
                 icon = Icons.Outlined.Person,
                 errorRes = uiState.recipientNameError,
                 placeholderRes = R.string.address_recipient_name_hint,
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -285,6 +295,7 @@ private fun AddressFormLoadedContent(
                 errorRes = uiState.phoneError,
                 placeholderRes = R.string.address_mobile_number_hint,
                 onCountryPrefixClicked = { countrySelectorOpenSignal++ },
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -332,6 +343,7 @@ private fun AddressFormLoadedContent(
                 labelRes = R.string.address_province,
                 icon = Icons.Outlined.Apartment,
                 placeholderRes = R.string.address_province_hint,
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -343,6 +355,7 @@ private fun AddressFormLoadedContent(
                     icon = Icons.Outlined.LocationCity,
                     errorRes = uiState.cityError,
                     placeholderRes = R.string.address_city_hint,
+                    onFocusChanged = onFormFieldFocusChanged,
                     modifier = Modifier.weight(1f),
                 )
                 AddressTextField(
@@ -353,6 +366,7 @@ private fun AddressFormLoadedContent(
                     errorRes = uiState.zipError,
                     placeholderRes = R.string.address_postal_code_hint,
                     keyboardType = KeyboardType.Number,
+                    onFocusChanged = onFormFieldFocusChanged,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -366,6 +380,7 @@ private fun AddressFormLoadedContent(
                 errorRes = uiState.address1Error,
                 placeholderRes = R.string.address_street_hint,
                 minLines = 2,
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -381,6 +396,7 @@ private fun AddressFormLoadedContent(
                 labelRes = R.string.address_address2,
                 icon = Icons.Outlined.Home,
                 placeholderRes = R.string.address_address2_hint,
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -390,6 +406,7 @@ private fun AddressFormLoadedContent(
                 labelRes = R.string.address_company,
                 icon = Icons.Outlined.Apartment,
                 placeholderRes = R.string.address_company_hint,
+                onFocusChanged = onFormFieldFocusChanged,
             )
         }
         item {
@@ -453,6 +470,7 @@ private fun PremiumPhoneField(
     errorRes: Int?,
     placeholderRes: Int,
     onCountryPrefixClicked: () -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val borderColor = if (errorRes != null) AppTheme.colors.error else AppTheme.colors.divider
@@ -537,7 +555,9 @@ private fun PremiumPhoneField(
                             innerTextField()
                         }
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .onFocusChanged { onFocusChanged(it.isFocused) },
                 )
             }
         }
@@ -619,7 +639,6 @@ private fun StickySaveAddressBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         )
     }
@@ -638,6 +657,7 @@ private fun AddressTextField(
     placeholderRes: Int? = null,
     readOnly: Boolean = false,
     prefix: String? = null,
+    onFocusChanged: (Boolean) -> Unit = {},
 ) {
     OutlinedTextField(
         value = value,
@@ -676,7 +696,9 @@ private fun AddressTextField(
             unfocusedContainerColor = AppTheme.colors.surfaceVariant,
             errorBorderColor = AppTheme.colors.error,
         ),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { onFocusChanged(it.isFocused) },
     )
 }
 

@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
@@ -49,8 +47,8 @@ fun RecentSearches(
                 Text(text = stringResource(id = R.string.search_clear_recent))
             }
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(recentSearches, key = { it }) { query ->
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            recentSearches.forEach { query ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

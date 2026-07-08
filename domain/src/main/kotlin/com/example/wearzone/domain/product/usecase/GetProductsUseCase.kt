@@ -22,4 +22,8 @@ class GetProductsUseCase(
     ): DataResult<List<Product>> {
         return repository.getProducts(collectionId)
     }
+
+    suspend fun getProductsPreview(limit: Int): DataResult<List<Product>> {
+        return repository.getProductsPreview(limit)
+    }
 }

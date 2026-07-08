@@ -33,12 +33,6 @@ fun TrendingSection(products: List<Product>, onProductClick: (String) -> Unit, o
                 style = MaterialTheme.typography.titleLarge,
                 color = AppTheme.colors.textPrimary,
             )
-            Text(
-                text = stringResource(id = R.string.home_see_all),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colors.textSecondary,
-                modifier = Modifier.clickable { }
-            )
         }
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

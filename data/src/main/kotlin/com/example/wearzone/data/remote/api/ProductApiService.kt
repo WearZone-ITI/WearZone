@@ -5,7 +5,11 @@ import com.example.wearzone.data.remote.dto.ProductsResponse
 import com.example.wearzone.data.remote.dto.SmartCollectionsResponse
 import com.example.wearzone.data.remote.dto.ProductDetailDto
 import com.example.wearzone.data.remote.dto.ProductMetafieldsResponse
+import com.example.wearzone.data.remote.dto.ShopifyGraphQlRequest
+import com.example.wearzone.data.remote.dto.ProductLocalizationGraphQlResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -45,6 +49,11 @@ interface ProductApiService {
         @Query("namespace") namespace: String = "wearzone",
         @Query("limit") limit: Int = 250,
     ): ProductMetafieldsResponse
+
+    @POST("admin/api/2024-04/graphql.json")
+    suspend fun getProductLocalizationMetafields(
+        @Body request: ShopifyGraphQlRequest,
+    ): ProductLocalizationGraphQlResponse
 
     @GET("admin/api/2024-04/products/{product_id}.json")
     suspend fun getProductDetail(

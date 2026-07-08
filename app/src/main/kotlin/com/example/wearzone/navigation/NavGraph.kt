@@ -111,6 +111,7 @@ fun NavGraph(
         composable<Route.SettingsRoute> {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToCart = { navController.navigate(Route.CartRoute) },
                 appVersion = BuildConfig.VERSION_NAME,
             )
         }
@@ -147,7 +148,7 @@ fun NavGraph(
                 },
                 onNavigateToRegister = {
                     navigateToRegisterForProtectedRoute(Route.CheckoutRoute)
-                }, 
+                },
                 onNavigateToCheckout = { navController.navigate(Route.CheckoutRoute) },
                 onContinueShopping = {
                     navController.navigate(Route.MainRoute) {
@@ -463,7 +464,14 @@ fun NavGraph(
                 onNavigateToProductDetail = { productId ->
                     navController.navigate(Route.ProductDetailRoute(productId))
                 },
-                onNavigateToCart = { navController.navigate(Route.CartRoute) }
+                onNavigateToCart = { navController.navigate(Route.CartRoute) },
+                onNavigateToProductList = { collectionId, categoryName ->
+                    navController.navigate(Route.ProductListRoute(collectionId, categoryName))
+                },
+                onNavigateToVendorProducts = { vendorName ->
+                    navController.navigate(Route.VendorProductsRoute(vendorName))
+                },
+                showBackButton = true,
             )
         }
 

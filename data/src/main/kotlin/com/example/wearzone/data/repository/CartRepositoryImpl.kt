@@ -6,6 +6,7 @@ import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.entity.toDomain
 import com.example.wearzone.data.local.entity.toEntity
 import com.example.wearzone.data.remote.datasource.ICartRemoteDataSource
+import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
 import com.example.wearzone.data.remote.datasource.IAuthRemoteDataSource
 import com.example.wearzone.data.remote.dto.DraftOrderCustomer
 import com.example.wearzone.data.remote.dto.DraftOrderLineItem
@@ -17,11 +18,14 @@ import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.common.runCatchingCancellable
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -29,9 +33,11 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CartRepositoryImpl @Inject constructor(
     private val localDataSource: ICartLocalDataSource,
     private val remoteDataSource: ICartRemoteDataSource,
+    private val productRemoteDataSource: IProductRemoteDataSource,
     private val authRemoteDataSource: IAuthRemoteDataSource,
     private val settingsDataSource: ISettingsPreferencesDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -41,9 +47,34 @@ class CartRepositoryImpl @Inject constructor(
     private val syncMutex = Mutex()
 
     override fun observeCart(): Flow<List<CartItem>> =
-        localDataSource.observeCartItems().map { list ->
-                list.map { it.toDomain() }
+        combine(
+            localDataSource.observeCartItems(),
+            settingsDataSource.observeSettingsPreferences(),
+        ) { items, settings ->
+            items to settings.languageCode
+        }
+            .mapLatest { (items, languageCode) ->
+                val productIds = items.mapNotNull { it.productId.toLongOrNull() }.distinct()
+                val localizedProductsById = if (productIds.isEmpty()) {
+                    emptyMap()
+                } else {
+                    runCatching {
+                        productRemoteDataSource
+                            .getProductsByIds(productIds)
+                            .associateBy { it.id }
+                    }.getOrDefault(emptyMap())
+                }
+
+                items.map { item ->
+                    val localizedProduct = localizedProductsById[item.productId]
+                    val localizedTitle = localizedProduct
+                        ?.toDomain(languageCode)
+                        ?.title
+                        ?.takeIf { it.isNotBlank() }
+                    item.toDomain().copy(title = localizedTitle ?: item.title)
+                }
             }
+            .flowOn(ioDispatcher)
 
     override suspend fun addToCart(
         item: CartItem

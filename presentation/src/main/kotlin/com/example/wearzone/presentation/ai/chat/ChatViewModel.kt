@@ -7,6 +7,7 @@ import com.example.wearzone.domain.ai.chat.model.ChatRole
 import com.example.wearzone.domain.ai.chat.usecase.ClearChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.GetChatHistoryUseCase
 import com.example.wearzone.domain.ai.chat.usecase.SendChatMessageUseCase
+import com.example.wearzone.domain.ai.chat.usecase.TranscribeVoiceUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +20,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
     private val sendChatMessageUseCase: SendChatMessageUseCase,
-    private val clearChatHistoryUseCase: ClearChatHistoryUseCase
+    private val clearChatHistoryUseCase: ClearChatHistoryUseCase,
+    private val transcribeVoiceUseCase: TranscribeVoiceUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChatUiState())
@@ -107,6 +110,32 @@ class ChatViewModel @Inject constructor(
     private fun clearHistory() {
         viewModelScope.launch {
             clearChatHistoryUseCase()
+        }
+    }
+
+    fun transcribeAudio(file: File) {
+        _uiState.update { it.copy(isSending = true) }
+        viewModelScope.launch {
+            val result = transcribeVoiceUseCase(file)
+            _uiState.update { it.copy(isSending = false) }
+            when (result) {
+                is DataResult.Success -> {
+                    val transcribedText = result.data.trim()
+                    _uiState.update { state ->
+                        val newText = if (state.inputText.isBlank()) {
+                            transcribedText
+                        } else {
+                            "${state.inputText} $transcribedText"
+                        }
+                        state.copy(inputText = newText)
+                    }
+                }
+                is DataResult.Error -> {
+                    val errorMsg = "Transcription failed"
+                    _uiState.update { it.copy(error = errorMsg) }
+                    _uiEffect.send(ChatUiEffect.ShowSnackbar(errorMsg))
+                }
+            }
         }
     }
 }

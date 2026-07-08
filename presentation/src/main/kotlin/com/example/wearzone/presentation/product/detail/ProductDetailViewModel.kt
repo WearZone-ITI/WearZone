@@ -15,6 +15,7 @@ import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.model.ProductVariant
 import com.example.wearzone.domain.product.repository.IReviewRepository
 import com.example.wearzone.domain.product.usecase.GetProductDetailUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
@@ -23,12 +24,18 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,10 +51,15 @@ class ProductDetailViewModel @Inject constructor(
     private val addToCartUseCase: AddToCartUseCase,
     private val reviewRepository: IReviewRepository,
     private val observeCartUseCase: ObserveCartUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
 ) : ViewModel() {
 
     private val productId: Long = savedStateHandle.get<String>("productId")?.toLongOrNull() ?: 9091143729380L
     private var currentProduct: ProductDetail? = null
+    private var reviewsJob: Job? = null
+    private var wishlistJob: Job? = null
+    private var cartJob: Job? = null
+    private var loadProductJob: Job? = null
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
@@ -55,6 +67,7 @@ class ProductDetailViewModel @Inject constructor(
     val uiEffect: Flow<ProductDetailUiEffect> = _uiEffect.receiveAsFlow()
 
     init {
+        observeLanguageChanges()
         loadProduct()
     }
 
@@ -101,16 +114,22 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadProduct() {
-        viewModelScope.launch {
-            _uiState.value = ProductDetailUiState.Loading
+    private fun loadProduct(showLoading: Boolean = true) {
+        loadProductJob?.cancel()
+        loadProductJob = viewModelScope.launch {
+            if (showLoading || _uiState.value !is ProductDetailUiState.Success) {
+                _uiState.value = ProductDetailUiState.Loading
+            }
             when (val result = getProductDetailUseCase(productId)) {
                 is DataResult.Success -> {
                     val productDetail = result.data
                     currentProduct = productDetail
+                    val previousState = _uiState.value as? ProductDetailUiState.Success
                     val defaultSize = productDetail.availableSizes.singleOrNull()
                     val defaultColor = productDetail.availableColors.singleOrNull()
-                    val selectedVariant = productDetail.bestVariantFor(defaultSize, defaultColor)
+                    val selectedSize = previousState?.selectedSize?.takeIf { it in productDetail.availableSizes } ?: defaultSize
+                    val selectedColor = previousState?.selectedColor?.takeIf { it in productDetail.availableColors } ?: defaultColor
+                    val selectedVariant = productDetail.bestVariantFor(selectedSize, selectedColor)
                     val accessState = getAuthAccessStateUseCase()
                     val user = if (accessState is AuthAccessState.AuthenticatedCustomer) getCurrentUserUseCase() else null
 
@@ -123,21 +142,24 @@ class ProductDetailViewModel @Inject constructor(
                         images = productDetail.imagesWithVariantFirst(selectedVariant).toImmutableList(),
                         availableSizes = productDetail.availableSizes.toImmutableList(),
                         availableColors = productDetail.availableColors.toImmutableList(),
-                        selectedSize = defaultSize,
-                        selectedColor = defaultColor,
-                        rating = productDetail.rating,
-                        reviewsCount = productDetail.reviewsCount,
-                        isFavorite = productDetail.isFavorite,
+                        selectedSize = selectedSize,
+                        selectedColor = selectedColor,
+                        rating = previousState?.rating ?: productDetail.rating,
+                        reviewsCount = previousState?.reviewsCount ?: productDetail.reviewsCount,
+                        isFavorite = previousState?.isFavorite ?: productDetail.isFavorite,
                         isOutOfStock = productDetail.isOutOfStock,
                         selectedVariantQuantity = selectedVariant?.availableQuantity ?: 0,
+                        quantityInCart = previousState?.quantityInCart ?: 0,
                     )
 
                     launchReviewsObserver(productDetail.id)
-                    if (user != null && user.uid.isNotEmpty()) launchWishlistObserver(user.uid, productDetail.id)
+                    if (user != null && user.uid.isNotEmpty()) launchWishlistObserver(user.uid, productDetail.id) else wishlistJob?.cancel()
                     launchCartObserver(productDetail.id)
                 }
                 is DataResult.Error -> {
-                    _uiState.value = ProductDetailUiState.Error(R.string.product_detail_error_loading)
+                    if (showLoading || _uiState.value !is ProductDetailUiState.Success) {
+                        _uiState.value = ProductDetailUiState.Error(R.string.product_detail_error_loading)
+                    }
                 }
             }
         }
@@ -267,7 +289,8 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun launchReviewsObserver(productId: String) {
-        viewModelScope.launch {
+        reviewsJob?.cancel()
+        reviewsJob = viewModelScope.launch {
             val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
             reviewRepository.getReviewsForProduct(productId)
                 .catch { _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.reviews_load_failed)) }
@@ -296,7 +319,8 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun launchWishlistObserver(userId: String, productId: String) {
-        viewModelScope.launch {
+        wishlistJob?.cancel()
+        wishlistJob = viewModelScope.launch {
             observeWishlistUseCase(userId).collect { wishlistItems ->
                 val isFav = wishlistItems.any { it.id == productId }
                 _uiState.update { state ->
@@ -307,7 +331,8 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun launchCartObserver(productId: String) {
-        viewModelScope.launch {
+        cartJob?.cancel()
+        cartJob = viewModelScope.launch {
             observeCartUseCase().collect { cartItems ->
                 val totalQty = cartItems.filter { it.productId == productId }.sumOf { it.quantity }
                 _uiState.update { state ->
@@ -315,6 +340,15 @@ class ProductDetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun observeLanguageChanges() {
+        observeSettingsPreferencesUseCase()
+            .map { it.languageCode }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { loadProduct(showLoading = false) }
+            .launchIn(viewModelScope)
     }
 
     private fun ProductDetail.bestVariantFor(size: String?, color: String?): ProductVariant? {
