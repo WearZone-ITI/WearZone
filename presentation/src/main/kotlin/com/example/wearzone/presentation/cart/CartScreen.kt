@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteSweep
-import androidx.compose.material3.AlertDialog
 import com.example.wearzone.presentation.common.FullScreenLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,6 +47,8 @@ import com.example.wearzone.presentation.cart.components.CartItemRow
 import com.example.wearzone.presentation.cart.components.EmptyCartContent
 import com.example.wearzone.presentation.cart.components.PriceSummaryBar
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.WearZoneDialog
+import com.example.wearzone.presentation.common.WearZoneDialogTone
 import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
@@ -288,19 +288,16 @@ private fun CartConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = { Text(text = message) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = confirmLabel, color = AppTheme.colors.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(id = R.string.cart_dialog_cancel))
-            }
-        },
+    WearZoneDialog(
+        title = title,
+        message = message,
+        confirmText = confirmLabel,
+        cancelText = stringResource(id = R.string.cart_dialog_cancel),
+        onConfirm = onConfirm,
+        onCancel = onDismiss,
+        onDismiss = onDismiss,
+        icon = Icons.Outlined.DeleteSweep,
+        iconContentDescription = confirmLabel,
+        tone = WearZoneDialogTone.Destructive,
     )
 }
