@@ -8,6 +8,11 @@ import com.example.wearzone.domain.ai.chat.model.ChatMessage
 import com.example.wearzone.domain.ai.chat.model.ChatRole
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Qualifier
 
@@ -108,6 +113,32 @@ class AiChatRemoteDataSourceImpl @Inject constructor(
         responseText
             ?.takeIf { it.isNotBlank() }
             ?: throw IllegalStateException("Stylist response empty.")
+    }
+
+    override suspend fun transcribeAudio(file: File): String = withContext(Dispatchers.IO) {
+        if (apiKey.isBlank()) {
+            throw IllegalStateException("Groq API key is missing.")
+        }
+
+        // 1. Prepare the File Part
+        val requestFile = file.asRequestBody("audio/mp4".toMediaTypeOrNull())
+        val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+        
+        // 2. Prepare the Model Part as pure text
+        val modelRequestBody = "whisper-large-v3".toRequestBody("text/plain".toMediaTypeOrNull())
+
+        val response = try {
+            groqApiService.transcribeAudio(
+                authorization = "Bearer ${apiKey.trim()}", 
+                file = filePart, 
+                model = modelRequestBody
+            )
+        } catch (e: Exception) {
+            Log.e("GROQ_WHISPER_DEBUG", "Transcription failed", e)
+            throw mapErrorToException(e)
+        }
+
+        response.text
     }
 
     private fun mapErrorToException(e: Exception): Exception = Exception(
