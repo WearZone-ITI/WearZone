@@ -7,12 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.wearzone.presentation.common.WearZoneAnimatedLoader
-import kotlinx.coroutines.delay
-
 import com.example.wearzone.presentation.common.theme.AppTheme
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun SplashScreen(
@@ -23,7 +22,7 @@ fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        delay(2000)
+        delay(2000.milliseconds)
         viewModel.handleIntent(SplashUiIntent.CheckStartupRouting)
     }
 

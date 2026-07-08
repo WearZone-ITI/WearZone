@@ -1,10 +1,10 @@
 package com.example.wearzone.presentation.common
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -18,8 +18,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.example.presentation.R
-import androidx.compose.ui.graphics.Color
-import com.example.wearzone.presentation.common.theme.ChampagneGold
+import com.example.wearzone.presentation.common.theme.AppTheme
 
 @Composable
 fun WearZoneAnimatedLoader(
@@ -34,34 +33,31 @@ fun WearZoneAnimatedLoader(
         iterations = LottieConstants.IterateForever
     )
 
-    val goldColor = ChampagneGold
-    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
-    val secondaryColor = onBackgroundColor.copy(alpha = 0.6f)
-    val backgroundTint = onBackgroundColor.copy(alpha = 0.05f)
+    val isDark = AppTheme.colors.background == Color(0xFF000000)
+
+    val primaryAnimColor = AppTheme.colors.selected
+    val secondaryAnimColor = AppTheme.colors.textPrimary
+    val bgAnimColor = if (isDark) AppTheme.colors.surface else AppTheme.colors.selected
 
     val dynamicProperties = rememberLottieDynamicProperties(
-        // Primary shapes (bag-outside) -> Gold
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
-            value = SimpleColorFilter(goldColor.toArgb()),
+            value = SimpleColorFilter(primaryAnimColor.toArgb()),
             keyPath = arrayOf("bag-outside", "**")
         ),
-        // Secondary shapes (bag-inside / items) -> adaptive onBackground
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
-            value = SimpleColorFilter(secondaryColor.toArgb()),
+            value = SimpleColorFilter(secondaryAnimColor.toArgb()),
             keyPath = arrayOf("bag-inside", "**")
         ),
-        // Sparks/Graphs animations -> Gold
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
-            value = SimpleColorFilter(goldColor.toArgb()),
+            value = SimpleColorFilter(primaryAnimColor.toArgb()),
             keyPath = arrayOf("Graphs-anim", "**")
         ),
-        // BG (the background circle/ring) -> transparent
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
-            value = SimpleColorFilter(Color.Transparent.toArgb()),
+            value = SimpleColorFilter(bgAnimColor.toArgb()),
             keyPath = arrayOf("BG", "**")
         )
     )
