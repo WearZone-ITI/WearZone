@@ -44,7 +44,6 @@ import com.example.wearzone.presentation.auth.register.components.LuxeTextField
 import com.example.wearzone.presentation.auth.register.components.PasswordStrengthBar
 import com.example.wearzone.presentation.auth.register.components.TermsCheckbox
 import com.example.wearzone.presentation.common.theme.AppTheme
-import com.example.wearzone.presentation.common.toMessage
 
 @Composable
 fun RegisterScreen(
@@ -56,7 +55,6 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val registerFailed = stringResource(R.string.error_register_failed)
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -66,8 +64,7 @@ fun RegisterScreen(
                 is RegisterUiEffect.NavigateToLogin -> onNavigateToLogin()
                 is RegisterUiEffect.NavigateToEmailVerification -> onNavigateToEmailVerification(effect.email)
                 is RegisterUiEffect.ShowSnackbar -> {
-                    val message = effect.error?.toMessage(context) ?: registerFailed
-                    snackbarHostState.showSnackbar(message)
+                    snackbarHostState.showSnackbar(context.getString(effect.messageRes))
                 }
             }
         }

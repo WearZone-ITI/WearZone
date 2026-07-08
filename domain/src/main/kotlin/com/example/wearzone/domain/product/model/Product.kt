@@ -15,4 +15,12 @@ data class Product(
     val isOutOfStock: Boolean = false,
     val size: String? = null,
     val color: String? = null,
+    val titleEn: String = title,
+    val titleAr: String = "",
+    val descriptionEn: String = "",
+    val descriptionAr: String = "",
+    val categoryEn: String = "",
+    val categoryAr: String = "",
+    val productTypeEn: String = productType,
+    val productTypeAr: String = "",
 )

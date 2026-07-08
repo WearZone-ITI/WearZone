@@ -266,6 +266,22 @@
     <string name="error_firestore_profile_save_failed">تعذر حفظ ملف العميل. يرجى المحاولة مرة أخرى.</string>
     <string name="error_firestore_profile_fetch_failed">تعذر تحميل ملف العميل. يرجى المحاولة مرة أخرى.</string>
     <string name="error_local_customer_id_save_failed">تعذر حفظ جلسة العميل. يرجى المحاولة مرة أخرى.</string>
+
+    <!-- Firebase/Auth localized errors -->
+    <string name="error_fill_all_fields">يرجى ملء جميع الحقول</string>
+    <string name="error_login_failed">فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_google_login_failed">فشل تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firebase_auth_generic">فشلت عملية المصادقة. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firebase_invalid_email">يرجى إدخال بريد إلكتروني صحيح.</string>
+    <string name="error_firebase_wrong_password">كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_firebase_user_not_found">لا يوجد حساب مرتبط بهذا البريد الإلكتروني.</string>
+    <string name="error_firebase_email_already_in_use">هذا البريد الإلكتروني مسجل بالفعل.</string>
+    <string name="error_firebase_weak_password">كلمة المرور ضعيفة. يرجى استخدام كلمة مرور أقوى.</string>
+    <string name="error_firebase_network_request_failed">خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.</string>
+    <string name="error_firebase_too_many_requests">تم إجراء محاولات كثيرة. يرجى الانتظار قليلًا ثم المحاولة مرة أخرى.</string>
+    <string name="error_google_credential_failed">تعذر إكمال تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى.</string>
+    <string name="wishlist_error_loading">تعذر تحميل قائمة المفضلة. يرجى المحاولة مرة أخرى.</string>
+    <string name="reviews_load_failed">تعذر تحميل التقييمات الآن.</string>
     <string name="terms_agreement_prefix">أوافق على </string>
     <string name="terms_of_service">شروط الاستخدام</string>
     <string name="terms_and"> و </string>

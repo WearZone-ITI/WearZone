@@ -261,6 +261,22 @@
     <string name="error_firestore_profile_save_failed">Unable to save your customer profile. Please try again.</string>
     <string name="error_firestore_profile_fetch_failed">Unable to load your customer profile. Please try again.</string>
     <string name="error_local_customer_id_save_failed">Unable to save your customer session. Please try again.</string>
+
+    <!-- Firebase/Auth localized errors -->
+    <string name="error_fill_all_fields">Please fill in all fields</string>
+    <string name="error_login_failed">Login failed. Please try again.</string>
+    <string name="error_google_login_failed">Google Sign-In failed. Please try again.</string>
+    <string name="error_firebase_auth_generic">Authentication failed. Please try again.</string>
+    <string name="error_firebase_invalid_email">Please enter a valid email address.</string>
+    <string name="error_firebase_wrong_password">The password is incorrect. Please try again.</string>
+    <string name="error_firebase_user_not_found">No account was found with this email address.</string>
+    <string name="error_firebase_email_already_in_use">This email address is already registered.</string>
+    <string name="error_firebase_weak_password">Password is too weak. Please use a stronger password.</string>
+    <string name="error_firebase_network_request_failed">Network error. Please check your connection and try again.</string>
+    <string name="error_firebase_too_many_requests">Too many attempts. Please wait a moment and try again.</string>
+    <string name="error_google_credential_failed">Unable to complete Google Sign-In. Please try again.</string>
+    <string name="wishlist_error_loading">Unable to load your wishlist. Please try again.</string>
+    <string name="reviews_load_failed">Unable to load reviews right now.</string>
     <string name="terms_agreement_prefix">I agree to WearZone\'s </string>
     <string name="terms_of_service"> Terms of Service</string>
     <string name="terms_and"> and </string>

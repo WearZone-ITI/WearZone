@@ -1,26 +1,21 @@
 package com.example.wearzone.presentation.common
 
 import android.content.Context
-import com.example.wearzone.domain.common.ValidationError
+import androidx.annotation.StringRes
 import com.example.presentation.R
+import com.example.wearzone.domain.common.ValidationError
+
+@StringRes
+fun ValidationError.toMessageRes(): Int {
+    return when (this) {
+        ValidationError.BlankName -> R.string.error_blank_name
+        ValidationError.InvalidEmail -> R.string.error_invalid_email
+        ValidationError.ShortPassword -> R.string.error_short_password
+        ValidationError.PasswordMismatch -> R.string.error_password_mismatch
+        ValidationError.TermsNotAccepted -> R.string.error_terms_not_accepted
+    }
+}
 
 fun ValidationError.toMessage(
     context: Context,
-): String {
-    return when (this) {
-        ValidationError.BlankName ->
-            context.getString(R.string.error_blank_name)
-
-        ValidationError.InvalidEmail ->
-            context.getString(R.string.error_invalid_email)
-
-        ValidationError.ShortPassword ->
-            context.getString(R.string.error_short_password)
-
-        ValidationError.PasswordMismatch ->
-            context.getString(R.string.error_password_mismatch)
-
-        ValidationError.TermsNotAccepted ->
-            context.getString(R.string.error_terms_not_accepted)
-    }
-}
+): String = context.getString(toMessageRes())

@@ -1,5 +1,7 @@
 package com.example.wearzone.data.remote.dto
 
+import com.example.wearzone.data.localization.CatalogLocalization
+import com.example.wearzone.data.localization.cleanText
 import com.example.wearzone.domain.product.model.ProductDetail
 import com.example.wearzone.domain.product.model.ProductVariant
 import kotlinx.serialization.SerialName
@@ -22,8 +24,14 @@ data class ShopifyProductDetail(
     val image: ImageDto? = null,
     val options: List<ProductOptionDto> = emptyList(),
     val variants: List<VariantDto> = emptyList(),
+    val localization: ProductLocalizationFields = ProductLocalizationFields(),
 ) {
-    fun toDomain(rating: Double, reviewsCount: Int, isFavorite: Boolean): ProductDetail {
+    fun toDomain(
+        rating: Double,
+        reviewsCount: Int,
+        isFavorite: Boolean,
+        languageCode: String? = null,
+    ): ProductDetail {
         val sizeOptionIndex = optionIndex("Size") ?: 0
         val colorOptionIndex = optionIndex("Color")
         val domainVariants = variants.map { variant ->
@@ -47,13 +55,31 @@ data class ShopifyProductDetail(
         val colors = colorOptionIndex?.let { index ->
             variants.mapNotNull { it.optionAt(index).cleanOptionValue() }.distinctBy { it.lowercase() }
         }.orEmpty()
+        val productTypeValue = productType.orEmpty()
+        val resolvedLocalization = localization.withProductFallbacks(
+            title = title,
+            description = bodyHtml.cleanText(),
+            productType = productTypeValue,
+        )
+        val displayTitle = CatalogLocalization.selectLocalized(
+            english = resolvedLocalization.titleEn,
+            arabic = resolvedLocalization.titleAr,
+            languageCode = languageCode,
+            fallback = title,
+        )
+        val displayDescription = CatalogLocalization.selectLocalized(
+            english = resolvedLocalization.descriptionEn,
+            arabic = resolvedLocalization.descriptionAr,
+            languageCode = languageCode,
+            fallback = bodyHtml.cleanText(),
+        )
 
         return ProductDetail(
             id = id.toString(),
             variantId = firstAvailableVariant?.id ?: variants.firstOrNull()?.id?.toString() ?: id.toString(),
-            title = title,
+            title = displayTitle,
             vendor = vendor,
-            descriptionHtml = bodyHtml.toPlainText(),
+            descriptionHtml = displayDescription,
             price = priceDouble,
             currencyCode = "EGP",
             images = galleryImages,
@@ -64,6 +90,14 @@ data class ShopifyProductDetail(
             variants = domainVariants,
             availableColors = colors,
             isOutOfStock = domainVariants.isNotEmpty() && domainVariants.none { it.isAvailable },
+            titleEn = resolvedLocalization.titleEn,
+            titleAr = resolvedLocalization.titleAr,
+            descriptionEn = resolvedLocalization.descriptionEn,
+            descriptionAr = resolvedLocalization.descriptionAr,
+            categoryEn = resolvedLocalization.categoryEn,
+            categoryAr = resolvedLocalization.categoryAr,
+            productTypeEn = resolvedLocalization.productTypeEn,
+            productTypeAr = resolvedLocalization.productTypeAr,
         )
     }
 
@@ -132,22 +166,3 @@ private fun String?.cleanOptionValue(): String? = this
     ?.trim()
     ?.takeIf { it.isNotBlank() }
     ?.takeUnless { it.equals("Default Title", ignoreCase = true) || it.equals("Default", ignoreCase = true) }
-
-private fun String?.toPlainText(): String = this
-    .orEmpty()
-    .replace(Regex("<\\s*br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
-    .replace(Regex("<\\s*/p\\s*>", RegexOption.IGNORE_CASE), "\n")
-    .replace(Regex("<\\s*/li\\s*>", RegexOption.IGNORE_CASE), "\n")
-    .replace(Regex("<\\s*li[^>]*>", RegexOption.IGNORE_CASE), "- ")
-    .replace(Regex("<[^>]*>"), "")
-    .replace("&nbsp;", " ")
-    .replace("&amp;", "&")
-    .replace("&lt;", "<")
-    .replace("&gt;", ">")
-    .replace("&quot;", "\"")
-    .replace("&#039;", "'")
-    .replace("&#39;", "'")
-    .replace(Regex("[ \\t]+"), " ")
-    .replace(Regex("\\n\\s+"), "\n")
-    .replace(Regex("\\n{3,}"), "\n\n")
-    .trim()

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.auth.usecase.CheckEmailVerifiedUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithEmailUseCase
 import com.example.wearzone.domain.auth.usecase.LoginWithGoogleUseCase
+import com.example.presentation.R
+import com.example.wearzone.presentation.common.toFirebaseAuthMessageRes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +69,7 @@ class LoginViewModel @Inject constructor(
     private fun loginWithEmail() {
         val currentForm = _formState.value
         if (currentForm.email.isBlank() || currentForm.password.isBlank()) {
-            sendEffect(LoginUiEffect.ShowSnackbar("Please fill in all fields"))
+            sendEffect(LoginUiEffect.ShowSnackbar(R.string.error_fill_all_fields))
             return
         }
         viewModelScope.launch {
@@ -84,11 +86,13 @@ class LoginViewModel @Inject constructor(
                             }
                         }
                         .onFailure { error ->
-                            _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Verification check failed")
+                            _uiState.value = LoginUiState.Error(R.string.email_verification_failed_check)
                         }
                 }
                 .onFailure { error ->
-                    _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Login failed")
+                    _uiState.value = LoginUiState.Error(
+                        messageRes = error.toFirebaseAuthMessageRes(R.string.error_login_failed),
+                    )
                 }
         }
 
@@ -109,11 +113,13 @@ class LoginViewModel @Inject constructor(
                             }
                         }
                         .onFailure { error ->
-                            _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Verification check failed")
+                            _uiState.value = LoginUiState.Error(R.string.email_verification_failed_check)
                         }
                 }
                 .onFailure { error ->
-                    _uiState.value = LoginUiState.Error(error.localizedMessage ?: "Google Sign-In failed")
+                    _uiState.value = LoginUiState.Error(
+                        messageRes = error.toFirebaseAuthMessageRes(R.string.error_google_login_failed),
+                    )
                 }
         }
     }

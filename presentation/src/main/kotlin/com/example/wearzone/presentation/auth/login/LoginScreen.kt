@@ -77,7 +77,7 @@ fun LoginScreen(
                 is LoginUiEffect.NavigateToEmailVerification -> onNavigateToEmailVerification(effect.email)
                 is LoginUiEffect.NavigateToForgotPassword -> onNavigateToForgotPassword()
                 is LoginUiEffect.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(effect.message)
+                    snackbarHostState.showSnackbar(context.getString(effect.messageRes))
                 }
                 is LoginUiEffect.LaunchGoogleSignIn -> {
                     try {
@@ -107,8 +107,10 @@ fun LoginScreen(
                             viewModel.handleIntent(LoginUiIntent.OnGoogleSignInResult(googleIdTokenCredential.idToken))
                         } else { snackbarHostState.showSnackbar(unexpectedCredential) }
                     } catch (e: GetCredentialException) {
-                        snackbarHostState.showSnackbar(e.message ?: googleFailed)
-                    } catch (e: Exception) { snackbarHostState.showSnackbar(e.message ?: googleFailed) }
+                        snackbarHostState.showSnackbar(googleFailed)
+                    } catch (e: Exception) {
+                        snackbarHostState.showSnackbar(googleFailed)
+                    }
                 }
             }
         }
@@ -220,16 +222,16 @@ private fun LoginContent(
             }
 
             if (uiState is LoginUiState.Error) {
-                val isWarning = uiState.message.contains("fill", ignoreCase = true) || uiState.message.contains("empty", ignoreCase = true)
-                if (isWarning) {
+                val message = stringResource(uiState.messageRes)
+                if (uiState.showAsWarning) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = uiState.message,
+                        text = message,
                         style = AppTypography.bodyMedium,
                         color = AppTheme.colors.warning
                     )
                 } else {
-                    NetworkStatusBanner(message = uiState.message)
+                    NetworkStatusBanner(message = message)
                 }
             }
 

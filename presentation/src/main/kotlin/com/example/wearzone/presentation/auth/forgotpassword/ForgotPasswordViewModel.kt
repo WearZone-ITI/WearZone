@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
 import com.example.wearzone.domain.auth.usecase.SendPasswordResetEmailUseCase
+import com.example.wearzone.presentation.common.toFirebaseAuthMessageRes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class ForgotPasswordViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     _uiState.value = ForgotPasswordUiState.Error(
-                        R.string.forgot_password_failed_send
+                        error.toFirebaseAuthMessageRes(R.string.forgot_password_failed_send)
                     )
                 }
         }

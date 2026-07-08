@@ -17,17 +17,28 @@ class SearchProductsUseCase(
 
     private fun Product.matches(filters: SearchFilters): Boolean {
         val normalizedQuery = filters.query.trim().lowercase()
+        val queryTargets = listOf(
+            title,
+            titleEn,
+            titleAr,
+            productType,
+            productTypeEn,
+            productTypeAr,
+            categoryEn,
+            categoryAr,
+            vendor,
+        ) + tags
         val matchesQuery = normalizedQuery.isBlank() ||
-            title.lowercase().contains(normalizedQuery) ||
-            vendor.lowercase().contains(normalizedQuery)
+            queryTargets.any { it.lowercase().contains(normalizedQuery) }
         val matchesMinPrice = filters.minPrice?.let { price >= it } ?: true
         val matchesMaxPrice = filters.maxPrice?.let { price <= it } ?: true
         val matchesBrand = filters.brandTitle?.let { vendor.equals(it, ignoreCase = true) } ?: true
         val matchesCategory = filters.categoryTitle?.let { category ->
-            title.contains(category, ignoreCase = true) ||
-                productType.equals(category, ignoreCase = true) ||
+            val normalizedCategory = category.trim().lowercase()
+            listOf(title, titleEn, titleAr, productType, productTypeEn, productTypeAr, categoryEn, categoryAr)
+                .any { it.lowercase().contains(normalizedCategory) || it.equals(category, ignoreCase = true) } ||
                 tags.any { tag ->
-                    tag.equals(category, ignoreCase = true) || tag.contains(category, ignoreCase = true)
+                    tag.equals(category, ignoreCase = true) || tag.lowercase().contains(normalizedCategory)
                 }
         } ?: true
         return matchesQuery && matchesMinPrice && matchesMaxPrice && matchesBrand && matchesCategory

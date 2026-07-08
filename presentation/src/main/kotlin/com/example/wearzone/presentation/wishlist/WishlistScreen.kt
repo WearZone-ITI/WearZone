@@ -113,7 +113,7 @@ fun WishlistScreen(
                 is WishlistUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = state.message,
+                            text = stringResource(state.messageRes),
                             color = AppTheme.colors.error
                         )
                     }

@@ -1,5 +1,7 @@
 package com.example.wearzone.data.remote.dto
 
+import com.example.wearzone.data.localization.CatalogLocalization
+import com.example.wearzone.data.localization.cleanText
 import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.product.model.Brand
 import com.example.wearzone.domain.product.model.Product
@@ -40,8 +42,26 @@ data class CategoryDto(
     val title: String,
     val imageUrl: String? = null,
     val productsCount: Int? = null,
+    val titleEn: String = title,
+    val titleAr: String = CatalogLocalization.arabicCategoryFor(title),
 ) {
-    fun toDomain(): Category = Category(id, title, imageUrl, productsCount)
+    fun toDomain(languageCode: String? = null): Category {
+        val englishTitle = titleEn.ifBlank { title }
+        val arabicTitle = titleAr.ifBlank { CatalogLocalization.arabicCategoryFor(englishTitle) }
+        return Category(
+            id = id,
+            title = CatalogLocalization.selectLocalized(
+                english = englishTitle,
+                arabic = arabicTitle,
+                languageCode = languageCode,
+                fallback = title,
+            ),
+            imageUrl = imageUrl,
+            productsCount = productsCount,
+            titleEn = englishTitle,
+            titleAr = arabicTitle,
+        )
+    }
 }
 
 @Serializable
@@ -68,23 +88,57 @@ data class ProductDto(
     val isOutOfStock: Boolean = false,
     val size: String? = null,
     val color: String? = null,
+    val titleEn: String = title,
+    val titleAr: String = "",
+    val descriptionEn: String = "",
+    val descriptionAr: String = "",
+    val categoryEn: String = "",
+    val categoryAr: String = "",
+    val productTypeEn: String = productType,
+    val productTypeAr: String = "",
 ) {
-    fun toDomain(): Product = Product(
-        id = id,
-        variantId = variantId,
-        title = title,
-        vendor = vendor,
-        price = price,
-        currencyCode = currencyCode,
-        imageUrl = imageUrl,
-        isFavorite = false,
-        productType = productType,
-        tags = tags,
-        maxQuantity = maxQuantity,
-        isOutOfStock = isOutOfStock,
-        size = size,
-        color = color,
-    )
+    fun toDomain(languageCode: String? = null): Product {
+        val englishTitle = titleEn.ifBlank { title }
+        val englishProductType = productTypeEn.ifBlank { productType }
+        val englishCategory = categoryEn.ifBlank { englishProductType }
+        val arabicCategory = categoryAr.ifBlank { CatalogLocalization.arabicCategoryFor(englishCategory) }
+        val arabicProductType = productTypeAr.ifBlank { CatalogLocalization.arabicCategoryFor(englishProductType) }
+
+        return Product(
+            id = id,
+            variantId = variantId,
+            title = CatalogLocalization.selectLocalized(
+                english = englishTitle,
+                arabic = titleAr,
+                languageCode = languageCode,
+                fallback = title,
+            ),
+            vendor = vendor,
+            price = price,
+            currencyCode = currencyCode,
+            imageUrl = imageUrl,
+            isFavorite = false,
+            productType = CatalogLocalization.selectLocalized(
+                english = englishProductType,
+                arabic = arabicProductType,
+                languageCode = languageCode,
+                fallback = productType,
+            ),
+            tags = tags,
+            maxQuantity = maxQuantity,
+            isOutOfStock = isOutOfStock,
+            size = size,
+            color = color,
+            titleEn = englishTitle,
+            titleAr = titleAr.cleanText(),
+            descriptionEn = descriptionEn.cleanText(),
+            descriptionAr = descriptionAr.cleanText(),
+            categoryEn = englishCategory,
+            categoryAr = arabicCategory,
+            productTypeEn = englishProductType,
+            productTypeAr = arabicProductType,
+        )
+    }
 }
 
 @Serializable
@@ -109,7 +163,15 @@ data class ShopifyCollection(
     val isDashboardBrand: Boolean
         get() = bodyHtml.orEmpty().contains(DASHBOARD_BRAND_MARKER)
 
-    fun toCategoryDto() = CategoryDto(id, title, image?.src, productsCount)
+    fun toCategoryDto() = CategoryDto(
+        id = id,
+        title = title,
+        imageUrl = image?.src,
+        productsCount = productsCount,
+        titleEn = title,
+        titleAr = CatalogLocalization.arabicCategoryFor(title),
+    )
+
     fun toBrandDto() = BrandDto(id.toString(), title, image?.src)
 }
 
@@ -124,6 +186,64 @@ data class ShopifyImage(
 data class ProductsResponse(val products: List<ShopifyProduct> = emptyList())
 
 @Serializable
+data class ProductMetafieldsResponse(val metafields: List<ShopifyMetafield> = emptyList())
+
+@Serializable
+data class ShopifyMetafield(
+    val id: Long? = null,
+    val namespace: String? = null,
+    val key: String,
+    val value: String? = null,
+    val type: String? = null,
+)
+
+@Serializable
+data class ProductLocalizationFields(
+    val titleEn: String = "",
+    val titleAr: String = "",
+    val descriptionEn: String = "",
+    val descriptionAr: String = "",
+    val categoryEn: String = "",
+    val categoryAr: String = "",
+    val productTypeEn: String = "",
+    val productTypeAr: String = "",
+) {
+    fun withProductFallbacks(
+        title: String,
+        description: String = "",
+        productType: String = "",
+    ): ProductLocalizationFields {
+        val resolvedCategoryEn = categoryEn.ifBlank { productType }
+        val resolvedProductTypeEn = productTypeEn.ifBlank { productType }
+        return copy(
+            titleEn = titleEn.ifBlank { title }.cleanText(),
+            titleAr = titleAr.cleanText(),
+            descriptionEn = descriptionEn.ifBlank { description }.cleanText(),
+            descriptionAr = descriptionAr.cleanText(),
+            categoryEn = resolvedCategoryEn.cleanText(),
+            categoryAr = categoryAr.ifBlank { CatalogLocalization.arabicCategoryFor(resolvedCategoryEn) }.cleanText(),
+            productTypeEn = resolvedProductTypeEn.cleanText(),
+            productTypeAr = productTypeAr.ifBlank { CatalogLocalization.arabicCategoryFor(resolvedProductTypeEn) }.cleanText(),
+        )
+    }
+}
+
+fun List<ShopifyMetafield>.toProductLocalizationFields(): ProductLocalizationFields {
+    val values = filter { it.namespace == null || it.namespace == "wearzone" }
+        .associate { it.key to it.value.orEmpty() }
+    return ProductLocalizationFields(
+        titleEn = values["title_en"].orEmpty(),
+        titleAr = values["title_ar"].orEmpty(),
+        descriptionEn = values["description_en"].orEmpty(),
+        descriptionAr = values["description_ar"].orEmpty(),
+        categoryEn = values["category_en"].orEmpty(),
+        categoryAr = values["category_ar"].orEmpty(),
+        productTypeEn = values["product_type_en"].orEmpty(),
+        productTypeAr = values["product_type_ar"].orEmpty(),
+    )
+}
+
+@Serializable
 data class ShopifyProduct(
     val id: Long,
     val title: String,
@@ -135,13 +255,20 @@ data class ShopifyProduct(
     val image: ShopifyImage? = null,
     val images: List<ShopifyImage> = emptyList(),
 ) {
-    fun toProductDto(): ProductDto {
+    fun toProductDto(
+        localization: ProductLocalizationFields = ProductLocalizationFields(),
+    ): ProductDto {
         val selectedVariant = variants.firstOrNull { it.availableQuantity > 0 } ?: variants.firstOrNull()
         val firstImage = selectedVariant?.imageId?.let { variantImageId ->
             images.firstOrNull { it.id == variantImageId }?.src
         } ?: image?.src ?: images.firstOrNull()?.src
         val availableQuantity = selectedVariant?.availableQuantity ?: 0
         val outOfStock = variants.isNotEmpty() && variants.none { it.availableQuantity > 0 }
+        val productTypeValue = productType.orEmpty()
+        val resolvedLocalization = localization.withProductFallbacks(
+            title = title,
+            productType = productTypeValue,
+        )
 
         return ProductDto(
             id = id.toString(),
@@ -151,12 +278,20 @@ data class ShopifyProduct(
             price = selectedVariant?.price?.toDoubleOrNull() ?: 0.0,
             currencyCode = "EGP",
             imageUrl = firstImage,
-            productType = productType.orEmpty(),
+            productType = productTypeValue,
             tags = parseTags(tags),
             maxQuantity = availableQuantity.coerceAtLeast(0),
             isOutOfStock = outOfStock,
             size = selectedVariant?.sizeValue,
             color = selectedVariant?.colorValue,
+            titleEn = resolvedLocalization.titleEn,
+            titleAr = resolvedLocalization.titleAr,
+            descriptionEn = resolvedLocalization.descriptionEn,
+            descriptionAr = resolvedLocalization.descriptionAr,
+            categoryEn = resolvedLocalization.categoryEn,
+            categoryAr = resolvedLocalization.categoryAr,
+            productTypeEn = resolvedLocalization.productTypeEn,
+            productTypeAr = resolvedLocalization.productTypeAr,
         )
     }
 }

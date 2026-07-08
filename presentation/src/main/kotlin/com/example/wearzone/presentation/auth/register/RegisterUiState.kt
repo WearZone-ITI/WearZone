@@ -1,6 +1,6 @@
 package com.example.wearzone.presentation.auth.register
 
-import com.example.wearzone.domain.common.ValidationError
+import androidx.annotation.StringRes
 
 /**
  * Represents real-time state of each form field,
@@ -24,7 +24,7 @@ sealed interface RegisterUiState {
     data object Idle : RegisterUiState
     data object Loading : RegisterUiState
     data class Success(val user: RegisteredUserUiModel) : RegisterUiState
-    data class Error(val message: ValidationError?) : RegisterUiState
+    data class Error(@StringRes val messageRes: Int) : RegisterUiState
 }
 
 data class RegisteredUserUiModel(

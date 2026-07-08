@@ -1,6 +1,7 @@
 package com.example.wearzone.presentation.wishlist
 
 import androidx.lifecycle.ViewModel
+import com.example.presentation.R
 import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
@@ -91,8 +92,8 @@ class WishlistViewModel @Inject constructor(
 
                 // Observe local database
                 observeWishlistUseCase(user.uid)
-                    .catch { e ->
-                        wishlistState.value = WishlistUiState.Error(e.message ?: "Unknown error")
+                    .catch {
+                        wishlistState.value = WishlistUiState.Error(R.string.wishlist_error_loading)
                     }
                     .collectLatest { items ->
                         val currentState = wishlistState.value
