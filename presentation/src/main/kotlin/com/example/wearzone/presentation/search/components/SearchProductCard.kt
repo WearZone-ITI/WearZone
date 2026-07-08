@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.wearzone.presentation.common.formatPrice
-import com.example.wearzone.presentation.common.theme.AppColors
+import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.search.ProductSearchUiModel
 
 @Composable
@@ -33,7 +33,7 @@ fun SearchProductCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(AppColors.InputBackground)
+            .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
             .padding(10.dp),
     ) {
@@ -45,27 +45,33 @@ fun SearchProductCard(
                 .fillMaxWidth()
                 .aspectRatio(0.82f)
                 .clip(RoundedCornerShape(14.dp))
-                .background(AppColors.Divider),
+                .background(AppTheme.colors.divider),
         )
+
         Spacer(modifier = Modifier.height(10.dp))
+
         Text(
             text = product.vendor,
-            color = AppColors.TextSecondary,
+            color = AppTheme.colors.textSecondary,
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+
         Text(
             text = product.title,
-            color = AppColors.TextPrimary,
+            color = AppTheme.colors.textPrimary,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
+
         Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = formatPrice(product.basePriceEgp),
-            color = AppColors.Primary,
+            color = AppTheme.colors.selected,
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
         )
     }
