@@ -10,7 +10,7 @@ import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.auth.usecase.LogoutUseCase
-import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.customer.address.usecase.GetCurrentCustomerIdUseCase
 import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
@@ -22,10 +22,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class ProfileViewModel @Inject constructor(
     private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val observeCartUseCase: ObserveCartUseCase,
+    private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
     private val getOrderHistoryUseCase: GetOrderHistoryUseCase,
     private val getCurrentCustomerIdUseCase: GetCurrentCustomerIdUseCase,
     private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
@@ -43,15 +44,33 @@ class ProfileViewModel @Inject constructor(
     private val currencyRepository: ICurrencyRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    private val profileState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
+    private val cartItemCount: StateFlow<Int> =
+        observeCartItemCountUseCase()
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                0,
+            )
+
+    val uiState: StateFlow<ProfileUiState> =
+        combine(profileState, cartItemCount) { state, count ->
+            when (state) {
+                is ProfileUiState.Content -> state.copy(cartItemCount = count)
+                is ProfileUiState.Guest -> state.copy(cartItemCount = 0)
+                else -> state
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            ProfileUiState.Loading,
+        )
 
     private val _uiEffect = Channel<ProfileUiEffect>(Channel.BUFFERED)
     val uiEffect: Flow<ProfileUiEffect> = _uiEffect.receiveAsFlow()
 
     init {
         loadProfile()
-        observeCart()
         observeSettings()
         fetchCurrencyRates()
     }
@@ -76,9 +95,9 @@ class ProfileViewModel @Inject constructor(
 
     private fun loadProfile() {
         viewModelScope.launch {
-            _uiState.value = ProfileUiState.Loading
+            profileState.value = ProfileUiState.Loading
             if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
-                _uiState.value = ProfileUiState.Guest()
+                profileState.value = ProfileUiState.Guest()
                 _uiEffect.send(ProfileUiEffect.ShowSignInRequired)
                 return@launch
             }
@@ -90,7 +109,7 @@ class ProfileViewModel @Inject constructor(
                 getOrderHistoryUseCase(id).getOrNull()?.take(2)?.map { it.toRecentOrderUi() }
             } ?: emptyList()
 
-            _uiState.value = ProfileUiState.Content(
+            profileState.value = ProfileUiState.Content(
                 displayName = user?.displayName,
                 email = user?.email,
                 photoUrl = user?.photoUrl,
@@ -111,7 +130,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun navigateIfAuthenticated(effect: ProfileUiEffect) {
-        val state = _uiState.value as? ProfileUiState.Content
+        val state = profileState.value as? ProfileUiState.Content
         if (state?.isAuthenticated == true) {
             sendEffect(effect)
         } else {
@@ -141,29 +160,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun observeCart() {
-        viewModelScope.launch {
-            observeCartUseCase().collect { cartItems ->
-                val count = if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
-                    cartItems.sumOf { it.quantity }
-                } else {
-                    0
-                }
-                _uiState.update { state ->
-                    when (state) {
-                        is ProfileUiState.Content -> state.copy(cartItemCount = count)
-                        is ProfileUiState.Guest -> state.copy(cartItemCount = 0)
-                        else -> state
-                    }
-                }
-            }
-        }
-    }
-
     private fun observeSettings() {
         viewModelScope.launch {
             observeSettingsPreferencesUseCase().collect { preferences ->
-                _uiState.update { state ->
+                profileState.update { state ->
                     if (state is ProfileUiState.Content) {
                         state.copy(selectedCurrency = preferences.selectedCurrency)
                     } else {

@@ -2,8 +2,6 @@ package com.example.wearzone.presentation.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wearzone.domain.auth.model.AuthAccessState
-import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.category.usecase.GetCategoriesUseCase
 import com.example.wearzone.domain.common.Category
 import com.example.wearzone.domain.common.DataResult
@@ -20,29 +18,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.presentation.R // Import الـ Resources
-import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
-    private val observeCartUseCase: ObserveCartUseCase
+    private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
 ) : ViewModel() {
 
 
     private val cartItemCount: StateFlow<Int> =
-        observeCartUseCase()
-            .map { items ->
-                if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
-                    items.sumOf { it.quantity }
-                } else {
-                    0
-                }
-            }
+        observeCartItemCountUseCase()
             .stateIn(
                 viewModelScope,
                 SharingStarted.Eagerly,

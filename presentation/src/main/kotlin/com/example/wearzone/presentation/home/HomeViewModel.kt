@@ -7,7 +7,7 @@ import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
 import com.example.wearzone.domain.cart.model.CartItem
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
-import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
@@ -20,13 +20,11 @@ import com.example.wearzone.domain.product.model.Brand
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -37,23 +35,15 @@ class HomeViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val observeCartUseCase: ObserveCartUseCase,
+    private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
     private val addToCartUseCase: AddToCartUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     private val homeDataState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val cartItemCount: StateFlow<Int> =
-        observeCartUseCase()
-            .mapLatest { items ->
-                if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
-                    items.sumOf { it.quantity }
-                } else {
-                    0
-                }
-            }
+        observeCartItemCountUseCase()
             .stateIn(
                 viewModelScope,
                 SharingStarted.Eagerly,

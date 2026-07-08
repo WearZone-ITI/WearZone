@@ -2,9 +2,7 @@ package com.example.wearzone.presentation.product.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wearzone.domain.auth.model.AuthAccessState
-import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
-import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,9 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,19 +19,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
-    private val getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
-    private val observeCartUseCase: ObserveCartUseCase,
+    private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
     ) : ViewModel() {
     private var currentCollectionId: Long? = null
     private val cartItemCount: StateFlow<Int> =
-        observeCartUseCase()
-            .map { items ->
-                if (getAuthAccessStateUseCase() is AuthAccessState.AuthenticatedCustomer) {
-                    items.sumOf { it.quantity }
-                } else {
-                    0
-                }
-            }
+        observeCartItemCountUseCase()
             .stateIn(
                 viewModelScope,
                 SharingStarted.Eagerly,
