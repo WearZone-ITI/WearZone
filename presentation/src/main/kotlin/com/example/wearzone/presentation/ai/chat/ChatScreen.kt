@@ -39,8 +39,11 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicNone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,12 +73,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.theme.AppTheme
 import kotlinx.coroutines.flow.collectLatest
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import java.io.File
 
 @Composable
 fun ChatScreen(
@@ -100,6 +114,7 @@ fun ChatScreen(
         onIntent = viewModel::handleIntent,
         onNavigateBack = onNavigateBack,
         onNavigateToProductDetail = onNavigateToProductDetail,
+        onTranscribeAudio = viewModel::transcribeAudio,
         snackbarHostState = snackbarHostState
     )
 }
@@ -111,6 +126,7 @@ private fun ChatContent(
     onIntent: (ChatUiIntent) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
+    onTranscribeAudio: (File) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
     val listState = rememberLazyListState()
@@ -186,7 +202,8 @@ private fun ChatContent(
                 inputText = uiState.inputText,
                 isSending = uiState.isSending,
                 onTextChanged = { onIntent(ChatUiIntent.OnInputTextChanged(it)) },
-                onSendClicked = { onIntent(ChatUiIntent.OnSendMessage) }
+                onSendClicked = { onIntent(ChatUiIntent.OnSendMessage) },
+                onTranscribeAudio = onTranscribeAudio
             )
         }
     ) { paddingValues ->
@@ -378,54 +395,136 @@ private fun ChatInputBar(
     inputText: String,
     isSending: Boolean,
     onTextChanged: (String) -> Unit,
-    onSendClicked: () -> Unit
+    onSendClicked: () -> Unit,
+    onTranscribeAudio: (File) -> Unit
 ) {
+    val context = LocalContext.current
+    val voiceRecorder = remember { VoiceRecorderHelper(context) }
+    var isRecording by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            // Optionally handle permission denial
+        }
+    }
+
     Surface(
-        color = AppTheme.colors.surface,
-        tonalElevation = 8.dp
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .imePadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .imePadding(),
+            verticalAlignment = Alignment.Bottom
         ) {
+            // 1. Text Input Field
             OutlinedTextField(
                 value = inputText,
                 onValueChange = onTextChanged,
-                modifier = Modifier.weight(1f),
-                placeholder = {
-                    Text(stringResource(R.string.ask_fashion_hint), color = AppTheme.colors.textSecondary)
-                },
-                maxLines = 4,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 4.dp),
+                placeholder = { Text("Message or hold mic...") },
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AppTheme.colors.accent,
-                    unfocusedBorderColor = AppTheme.colors.divider,
-                    focusedContainerColor = AppTheme.colors.surfaceVariant,
-                    unfocusedContainerColor = AppTheme.colors.surfaceVariant
+                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 ),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(
-                    onSend = { if (inputText.isNotBlank() && !isSending) onSendClicked() }
-                )
+                maxLines = 4
             )
-            Spacer(Modifier.width(12.dp))
-            val canSend = inputText.isNotBlank() && !isSending
-            IconButton(
-                onClick = onSendClicked,
-                enabled = canSend,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(if (canSend) AppTheme.colors.selected else AppTheme.colors.divider)
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Action Buttons Row (Mic + Send)
+            Row(
+                modifier = Modifier.padding(bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = stringResource(R.string.send),
-                    tint = if (canSend) AppTheme.colors.onAccent else AppTheme.colors.textSecondary
-                )
+                // 2. Microphone Button
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isRecording) MaterialTheme.colorScheme.error 
+                            else MaterialTheme.colorScheme.secondaryContainer
+                        )
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    val hasPermission = ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.RECORD_AUDIO
+                                    ) == PackageManager.PERMISSION_GRANTED
+
+                                    if (hasPermission) {
+                                        isRecording = true
+                                        voiceRecorder.startRecording()
+                                        
+                                        tryAwaitRelease() 
+                                        
+                                        if (isRecording) {
+                                            isRecording = false
+                                            voiceRecorder.stopRecording()
+                                            val file = File(context.cacheDir, "audio_message.m4a")
+                                            if (file.exists()) {
+                                                onTranscribeAudio(file)
+                                            }
+                                        }
+                                    } else {
+                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                    }
+                                }
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isRecording) Icons.Default.Mic else Icons.Default.MicNone,
+                        contentDescription = "Hold to Record",
+                        tint = if (isRecording) MaterialTheme.colorScheme.onError 
+                               else MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+
+                // 3. Send Button
+                val canSend = inputText.isNotBlank() && !isSending
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (canSend) MaterialTheme.colorScheme.primary 
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        .clickable(enabled = canSend) {
+                            onSendClicked()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isSending) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp), 
+                            color = MaterialTheme.colorScheme.onPrimary, 
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Send",
+                            tint = if (canSend) MaterialTheme.colorScheme.onPrimary 
+                                   else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
