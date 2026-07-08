@@ -28,6 +28,7 @@ import com.example.wearzone.domain.cart.repository.ICartRepository
 import com.example.wearzone.domain.cart.usecase.AddToCartUseCase
 import com.example.wearzone.domain.cart.usecase.ClearCartUseCase
 import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.cart.usecase.RemoveFromCartUseCase
 import com.example.wearzone.domain.cart.usecase.UpdateCartQuantityUseCase
 import com.example.wearzone.domain.checkout.repository.ICheckoutRepository
@@ -224,6 +225,14 @@ object UseCaseModule {
         repository: ICartRepository,
     ): ObserveCartUseCase {
         return ObserveCartUseCase(repository)
+    }
+
+    @Provides
+    fun provideObserveCartItemCountUseCase(
+        repository: ICartRepository,
+        getAuthAccessStateUseCase: GetAuthAccessStateUseCase,
+    ): ObserveCartItemCountUseCase {
+        return ObserveCartItemCountUseCase(repository, getAuthAccessStateUseCase)
     }
 
     @Provides

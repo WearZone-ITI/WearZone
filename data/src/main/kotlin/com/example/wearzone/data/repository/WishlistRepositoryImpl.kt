@@ -1,25 +1,36 @@
 package com.example.wearzone.data.repository
 
+import com.example.wearzone.data.di.IoDispatcher
+import com.example.wearzone.data.local.datasource.ISettingsPreferencesDataSource
 import com.example.wearzone.data.local.wishlist.WishlistDao
 import com.example.wearzone.data.local.wishlist.WishlistEntity
 import com.example.wearzone.data.local.wishlist.toDomainModel
 import com.example.wearzone.data.local.wishlist.toEntity
 import com.example.wearzone.domain.wishlist.model.WishlistItem
+import com.example.wearzone.data.remote.datasource.IProductRemoteDataSource
 import com.example.wearzone.domain.wishlist.repository.IWishlistRepository
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class WishlistRepositoryImpl @Inject constructor(
-    private val wishlistDao: WishlistDao
+    private val wishlistDao: WishlistDao,
+    private val productRemoteDataSource: IProductRemoteDataSource,
+    private val settingsDataSource: ISettingsPreferencesDataSource,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : IWishlistRepository {
 
     private val database = FirebaseDatabase.getInstance().reference
@@ -57,9 +68,34 @@ class WishlistRepositoryImpl @Inject constructor(
         userWishlistRef.addValueEventListener(listener)
         
         val job = launch {
-            wishlistDao.getWishlistFlow(userId).collect { entities ->
-                send(entities.map { it.toDomainModel() })
+            combine(
+                wishlistDao.getWishlistFlow(userId),
+                settingsDataSource.observeSettingsPreferences(),
+            ) { entities, settings ->
+                entities to settings.languageCode
             }
+                .mapLatest { (entities, languageCode) ->
+                    val productIds = entities.mapNotNull { it.id.toLongOrNull() }.distinct()
+                    val localizedProductsById = if (productIds.isEmpty()) {
+                        emptyMap()
+                    } else {
+                        runCatching {
+                            productRemoteDataSource
+                                .getProductsByIds(productIds)
+                                .associateBy { it.id }
+                        }.getOrDefault(emptyMap())
+                    }
+
+                    entities.map { entity ->
+                        val localizedTitle = localizedProductsById[entity.id]
+                            ?.toDomain(languageCode)
+                            ?.title
+                            ?.takeIf { it.isNotBlank() }
+                        entity.toDomainModel().copy(title = localizedTitle ?: entity.title)
+                    }
+                }
+                .flowOn(ioDispatcher)
+                .collect { items -> send(items) }
         }
         
         awaitClose {

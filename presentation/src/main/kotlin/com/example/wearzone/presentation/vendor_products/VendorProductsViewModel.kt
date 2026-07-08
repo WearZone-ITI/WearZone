@@ -13,15 +13,22 @@ import com.example.wearzone.domain.common.DataResult
 import com.example.wearzone.domain.common.DomainError
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.product.usecase.GetProductsByVendorUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,7 +42,8 @@ class VendorProductsViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val addToCartUseCase: AddToCartUseCase
+    private val addToCartUseCase: AddToCartUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
 ) : ViewModel() {
 
     private val vendorName: String = savedStateHandle.get<String>("vendorName").orEmpty()
@@ -47,8 +55,11 @@ class VendorProductsViewModel @Inject constructor(
     val uiEffect = _uiEffect.receiveAsFlow()
 
     private var currentUserId: String? = null
+    private var loadProductsJob: Job? = null
+    private var wishlistJob: Job? = null
 
     init {
+        observeLanguageChanges()
         loadProducts()
     }
 
@@ -66,9 +77,12 @@ class VendorProductsViewModel @Inject constructor(
         }
     }
 
-    private fun loadProducts() {
-        viewModelScope.launch {
-            _uiState.value = VendorProductsUiState.Loading
+    private fun loadProducts(showLoading: Boolean = true) {
+        loadProductsJob?.cancel()
+        loadProductsJob = viewModelScope.launch {
+            if (showLoading || _uiState.value !is VendorProductsUiState.Success) {
+                _uiState.value = VendorProductsUiState.Loading
+            }
             val accessState = getAuthAccessStateUseCase()
             val user = if (accessState is AuthAccessState.AuthenticatedCustomer) {
                 getCurrentUserUseCase()
@@ -86,7 +100,8 @@ class VendorProductsViewModel @Inject constructor(
                     )
                     // If user is logged in, observe wishlist to update isFavorite flags dynamically
                     if (user != null && user.uid.isNotEmpty()) {
-                        launch {
+                        wishlistJob?.cancel()
+                        wishlistJob = launch {
                             observeWishlistUseCase(user.uid).collect { wishlistItems ->
                                 val wishlistIds = wishlistItems.map { it.id }.toSet()
                                 _uiState.update { state ->
@@ -99,6 +114,8 @@ class VendorProductsViewModel @Inject constructor(
                                 }
                             }
                         }
+                    } else {
+                        wishlistJob?.cancel()
                     }
                 }
                 is DataResult.Error -> {
@@ -107,10 +124,21 @@ class VendorProductsViewModel @Inject constructor(
                         is DomainError.Network -> error.exception.message ?: "Network error"
                         is DomainError.Unknown -> error.exception.message ?: "Unknown error"
                     }
-                    _uiState.value = VendorProductsUiState.Error(message)
+                    if (showLoading || _uiState.value !is VendorProductsUiState.Success) {
+                        _uiState.value = VendorProductsUiState.Error(message)
+                    }
                 }
             }
         }
+    }
+
+    private fun observeLanguageChanges() {
+        observeSettingsPreferencesUseCase()
+            .map { it.languageCode }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { loadProducts(showLoading = false) }
+            .launchIn(viewModelScope)
     }
 
     private fun addToCart(product: Product) {

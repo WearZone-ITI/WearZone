@@ -516,6 +516,9 @@
     <string name="search_reset_filters">إعادة تعيين</string>
     <string name="search_start_title">ابحث عن قطعتك القادمة</string>
     <string name="search_start_subtitle">ابحث عن طريق المنتج، المصمم، الماركة، أو الفئة.</string>
+    <string name="search_popular_categories">تصنيفات شائعة</string>
+    <string name="search_popular_brands">ماركات شائعة</string>
+    <string name="search_suggested_products">منتجات مقترحة</string>
     <string name="search_empty_title">لم نجد تصاميم مطابقة</string>
     <string name="search_empty_subtitle">جرّب كلمة مفتاحية أخرى أو خفف قيود الفلاتر.</string>
     <string name="search_error_title">البحث غير متاح حالياً</string>

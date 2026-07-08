@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.auth.model.AuthAccessState
 import com.example.wearzone.domain.auth.usecase.GetAuthAccessStateUseCase
 import com.example.wearzone.domain.auth.usecase.GetCurrentUserUseCase
-import com.example.wearzone.domain.cart.usecase.ObserveCartUseCase
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.SyncWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,14 +31,11 @@ class WishlistViewModel @Inject constructor(
     private val observeWishlistUseCase: ObserveWishlistUseCase,
     private val syncWishlistUseCase: SyncWishlistUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val observeCartUseCase: ObserveCartUseCase,
+    private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
 ) : ViewModel() {
 
     private val cartItemCount: StateFlow<Int> =
-        observeCartUseCase()
-            .map { items ->
-                items.sumOf { it.quantity }
-            }
+        observeCartItemCountUseCase()
             .stateIn(
                 viewModelScope,
                 SharingStarted.Eagerly,
