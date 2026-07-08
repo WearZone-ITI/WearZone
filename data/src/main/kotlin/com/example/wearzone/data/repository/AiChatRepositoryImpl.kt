@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
@@ -96,6 +97,15 @@ class AiChatRepositoryImpl @Inject constructor(
             DataResult.Success(Unit)
         } catch (e: Exception) {
             _history.value = _history.value.filter { it.id != pendingMsgId }
+            DataResult.Error(DomainError.Unknown(e))
+        }
+    }
+
+    override suspend fun transcribeVoiceMessage(audioFile: File): DataResult<String> {
+        return try {
+            val text = remoteDataSource.transcribeAudio(audioFile)
+            DataResult.Success(text)
+        } catch (e: Exception) {
             DataResult.Error(DomainError.Unknown(e))
         }
     }

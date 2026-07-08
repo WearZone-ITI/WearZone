@@ -432,7 +432,14 @@
     <string name="content_desc_wishlist_remove">إزالة من المفضلة</string>
     <string name="content_desc_product_image">صورة المنتج</string>
     <string name="content_desc_star_rating">تقييم النجوم</string>
-       <!-- Product Detail Reviews -->
+
+    <string name="chat_input_placeholder">اكتب رسالة أو اضغط مطولاً على الميكروفون...</string>
+    <string name="hold_to_record">اضغط مطولاً للتسجيل</string>
+    <string name="record_title">تسجيل...</string>
+    <string name="release_to_send">ارفع صباعك للإرسال</string>
+
+
+    <!-- Product Detail Reviews -->
     <string name="review_submitted_successfully">تم إرسال التقييم بنجاح!</string>
     <string name="review_submit_failed">فشل إرسال التقييم. يرجى المحاولة مرة أخرى.</string>
     <string name="product_detail_write_review">كتابة تقييم</string>

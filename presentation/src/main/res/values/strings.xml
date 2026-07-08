@@ -429,6 +429,11 @@
     <string name="content_desc_wishlist_remove">Remove from wishlist</string>
     <string name="content_desc_product_image">Product image</string>
     <string name="content_desc_star_rating">Star rating</string>
+
+    <string name="chat_input_placeholder">Message or hold mic...</string>
+    <string name="hold_to_record">Hold to Record</string>
+    <string name="record_title">Recording...</string>
+    <string name="release_to_send">Release to send</string>
        <!-- Product Detail Reviews -->
     <string name="review_submitted_successfully">Review submitted successfully!</string>
     <string name="review_submit_failed">Failed to submit review. Please try again.</string>
