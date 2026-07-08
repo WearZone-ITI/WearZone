@@ -29,7 +29,6 @@ import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.WarningAmber
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,7 +43,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -69,6 +67,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.presentation.R
 import com.example.wearzone.presentation.common.SignInRequiredDialog
+import com.example.wearzone.presentation.common.WearZoneDialog
+import com.example.wearzone.presentation.common.WearZoneDialogTone
 import com.example.wearzone.presentation.common.formatPrice
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.order.history.OrderStatusTone
@@ -701,22 +701,16 @@ private fun CancelOrderDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.order_details_cancel_dialog_title)) },
-        text = { Text(text = stringResource(R.string.order_details_cancel_dialog_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.order_details_cancel_dialog_confirm),
-                    color = AppTheme.colors.error,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cart_dialog_cancel))
-            }
-        },
+    WearZoneDialog(
+        title = stringResource(R.string.order_details_cancel_dialog_title),
+        message = stringResource(R.string.order_details_cancel_dialog_message),
+        confirmText = stringResource(R.string.order_details_cancel_dialog_confirm),
+        cancelText = stringResource(R.string.cart_dialog_cancel),
+        onConfirm = onConfirm,
+        onCancel = onDismiss,
+        onDismiss = onDismiss,
+        icon = Icons.Outlined.WarningAmber,
+        iconContentDescription = stringResource(R.string.order_details_cancel_dialog_confirm),
+        tone = WearZoneDialogTone.Destructive,
     )
 }
