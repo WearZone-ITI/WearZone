@@ -4,6 +4,7 @@ import com.example.wearzone.data.remote.dto.CustomCollectionsResponse
 import com.example.wearzone.data.remote.dto.ProductsResponse
 import com.example.wearzone.data.remote.dto.SmartCollectionsResponse
 import com.example.wearzone.data.remote.dto.ProductDetailDto
+import com.example.wearzone.data.remote.dto.ProductMetafieldsResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -36,6 +37,14 @@ interface ProductApiService {
         @Query("limit") limit: Int = 250,
         @Query("fields") fields: String = PRODUCT_LIST_FIELDS,
     ): ProductsResponse
+
+
+    @GET("admin/api/2024-04/products/{product_id}/metafields.json")
+    suspend fun getProductMetafields(
+        @Path("product_id") productId: Long,
+        @Query("namespace") namespace: String = "wearzone",
+        @Query("limit") limit: Int = 250,
+    ): ProductMetafieldsResponse
 
     @GET("admin/api/2024-04/products/{product_id}.json")
     suspend fun getProductDetail(

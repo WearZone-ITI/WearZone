@@ -121,7 +121,7 @@ private fun EmailVerificationContent(
             if (uiState is EmailVerificationUiState.Error) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = uiState.message,
+                    text = stringResource(uiState.messageRes),
                     style = AppTypography.bodyMedium,
                     color = AppTheme.colors.error,
                     modifier = Modifier

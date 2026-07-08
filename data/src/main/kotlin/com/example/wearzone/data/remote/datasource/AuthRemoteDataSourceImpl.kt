@@ -4,7 +4,9 @@ import com.example.wearzone.data.remote.api.AuthApiService
 import com.example.wearzone.data.remote.dto.CustomerDto
 import com.example.wearzone.data.remote.dto.CustomerRequest
 import com.example.wearzone.data.remote.result.RegisterResult
+import com.example.wearzone.domain.common.FirebaseAuthFailureException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -13,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.cancellation.CancellationException
 
 class AuthRemoteDataSourceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -21,14 +24,18 @@ class AuthRemoteDataSourceImpl @Inject constructor(
 ) : IAuthRemoteDataSource {
 
     override suspend fun signInWithEmail(email: String, password: String): FirebaseUser {
-        val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-        return result.user ?: throw Exception("User is null after sign in")
+        val result = mapFirebaseAuthException {
+            firebaseAuth.signInWithEmailAndPassword(email, password).await()
+        }
+        return result.user ?: throw IllegalStateException("firebase_user_missing_after_sign_in")
     }
 
     override suspend fun signInWithGoogleCredential(idToken: String): FirebaseUser {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        val result = firebaseAuth.signInWithCredential(credential).await()
-        return result.user ?: throw Exception("User is null after Google sign in")
+        val result = mapFirebaseAuthException {
+            firebaseAuth.signInWithCredential(credential).await()
+        }
+        return result.user ?: throw IllegalStateException("firebase_user_missing_after_google_sign_in")
     }
 
     override suspend fun getSavedShopifyCustomerId(uid: String): Long? {
@@ -92,12 +99,14 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     ): RegisterResult {
 
         try {
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            val user = authResult.user ?: throw IllegalStateException("User creation failed")
+            val authResult = mapFirebaseAuthException {
+                firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            }
+            val user = authResult.user ?: throw IllegalStateException("firebase_user_missing_after_registration")
 
             val profileUpdates = UserProfileChangeRequest.Builder().setDisplayName(name).build()
-            user.updateProfile(profileUpdates).await()
-            user.reload().await()
+            mapFirebaseAuthException { user.updateProfile(profileUpdates).await() }
+            mapFirebaseAuthException { user.reload().await() }
 
             val request = CustomerRequest(
                 customer = CustomerDto(
@@ -114,8 +123,9 @@ class AuthRemoteDataSourceImpl @Inject constructor(
 
             return RegisterResult(firebaseUser = user, customerId = customerResponse.customer.id)
         } catch (e: Exception) {
-            // rollback Firebase if Shopify fails
-            firebaseAuth.currentUser?.delete()?.await()
+            if (e is CancellationException) throw e
+            // rollback Firebase if Shopify/customer profile creation fails, but keep the original error.
+            runCatching { firebaseAuth.currentUser?.delete()?.await() }
             throw e
         }
     }
@@ -129,13 +139,13 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun sendEmailVerification() {
-        val user = firebaseAuth.currentUser ?: throw IllegalStateException("No signed-in user")
-        user.sendEmailVerification().await()
+        val user = firebaseAuth.currentUser ?: throw IllegalStateException("firebase_no_signed_in_user")
+        mapFirebaseAuthException { user.sendEmailVerification().await() }
     }
 
     override suspend fun isEmailVerified(): Boolean {
         val user = firebaseAuth.currentUser ?: return false
-        user.reload().await()
+        mapFirebaseAuthException { user.reload().await() }
         return user.isEmailVerified
     }
 
@@ -158,6 +168,12 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun sendPasswordResetEmail(email: String) {
-        firebaseAuth.sendPasswordResetEmail(email).await()
+        mapFirebaseAuthException { firebaseAuth.sendPasswordResetEmail(email).await() }
+    }
+
+    private suspend fun <T> mapFirebaseAuthException(block: suspend () -> T): T = try {
+        block()
+    } catch (e: FirebaseAuthException) {
+        throw FirebaseAuthFailureException(e.errorCode)
     }
 }

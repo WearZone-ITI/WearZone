@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wearzone.domain.auth.usecase.RegisterUseCase
 import com.example.wearzone.domain.common.ValidationException
+import com.example.presentation.R
+import com.example.wearzone.presentation.common.toFirebaseAuthMessageRes
+import com.example.wearzone.presentation.common.toMessageRes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,9 +97,11 @@ class RegisterViewModel @Inject constructor(
                     _effects.send(RegisterUiEffect.NavigateToEmailVerification(user.email))
                 },
                 onFailure = { throwable ->
-                    val message = (throwable as? ValidationException)?.error
-                    _uiState.value = RegisterUiState.Error(message)
-                    _effects.send(RegisterUiEffect.ShowSnackbar(message))
+                    val validationError = (throwable as? ValidationException)?.error
+                    val messageRes = validationError?.toMessageRes()
+                        ?: throwable.toFirebaseAuthMessageRes(R.string.error_register_failed)
+                    _uiState.value = RegisterUiState.Error(messageRes)
+                    _effects.send(RegisterUiEffect.ShowSnackbar(messageRes))
                 },
             )
 

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1048875285452",
+    "firebase_url": "https://wearzone-a0084-default-rtdb.firebaseio.com",
     "project_id": "wearzone-a0084",
     "storage_bucket": "wearzone-a0084.firebasestorage.app"
   },
@@ -13,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1048875285452-d1crsidj698kp973ojsn2dra7s46jund.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wearzone",
+            "certificate_hash": "beabfcd83b73ea66353eaa431a49fa6f1cdad472"
+          }
+        },
+        {
+          "client_id": "1048875285452-dlkd1o0e8rjgkjvp9rbnab852i7scv38.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wearzone",
+            "certificate_hash": "4092e6041927d643ead5b8a3529ac81ebbf8d830"
+          }
+        },
         {
           "client_id": "1048875285452-nqr49osm6g2e5uubo4upr0to0u22kg5v.apps.googleusercontent.com",
           "client_type": 1,

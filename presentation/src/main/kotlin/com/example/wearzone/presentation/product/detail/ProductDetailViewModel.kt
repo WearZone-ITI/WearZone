@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -268,7 +269,9 @@ class ProductDetailViewModel @Inject constructor(
     private fun launchReviewsObserver(productId: String) {
         viewModelScope.launch {
             val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
-            reviewRepository.getReviewsForProduct(productId).collect { reviewsList ->
+            reviewRepository.getReviewsForProduct(productId)
+                .catch { _uiEffect.send(ProductDetailUiEffect.ShowToast(R.string.reviews_load_failed)) }
+                .collect { reviewsList ->
                 val totalCount = reviewsList.size
                 val avgRating = if (totalCount > 0) reviewsList.map { it.rating }.sum() / totalCount else 0.0
                 val reviewsUiList = reviewsList.map { review ->

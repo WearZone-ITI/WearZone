@@ -100,7 +100,7 @@ class EmailVerificationViewModel @Inject constructor(
                 .onFailure { error ->
                     if (showErrorOnFalse) {
                         _uiState.value = EmailVerificationUiState.Error(
-                            error.localizedMessage ?: "Failed to check verification status"
+                            R.string.email_verification_failed_check
                         )
                     }
                 }

@@ -16,6 +16,14 @@ data class ProductDetail(
     val variants: List<ProductVariant> = emptyList(),
     val availableColors: List<String> = emptyList(),
     val isOutOfStock: Boolean = false,
+    val titleEn: String = title,
+    val titleAr: String = "",
+    val descriptionEn: String = descriptionHtml,
+    val descriptionAr: String = "",
+    val categoryEn: String = "",
+    val categoryAr: String = "",
+    val productTypeEn: String = "",
+    val productTypeAr: String = "",
 )
 
 data class ProductVariant(
