@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 data class SearchUiState(
     val query: String = "",
     val products: ImmutableList<ProductSearchUiModel> = persistentListOf(),
+    val suggestedProducts: ImmutableList<ProductSearchUiModel> = persistentListOf(),
     val recentSearches: ImmutableList<String> = persistentListOf(),
     val brands: ImmutableList<SearchFilterOptionUiModel> = persistentListOf(),
     val categories: ImmutableList<SearchFilterOptionUiModel> = persistentListOf(),

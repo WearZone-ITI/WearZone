@@ -41,6 +41,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -63,6 +64,7 @@ private val Context.settingsDataStore: DataStore<Preferences> by preferencesData
 abstract class DataSourceModule {
 
     @Binds
+    @Singleton
     abstract fun bindProductRemoteDataSource(
         productRemoteDataSourceImpl: ProductRemoteDataSourceImpl,
     ): IProductRemoteDataSource

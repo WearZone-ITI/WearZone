@@ -60,6 +60,16 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getProductsPreview(limit: Int): DataResult<List<Product>> = withContext(ioDispatcher) {
+        try {
+            val languageCode = currentLanguageCode()
+            val dtoList = remoteDataSource.getProductsPreview(limit)
+            DataResult.Success(dtoList.map { it.toDomain(languageCode) })
+        } catch (e: Exception) {
+            DataResult.Error(DomainError.Unknown(e))
+        }
+    }
+
     override suspend fun getProductsByVendor(vendor: String): DataResult<List<Product>> = withContext(ioDispatcher) {
         try {
             val languageCode = currentLanguageCode()

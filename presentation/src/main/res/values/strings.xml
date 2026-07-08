@@ -507,6 +507,9 @@
     <string name="search_reset_filters">Reset</string>
     <string name="search_start_title">Find your next piece</string>
     <string name="search_start_subtitle">Search by product, designer, brand, or category.</string>
+    <string name="search_popular_categories">Popular categories</string>
+    <string name="search_popular_brands">Popular brands</string>
+    <string name="search_suggested_products">Suggested products</string>
     <string name="search_empty_title">No results found</string>
     <string name="search_empty_subtitle">We couldn\'t find what you were looking for. Try a different term or keyword.</string>
     <string name="search_error_title">Search unavailable</string>

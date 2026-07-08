@@ -38,9 +38,11 @@ fun SearchResults(
             title = stringResource(id = R.string.search_empty_title),
             description = stringResource(id = R.string.search_empty_subtitle),
         )
+        state.products.isEmpty() && state.hasUsefulInitialContent() -> Box(modifier = modifier.fillMaxSize())
         state.products.isEmpty() -> SearchMessage(
             title = stringResource(id = R.string.search_start_title),
             subtitle = stringResource(id = R.string.search_start_subtitle),
+            modifier = modifier,
         )
         else -> LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -57,3 +59,6 @@ fun SearchResults(
         }
     }
 }
+
+private fun SearchUiState.hasUsefulInitialContent(): Boolean =
+    !hasSearched && (recentSearches.isNotEmpty() || categories.isNotEmpty() || brands.isNotEmpty())

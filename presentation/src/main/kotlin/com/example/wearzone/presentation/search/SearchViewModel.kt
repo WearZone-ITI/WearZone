@@ -17,9 +17,12 @@ import com.example.wearzone.domain.search.usecase.ClearRecentSearchesUseCase
 import com.example.wearzone.domain.search.usecase.GetRecentSearchesUseCase
 import com.example.wearzone.domain.search.usecase.SaveRecentSearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,12 +54,12 @@ class SearchViewModel @Inject constructor(
     val uiEffect = _uiEffect.receiveAsFlow()
 
     private val queryChanges = MutableStateFlow("")
+    private var searchJob: Job? = null
 
     init {
         observeRecentSearches()
         observeQueryChanges()
-        loadFilterOptions()
-        searchProducts()
+        loadInitialSearchContent()
         observeCart()
     }
 
@@ -97,27 +100,46 @@ class SearchViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun loadFilterOptions() {
+    private fun loadInitialSearchContent() {
         viewModelScope.launch {
-            val brandsResult = getProductsUseCase.getBrands()
-            val categoriesResult = getProductsUseCase.getCategories()
+            _uiState.update { it.copy(isLoading = true, hasError = false, errorMessage = null) }
+
+            val brandsDeferred = async { getProductsUseCase.getBrands() }
+            val categoriesDeferred = async { getProductsUseCase.getCategories() }
+            val suggestedProductsDeferred = async {
+                getProductsUseCase.getProductsPreview(INITIAL_SEARCH_PRODUCT_LIMIT)
+            }
+
+            val brandsResult = brandsDeferred.await()
+            val categoriesResult = categoriesDeferred.await()
+            val suggestedProducts = suggestedProductsDeferred.await().toProductSearchModels()
+
             _uiState.update { state ->
+                val shouldShowSuggestedProducts = state.query.isBlank() && !state.hasActiveFilters()
                 state.copy(
                     brands = brandsResult.toBrandOptions(),
                     categories = categoriesResult.toCategoryOptions(),
+                    suggestedProducts = suggestedProducts,
+                    products = if (shouldShowSuggestedProducts) suggestedProducts else state.products,
+                    isLoading = false,
                 )
             }
         }
     }
 
     private fun updateQuery(query: String) {
-        _uiState.update { it.copy(query = query, hasSearched = query.isNotBlank()) }
+        _uiState.update { state ->
+            state.copy(
+                query = query,
+                hasSearched = query.isNotBlank() || state.hasActiveFilters(),
+            )
+        }
         queryChanges.value = query
     }
 
     private fun submitSearch() {
         viewModelScope.launch {
-            _uiState.value.query.let { saveRecentSearchUseCase(it) }
+            _uiState.value.query.trim().takeIf { it.isNotBlank() }?.let { saveRecentSearchUseCase(it) }
             searchProducts()
         }
     }
@@ -171,10 +193,23 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchProducts() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, hasError = false, errorMessage = null) }
-
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             val filters = _uiState.value.toFilters()
+            if (!filters.hasActiveCriteria()) {
+                _uiState.update {
+                    it.copy(
+                        products = it.suggestedProducts,
+                        isLoading = false,
+                        hasSearched = false,
+                        hasError = false,
+                        errorMessage = null,
+                    )
+                }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isLoading = true, hasSearched = true, hasError = false, errorMessage = null) }
 
             when (val result = searchProductsUseCase(filters)) {
                 is DataResult.Error -> {
@@ -213,6 +248,24 @@ class SearchViewModel @Inject constructor(
         categoryTitle = selectedCategoryTitle,
     )
 
+    private fun SearchUiState.hasActiveFilters(): Boolean =
+        selectedBrandTitle != null ||
+                selectedCategoryTitle != null ||
+                minPrice.toDoubleOrNull() != null ||
+                maxPrice.toDoubleOrNull() != null
+
+    private fun SearchFilters.hasActiveCriteria(): Boolean =
+        query.isNotBlank() ||
+                brandTitle != null ||
+                categoryTitle != null ||
+                minPrice != null ||
+                maxPrice != null
+
+    private fun DataResult<List<Product>>.toProductSearchModels() = when (this) {
+        is DataResult.Error -> persistentListOf<ProductSearchUiModel>()
+        is DataResult.Success -> data.map { product -> product.toUiModel() }.toImmutableList()
+    }
+
     private fun Product.toUiModel(): ProductSearchUiModel = ProductSearchUiModel(
         id = id,
         title = title,
@@ -248,6 +301,10 @@ class SearchViewModel @Inject constructor(
 
     private fun String.filterPriceInput(): String {
         return filterIndexed { index, char -> char.isDigit() || (char == '.' && indexOf('.') == index) }
+    }
+
+    private companion object {
+        const val INITIAL_SEARCH_PRODUCT_LIMIT = 12
     }
 
     private fun observeCart() {

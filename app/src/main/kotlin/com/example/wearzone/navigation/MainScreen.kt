@@ -52,6 +52,7 @@ import com.example.presentation.R
 import com.example.wearzone.presentation.address.form.AddressFormScreen
 import com.example.wearzone.presentation.address.list.AddressListScreen
 import com.example.wearzone.presentation.categories.CategoriesScreen
+import com.example.wearzone.presentation.common.rememberKeyboardVisibility
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.order.details.OrderDetailsScreen
@@ -87,10 +88,15 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val isKeyboardVisible by rememberKeyboardVisibility()
 
     val shouldHideBottomBar =
-        currentDestination?.hasRoute(Route.AddressAddRoute::class) == true ||
-                currentDestination?.hasRoute(Route.AddressEditRoute::class) == true
+        currentDestination?.hasRoute(Route.AddressListRoute::class) == true ||
+                currentDestination?.hasRoute(Route.AddressAddRoute::class) == true ||
+                currentDestination?.hasRoute(Route.AddressEditRoute::class) == true ||
+                currentDestination?.hasRoute(Route.OrderHistoryRoute::class) == true ||
+                currentDestination?.hasRoute(Route.OrderDetailsRoute::class) == true
+    val shouldShowBottomBar = !shouldHideBottomBar && !isKeyboardVisible
 
     val navItems = listOf(
         BottomNavItem(
@@ -132,7 +138,7 @@ fun MainScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         bottomBar = {
-            if (!shouldHideBottomBar) {
+            if (shouldShowBottomBar) {
                 val selectedIndex = remember(currentDestination) {
                     navItems.indexOfFirst { item ->
                         when (item.labelRes) {
@@ -268,7 +274,12 @@ fun MainScreen(
             composable<Route.SearchRoute> {
                 SearchScreen(
                     onNavigateBack = {
-                        bottomNavController.popBackStack()
+                        val popped = bottomNavController.popBackStack()
+                        if (!popped) {
+                            bottomNavController.navigate(Route.HomeRoute) {
+                                launchSingleTop = true
+                            }
+                        }
                     },
                     onNavigateToProductDetail = { productId ->
                         onNavigateToProductDetail(productId)
