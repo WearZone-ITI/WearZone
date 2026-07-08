@@ -97,10 +97,6 @@ private fun ChatContent(
         }
     }
 
-    LaunchedEffect(uiState.messages.lastOrNull()?.id, renderedCardCount) {
-        Log.d("WearZoneSmartChat", "ChatScreen render messages=${uiState.messages.size} cards=$renderedCardCount")
-    }
-
     Scaffold(
         containerColor = AppTheme.colors.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
