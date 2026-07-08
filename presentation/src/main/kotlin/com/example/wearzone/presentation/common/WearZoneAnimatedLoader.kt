@@ -39,31 +39,26 @@ fun WearZoneAnimatedLoader(
     val bgCircleColor = if (isDark) Color.Black.toArgb() else Color.Transparent.toArgb()
 
     val dynamicProperties = rememberLottieDynamicProperties(
-        // العناصر الطايرة (Layer 1→6 Outlines) جوه الـ precomp "Graphs-anim" - دهبي
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
             value = SimpleColorFilter(goldColor),
             keyPath = arrayOf("Graphs-anim", "**")
         ),
-        // جسم الشنطة: الحافة (Stroke) دهبي
         rememberLottieDynamicProperty(
             property = LottieProperty.STROKE_COLOR,
             value = goldColor,
             keyPath = arrayOf("bag-outside", "bag", "Stroke 1")
         ),
-        // وبنصفّر شفافية الـ Fill بتاعها عشان تبقى مفرغة من الداخل (Outline بس)
         rememberLottieDynamicProperty(
             property = LottieProperty.OPACITY,
             value = 0,
             keyPath = arrayOf("bag-outside", "bag", "Fill 1")
         ),
-        // يد الشنطة (الـ Fill بتاعتها أصلاً مخفي بالتصميم) - حافتها دهبي برضو
         rememberLottieDynamicProperty(
             property = LottieProperty.STROKE_COLOR,
             value = goldColor,
             keyPath = arrayOf("bag-outside", "handle", "Stroke 1")
         ),
-        // فتحة الشنطة من جوه (bag-inside): نخفيها بالكامل (Stroke + Fill) عشان تختفي الحزّة اللي طالعة في نص الشنطة
         rememberLottieDynamicProperty(
             property = LottieProperty.OPACITY,
             value = 0,
@@ -74,7 +69,6 @@ fun WearZoneAnimatedLoader(
             value = 0,
             keyPath = arrayOf("bag-inside", "Shape 1", "Fill 1")
         ),
-        // خلفية الديزاين (BG): سودا في النايت مود، وشفافة في الدي مود
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR_FILTER,
             value = SimpleColorFilter(bgCircleColor),
