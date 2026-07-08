@@ -1,7 +1,5 @@
 package com.example.wearzone.data.remote.mapper
 
-import android.icu.number.Precision.currency
-import android.util.Log
 import com.example.data.BuildConfig
 import com.example.wearzone.data.remote.dto.BillingDataDto
 import com.example.wearzone.data.remote.dto.CustomerPaymentDto
@@ -56,9 +54,6 @@ fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto 
 
         itemsTotal = intentionItems.sumOf { it.amount * it.quantity }
     }
-
-    Log.d("PAYMOB", "Amount = $totalAmount")
-    Log.d("PAYMOB", "Items Total = $itemsTotal")
 
     return IntentionRequestDto(
         amount = totalAmount,

@@ -1,6 +1,5 @@
 package com.example.wearzone.data.repository
 
-import android.util.Log
 import com.example.wearzone.data.di.IoDispatcher
 import com.example.wearzone.data.remote.api.PaymobApiService
 import com.example.wearzone.data.remote.mapper.toDomain
@@ -34,16 +33,6 @@ class PaymentRepositoryImpl @Inject constructor(
                 )
                 Result.success(response.toDomain())
             } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-
-                Log.e(
-                    "PAYMOB_ERROR",
-                    """
-        Code: ${e.code()}
-        Message: ${e.message()}
-        Body: $errorBody
-        """.trimIndent()
-                )
                 Result.failure(PaymentException.ApiError(e.code(), e.message()))
             } catch (e: IOException) {
                 Result.failure(PaymentException.NetworkError)
