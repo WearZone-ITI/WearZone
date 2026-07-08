@@ -13,6 +13,7 @@ import com.example.wearzone.domain.product.usecase.GetProductsUseCase
 import com.example.wearzone.domain.wishlist.model.WishlistItem
 import com.example.wearzone.domain.wishlist.usecase.ObserveWishlistUseCase
 import com.example.wearzone.domain.wishlist.usecase.ToggleFavoriteUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.presentation.R
 import com.example.wearzone.domain.product.model.Product
 import com.example.wearzone.domain.common.Category
@@ -20,11 +21,17 @@ import com.example.wearzone.domain.product.model.Brand
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -38,7 +45,8 @@ class HomeViewModel @Inject constructor(
     private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
     private val addToCartUseCase: AddToCartUseCase,
     private val observeWishlistUseCase: ObserveWishlistUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
 ) : ViewModel() {
 
     private val homeDataState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -66,7 +74,11 @@ class HomeViewModel @Inject constructor(
     private val _uiEffect = Channel<HomeUiEffect>(Channel.BUFFERED)
     val uiEffect = _uiEffect.receiveAsFlow()
 
+    private var wishlistJob: Job? = null
+    private var loadHomeJob: Job? = null
+
     init {
+        observeLanguageChanges()
         handleIntent(HomeUiIntent.LoadHomeData)
     }
 
@@ -180,9 +192,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadHomeData() {
-        viewModelScope.launch {
-            homeDataState.update { HomeUiState.Loading }
+    private fun loadHomeData(showLoading: Boolean = true) {
+        loadHomeJob?.cancel()
+        loadHomeJob = viewModelScope.launch {
+            if (showLoading || homeDataState.value !is HomeUiState.Success) {
+                homeDataState.update { HomeUiState.Loading }
+            }
 
             val categoriesResult = getProductsUseCase.getCategories()
             val brandsResult = getProductsUseCase.getBrands()
@@ -199,7 +214,8 @@ class HomeViewModel @Inject constructor(
                 productsResult is DataResult.Success
             ) {
                 if (user != null && user.uid.isNotEmpty()) {
-                    launch {
+                    wishlistJob?.cancel()
+                    wishlistJob = launch {
                         observeWishlistUseCase(user.uid).collect { wishlistItems ->
                             val wishlistIds = wishlistItems.map { it.id }.toSet()
                             updateStateWithWishlist(
@@ -212,6 +228,7 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 } else {
+                    wishlistJob?.cancel()
                     updateStateWithWishlist(
                         categoriesResult.data,
                         brandsResult.data,
@@ -221,11 +238,24 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } else {
-                homeDataState.update {
-                    HomeUiState.Error("Failed to load home data")
+                homeDataState.update { currentState ->
+                    if (currentState is HomeUiState.Success && !showLoading) {
+                        currentState
+                    } else {
+                        HomeUiState.Error("Failed to load home data")
+                    }
                 }
             }
         }
+    }
+
+    private fun observeLanguageChanges() {
+        observeSettingsPreferencesUseCase()
+            .map { it.languageCode }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { loadHomeData(showLoading = false) }
+            .launchIn(viewModelScope)
     }
 
     private fun updateStateWithWishlist(

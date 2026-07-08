@@ -19,14 +19,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.presentation.R // Import الـ Resources
 import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
 ) : ViewModel() {
 
 
@@ -55,8 +63,12 @@ class CategoriesViewModel @Inject constructor(
     val uiEffect: Flow<CategoriesUiEffect> = _uiEffect.receiveAsFlow()
 
     private var allCategories: List<CategoryUiModel> = emptyList()
+    private var loadCategoriesJob: Job? = null
 
-    init { loadCategories() }
+    init {
+        observeLanguageChanges()
+        loadCategories()
+    }
 
     fun handleIntent(intent: CategoriesUiIntent) {
         when (intent) {
@@ -67,20 +79,20 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    private fun loadCategories() {
-        viewModelScope.launch {
-            _uiState.update { CategoriesUiState.Loading }
+    private fun loadCategories(showLoading: Boolean = true) {
+        loadCategoriesJob?.cancel()
+        loadCategoriesJob = viewModelScope.launch {
+            val currentQuery = (_uiState.value as? CategoriesUiState.Success)?.searchQuery
+                ?: (_uiState.value as? CategoriesUiState.Empty)?.searchQuery
+                ?: ""
+            if (showLoading || _uiState.value !is CategoriesUiState.Success) {
+                _uiState.update { CategoriesUiState.Loading }
+            }
 
             when (val result = getCategoriesUseCase()) {
                 is DataResult.Success -> {
                     allCategories = result.data.map { it.toUiModel() }
-                    _uiState.update {
-                        if (allCategories.isEmpty()) {
-                            CategoriesUiState.Empty()
-                        } else {
-                            CategoriesUiState.Success(allCategories.toImmutableList())
-                        }
-                    }
+                    publishFilteredCategories(currentQuery)
                 }
                 is DataResult.Error -> {
                     val errorPair = result.error.toResDetails()
@@ -91,6 +103,10 @@ class CategoriesViewModel @Inject constructor(
     }
 
     private fun filterCategories(query: String) {
+        publishFilteredCategories(query)
+    }
+
+    private fun publishFilteredCategories(query: String) {
         val filtered = if (query.isBlank()) {
             allCategories
         } else {
@@ -115,6 +131,15 @@ class CategoriesViewModel @Inject constructor(
         viewModelScope.launch {
             _uiEffect.send(CategoriesUiEffect.NavigateToCart)
         }
+    }
+
+    private fun observeLanguageChanges() {
+        observeSettingsPreferencesUseCase()
+            .map { it.languageCode }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { loadCategories(showLoading = false) }
+            .launchIn(viewModelScope)
     }
 
     private fun Category.toUiModel() = CategoryUiModel(

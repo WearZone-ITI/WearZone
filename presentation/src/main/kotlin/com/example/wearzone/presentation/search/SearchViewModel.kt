@@ -14,6 +14,7 @@ import com.example.wearzone.domain.search.model.SearchFilters
 import com.example.wearzone.domain.search.usecase.ClearRecentSearchesUseCase
 import com.example.wearzone.domain.search.usecase.GetRecentSearchesUseCase
 import com.example.wearzone.domain.search.usecase.SaveRecentSearchUseCase
+import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -25,7 +26,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -42,6 +45,7 @@ class SearchViewModel @Inject constructor(
     private val saveRecentSearchUseCase: SaveRecentSearchUseCase,
     private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase,
     private val observeCartItemCountUseCase: ObserveCartItemCountUseCase,
+    private val observeSettingsPreferencesUseCase: ObserveSettingsPreferencesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -52,12 +56,14 @@ class SearchViewModel @Inject constructor(
 
     private val queryChanges = MutableStateFlow("")
     private var searchJob: Job? = null
+    private var initialContentJob: Job? = null
 
     init {
         observeRecentSearches()
         observeQueryChanges()
         loadInitialSearchContent()
         observeCart()
+        observeLanguageChanges()
     }
 
     fun handleIntent(intent: SearchUiIntent) {
@@ -97,9 +103,14 @@ class SearchViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun loadInitialSearchContent() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, hasError = false, errorMessage = null) }
+    private fun loadInitialSearchContent(showLoading: Boolean = true) {
+        initialContentJob?.cancel()
+        initialContentJob = viewModelScope.launch {
+            if (showLoading || _uiState.value.products.isEmpty()) {
+                _uiState.update { it.copy(isLoading = true, hasError = false, errorMessage = null) }
+            } else {
+                _uiState.update { it.copy(hasError = false, errorMessage = null) }
+            }
 
             val brandsDeferred = async { getProductsUseCase.getBrands() }
             val categoriesDeferred = async { getProductsUseCase.getCategories() }
@@ -122,6 +133,20 @@ class SearchViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun observeLanguageChanges() {
+        observeSettingsPreferencesUseCase()
+            .map { it.languageCode }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach {
+                loadInitialSearchContent(showLoading = false)
+                if (_uiState.value.toFilters().hasActiveCriteria()) {
+                    searchProducts(showLoading = false)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun updateQuery(query: String) {
@@ -189,7 +214,7 @@ class SearchViewModel @Inject constructor(
         searchProducts()
     }
 
-    private fun searchProducts() {
+    private fun searchProducts(showLoading: Boolean = true) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             val filters = _uiState.value.toFilters()
@@ -206,7 +231,11 @@ class SearchViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.update { it.copy(isLoading = true, hasSearched = true, hasError = false, errorMessage = null) }
+            if (showLoading) {
+                _uiState.update { it.copy(isLoading = true, hasSearched = true, hasError = false, errorMessage = null) }
+            } else {
+                _uiState.update { it.copy(hasSearched = true, hasError = false, errorMessage = null) }
+            }
 
             when (val result = searchProductsUseCase(filters)) {
                 is DataResult.Error -> {

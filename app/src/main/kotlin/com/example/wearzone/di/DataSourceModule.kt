@@ -85,6 +85,7 @@ abstract class DataSourceModule {
     ): ICartRemoteDataSource
 
     @Binds
+    @Singleton
     abstract fun bindCategoryRemoteDataSource(
         categoryRemoteDataSourceImpl: CategoryRemoteDataSourceImpl,
     ): ICategoryRemoteDataSource
