@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +31,6 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -41,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +61,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.domain.settings.model.ThemeMode
+import com.example.wearzone.presentation.common.WearZoneDialog
+import com.example.wearzone.presentation.common.WearZoneDialogTone
 import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.settings.components.SettingsDivider
 import com.example.wearzone.presentation.settings.components.SettingsPreferenceRow
@@ -358,32 +359,29 @@ private fun LanguagePickerDialog(
     onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.settings_language_dialog_title)) },
-        text = {
-            Column {
-                ThemeModeRow(
-                    titleRes = R.string.settings_language_english,
-                    selected = selectedLanguageCode == ENGLISH_LANGUAGE_CODE,
-                    onClick = { onLanguageSelected(ENGLISH_LANGUAGE_CODE) },
-                )
-                SettingsDivider()
-                ThemeModeRow(
-                    titleRes = R.string.settings_language_arabic,
-                    selected = selectedLanguageCode == ARABIC_LANGUAGE_CODE,
-                    onClick = { onLanguageSelected(ARABIC_LANGUAGE_CODE) },
-                )
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.profile_logout_dialog_cancel))
-            }
-        },
-        containerColor = AppTheme.colors.surface,
-    )
+    WearZoneDialog(
+        title = stringResource(R.string.settings_language_dialog_title),
+        cancelText = stringResource(R.string.profile_logout_dialog_cancel),
+        onCancel = onDismiss,
+        onDismiss = onDismiss,
+        icon = Icons.Outlined.Language,
+        iconContentDescription = stringResource(R.string.settings_language_dialog_title),
+        tone = WearZoneDialogTone.Info,
+    ) {
+        Column {
+            ThemeModeRow(
+                titleRes = R.string.settings_language_english,
+                selected = selectedLanguageCode == ENGLISH_LANGUAGE_CODE,
+                onClick = { onLanguageSelected(ENGLISH_LANGUAGE_CODE) },
+            )
+            SettingsDivider()
+            ThemeModeRow(
+                titleRes = R.string.settings_language_arabic,
+                selected = selectedLanguageCode == ARABIC_LANGUAGE_CODE,
+                onClick = { onLanguageSelected(ARABIC_LANGUAGE_CODE) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -457,27 +455,26 @@ private fun LegalInfoDialog(
     bodyRes: Int,
     onDismiss: () -> Unit,
 ) {
-    // TODO: Replace this temporary copy with approved WearZone legal content.
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(titleRes)) },
-        text = {
-            Text(
-                text = stringResource(bodyRes),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colors.textSecondary,
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.settings_dialog_done))
-            }
-        },
-        containerColor = AppTheme.colors.surface,
-        titleContentColor = AppTheme.colors.textPrimary,
-        textContentColor = AppTheme.colors.textSecondary,
-    )
+    WearZoneDialog(
+        title = stringResource(titleRes),
+        confirmText = stringResource(R.string.settings_dialog_done),
+        onConfirm = onDismiss,
+        onDismiss = onDismiss,
+        icon = Icons.Outlined.Info,
+        iconContentDescription = stringResource(titleRes),
+        tone = WearZoneDialogTone.Info,
+    ) {
+        Text(
+            text = stringResource(bodyRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colors.textSecondary,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 360.dp)
+                .verticalScroll(rememberScrollState()),
+        )
+    }
 }
 
 private const val ENGLISH_LANGUAGE_CODE = "en"
