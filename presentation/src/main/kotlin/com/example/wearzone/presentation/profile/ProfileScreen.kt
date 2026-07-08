@@ -226,93 +226,20 @@ private fun ProfileLoadedContent(
         item { Spacer(modifier = Modifier.height(32.dp)) }
         item { HorizontalDivider(color = AppTheme.colors.divider) }
         items(profileRows(), key = { it.titleRes }) { row ->
-            if (row.intent is ProfileUiIntent.OnCurrencyClicked) {
-                CurrencyMenuRow(
-                    selectedCurrency = uiState.selectedCurrency,
-                    availableCurrencies = uiState.availableCurrencies,
-                    onCurrencySelected = { onIntent(ProfileUiIntent.OnCurrencySelected(it)) }
-                )
-            } else {
-                ProfileMenuRow(
-                    icon = row.icon,
-                    titleRes = row.titleRes,
-                    trailingRes = row.trailingRes,
-                    isDestructive = row.isDestructive,
-                    onClick = { onIntent(row.intent) },
-                )
-            }
+            ProfileMenuRow(
+                icon = row.icon,
+                titleRes = row.titleRes,
+                trailingRes = row.trailingRes,
+                isDestructive = row.isDestructive,
+                onClick = { onIntent(row.intent) },
+            )
+
             if (!row.isDestructive) {
                 HorizontalDivider(color = AppTheme.colors.divider)
             }
         }
     }
 }
-
-@Composable
-private fun CurrencyMenuRow(
-    selectedCurrency: String,
-    availableCurrencies: List<String>,
-    onCurrencySelected: (String) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .clickable { expanded = true }
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.CreditCard,
-            contentDescription = null,
-            tint = AppTheme.colors.textPrimary,
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = stringResource(R.string.profile_currency),
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colors.textPrimary,
-            modifier = Modifier.weight(1f),
-        )
-        Box {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = selectedCurrency,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.colors.textSecondary,
-                )
-                Icon(
-                    imageVector = Icons.Outlined.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = AppTheme.colors.textSecondary,
-                )
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(AppTheme.colors.surface)
-            ) {
-                availableCurrencies.forEach { currency ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = currency,
-                                color = if (currency == selectedCurrency) AppTheme.colors.selected else AppTheme.colors.textPrimary
-                            )
-                        },
-                        onClick = {
-                            onCurrencySelected(currency)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
 @Composable
 private fun RecentOrdersHeader(
     onViewAllClicked: () -> Unit,
@@ -364,7 +291,6 @@ private data class ProfileRow(
 private fun profileRows() = listOf(
     ProfileRow(Icons.Outlined.List, R.string.profile_my_orders, ProfileUiIntent.OnMyOrdersClicked),
     ProfileRow(Icons.Outlined.LocationOn, R.string.profile_saved_addresses, ProfileUiIntent.OnSavedAddressesClicked),
-    ProfileRow(Icons.Outlined.CreditCard, R.string.profile_currency, ProfileUiIntent.OnCurrencyClicked),
     ProfileRow(Icons.Outlined.Settings, R.string.profile_settings, ProfileUiIntent.OnSettingsClicked),
     ProfileRow(Icons.Outlined.ExitToApp, R.string.profile_logout, ProfileUiIntent.OnLogoutClicked, isDestructive = true),
 )

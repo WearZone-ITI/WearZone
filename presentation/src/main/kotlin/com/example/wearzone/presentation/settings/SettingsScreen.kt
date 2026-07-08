@@ -392,58 +392,37 @@ private fun CurrencySettingsRow(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .clickable { expanded = true }
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.CreditCard,
-            contentDescription = null,
-            tint = AppTheme.colors.textPrimary,
+    Box {
+        SettingsPreferenceRow(
+            icon = Icons.Outlined.CreditCard,
+            titleRes = R.string.profile_currency,
+            valueText = selectedCurrency,
+            onClick = { expanded = true },
         )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = stringResource(R.string.profile_currency),
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colors.textPrimary,
-            modifier = Modifier.weight(1f),
-        )
-        Box {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = selectedCurrency,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.colors.textSecondary,
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(AppTheme.colors.surface),
+        ) {
+            availableCurrencies.forEach { currency ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = currency,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (currency == selectedCurrency) {
+                                AppTheme.colors.selected
+                            } else {
+                                AppTheme.colors.textPrimary
+                            },
+                        )
+                    },
+                    onClick = {
+                        onCurrencySelected(currency)
+                        expanded = false
+                    },
                 )
-                Icon(
-                    imageVector = Icons.Outlined.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = AppTheme.colors.textSecondary,
-                )
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(AppTheme.colors.surface)
-            ) {
-                availableCurrencies.forEach { currency ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = currency,
-                                color = if (currency == selectedCurrency) AppTheme.colors.selected else AppTheme.colors.textPrimary
-                            )
-                        },
-                        onClick = {
-                            onCurrencySelected(currency)
-                            expanded = false
-                        }
-                    )
-                }
             }
         }
     }
