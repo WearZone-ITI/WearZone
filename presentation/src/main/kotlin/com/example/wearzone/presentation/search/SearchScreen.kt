@@ -40,6 +40,9 @@ fun SearchScreen(
     onNavigateBack: () -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
     onNavigateToCart: () -> Unit,
+    onNavigateToProductList: (Long, String) -> Unit,
+    onNavigateToVendorProducts: (String) -> Unit,
+    showBackButton: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -56,7 +59,7 @@ fun SearchScreen(
             TopBar(
                 cartItemCount = uiState.cartItemCount,
                 onAddToCartClick = { onNavigateToCart() },
-                onNavigateBack = onNavigateBack,
+                onNavigateBack = onNavigateBack.takeIf { showBackButton },
             )
         },
         containerColor = AppTheme.colors.background,
@@ -65,6 +68,8 @@ fun SearchScreen(
             state = uiState,
             modifier = Modifier.padding(paddingValues),
             onIntent = viewModel::handleIntent,
+            onNavigateToProductList = onNavigateToProductList,
+            onNavigateToVendorProducts = onNavigateToVendorProducts,
         )
     }
 }
@@ -74,6 +79,8 @@ private fun SearchContent(
     state: SearchUiState,
     modifier: Modifier = Modifier,
     onIntent: (SearchUiIntent) -> Unit,
+    onNavigateToProductList: (Long, String) -> Unit,
+    onNavigateToVendorProducts: (String) -> Unit,
 ) {
     val showInitialContent = state.query.isBlank() && !state.hasSearched
 
@@ -92,7 +99,17 @@ private fun SearchContent(
             }
 
             if (showInitialContent) {
-                SearchQuickOptions(state = state, onIntent = onIntent)
+                SearchQuickOptions(
+                    state = state,
+                    onCategorySelected = { option ->
+                        option.id.toLongOrNull()?.let { categoryId ->
+                            onNavigateToProductList(categoryId, option.title)
+                        }
+                    },
+                    onBrandSelected = { option ->
+                        onNavigateToVendorProducts(option.title)
+                    },
+                )
                 if (state.products.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -120,7 +137,8 @@ private fun SearchContent(
 @Composable
 private fun SearchQuickOptions(
     state: SearchUiState,
-    onIntent: (SearchUiIntent) -> Unit,
+    onCategorySelected: (SearchFilterOptionUiModel) -> Unit,
+    onBrandSelected: (SearchFilterOptionUiModel) -> Unit,
 ) {
     val popularCategories = state.categories.take(MAX_INITIAL_FILTER_OPTIONS)
     val popularBrands = state.brands.take(MAX_INITIAL_FILTER_OPTIONS)
@@ -130,20 +148,14 @@ private fun SearchQuickOptions(
             QuickOptionRow(
                 title = stringResource(id = R.string.search_popular_categories),
                 options = popularCategories,
-                onSelected = { categoryTitle ->
-                    onIntent(SearchUiIntent.OnCategorySelected(categoryTitle))
-                    onIntent(SearchUiIntent.OnApplyFilters)
-                },
+                onSelected = onCategorySelected,
             )
         }
         if (popularBrands.isNotEmpty()) {
             QuickOptionRow(
                 title = stringResource(id = R.string.search_popular_brands),
                 options = popularBrands,
-                onSelected = { brandTitle ->
-                    onIntent(SearchUiIntent.OnBrandSelected(brandTitle))
-                    onIntent(SearchUiIntent.OnApplyFilters)
-                },
+                onSelected = onBrandSelected,
             )
         }
     }
@@ -153,7 +165,7 @@ private fun SearchQuickOptions(
 private fun QuickOptionRow(
     title: String,
     options: List<SearchFilterOptionUiModel>,
-    onSelected: (String) -> Unit,
+    onSelected: (SearchFilterOptionUiModel) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -168,7 +180,7 @@ private fun QuickOptionRow(
         ) {
             items(options, key = { it.id }) { option ->
                 AssistChip(
-                    onClick = { onSelected(option.title) },
+                    onClick = { onSelected(option) },
                     label = {
                         Text(
                             text = option.title,

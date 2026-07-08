@@ -57,8 +57,10 @@ import com.example.wearzone.presentation.common.theme.AppTheme
 import com.example.wearzone.presentation.home.HomeScreen
 import com.example.wearzone.presentation.order.details.OrderDetailsScreen
 import com.example.wearzone.presentation.order.history.OrderHistoryScreen
+import com.example.wearzone.presentation.product.list.ProductListScreen
 import com.example.wearzone.presentation.profile.ProfileScreen
 import com.example.wearzone.presentation.search.SearchScreen
+import com.example.wearzone.presentation.vendor_products.VendorProductsScreen
 import com.example.wearzone.presentation.wishlist.WishlistScreen
 import kotlinx.coroutines.launch
 
@@ -95,7 +97,9 @@ fun MainScreen(
                 currentDestination?.hasRoute(Route.AddressAddRoute::class) == true ||
                 currentDestination?.hasRoute(Route.AddressEditRoute::class) == true ||
                 currentDestination?.hasRoute(Route.OrderHistoryRoute::class) == true ||
-                currentDestination?.hasRoute(Route.OrderDetailsRoute::class) == true
+                currentDestination?.hasRoute(Route.OrderDetailsRoute::class) == true ||
+                currentDestination?.hasRoute(Route.ProductListRoute::class) == true ||
+                currentDestination?.hasRoute(Route.VendorProductsRoute::class) == true
     val shouldShowBottomBar = !shouldHideBottomBar && !isKeyboardVisible
 
     val navItems = listOf(
@@ -286,7 +290,45 @@ fun MainScreen(
                     },
                     onNavigateToCart = {
                         onNavigateToCart()
-                    }
+                    },
+                    onNavigateToProductList = { collectionId, categoryName ->
+                        bottomNavController.navigate(Route.ProductListRoute(collectionId, categoryName))
+                    },
+                    onNavigateToVendorProducts = { vendorName ->
+                        bottomNavController.navigate(Route.VendorProductsRoute(vendorName))
+                    },
+                    showBackButton = false,
+                )
+            }
+
+            composable<Route.ProductListRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.ProductListRoute>()
+
+                ProductListScreen(
+                    collectionId = route.collectionId,
+                    categoryName = route.categoryName,
+                    onNavigateBack = {
+                        bottomNavController.popBackStack()
+                    },
+                    onNavigateToProductDetail = { productId ->
+                        onNavigateToProductDetail(productId)
+                    },
+                    onNavigateToCart = {
+                        onNavigateToCart()
+                    },
+                )
+            }
+
+            composable<Route.VendorProductsRoute> {
+                VendorProductsScreen(
+                    onNavigateBack = {
+                        bottomNavController.popBackStack()
+                    },
+                    onNavigateToProductDetail = { productId ->
+                        onNavigateToProductDetail(productId)
+                    },
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToRegister = onNavigateToRegister,
                 )
             }
 

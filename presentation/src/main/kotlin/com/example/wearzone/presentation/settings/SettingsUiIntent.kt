@@ -4,6 +4,7 @@ import com.example.wearzone.domain.settings.model.ThemeMode
 
 sealed interface SettingsUiIntent {
     data object OnBackClicked : SettingsUiIntent
+    data object OnCartClicked : SettingsUiIntent
     data class OnThemeModeSelected(val themeMode: ThemeMode) : SettingsUiIntent
     data class OnNotificationsToggled(val enabled: Boolean) : SettingsUiIntent
     data object OnLanguageClicked : SettingsUiIntent

@@ -12,6 +12,7 @@ sealed interface SettingsUiState {
         val notificationsEnabled: Boolean,
         val languageCode: String = "en",
         @param:StringRes val languageRes: Int = R.string.settings_language_english,
+        val cartItemCount: Int = 0,
     ) : SettingsUiState
 
     data class Error(@param:StringRes val messageRes: Int) : SettingsUiState

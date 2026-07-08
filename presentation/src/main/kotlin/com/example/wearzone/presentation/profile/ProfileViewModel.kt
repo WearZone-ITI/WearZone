@@ -86,16 +86,21 @@ class ProfileViewModel @Inject constructor(
             ProfileUiIntent.OnLogoutClicked -> requestLogout()
             ProfileUiIntent.OnLogoutConfirmed -> confirmLogout()
             ProfileUiIntent.OnLogoutCancelled -> Unit
-            ProfileUiIntent.OnRetry -> loadProfile()
+            ProfileUiIntent.OnRetry -> loadProfile(forceRefresh = true)
             ProfileUiIntent.OnCardClicked -> sendEffect(ProfileUiEffect.NavigateToCart)
             ProfileUiIntent.OnSignInClicked -> sendEffect(ProfileUiEffect.NavigateToLogin)
             ProfileUiIntent.OnCreateAccountClicked -> sendEffect(ProfileUiEffect.NavigateToRegister)
         }
     }
 
-    private fun loadProfile() {
+    private fun loadProfile(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            profileState.value = ProfileUiState.Loading
+            val currentState = profileState.value
+            val hasContent = currentState is ProfileUiState.Content
+            if (forceRefresh || !hasContent) {
+                profileState.value = ProfileUiState.Loading
+            }
+
             if (getAuthAccessStateUseCase() !is AuthAccessState.AuthenticatedCustomer) {
                 profileState.value = ProfileUiState.Guest()
                 _uiEffect.send(ProfileUiEffect.ShowSignInRequired)

@@ -3,6 +3,7 @@ package com.example.wearzone.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.R
+import com.example.wearzone.domain.cart.usecase.ObserveCartItemCountUseCase
 import com.example.wearzone.domain.settings.model.ThemeMode
 import com.example.wearzone.domain.settings.usecase.ObserveSettingsPreferencesUseCase
 import com.example.wearzone.domain.settings.usecase.SetLanguageUseCase
@@ -12,10 +13,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,10 +29,28 @@ class SettingsViewModel @Inject constructor(
     private val setThemeModeUseCase: SetThemeModeUseCase,
     private val setNotificationsEnabledUseCase: SetNotificationsEnabledUseCase,
     private val setLanguageUseCase: SetLanguageUseCase,
+    observeCartItemCountUseCase: ObserveCartItemCountUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+    private val settingsState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
+    private val cartItemCount: StateFlow<Int> = observeCartItemCountUseCase()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            0,
+        )
+
+    val uiState: StateFlow<SettingsUiState> =
+        combine(settingsState, cartItemCount) { state, count ->
+            when (state) {
+                is SettingsUiState.Content -> state.copy(cartItemCount = count)
+                else -> state
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            SettingsUiState.Loading,
+        )
 
     private val _uiEffect = Channel<SettingsUiEffect>(Channel.BUFFERED)
     val uiEffect: Flow<SettingsUiEffect> = _uiEffect.receiveAsFlow()
@@ -43,6 +64,7 @@ class SettingsViewModel @Inject constructor(
     fun handleIntent(intent: SettingsUiIntent) {
         when (intent) {
             SettingsUiIntent.OnBackClicked -> sendEffect(SettingsUiEffect.NavigateBack)
+            SettingsUiIntent.OnCartClicked -> sendEffect(SettingsUiEffect.NavigateToCart)
             is SettingsUiIntent.OnThemeModeSelected -> setThemeMode(intent.themeMode)
             is SettingsUiIntent.OnNotificationsToggled -> setNotificationsEnabled(intent.enabled)
             SettingsUiIntent.OnLanguageClicked -> sendEffect(SettingsUiEffect.ShowLanguagePicker)
@@ -56,13 +78,13 @@ class SettingsViewModel @Inject constructor(
     private fun observeSettings() {
         settingsJob?.cancel()
         settingsJob = viewModelScope.launch {
-            _uiState.value = SettingsUiState.Loading
+            settingsState.value = SettingsUiState.Loading
             observeSettingsPreferencesUseCase()
                 .catch {
-                    _uiState.value = SettingsUiState.Error(R.string.settings_error_load_failed)
+                    settingsState.value = SettingsUiState.Error(R.string.settings_error_load_failed)
                 }
                 .collect { preferences ->
-                    _uiState.value = SettingsUiState.Content(
+                    settingsState.value = SettingsUiState.Content(
                         selectedThemeMode = preferences.themeMode,
                         notificationsEnabled = preferences.notificationsEnabled,
                         languageCode = preferences.languageCode,

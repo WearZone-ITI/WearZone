@@ -30,7 +30,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -61,6 +60,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.presentation.R
 import com.example.wearzone.domain.settings.model.ThemeMode
+import com.example.wearzone.presentation.common.CartIconButton
 import com.example.wearzone.presentation.common.WearZoneDialog
 import com.example.wearzone.presentation.common.WearZoneDialogTone
 import com.example.wearzone.presentation.common.theme.AppTheme
@@ -74,6 +74,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToCart: () -> Unit,
     appVersion: String,
     viewModel: SettingsViewModel = hiltViewModel(),
     profileViewModel: com.example.wearzone.presentation.profile.ProfileViewModel = hiltViewModel(),
@@ -110,6 +111,7 @@ fun SettingsScreen(
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 SettingsUiEffect.NavigateBack -> onNavigateBack()
+                SettingsUiEffect.NavigateToCart -> onNavigateToCart()
                 SettingsUiEffect.ShowLanguagePicker -> showLanguageDialog = true
                 SettingsUiEffect.ShowLanguageUpdated -> coroutineScope.launch {
                     snackbarHostState.showSnackbar(currentContext.getString(R.string.settings_language_updated))
@@ -225,7 +227,9 @@ private fun SettingsLoadedContent(
     ) {
         item {
             SettingsTopBar(
+                cartItemCount = uiState.cartItemCount,
                 onBackClicked = { onIntent(SettingsUiIntent.OnBackClicked) },
+                onCartClicked = { onIntent(SettingsUiIntent.OnCartClicked) },
             )
         }
         item { Spacer(modifier = Modifier.height(48.dp)) }
@@ -319,7 +323,9 @@ private fun SettingsLoadedContent(
 
 @Composable
 private fun SettingsTopBar(
+    cartItemCount: Int,
     onBackClicked: () -> Unit,
+    onCartClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -343,13 +349,10 @@ private fun SettingsTopBar(
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingBag,
-                contentDescription = stringResource(R.string.content_desc_cart),
-                tint = AppTheme.colors.textPrimary,
-            )
-        }
+        CartIconButton(
+            cartItemCount = cartItemCount,
+            onClick = onCartClicked,
+        )
     }
 }
 
