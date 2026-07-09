@@ -15,9 +15,7 @@ class GetRandomCouponOfferUseCase {
     private companion object {
         val COUPON_POOL = listOf(
             CouponOffer(code = "BUY4GET25", discountPercentage = 25),
-            CouponOffer(code = "NEWARRIVAL10", discountPercentage = 100),
             CouponOffer(code="CODE_DISCOUNT_BLACKFRIDAY", discountPercentage = 80),
-            CouponOffer(code = "FREESHIPPING2026", discountPercentage = 100)
 
         )
     }
