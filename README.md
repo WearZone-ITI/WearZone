@@ -158,7 +158,7 @@ The application integrates with Shopify for catalog and commerce operations, Fir
   </tr>
   <tr>
     <td><img src="docs/screenshots/cart.png" alt="Cart screen" width="200"/></td>
-    <td><img src="docs/screenshots/checkout.png" alt="Checkout screen" width="200"/></td>
+    <td><img src="docs/screenshots/paymob-payment.png" alt="Checkout screen" width="200"/></td>
     <td><img src="docs/screenshots/ai-assistant.png" alt="AI shopping assistant" width="200"/></td>
     <td><img src="docs/screenshots/profile.png" alt="Profile screen" width="200"/></td>
   </tr>
