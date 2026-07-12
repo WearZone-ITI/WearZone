@@ -1,5 +1,6 @@
 package com.example.wearzone.data.remote.mapper
 
+import android.util.Log
 import com.example.data.BuildConfig
 import com.example.wearzone.data.remote.dto.BillingDataDto
 import com.example.wearzone.data.remote.dto.CustomerPaymentDto
@@ -14,45 +15,59 @@ private const val CURRENCY_MULTIPLIER = 100L
 
 fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto {
 
-    val subtotal = cartItems.sumOf { it.price * it.quantity }
+    val subtotalMinor = cartItems.sumOf {
+        (it.price * CURRENCY_MULTIPLIER).roundToLong() * it.quantity
+    }
 
-    val discount = subtotal - (totalAmount / 100.0)
+    val discountMinor = subtotalMinor - totalAmount
+    var remainingDiscount = discountMinor
 
-    var remainingDiscount = discount
+    val intentionItems = mutableListOf<IntentionItemDto>()
 
-    val intentionItems = cartItems.mapIndexed { index, item ->
+    cartItems.forEachIndexed { index, item ->
 
-        val itemTotal = item.price * item.quantity
+        val itemTotalMinor =
+            (item.price * CURRENCY_MULTIPLIER).roundToLong() * item.quantity
 
-        val itemDiscount = if (index == cartItems.lastIndex) {
-            remainingDiscount
-        } else {
-            val d = discount * (itemTotal / subtotal)
-            remainingDiscount -= d
-            d
+        val itemDiscountMinor =
+            if (index == cartItems.lastIndex) {
+                remainingDiscount
+            } else {
+                val d = (discountMinor.toDouble() * itemTotalMinor / subtotalMinor)
+                    .roundToLong()
+
+                remainingDiscount -= d
+                d
+            }
+
+        val finalItemTotalMinor = itemTotalMinor - itemDiscountMinor
+
+        val baseUnitPrice = finalItemTotalMinor / item.quantity
+        var remainder = finalItemTotalMinor % item.quantity
+
+        repeat(item.quantity) {
+            val amount = if (remainder > 0) {
+                remainder--
+                baseUnitPrice + 1
+            } else {
+                baseUnitPrice
+            }
+
+            intentionItems.add(
+                IntentionItemDto(
+                    name = item.title,
+                    amount = amount,
+                    quantity = 1,
+                    description = item.size?.let { "Size: $it" } ?: item.vendor
+                )
+            )
         }
+    }
 
-        val discountedUnitPrice = (itemTotal - itemDiscount) / item.quantity
+    val itemsTotal = intentionItems.sumOf { it.amount }
 
-        IntentionItemDto(
-            name = item.title,
-            amount = (discountedUnitPrice * CURRENCY_MULTIPLIER).roundToLong(),
-            description = item.size?.let { "Size: $it" } ?: item.vendor,
-            quantity = item.quantity)
-    }.toMutableList()
-
-    var itemsTotal = intentionItems.sumOf { it.amount * it.quantity }
-    val difference = totalAmount - itemsTotal
-
-    if (difference != 0L) {
-        val lastIndex = intentionItems.lastIndex
-        val last = intentionItems[lastIndex]
-
-        intentionItems[lastIndex] = last.copy(
-            amount = last.amount + (difference / last.quantity)
-        )
-
-        itemsTotal = intentionItems.sumOf { it.amount * it.quantity }
+    check(itemsTotal == totalAmount) {
+        "Items total ($itemsTotal) != total amount ($totalAmount)"
     }
 
     return IntentionRequestDto(
@@ -71,7 +86,7 @@ fun CheckoutData.toIntentionRequestDto(specialRef: String): IntentionRequestDto 
             email = customerInfo.email
         ),
         specialReference = specialRef,
-        extras = emptyMap(),
+        extras = emptyMap()
     )
 }
 
