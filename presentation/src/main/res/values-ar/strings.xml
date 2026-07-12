@@ -14,6 +14,15 @@
     <string name="onboarding_delivery_moment_image_description">امرأة تفتح طرد أزياء</string>
     <string name="onboarding_delivery_moment_title">افتح أناقتك</string>
     <string name="onboarding_delivery_moment_description">أكمل شاشة التعريف لتكون جاهزًا لرحلتك مع WearZone.</string>
+    <string name="onboarding_secure_checkout_image_description">دفع آمن وإكمال طلب أزياء</string>
+    <string name="onboarding_secure_checkout_title">ادفع بأمان وسهولة</string>
+    <string name="onboarding_secure_checkout_description">أضف منتجاتك للسلة، احفظ عنوانك، وأكمل طلبك بثقة.</string>
+    <string name="onboarding_ecommerce_image_description">تطبيق تسوق أزياء يعرض منتجات وبطاقات تسوق</string>
+    <string name="onboarding_ecommerce_title">تسوق أحدث صيحات الموضة</string>
+    <string name="onboarding_ecommerce_description">تصفح المنتجات والتصنيفات بسهولة واختر الستايل المناسب لك.</string>
+    <string name="onboarding_ai_assistant_image_description">مساعد أزياء ذكي داخل محادثة على الهاتف</string>
+    <string name="onboarding_ai_assistant_title">اسأل مساعدك الذكي</string>
+    <string name="onboarding_ai_assistant_description">احصل على اقتراحات ذكية لاختيار المنتجات والإطلالات المناسبة لك.</string>
     <string name="login_placeholder_title">شاشة تسجيل الدخول</string>
     <!--  Customer Addresses  -->
     <string name="address_list_title">العناوين المحفوظة</string>
