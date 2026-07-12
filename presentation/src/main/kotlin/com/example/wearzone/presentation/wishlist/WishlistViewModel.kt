@@ -83,10 +83,14 @@ class WishlistViewModel @Inject constructor(
                 wishlistState.value = WishlistUiState.GuestState
             } else {
                 currentUserId = user.uid
-                // Start sync in background
-                syncWishlistUseCase(user.uid)
 
-                // Observe local database
+                // Fire-and-forget background sync — does NOT block local DB observation
+                launch {
+                    runCatching { syncWishlistUseCase(user.uid) }
+                    // Sync failure is intentionally swallowed; Room is the SSOT
+                }
+
+                // Immediately observe local Room database (works offline too)
                 observeWishlistUseCase(user.uid)
                     .catch {
                         wishlistState.value = WishlistUiState.Error(R.string.wishlist_error_loading)

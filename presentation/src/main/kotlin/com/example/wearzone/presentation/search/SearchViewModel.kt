@@ -80,7 +80,13 @@ class SearchViewModel @Inject constructor(
             is SearchUiIntent.OnMaxPriceChanged -> updateMaxPrice(intent.maxPrice)
             is SearchUiIntent.OnApplyFilters -> applyFilters()
             is SearchUiIntent.OnResetFilters -> resetFilters()
-            is SearchUiIntent.OnRetry -> searchProducts()
+            is SearchUiIntent.OnRetry -> {
+                if (_uiState.value.toFilters().hasActiveCriteria()) {
+                    searchProducts()
+                } else {
+                    loadInitialSearchContent()
+                }
+            }
             is SearchUiIntent.OnProductClicked -> navigateToProduct(intent.productId)
         }
     }
@@ -120,7 +126,17 @@ class SearchViewModel @Inject constructor(
 
             val brandsResult = brandsDeferred.await()
             val categoriesResult = categoriesDeferred.await()
-            val suggestedProducts = suggestedProductsDeferred.await().toProductSearchModels()
+            val suggestedProductsResult = suggestedProductsDeferred.await()
+            val suggestedProducts = suggestedProductsResult.toProductSearchModels()
+
+            val allFailed = brandsResult is DataResult.Error &&
+                    categoriesResult is DataResult.Error &&
+                    suggestedProductsResult is DataResult.Error
+
+            if (allFailed) {
+                _uiState.update { it.copy(isLoading = false, hasError = true) }
+                return@launch
+            }
 
             _uiState.update { state ->
                 val shouldShowSuggestedProducts = state.query.isBlank() && !state.hasActiveFilters()
@@ -130,6 +146,7 @@ class SearchViewModel @Inject constructor(
                     suggestedProducts = suggestedProducts,
                     products = if (shouldShowSuggestedProducts) suggestedProducts else state.products,
                     isLoading = false,
+                    hasError = false,
                 )
             }
         }

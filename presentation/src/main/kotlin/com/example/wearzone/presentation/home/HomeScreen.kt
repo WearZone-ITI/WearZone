@@ -2,6 +2,7 @@ package com.example.wearzone.presentation.home
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,15 @@ import com.example.wearzone.presentation.home.components.TrendingSection
 import com.example.wearzone.presentation.wishlist.components.RemoveFavoriteDialog
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.material.icons.filled.Face
+import com.example.wearzone.presentation.common.NetworkErrorState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.res.stringResource
+import androidx.compose.material3.MaterialTheme
+import com.example.wearzone.presentation.home.components.ProductCard
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -102,11 +112,43 @@ fun HomeScreen(
                     HomeScreenSkeleton()
                 }
                 is HomeUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        color = AppTheme.colors.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    ) {
+                        item {
+                            NetworkErrorState(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                onRetry = { viewModel.handleIntent(HomeUiIntent.LoadHomeData) }
+                            )
+                        }
+
+                        if (state.offlineFavorites.isNotEmpty()) {
+                            item { Spacer(modifier = Modifier.height(32.dp)) }
+                            item {
+                                Column {
+                                    Text(
+                                        text = stringResource(id = R.string.wishlist_title),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = AppTheme.colors.textPrimary,
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        items(state.offlineFavorites) { product ->
+                                            ProductCard(
+                                                product = product,
+                                                onProductClick = { viewModel.handleIntent(HomeUiIntent.OnProductClicked(it)) },
+                                                onAddToCartClick = { viewModel.handleIntent(HomeUiIntent.OnAddToCartClicked(it)) },
+                                                onFavoriteClick = { viewModel.handleIntent(HomeUiIntent.OnFavoriteClicked(it)) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 is HomeUiState.Success -> {
                     if (state.productToRemove != null) {
