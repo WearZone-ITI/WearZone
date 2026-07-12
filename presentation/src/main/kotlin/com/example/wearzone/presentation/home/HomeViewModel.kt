@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -238,11 +239,37 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } else {
+                val offlineFavorites = if (user != null && user.uid.isNotEmpty()) {
+                    try {
+                        val wishlistItems = observeWishlistUseCase(user.uid).first()
+                        wishlistItems.map { item ->
+                            Product(
+                                id = item.id,
+                                variantId = "",
+                                title = item.title,
+                                vendor = item.vendor,
+                                price = item.price.toDoubleOrNull() ?: 0.0,
+                                currencyCode = item.currencyCode,
+                                imageUrl = item.imageUrl,
+                                isFavorite = true,
+                                isOutOfStock = item.isOutOfStock
+                            )
+                        }
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                } else {
+                    emptyList()
+                }
+
                 homeDataState.update { currentState ->
                     if (currentState is HomeUiState.Success && !showLoading) {
                         currentState
                     } else {
-                        HomeUiState.Error("Failed to load home data")
+                        HomeUiState.Error(
+                            message = "Failed to load home data",
+                            offlineFavorites = offlineFavorites.toImmutableList()
+                        )
                     }
                 }
             }

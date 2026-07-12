@@ -6,6 +6,7 @@ import com.example.wearzone.data.db.WearZoneDatabase
 import com.example.wearzone.data.local.dao.CartDao
 import com.example.wearzone.data.local.search.RecentSearchDao
 import com.example.wearzone.data.local.wishlist.WishlistDao
+import com.example.wearzone.data.local.home.HomeCacheDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,5 +45,11 @@ object DatabaseModule {
     @Singleton
     fun provideWishlistDao(database: WearZoneDatabase): WishlistDao {
         return database.wishlistDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHomeCacheDao(database: WearZoneDatabase): HomeCacheDao {
+        return database.homeCacheDao()
     }
 }

@@ -19,5 +19,8 @@ sealed interface HomeUiState {
         val productToRemove: Product? = null,
         val promoAds: ImmutableList<Product> = persistentListOf()
     ) : HomeUiState
-    data class Error(val message: String) : HomeUiState
+    data class Error(
+        val message: String,
+        val offlineFavorites: ImmutableList<Product> = persistentListOf()
+    ) : HomeUiState
 }
