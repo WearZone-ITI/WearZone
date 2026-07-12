@@ -167,6 +167,7 @@ The application integrates with Shopify for catalog and commerce operations, Fir
 <td colspan="2" align="center" valign="top"><img src="docs/screenshots/profile.png" alt="WearZone profile screen" width="200"></td>
 <td colspan="2" align="center" valign="top"><img src="docs/screenshots/settings.png" alt="WearZone settings screen" width="200"></td>
 </tr>
+
 </table>
 
 ## 🛠️ Tech Stack
