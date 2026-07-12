@@ -1,6 +1,5 @@
 package com.example.wearzone.data.remote.mapper
 
-import android.util.Log
 import com.example.data.BuildConfig
 import com.example.wearzone.data.remote.dto.BillingDataDto
 import com.example.wearzone.data.remote.dto.CustomerPaymentDto
