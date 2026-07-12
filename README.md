@@ -131,40 +131,43 @@ The application integrates with Shopify for catalog and commerce operations, Fir
 - Coil memory and disk image caching.
 - WorkManager-based promotional coupon notifications.
 
----
 
 ## 📱 Screenshots
 
-> Add the final screenshots to `docs/screenshots/` using the filenames referenced below.
-
-<table>
-  <tr>
-    <th>Onboarding</th>
-    <th>Home</th>
-    <th>Search</th>
-    <th>Product Details</th>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/onboarding.png" alt="Onboarding screen" width="200"/></td>
-    <td><img src="docs/screenshots/home.png" alt="Home screen" width="200"/></td>
-    <td><img src="docs/screenshots/search.png" alt="Search screen" width="200"/></td>
-    <td><img src="docs/screenshots/product-details.png" alt="Product details screen" width="200"/></td>
-  </tr>
-  <tr>
-    <th>Cart</th>
-    <th>Checkout</th>
-    <th>AI Assistant</th>
-    <th>Profile</th>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/cart.png" alt="Cart screen" width="200"/></td>
-    <td><img src="docs/screenshots/checkout.png" alt="Checkout screen" width="200"/></td>
-    <td><img src="docs/screenshots/ai-assistant.png" alt="AI shopping assistant" width="200"/></td>
-    <td><img src="docs/screenshots/profile.png" alt="Profile screen" width="200"/></td>
-  </tr>
+<table align="center">
+<tr>
+<th align="center" width="25%">AI Style Onboarding</th>
+<th align="center" width="25%">Arabic Dark Home</th>
+<th align="center" width="25%">Search &amp; Filters</th>
+<th align="center" width="25%">Product Details</th>
+</tr>
+<tr>
+<td align="center" valign="top"><img src="docs/screenshots/ai-style-onboarding.png" alt="WearZone AI style onboarding screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/arabic-dark-home.png" alt="WearZone Arabic dark mode home screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/search-filters.png" alt="WearZone search and filters screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/product-details.png" alt="WearZone product details screen" width="200"></td>
+</tr>
+<tr>
+<th align="center">AI Assistant</th>
+<th align="center">Shopping Cart</th>
+<th align="center">Checkout</th>
+<th align="center">Paymob Payment</th>
+</tr>
+<tr>
+<td align="center" valign="top"><img src="docs/screenshots/ai-assistant-chat.png" alt="WearZone AI shopping assistant screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/shopping-cart.png" alt="WearZone shopping cart screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/checkout.png" alt="WearZone checkout screen" width="200"></td>
+<td align="center" valign="top"><img src="docs/screenshots/paymob-payment.png" alt="WearZone Paymob payment screen" width="200"></td>
+</tr>
+<tr>
+<th colspan="2" align="center">Profile</th>
+<th colspan="2" align="center">Settings</th>
+</tr>
+<tr>
+<td colspan="2" align="center" valign="top"><img src="docs/screenshots/profile.png" alt="WearZone profile screen" width="200"></td>
+<td colspan="2" align="center" valign="top"><img src="docs/screenshots/settings.png" alt="WearZone settings screen" width="200"></td>
+</tr>
 </table>
-
----
 
 ## 🛠️ Tech Stack
 
